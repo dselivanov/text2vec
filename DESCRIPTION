@@ -1,0 +1,22 @@
+Package: tmlite
+Type: Package
+Title: simple and fast text mining framework
+Version: 0.1
+Date: 2014-09-16
+Author: Dmitriy Selivanov <selivanov.dmitriy@gmail.com>
+Maintainer: Dmitriy Selivanov <selivanov.dmitriy@gmail.com>
+Description: simple and fast text mining framework
+URL: https://github.com/dselivanov/tmlite
+License: Apache License 2.0
+Depends:
+    R (>= 3.0.0),
+    Matrix
+Imports:
+    Rcpp,
+    slam,
+    parallel,
+    magrittr
+Suggests:
+    SnowballC
+LinkingTo: Rcpp
+
