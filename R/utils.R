@@ -14,7 +14,6 @@
 #' @examples
 #' # Split vector into 4 chunks. splits paramenter usually should be equal to number of cores in the machine.
 #' splits <- split_vector(vector = runif(100), parallerismLevel = 2, splits = 2)
-#' @export
 split_vector <- function(vector, parallerismLevel = 1, splits = ceiling(detectCores() / 2)) {
   if(! is.vector(vector)) stop("vector must be vector or list")
   if (length(vector) < splits * parallerismLevel) {
