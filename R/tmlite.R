@@ -3,10 +3,14 @@
 #' @docType package
 #' @name tmlite
 #' @useDynLib tmlite
+#' @import Matrix
 #' @import Rcpp
 #' @importFrom magrittr %>%
-#' @importFrom parallel mclapply
-#' @importFrom parallel detectCores
-#' @importFrom slam simple_triplet_matrix
-#' @importFrom Matrix sparseMatrix
+NULL
+
+
+#' Rcpp module: DictCorpus
+#' Exposes C++ functions to construct Document-Term Matrix
+#' @name DictCorpus
+#' @export
 NULL
