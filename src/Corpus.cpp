@@ -5,40 +5,43 @@ using namespace std;
 // Enable C++11 via this plugin (Rcpp 0.10.3 or later)
 // [[Rcpp::plugins(cpp11)]]
 
-class TmliteCorpus {
+class DictCorpus {
 public:
   // constructor
-  TmliteCorpus(): doc_count(0) {};
+  DictCorpus(): doc_count(0) {};
 
   int doc_count;
   unordered_map<string, int> dict;
 
-  void insert_document(vector < vector< string > > text_list) {
+  void insert_document( vector< string > words) {
     typename unordered_map < string, int > :: const_iterator element_it;
-    for (auto it : text_list) {
-      vector< string > current_doc = it;
-      int K = current_doc.size();
-      int col_index;
-      unordered_map<int, int> indices;
-      for (auto element : current_doc) {
-        element_it = dict.find(element);
-        if(element_it == dict.end()) {
-          //col_index = dict.size() + 1;
-          col_index = dict.size();
-          dict.insert(make_pair(element, col_index));
-          terms.push_back(element);
-        } else {
-          col_index = element_it -> second;
-        }
-        ++indices[col_index];
+    int K = words.size();
+    int col_index;
+    unordered_map<int, int> indices;
+    for (auto element : words) {
+      element_it = dict.find(element);
+      if(element_it == dict.end()) {
+        col_index = dict.size();
+        dict.insert(make_pair(element, col_index));
+        terms.push_back(element);
+      } else {
+        col_index = element_it -> second;
       }
+      ++indices[col_index];
+    }
 
-      for (auto element : indices) {
-        j.push_back(element.first);
-        x.push_back(element.second);
-        i.push_back(doc_count);
-      }
-      doc_count++;
+    for (auto element : indices) {
+      j.push_back(element.first);
+      x.push_back(element.second);
+      i.push_back(doc_count);
+    }
+    doc_count++;
+  }
+  void insert_document_batch( vector< vector< string > > docs) {
+    //typename vector < string> :: const_iterator element_it;
+    for (auto it:docs) {
+      vector<string> words = it;
+      insert_document(it);
     }
   }
   SEXP get_dtm() {
@@ -64,12 +67,13 @@ private:
   vector<string> terms;
 };
 
-RCPP_MODULE(TmliteCorpus) {
-  class_< TmliteCorpus >( "TmliteCorpus" )
+RCPP_MODULE(DictCorpus) {
+  class_< DictCorpus >( "DictCorpus" )
   .constructor()
-  .field_readonly( "doc_count", &TmliteCorpus::doc_count )
-  .field_readonly( "dict", &TmliteCorpus::dict )
-  .method( "insert_document", &TmliteCorpus::insert_document )
-  .method( "get_dtm", &TmliteCorpus::get_dtm )
+  .field_readonly( "doc_count", &DictCorpus::doc_count )
+  .field_readonly( "dict", &DictCorpus::dict )
+  .method( "insert_document", &DictCorpus::insert_document )
+  .method( "insert_document_batch", &DictCorpus::insert_document_batch )
+  .method( "get_dtm", &DictCorpus::get_dtm )
   ;
 }

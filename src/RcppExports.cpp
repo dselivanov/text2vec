@@ -5,25 +5,3 @@
 
 using namespace Rcpp;
 
-// ListWordCount
-List ListWordCount(List stringList);
-RcppExport SEXP tmlite_ListWordCount(SEXP stringListSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< List >::type stringList(stringListSEXP);
-    __result = Rcpp::wrap(ListWordCount(stringList));
-    return __result;
-END_RCPP
-}
-// ListWordCount2
-List ListWordCount2(List stringList);
-RcppExport SEXP tmlite_ListWordCount2(SEXP stringListSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< List >::type stringList(stringListSEXP);
-    __result = Rcpp::wrap(ListWordCount2(stringList));
-    return __result;
-END_RCPP
-}
