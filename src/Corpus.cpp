@@ -36,9 +36,9 @@ protected:
   SEXP get_dtm_internal(const vector <string> &col_names, int ncol) {
     SEXP dtm_col_names;
 
-    if(col_names.empty()) {
+    if(col_names.empty())
       dtm_col_names = R_NilValue;
-    }
+    else dtm_col_names = wrap(col_names);
 
     NumericVector xdouble(x.begin(), x.end());
     S4 dtm("dgTMatrix");
