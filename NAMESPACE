@@ -2,8 +2,12 @@
 
 S3method(create_dict_corpus,character)
 S3method(create_dict_corpus,connection)
+S3method(create_hash_corpus,character)
+S3method(create_hash_corpus,connection)
 export(DictCorpus)
+export(HashCorpus)
 export(create_dict_corpus)
+export(create_hash_corpus)
 export(dtm_get_idf)
 export(dtm_get_tf)
 export(dtm_remove_common_terms)

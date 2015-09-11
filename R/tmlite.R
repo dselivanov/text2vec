@@ -14,3 +14,9 @@ NULL
 #' @name DictCorpus
 #' @export
 NULL
+
+#' Rcpp module: HashCorpus
+#' Exposes C++ functions to construct Document-Term Matrix
+#' @name HashCorpus
+#' @export
+NULL
