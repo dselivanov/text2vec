@@ -15,8 +15,8 @@ create_dict_corpus(src, preprocess_fun = identity,
 do some text preprocessing (usually cleaning) and return \code{character vector}.
 see \link{simple_preprocess} function for example.}
 
-\item{stemming_fun}{- - \code{function} which takes \code{character vector},
-stem each word and return \code{character vector}.
+\item{stemming_fun}{- - \code{function} which takes \code{list} of \code{character vector}s,
+stem each word and return \code{list} of \code{character vector}s.
 See \link{SnowballC::wordStem} for example.}
 
 \item{batch_size}{- \code{integer} - how many documents we want to convert

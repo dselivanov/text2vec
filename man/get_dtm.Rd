@@ -5,7 +5,8 @@
 \alias{get_tdm}
 \title{DTM ( TDM ) construction}
 \usage{
-get_dtm(corpus, dictionary = NULL, stopwords = NULL)
+get_dtm(corpus, dictionary = NULL, stopwords = NULL, type = c("dgCMatrix",
+  "dgTMatrix", "LDA_C"))
 
 get_tdm(corpus, dictionary = NULL, stopwords = NULL)
 }
@@ -35,12 +36,14 @@ preprocess_fun <- function(txt) {
      # strip whitespaces
      gsub(pattern = "\\\\s+", replacement = " ", x = .)
 }
+stemfun <- function(txt_char_vec, lang = 'en')
+ lapply(txt_char_vec, function(x) SnowballC::wordStem(x, language = lang))
 # or use simple_preprocess() insted
 txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
 corpus <- create_dict_corpus(txt,
    preprocess_fun = preprocess_fun,
    tokenizer = simple_tokenizer,
-   stemming_fun = function(x) SnowballC::wordStem(x, language = 'en'),
+   stemming_fun = stemfun,
    batch_size = 1
    )
 dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )

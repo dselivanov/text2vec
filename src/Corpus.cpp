@@ -1,53 +1,95 @@
-#include <Rcpp.h>
-#include <unordered_map>
-using namespace Rcpp;
-using namespace std;
-// Enable C++11 via this plugin (Rcpp 0.10.3 or later)
-// [[Rcpp::plugins(cpp11)]]
+#include "tmlite.h"
+
+class Document {
+public:
+  Document(const unordered_map<uint32_t, int> &doc_map, int doc_num) {
+    doc_len = doc_map.size();
+
+    vector<uint32_t> term(doc_len);
+
+    vector<int> cnt(doc_map.size());
+    int i = 0;
+    for(auto it:doc_map) {
+      term[i] = it.first;
+      cnt[i] = it.second;
+      i++;
+    }
+    term_ids = term;
+    term_counts = cnt;
+    doc_id = doc_num;
+    // Rprintf("doc %d inserted, len = %d, first: %d->%d \n", doc_num, doc_len, doc_map.begin()->first, doc_map.begin()->second);
+  };
+  vector<uint32_t> term_ids;
+  vector<int> term_counts;
+  size_t doc_len;
+  int doc_id;
+};
 
 class Corpus {
 public:
 
   void insert_document( CharacterVector words);
 
-  void insert_document_batch( ListOf<CharacterVector> docs);
+  void insert_document_batch( ListOf<CharacterVector> docs_batch);
 
   int get_doc_count();
 
 protected:
-
-  vector<int> i;
-  vector<int> j;
-  vector<int> x;
-  // terms
+  vector<Document> docs;
   vector<string> terms;
   //document counter
   int doc_count;
-
-  void insert_dtm_doc(unordered_map<uint32_t, int> &indices) {
-    for (auto element : indices) {
-      this -> j.push_back(element.first);
-      this -> x.push_back(element.second);
-      this -> i.push_back(doc_count);
-    }
-    // doument inserted => increase document counter
-    this -> doc_count++;
+  // number of tokens
+  int token_count;
+  void insert_dtm_doc(const unordered_map<uint32_t, int> &indices) {
+    Document doc(indices, doc_count);
+    docs.push_back(doc);
+    doc_count++;
+    token_count += indices.size();
   }
-  SEXP get_dtm_internal(const vector <string> &col_names, int ncol) {
-    SEXP dtm_col_names;
 
-    if(col_names.empty())
-      dtm_col_names = R_NilValue;
-    else dtm_col_names = wrap(col_names);
+  SEXP get_dtm_dgT(int ncol) {
+    size_t i = 0;
+    NumericVector dtm_x(token_count);
+    IntegerVector dtm_i(token_count);
+    IntegerVector dtm_j(token_count);
 
-    NumericVector xdouble(x.begin(), x.end());
+    for (auto doc: docs) {
+      for (size_t j = 0; j < doc.doc_len; j++) {
+        dtm_i[i] = doc.doc_id;
+        dtm_j[i] = doc.term_ids[j];
+        dtm_x[i] = doc.term_counts[j];
+        i++;
+      }
+    }
+
     S4 dtm("dgTMatrix");
-    dtm.slot("i") = i;
-    dtm.slot("j") = j;
-    dtm.slot("x") = xdouble;
+    dtm.slot("i") = dtm_i;
+    dtm.slot("j") = dtm_j;
+    dtm.slot("x") = dtm_x;
     dtm.slot("Dim") = IntegerVector::create(doc_count, ncol) ;
-    dtm.slot("Dimnames") = List::create(R_NilValue, dtm_col_names);
+    //if(col_names.empty())
+    if(this->terms.empty())
+      dtm.slot("Dimnames") = List::create(R_NilValue, R_NilValue);
+    else
+      dtm.slot("Dimnames") = List::create(R_NilValue, terms);
     return dtm;
+    }
+
+
+  SEXP get_dtm_ldaC() {
+    List lda_c_dtm(doc_count);
+    size_t j = 0;
+    for(auto doc : this->docs) {
+      IntegerMatrix lda_c_doc(2, doc.doc_len);
+      for (int i = 0; i < doc.doc_len; i++) {
+        lda_c_doc(0, i) = doc.term_ids[i];
+        lda_c_doc(1, i) = doc.term_counts[i];
+      }
+      lda_c_dtm[j] = lda_c_doc;
+      j++;
+    }
+    return lda_c_dtm;
   }
 };
 
@@ -55,6 +97,7 @@ class DictCorpus: public Corpus {
 public:
   // constructor
   DictCorpus() {
+    token_count = 0;
     doc_count = 0;
   };
 
@@ -90,12 +133,20 @@ public:
     insert_dtm_doc(indices);
   }
 
-  void insert_document_batch(ListOf<CharacterVector> docs)  {
-    for (auto it:docs)
+  void insert_document_batch(ListOf<CharacterVector> docs_batch)  {
+    for (auto it:docs_batch)
       insert_document(it);
   }
-  SEXP get_dtm() {
-    return get_dtm_internal (terms, terms.size());
+
+  SEXP get_dtm(IntegerVector type) {
+    switch (type[0]) {
+    case 0:
+      return get_dtm_dgT (terms.size());
+    case 1:
+      return get_dtm_ldaC();
+    default:
+      return R_NilValue;
+    }
   }
 };
 
@@ -128,9 +179,17 @@ public:
       insert_document(it);
   }
 
-  SEXP get_dtm() {
-    return get_dtm_internal (terms, buckets_size);
+  SEXP get_dtm(int type) {
+    switch (type) {
+    case 0:
+      return get_dtm_dgT (buckets_size);
+    case 1:
+      return get_dtm_ldaC();
+    default:
+      return R_NilValue;
+    }
   }
+
 private:
   uint32_t buckets_size;
 };

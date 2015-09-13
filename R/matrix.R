@@ -16,36 +16,50 @@
 #'      # strip whitespaces
 #'      gsub(pattern = "\\s+", replacement = " ", x = .)
 #' }
+#' stemfun <- function(txt_char_vec, lang = 'en')
+#'  lapply(txt_char_vec, function(x) SnowballC::wordStem(x, language = lang))
 #' # or use simple_preprocess() insted
 #' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
 #' corpus <- create_dict_corpus(txt,
 #'    preprocess_fun = preprocess_fun,
 #'    tokenizer = simple_tokenizer,
-#'    stemming_fun = function(x) SnowballC::wordStem(x, language = 'en'),
+#'    stemming_fun = stemfun,
 #'    batch_size = 1
 #'    )
 #' dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
 #' tdm <- get_tdm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
 #' @export
-get_dtm <- function(corpus, dictionary = NULL, stopwords = NULL) {
-  dtm <- corpus$get_dtm()
-  terms <- dtm@Dimnames[[2]]
-  terms_len <- dtm@Dim[[2]]
+get_dtm <- function(corpus, dictionary = NULL, stopwords = NULL,
+                    type = c("dgCMatrix", "dgTMatrix", "LDA_C")) {
+  dtm <- switch(type,
+           dgCMatrix = as(corpus$get_dtm(0L), "dgCMatrix"),
+           dgTMatrix = corpus$get_dtm(0L),
+           LDA_C = corpus$get_dtm(1L),
+           NULL
+           )
+  if(type != 'LDA_C') {
+    terms <- dtm@Dimnames[[2]]
+    terms_len <- dtm@Dim[[2]]
 
-  if(is.character(dictionary) && length(dictionary) > 0)
-    ind_dict <- terms %in% dictionary
-  else ind_dict <- rep(T, terms_len)
+    if(is.character(dictionary) && length(dictionary) > 0)
+      ind_dict <- terms %in% dictionary
+    else ind_dict <- rep(T, terms_len)
 
-  if(is.character(stopwords) && length(stopwords) > 0)
-    ind_stop <- !(terms %in% stopwords)
-  else ind_stop <- rep(T, terms_len)
+    if(is.character(stopwords) && length(stopwords) > 0)
+      ind_stop <- !(terms %in% stopwords)
+    else ind_stop <- rep(T, terms_len)
 
-  ind <- ind_stop & ind_dict
+    ind <- ind_stop & ind_dict
 
-  if( sum(ind) < terms_len)
-    dtm[,ind]
-  else
+    if( sum(ind) < terms_len)
+      dtm[,ind]
+    else
+      dtm
+  } else {
+    if(any( !is.null(dictionary),  !is.null(dictionary) ))
+      warning("for LDA-C format we currently didn't filter stopwords, and don't use dictionary")
     dtm
+  }
 }
 
 #' @describeIn get_dtm

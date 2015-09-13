@@ -1,13 +1,14 @@
 #' @name create_dict_corpus
 #' @title RAM-friendly streaming dictionary based corpus construction.
+#' @description For examples see  \link{get_dtm}
 #' @param src - generally \link{connection} object.
 #' @param preprocess_fun - \code{function} which takes \code{character vector},
 #' do some text preprocessing (usually cleaning) and return \code{character vector}.
 #' see \link{simple_preprocess} function for example.
 #' @param simple_tokenizer - \code{function} which takes \code{character vector},
 #' split it into tokens and return \link{list} of \code{character vector}s.
-#' @param stemming_fun - - \code{function} which takes \code{character vector},
-#' stem each word and return \code{character vector}.
+#' @param stemming_fun - - \code{function} which takes \code{list} of \code{character vector}s,
+#' stem each word and return \code{list} of \code{character vector}s.
 #' See \link{SnowballC::wordStem} for example.
 #' @param batch_size - \code{integer} - how many documents we want to convert
 #' into vector representation per one fetching from connection.
@@ -16,6 +17,8 @@
 #' @param limit - \code{integer} - maximum number of documents we want to
 #' transform into vector representation.
 #' @param progress - \code{logical} - show progress bar
+#' @return corpus object (XPtr - external pointer), stored outside of R's heap. We can add documents into this corpus
+#' by reference - no copy at all.
 #' @export
 create_dict_corpus <- function(src,
                           preprocess_fun = identity,
@@ -55,6 +58,7 @@ create_dict_corpus.character <- function(src,
 
 #' @name create_hash_corpus
 #' @title RAM-friendly streaming dictionary based corpus construction.
+#' @description For examples see  \link{get_dtm}
 #' @param src - generally \link{connection} object.
 #' @param preprocess_fun - \code{function} which takes \code{character vector},
 #' do some text preprocessing (usually cleaning) and return \code{character vector}.
@@ -72,6 +76,8 @@ create_dict_corpus.character <- function(src,
 #' @param limit - \code{integer} - maximum number of documents we want to
 #' transform into vector representation.
 #' @param progress - \code{logical} - show progress bar
+#' @return corpus object (XPtr - external pointer), stored outside of R's heap. We can add documents into this corpus
+#' by reference - no copy at all.
 #' @export
 create_hash_corpus <- function(src,
                                preprocess_fun = identity,
@@ -139,7 +145,7 @@ fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, stemmi
     corpus$insert_document_batch(val)
     loaded_count <- loaded_count + batch_size
   }
-  print(timing)
+  # print(timing)
   if(is.numeric(limit)) close(pb)
   corpus
 }
@@ -190,5 +196,4 @@ get_word_list <- function(char_vec,
     preprocess_fun %>%
     tokenizer %>%
     stemming_fun
-    # lapply(stemming_fun)
 }
