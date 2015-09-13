@@ -26,6 +26,7 @@ create_dict_corpus <- function(src,
                           stemming_fun = identity,
                           batch_size = 10,
                           limit = NULL,
+                          skip = 0,
                           progress = T) {
   UseMethod("create_dict_corpus")
 }
@@ -38,9 +39,10 @@ create_dict_corpus.connection <- function(src,
                                      stemming_fun = identity,
                                      batch_size = 10,
                                      limit = NULL,
+                                     skip = 0,
                                      progress = T) {
   corpus <- new(DictCorpus)
-  fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, stemming_fun, batch_size, limit, progress)
+  fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, stemming_fun, batch_size, limit, skip, progress)
 }
 
 #' @aliases create_dict_corpus
@@ -51,6 +53,7 @@ create_dict_corpus.character <- function(src,
                                     stemming_fun = identity,
                                     batch_size = 10,
                                     limit = NULL,
+                                    skip = 0,
                                     progress = T) {
   corpus <- new(DictCorpus)
   fill_corpus_character(src, corpus, preprocess_fun, tokenizer, stemming_fun, batch_size, limit, progress)
@@ -86,6 +89,7 @@ create_hash_corpus <- function(src,
                                hash_size = 2**18,
                                batch_size = 10,
                                limit = NULL,
+                               skip = 0,
                                progress = T) {
   if(!is.numeric(hash_size)) stop("hash_size should be integer from 1 to 2^32")
   UseMethod("create_hash_corpus")
@@ -101,9 +105,10 @@ create_hash_corpus.connection <- function(con,
                                          hash_size = 2**18,
                                          batch_size = 10,
                                          limit = NULL,
+                                         skip = 0,
                                          progress = T) {
   corpus <- new(HashCorpus, hash_size)
-  fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, stemming_fun, batch_size, limit, progress)
+  fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, stemming_fun, batch_size, limit, skip, progress)
 }
 
 #' @aliases create_hash_corpus
@@ -150,7 +155,7 @@ fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, stemmi
   corpus
 }
 
-fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, stemming_fun, batch_size, limit, progress) {
+fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, stemming_fun, batch_size, limit, skip, progress) {
 
   if(is.numeric(limit)) {
     lim <- limit
@@ -163,7 +168,8 @@ fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, stemm
       pb <- txtProgressBar(min = 0, max = limit, style = 3)
     else print("No progess will shown - don't know length of the input stream")
   }
-
+  if(is.numeric(skip) && skip > 0)
+    readLines(con = con, n = skip, warn = F);
   # readLines() call is the BOTTLENECK
   # TODO:
   # switch to readr::read_lines() when

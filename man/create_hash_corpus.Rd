@@ -6,7 +6,7 @@
 \usage{
 create_hash_corpus(src, preprocess_fun = identity,
   tokenizer = simple_tokenizer, stemming_fun = identity, hash_size = 2^18,
-  batch_size = 10, limit = NULL, progress = T)
+  batch_size = 10, limit = NULL, skip = 0, progress = T)
 }
 \arguments{
 \item{src}{- generally \link{connection} object.}
@@ -34,7 +34,11 @@ transform into vector representation.}
 \item{simple_tokenizer}{- \code{function} which takes \code{character vector},
 split it into tokens and return \link{list} of \code{character vector}s.}
 }
+\value{
+corpus object (XPtr - external pointer), stored outside of R's heap. We can add documents into this corpus
+by reference - no copy at all.
+}
 \description{
-RAM-friendly streaming dictionary based corpus construction.
+For examples see  \link{get_dtm}
 }
 
