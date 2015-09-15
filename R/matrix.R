@@ -150,7 +150,7 @@ dtm_transform <- function(dtm, type = c('tfidf', 'tf', 'boolean'), ...) {
 dtm_remove_common_terms <- function (dtm, uncommon = 0.01, common = 0.99)
 {
   tdm <-t(dtm)
-  tab <- c(sum(tdm@i == 0), tabulate(tdm@i))
+  tab <- c(sum(tdm@i == 0), tabulate(tdm@i, nbins = dim(tdm)[[1]]) - 1 )
   t1 <- tab > tdm@Dim[[2]] * uncommon
   t2 <- tab < tdm@Dim[[2]] * common
   t(tdm[t1 & t2, ])
