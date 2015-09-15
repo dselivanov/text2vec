@@ -141,7 +141,7 @@ fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, stemmi
   while( loaded_count < limit ) {
     i1 <- loaded_count + 1
     i2 <- min(loaded_count + batch_size, limit)
-    if(is.numeric(limit)) {
+    if(is.numeric(limit) && isTRUE(progress)) {
       setTxtProgressBar(pb, loaded_count)
     }
     t1 <- Sys.time()
@@ -151,7 +151,7 @@ fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, stemmi
     loaded_count <- loaded_count + batch_size
   }
   # print(timing)
-  if(is.numeric(limit)) close(pb)
+  if(is.numeric(limit) && isTRUE(progress)) close(pb)
   corpus
 }
 
