@@ -31,6 +31,7 @@
 #' @export
 get_dtm <- function(corpus, dictionary = NULL, stopwords = NULL,
                     type = c("dgCMatrix", "dgTMatrix", "LDA_C")) {
+  type <- match.arg(type)
   dtm <- switch(type,
            dgCMatrix = as(corpus$get_dtm(0L), "dgCMatrix"),
            dgTMatrix = corpus$get_dtm(0L),
@@ -150,7 +151,7 @@ dtm_transform <- function(dtm, type = c('tfidf', 'tf', 'boolean'), ...) {
 dtm_remove_common_terms <- function (dtm, uncommon = 0.01, common = 0.99)
 {
   tdm <-t(dtm)
-  tab <- c(sum(tdm@i == 0), tabulate(tdm@i, nbins = dim(tdm)[[1]]) - 1 )
+  tab <- c(sum(tdm@i == 0), tabulate(tdm@i, nbins = dim(tdm)[[1]] - 1))
   t1 <- tab > tdm@Dim[[2]] * uncommon
   t2 <- tab < tdm@Dim[[2]] * common
   t(tdm[t1 & t2, ])
