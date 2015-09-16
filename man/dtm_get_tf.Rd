@@ -4,7 +4,7 @@
 \alias{dtm_get_tf}
 \title{TermFrequency scaling matrix construction from Document-Term-Matrix}
 \usage{
-dtm_get_tf(dtm, type = c("tf", "boolean"))
+dtm_get_tf(dtm, type = c("tf", "binary"))
 }
 \arguments{
 \item{dtm}{\link{sparseMatrix} - Document-Term-Matrix}
@@ -12,10 +12,10 @@ dtm_get_tf(dtm, type = c("tf", "boolean"))
 \item{type}{type of scaling. Formula for tf :
 \deqn{tf = \fraq {# word appears in document}{# words in document}}{%
 tf = (# word appears in document) / (# words in document) }
-\deqn{tf = {Does word appears in document (boolean encoding): 0 if not appears, 1 if appears}}{%
-tf = (Does word appears in document (boolean encoding): 0 if not appears, 1 if appears)}}
+\deqn{tf = {Does word appears in document (binary encoding): 0 if not appears, 1 if appears}}{%
+tf = (Does word appears in document (binary encoding): 0 if not appears, 1 if appears)}}
 
-\item{type}{\code{c('tf', 'boolean')} - type of TF scaling matrix}
+\item{type}{\code{c('tf', 'binary')} - type of TF scaling matrix}
 }
 \description{
 Creates TermFrequency (tf) scaling matrix from Document-Term-Matrix

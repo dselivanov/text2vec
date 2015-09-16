@@ -7,15 +7,13 @@
 dtm_get_idf(dtm, logScale = log2)
 }
 \arguments{
-\item{logScale}{function to use in idf calculation. Usually \link{log2} used.}
+\item{dtm}{\link{dgCMatrix} - Document-Term matrix.}
 
-\item{m}{\link{sparseMatrix} - DocumentTermMatrix.}
+\item{logScale}{function to use in idf calculation. Usually \link{log2} used.}
 }
 \description{
-Creates Inverse Document-Frequency (idf) scaling matrix
-from Document-Term-Matrix.
-\deqn{idf = \log(\fraq {#documents in the corpus}{# documents where the term + 1}}{%
-idf = log (# documents in the corpus) / (# documents where the term appears) }
+Creates Inverse Document-Frequency (idf) scaling matrix from Document-Term matrix.
+idf = log (# documents in the corpus) / (# documents where the term appears + 1)
 For examples see  \link{get_dtm}
 }
 
