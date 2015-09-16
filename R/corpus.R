@@ -185,7 +185,7 @@ fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, stemm
       not_loaded <- (loaded_count <= limit)
       if(isTRUE(progress)) setTxtProgressBar(pb, loaded_count)
     } else {
-      if ( (loaded_count %% 1000 == 0))
+      if (loaded_count %% 1000 == 0 && isTRUE(progress))
         print(paste(loaded_count, "lines loaded"))
     }
     val <- get_word_list(docs, preprocess_fun, tokenizer, stemming_fun)
