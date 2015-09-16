@@ -8,7 +8,8 @@
 get_dtm(corpus, dictionary = NULL, stopwords = NULL, type = c("dgCMatrix",
   "dgTMatrix", "LDA_C"))
 
-get_tdm(corpus, dictionary = NULL, stopwords = NULL)
+get_tdm(corpus, dictionary = NULL, stopwords = NULL, type = c("dgCMatrix",
+  "dgTMatrix", "LDA_C"))
 }
 \arguments{
 \item{corpus}{- TmliteCorpus input corpus.
