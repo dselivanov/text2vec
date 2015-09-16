@@ -27,7 +27,7 @@
 #' @export
 dtm_transform <- function(dtm, transformer, ...) {
   res <- transformer(dtm, ...)
-  if( !inherits(res, "dgCMatrix") )
+  if( !inherits(res, "Matrix") )
     stop("transformer should produce object of dgCMatrix class")
   res
 }
@@ -90,6 +90,8 @@ tfidf_transformer <- function(dtm, idf = NULL) {
   if(inherits(idf, 'ddiMatrix'))
     dtm_get_tf(dtm, type = 'tf') %*% dtm %*% idf
   else {
+    if(!inherits(dtm, 'dgCMatrix'))
+      dtm <- as(dtm, "dgCMatrix")
     dtm_get_tf(dtm, type = 'tf') %*% dtm %*% dtm_get_idf(dtm)
   }
 }
