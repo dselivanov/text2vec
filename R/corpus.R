@@ -55,6 +55,7 @@ create_dict_corpus.character <- function(src,
                                     limit = NULL,
                                     skip = 0,
                                     progress = T) {
+  on.exit(close(src))
   corpus <- new(DictCorpus)
   fill_corpus_character(src, corpus, preprocess_fun, tokenizer, stemming_fun, batch_size, limit, progress)
 }
@@ -98,7 +99,7 @@ create_hash_corpus <- function(src,
 
 #' @aliases create_hash_corpus
 #' @export
-create_hash_corpus.connection <- function(con,
+create_hash_corpus.connection <- function(src,
                                          preprocess_fun = identity,
                                          tokenizer = simple_tokenizer,
                                          stemming_fun = identity,
@@ -107,8 +108,9 @@ create_hash_corpus.connection <- function(con,
                                          limit = NULL,
                                          skip = 0,
                                          progress = T) {
+  on.exit(close(src))
   corpus <- new(HashCorpus, hash_size)
-  fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, stemming_fun, batch_size, limit, skip, progress)
+  fill_corpus_connection(src, corpus, preprocess_fun, tokenizer, stemming_fun, batch_size, limit, skip, progress)
 }
 
 #' @aliases create_hash_corpus
@@ -181,7 +183,7 @@ fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, stemm
     batch_size <- min(batch_size, lim - loaded_count)
     if(is.numeric(limit)) {
       not_loaded <- (loaded_count <= limit)
-      setTxtProgressBar(pb, loaded_count)
+      if(isTRUE(progress)) setTxtProgressBar(pb, loaded_count)
     } else {
       if ( (loaded_count %% 1000 == 0))
         print(paste(loaded_count, "lines loaded"))
@@ -189,8 +191,7 @@ fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, stemm
     val <- get_word_list(docs, preprocess_fun, tokenizer, stemming_fun)
     corpus$insert_document_batch(val)
   }
-  close(con)
-  if(is.numeric(limit)) close(pb)
+  if(is.numeric(limit) && isTRUE(progress)) close(pb)
   corpus
 }
 
