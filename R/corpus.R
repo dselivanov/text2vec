@@ -41,6 +41,7 @@ create_dict_corpus.connection <- function(src,
                                      limit = NULL,
                                      skip = 0,
                                      progress = T) {
+  on.exit(close(src))
   corpus <- new(DictCorpus)
   fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, stemming_fun, batch_size, limit, skip, progress)
 }
@@ -55,7 +56,6 @@ create_dict_corpus.character <- function(src,
                                     limit = NULL,
                                     skip = 0,
                                     progress = T) {
-  on.exit(close(src))
   corpus <- new(DictCorpus)
   fill_corpus_character(src, corpus, preprocess_fun, tokenizer, stemming_fun, batch_size, limit, progress)
 }
