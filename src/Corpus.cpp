@@ -107,17 +107,17 @@ public:
   int get_doc_count() { return doc_count; };
 
   void insert_document( CharacterVector words) {
-    typename unordered_map < string, int > :: const_iterator word_iterator;
+    typename unordered_map < string, int > :: const_iterator term_iterator;
     int col_index;
     // map represents pair of (word_id, word_count)
     // we add words to dictionary iteratively
     // each new word has incremented index
     unordered_map<uint32_t, int> indices;
     for (auto element : words) {
-      word_iterator = dict.find(as<string>(element));
+      term_iterator = dict.find(as<string>(element));
       // new element - add to dictionary
       // set index to the next int that is not used - dict.size()
-      if(word_iterator == dict.end()) {
+      if(term_iterator == dict.end()) {
         col_index = dict.size();
         dict.insert(make_pair(as<string>(element), col_index));
         // keep word in order (we don't want to use bi-directional map)
@@ -125,7 +125,7 @@ public:
       }
       // dictionary already contains document - get its index
       else {
-        col_index = word_iterator -> second;
+        col_index = term_iterator -> second;
       }
       ++indices[col_index];
     }
@@ -160,9 +160,6 @@ public:
 
   int get_doc_count() { return doc_count; };
   // implements hashing trick
-  // we use std::hash
-  // investigate approaches to use murmurhash from digest package instead
-  std::hash<string> hash_fn;
   void insert_document( CharacterVector   words) {
     typename unordered_map < string, int > :: const_iterator element_it;
     uint32_t col_index;
@@ -191,6 +188,9 @@ public:
   }
 
 private:
+  // we use std::hash
+  // investigate approaches to use murmurhash from digest package instead
+  std::hash<string> hash_fn;
   uint32_t buckets_size;
 };
 
