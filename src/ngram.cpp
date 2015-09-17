@@ -50,7 +50,6 @@ void ngram(const vector<string> &terms,
   }
 }
 
-// [[Rcpp::export]]
 unordered_map<string, int> ngram_counter(vector<string> x, int n_min = 1, int n_max = 2, const string delim = "_") {
   unordered_map<string, int> dict;
   unordered_map<uint32_t, int> indices;
