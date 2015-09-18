@@ -6,7 +6,7 @@
 \title{DTM ( TDM ) construction}
 \usage{
 get_dtm(corpus, dictionary = NULL, stopwords = NULL, type = c("dgCMatrix",
-  "dgTMatrix", "LDA_C"))
+  "dgTMatrix", "LDA_C", "LIL"))
 
 get_tdm(corpus, dictionary = NULL, stopwords = NULL, type = c("dgCMatrix",
   "dgTMatrix", "LDA_C"))
@@ -20,6 +20,10 @@ dictionary in Document-Term-Matrix construction.
 NULL if all words should be used.}
 
 \item{stopwords}{- \link{character} or \link{NULL} - words to remove from DTM ( TDM )}
+
+\item{type}{- character, one of \link{dgCMatrix}, \link{dgTMatrix},
+\code{LDA_C} - Blei's lda-c format (list of 2*doc_terms_size), see \link{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
+\code{LIL} - same as LDA-C, but without terms count. Useful for Minhash algorithm.}
 }
 \description{
 Creates Document-Term-Matrix/Term-Document-Matrix from TmliteCorpus.

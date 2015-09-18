@@ -7,6 +7,9 @@
 #' dictionary in Document-Term-Matrix construction.
 #' NULL if all words should be used.
 #' @param stopwords - \link{character} or \link{NULL} - words to remove from DTM ( TDM )
+#' @param type - character, one of \link{dgCMatrix}, \link{dgTMatrix},
+#' \code{LDA_C} - Blei's lda-c format (list of 2*doc_terms_size), see \link{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
+#' \code{LIL} - same as LDA-C, but without terms count. Useful for Minhash algorithm.
 #' @examples
 #' preprocess_fun <- function(txt) {
 #'    txt %>%
@@ -30,15 +33,16 @@
 #' tdm <- get_tdm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
 #' @export
 get_dtm <- function(corpus, dictionary = NULL, stopwords = NULL,
-                    type = c("dgCMatrix", "dgTMatrix", "LDA_C")) {
+                    type = c("dgCMatrix", "dgTMatrix", "LDA_C", "LIL")) {
   type <- match.arg(type)
   dtm <- switch(type,
            dgCMatrix = as(corpus$get_dtm(0L), "dgCMatrix"),
            dgTMatrix = corpus$get_dtm(0L),
            LDA_C = corpus$get_dtm(1L),
+           LIL = corpus$get_dtm(2L),
            NULL
            )
-  if(type != 'LDA_C') {
+  if ( !(type %in% c('LDA_C', 'LIL')) ) {
     terms <- dtm@Dimnames[[2]]
     terms_len <- dtm@Dim[[2]]
 
