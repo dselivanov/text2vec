@@ -201,6 +201,7 @@ public:
     doc_count = 0;
     token_count = 0;
     buckets_size = size;
+    hash_fun = [=](string x) { return hash_fn(x) % buckets_size; };
   };
   // total number of tokens in corpus
   int get_token_count() {return this->get_token_count();};
@@ -213,7 +214,7 @@ public:
 
     // iterate trhough input global_terms
     for (auto element : terms)
-      process_term_hash(element, term_count_map, this-> buckets_size, this-> hash_fn);
+      process_term_hash(element, term_count_map, this-> buckets_size, this -> hash_fun);
 
     insert_dtm_doc(term_count_map);
   }
@@ -241,6 +242,7 @@ private:
   // we use std::hash
   // investigate approaches to use murmurhash3 from digest package instead
   std::hash<string> hash_fn;
+  std::function<uint32_t(string)> hash_fun;
   uint32_t buckets_size;
 };
 
