@@ -1,48 +1,32 @@
 #include "tmlite.h"
+using namespace Rcpp;
+using namespace std;
 //implements n-gram counting
-template <typename T>
-void ngram(const vector<string> &terms,
-           unordered_map<T, int> &dict,
-           unordered_map<uint32_t, int> &indices,
-           vector<T> &terms_set,
-           int n_min = 1, int n_max = 2, const string delim = "_") {
+void ngram_count(const vector<string> &terms,
+           unordered_map<uint32_t, int> &term_count_map,
+           unordered_map<string, int> &dict,
+           vector<string> &terms_vec,
+           int n_min = 1, int n_max = 2,
+           const string delim = "_") {
   // iterates through input vector by window of size = n_max and build n-grams
   // for terms ["a", "b", "c", "d"] and n_min = 1, n_max = 2
-  // will build n-grams in following order
+  // will build 1:3-grams in following order
   //"a"     "a_b"   "a_b_c" "b"     "b_c"   "b_c_d" "c"     "c_d"   "d"
-  int debug = 0;
-  vector<string> res;
-  int dict_ind;
+  string k_gram;
+  int k;
+  int last_observed;
   int len = terms.size();
-  //typename unordered_map < T, int > :: const_iterator term_iterator;
-  typename unordered_map < T, int > :: iterator term_iterator;
   for(int j = 0; j < len; j ++ ) {
-    if (debug) printf("j=%d\n", j);
-    T k_gram;
-    int k = 0;
-    int last_observed = j + k;
+    k = 0;
+    last_observed = j + k;
     while (k < n_max && last_observed < len) {
-      if (debug) printf ("k=%d\n", k);
       if( k == 0)
         k_gram = terms[last_observed];
       else
         k_gram = k_gram + delim + terms[last_observed];
       if(k >= n_min - 1) {
-        if (debug) printf("%s\n", k_gram.c_str());
-
-        term_iterator = dict.find(k_gram);
-        // new ngram
-        if(term_iterator == dict.end()) {
-          dict.insert(make_pair(k_gram,  1));
-          //dict_ind = dict.size();
-          //dict.insert(make_pair(k_gram,  dict_ind));
-          //terms_set.push_back(k_gram);
-        }
-        else {
-          term_iterator->second++;
-          //dict_ind = term_iterator -> second;
-        }
-        //++indices[dict_ind];
+        // here we catch next ngram and should process it
+        process_term_dict(k_gram, term_count_map, dict, terms_vec);
       }
       k = k + 1;
       last_observed = j + k;
@@ -50,14 +34,47 @@ void ngram(const vector<string> &terms,
   }
 }
 
-unordered_map<string, int> ngram_counter(vector<string> x, int n_min = 1, int n_max = 2, const string delim = "_") {
-  unordered_map<string, int> dict;
-  unordered_map<uint32_t, int> indices;
-  vector<string> terms_set;
-  ngram<string>(x, dict, indices, terms_set, n_min, n_max, delim);
-  return dict;
-}
 
-/*** R
-ngram_counter (c(letters[1:6], "a", "b"), 1, 3)
-*/
+// this temporarly expose ngram functionality
+//'@export
+// [[Rcpp::export]]
+CharacterVector ngram(CharacterVector terms,
+                     int n_min = 1, int n_max = 1, std::string delim = "_") {
+  // iterates through input vector by window of size = n_max and build n-grams
+  // for terms ["a", "b", "c", "d"] and n_min = 1, n_max = 2
+  // will build 1:3-grams in following order
+  //"a"     "a_b"   "a_b_c" "b"     "b_c"   "b_c_d" "c"     "c_d"   "d"
+
+  int len = terms.size();
+
+  // calculate res size
+  int out_len = 0;
+  if(len >= n_min)
+    for(int i = n_min; i <= n_max; i++) {
+      out_len += (len - i) + 1;
+    }
+
+  CharacterVector res(out_len);
+  string k_gram;
+  int k;
+  int i = 0;
+  int last_observed;
+
+  for(int j = 0; j < len; j ++ ) {
+    k = 0;
+    last_observed = j + k;
+    while (k < n_max && last_observed < len) {
+      if( k == 0)
+        k_gram = as<string>(terms[last_observed]);
+      else
+        k_gram = k_gram + delim + as<string>(terms[last_observed]);
+      if(k >= n_min - 1) {
+        res[i] = k_gram;
+        i++;
+      }
+      k = k + 1;
+      last_observed = j + k;
+    }
+  }
+  return res;
+}
