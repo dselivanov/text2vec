@@ -5,7 +5,8 @@ void process_term_dict (const string &term,
                         unordered_map<string, int> &dict,
                         vector<string> &terms_vec
 ) {
-  typename unordered_map < string, int > :: const_iterator term_iterator =  dict.find(term);
+  typename unordered_map < string, int > :: const_iterator term_iterator;
+  term_iterator = dict.find(term);
   // id of last observed unique term
   // we use incremented ids, so set new index dict.size()
   // and then grow dict => insert new term
@@ -30,7 +31,6 @@ void process_term_hash (const string &term,
                         unordered_map<uint32_t, int> &term_count_map,
                         uint32_t buckets_size,
                         std::function<uint32_t(string)> hash_fun) {
-
   uint32_t term_id = hash_fun(term);
   ++term_count_map[term_id];
 }
@@ -63,9 +63,9 @@ public:
 class Corpus {
 public:
 
-  void insert_document( CharacterVector terms);
+  void insert_document( const vector <string> &terms, int ngram_min, int ngram_max, const string ngram_delim);
 
-  void insert_document_batch( ListOf<CharacterVector> docs_batch);
+  void insert_document_batch( const vector <vector <string> > &docs_batch, int ngram_min, int ngram_max, const string ngram_delim = "_");
 
   int get_doc_count();
 
@@ -163,20 +163,35 @@ public:
   // total number of documents in corpus
   int get_doc_count() { return doc_count; };
 
-  void insert_document(const vector <string> &terms) {
+  void insert_document(const vector <string> &terms, int ngram_min, int ngram_max, const string ngram_delim = "_") {
     // map represents pair of (word_id, word_count)
     // we add terms to dictionary iteratively
     // each new term has incremented index
     unordered_map<uint32_t, int> term_count_map;
-    for (auto element : terms)
-      process_term_dict (element, term_count_map, this->dict, this->global_terms);
+
+    if(ngram_min == 1 && ngram_max == 1) {
+      // iterate trhough input global_terms
+      for (auto term : terms) {
+        process_term_dict (term, term_count_map, this->dict, this->global_terms);
+      }
+    }
+    // harder case - n-grams
+    else {
+      //lamda which defines how to process each ngram term
+      std::function<void(string)> process_term_fun = [&](string x) {
+        process_term_dict (x, term_count_map, this->dict, this->global_terms);
+      };
+      ngram_count(terms,
+                  process_term_fun,
+                  ngram_min, ngram_max, ngram_delim);
+    }
     // add row - update sparse matrix values
     insert_dtm_doc(term_count_map);
   }
 
-  void insert_document_batch(const vector < vector <string> > &docs_batch)  {
+  void insert_document_batch(const vector < vector <string> > &docs_batch, int ngram_min, int ngram_max, const string ngram_delim = "_") {
     for (auto it:docs_batch)
-      insert_document(it);
+      insert_document(it, ngram_min, ngram_max, ngram_delim);
     //Rprintf("token_count = %d\n", token_count);
   }
 
@@ -213,23 +228,38 @@ public:
   // total number of documents in corpus
   int get_doc_count() { return doc_count; };
 
-  void insert_document(const vector<string> &terms) {
+  void insert_document(const vector<string> &terms, int ngram_min, int ngram_max, const string ngram_delim = "_") {
 
     unordered_map<uint32_t, int> term_count_map;
-
-    // iterate trhough input global_terms
-    for (auto element : terms)
-      process_term_hash(element, term_count_map, this-> buckets_size, this -> hash_fun);
+    // simple unigrams
+    // ngram_count also can process unigrams,
+    // but following "if" state used for performance reasons
+    if(ngram_min == 1 && ngram_max == 1) {
+      // iterate trhough input global_terms
+      for (auto term : terms) {
+        process_term_hash(term, term_count_map, this-> buckets_size, this -> hash_fun);
+      }
+    }
+    // harder case - n-grams
+    else {
+      //lamda which defines how to process each ngram term
+      std::function<void(string)> process_term_fun = [&](string x) {
+        process_term_hash(x, term_count_map, this-> buckets_size, this -> hash_fun);
+      };
+      ngram_count(terms,
+                  process_term_fun,
+                  ngram_min, ngram_max, ngram_delim);
+    }
 
     insert_dtm_doc(term_count_map);
   }
 
-  void insert_document_batch(const vector< vector <string > >  docs)  {
+  void insert_document_batch(const vector< vector <string > >  docs, int ngram_min, int ngram_max, const string ngram_delim = "_") {
     for (auto it:docs)
-      insert_document(it);
+      insert_document(it, ngram_min, ngram_max, ngram_delim);
     //Rprintf("token_count = %d\n", token_count);
   }
-
+  // R's interface to document-term matrix construction
   SEXP get_dtm(int type) {
     switch (type) {
     case 0:

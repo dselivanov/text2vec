@@ -3,20 +3,18 @@ using namespace Rcpp;
 using namespace std;
 //implements n-gram counting
 void ngram_count(const vector<string> &terms,
-           unordered_map<uint32_t, int> &term_count_map,
-           unordered_map<string, int> &dict,
-           vector<string> &terms_vec,
-           int n_min = 1, int n_max = 2,
+           std::function<void(string)> process_ngram,
+           int n_min = 1, int n_max = 1,
            const string delim = "_") {
   // iterates through input vector by window of size = n_max and build n-grams
   // for terms ["a", "b", "c", "d"] and n_min = 1, n_max = 2
   // will build 1:3-grams in following order
   //"a"     "a_b"   "a_b_c" "b"     "b_c"   "b_c_d" "c"     "c_d"   "d"
   string k_gram;
-  int k;
-  int last_observed;
-  int len = terms.size();
-  for(int j = 0; j < len; j ++ ) {
+  size_t k;
+  size_t last_observed;
+  size_t len = terms.size();
+  for(size_t j = 0; j < len; j ++ ) {
     k = 0;
     last_observed = j + k;
     while (k < n_max && last_observed < len) {
@@ -26,7 +24,8 @@ void ngram_count(const vector<string> &terms,
         k_gram = k_gram + delim + terms[last_observed];
       if(k >= n_min - 1) {
         // here we catch next ngram and should process it
-        process_term_dict(k_gram, term_count_map, dict, terms_vec);
+        //process_term_dict(k_gram, term_count_map, dict, terms_vec);
+        process_ngram(k_gram);
       }
       k = k + 1;
       last_observed = j + k;
@@ -39,16 +38,16 @@ void ngram_count(const vector<string> &terms,
 //'@export
 // [[Rcpp::export]]
 CharacterVector ngram(CharacterVector terms,
-                     int n_min = 1, int n_max = 1, std::string delim = "_") {
+                      int n_min = 1, int n_max = 1, std::string delim = "_") {
   // iterates through input vector by window of size = n_max and build n-grams
   // for terms ["a", "b", "c", "d"] and n_min = 1, n_max = 2
   // will build 1:3-grams in following order
   //"a"     "a_b"   "a_b_c" "b"     "b_c"   "b_c_d" "c"     "c_d"   "d"
 
-  int len = terms.size();
+  size_t len = terms.size();
 
   // calculate res size
-  int out_len = 0;
+  size_t out_len = 0;
   if(len >= n_min)
     for(int i = n_min; i <= n_max; i++) {
       out_len += (len - i) + 1;
@@ -56,11 +55,11 @@ CharacterVector ngram(CharacterVector terms,
 
   CharacterVector res(out_len);
   string k_gram;
-  int k;
-  int i = 0;
-  int last_observed;
+  size_t k;
+  size_t i = 0;
+  size_t last_observed;
 
-  for(int j = 0; j < len; j ++ ) {
+  for(size_t j = 0; j < len; j ++ ) {
     k = 0;
     last_observed = j + k;
     while (k < n_max && last_observed < len) {

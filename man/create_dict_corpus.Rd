@@ -2,41 +2,58 @@
 % Please edit documentation in R/corpus.R
 \name{create_dict_corpus}
 \alias{create_dict_corpus}
-\title{RAM-friendly streaming dictionary based corpus construction.}
+\alias{create_hash_corpus}
+\title{RAM-friendly streaming corpus construction. Dictionary or hash based.}
 \usage{
 create_dict_corpus(src, preprocess_fun = identity,
-  tokenizer = simple_tokenizer, stemming_fun = identity, batch_size = 10,
+  tokenizer = simple_tokenizer, ngram = c(min_n = 1L, max_n = 1L),
+  stemming_fun = identity, batch_size = 10, limit = NULL, skip = 0,
+  progress = T)
+
+create_hash_corpus(src, preprocess_fun = identity,
+  tokenizer = simple_tokenizer, ngram = c(min_n = 1L, max_n = 1L),
+  stemming_fun = identity, hash_size = 2^18, batch_size = 10,
   limit = NULL, skip = 0, progress = T)
 }
 \arguments{
-\item{src}{- generally \link{connection} object.}
+\item{src}{\code{character} vector or \link{connection} object.}
 
-\item{preprocess_fun}{- \code{function} which takes \code{character vector},
-do some text preprocessing (usually cleaning) and return \code{character vector}.
+\item{preprocess_fun}{\bold{\code{function}} which \bold{takes \code{character vector}},
+do some text preprocessing (usually cleaning) and \bold{return \code{character vector}}.
 see \link{simple_preprocess} function for example.}
 
-\item{stemming_fun}{- - \code{function} which takes \code{list} of \code{character vector}s,
-stem each word and return \code{list} of \code{character vector}s.
+\item{tokenizer}{\bold{\code{function}} which takes \bold{takes \code{character vector}},
+split it into tokens and \bold{return \link{list} of \code{character vector}s}.}
+
+\item{ngram}{\code{vector} of \bold{length = 2}. The lower and upper boundary of the range of
+n-values for different n-grams to be extracted.
+All values of n such that \code{min_n <= n <= max_n} will be used.}
+
+\item{stemming_fun}{\bold{\code{function}} which takes \bold{\code{list} of \code{character vector}s},
+stem each word in each vector and return \bold{\code{list} of \code{character vector}s}.
 See \link{SnowballC::wordStem} for example.}
 
-\item{batch_size}{- \code{integer} - how many documents we want to convert
+\item{batch_size}{\code{integer} - how many documents we want to convert
 into vector representation per one fetching from connection.
 Generally setting this to large number speeding up DTM construction,
 but more RAM intensive.}
 
-\item{limit}{- \code{integer} - maximum number of documents we want to
+\item{limit}{\code{integer} - maximum number of documents we want to
 transform into vector representation.}
 
-\item{progress}{- \code{logical} - show progress bar}
+\item{progress}{\code{logical} - show progress bar}
 
-\item{simple_tokenizer}{- \code{function} which takes \code{character vector},
-split it into tokens and return \link{list} of \code{character vector}s.}
+\item{hash_size}{\code{integer >= 0 } - number of hash-buckets
+for hashing trick (feature hashing). Preferably power of 2 number.}
 }
 \value{
-corpus object (XPtr - external pointer), stored outside of R's heap. We can add documents into this corpus
-by reference - no copy at all.
+corpus object, stored outside of R's heap.(XPtr - external pointer). We can add documents into this corpus
+by reference - no copy at all. See source code for details.
 }
 \description{
-For examples see  \link{get_dtm}
+RAM-friendly streaming corpus construction. Dictionary or hash based.
+}
+\details{
+For examples see  \link{get_dtm}.
 }
 
