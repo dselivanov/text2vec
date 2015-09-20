@@ -30,7 +30,7 @@ These are all excellent and very efficient packages, so **tmlite** will be focus
 5. Document-Term matrix is key object. At the moment it can be extracted from corpus into `dgCMatrix`, `dgTMatrix` or [LDA-C](https://www.cs.princeton.edu/~blei/lda-c/readme.txt) which is standart for [lda](https://cran.r-project.org/web/packages/lda/index.html) package. `dgCMatrix` is default for sparse matrices in R and most of the packages that work with sparse matrices work with `dgCMatrix` matrices, so it will be easy to interact with them.
 
 ## Quick reference
-Firыt quick example is based on kaggle's [Bag of Words Meets Bags of Popcorn](https://www.kaggle.com/c/word2vec-nlp-tutorial) competition data - [labeledTrainData.tsv.zip](https://www.kaggle.com/c/word2vec-nlp-tutorial/download/labeledTrainData.tsv.zip).  
+First quick example is based on kaggle's [Bag of Words Meets Bags of Popcorn](https://www.kaggle.com/c/word2vec-nlp-tutorial) competition data - [labeledTrainData.tsv.zip](https://www.kaggle.com/c/word2vec-nlp-tutorial/download/labeledTrainData.tsv.zip).  
 
 Here I'll demostrate flexibility of the corpus creation procedure and how to vectorize large collection of documents. 
 

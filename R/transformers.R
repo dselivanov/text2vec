@@ -44,7 +44,7 @@ dtm_transform <- function(dtm, transformer, ...) {
 #' or more than second will be filtered out
 #' @seealso \link{tf_transformer}, \link{tfidf_transformer}, \link{binary_transformer}
 #' @export
-filter_commons_transformer <- function (dtm, term_freq = c(common = 0.001, uncommon = 0.975) )
+filter_commons_transformer <- function (dtm, term_freq = c(uncommon = 0.001, common = 0.975) )
 {
   uncommon = term_freq[[1]]
   common = term_freq[[2]]
