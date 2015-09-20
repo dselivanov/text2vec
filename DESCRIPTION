@@ -16,10 +16,12 @@ Depends:
     R (>= 3.0.0),
     Matrix
 Imports:
-    Rcpp (>= 0.10.3),
-    magrittr
+    Rcpp (>= 0.11),
+    digest(>= 0.6.8),
+    magrittr(>= 1.5)
 LinkingTo:
-    Rcpp
+    Rcpp,
+    digest(>= 0.6.8)
 Suggests:
     SnowballC,
     knitr
