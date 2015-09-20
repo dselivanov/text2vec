@@ -4,7 +4,7 @@
 \alias{filter_commons_transformer}
 \title{remove (un)common terms from Document-Term matrix}
 \usage{
-filter_commons_transformer(dtm, term_freq = c(common = 0.001, uncommon =
+filter_commons_transformer(dtm, term_freq = c(uncommon = 0.001, common =
   0.975))
 }
 \arguments{

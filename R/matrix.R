@@ -26,9 +26,19 @@
 #' corpus <- create_dict_corpus(txt,
 #'    preprocess_fun = preprocess_fun,
 #'    tokenizer = simple_tokenizer,
-#'    stemming_fun = stemfun,
 #'    batch_size = 1
 #'    )
+#' # or if stemming is needed
+#' preprocess_fun <- function(txt) {
+#'    txt %>%
+#'      tolower %>%
+#'      # keep only words with latin letters
+#'      gsub(pattern = "[^a-z]", replacement = " ", x = .) %>%
+#'      # strip whitespaces
+#'      gsub(pattern = "\\s+", replacement = " ", x = .) %>%
+#'      simple_tokenizer %>%
+#'      lapply(SnowballC::wordStem, language = 'en')
+#' }
 #' dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
 #' tdm <- get_tdm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
 #' @export
@@ -80,15 +90,22 @@ get_tdm <- function(corpus, dictionary = NULL, stopwords = NULL,
 #' idf = log (# documents in the corpus) / (# documents where the term appears + 1)
 #' For examples see  \link{get_dtm}
 #' @param dtm \link{dgCMatrix} - Document-Term matrix.
-#' @param logScale function to use in idf calculation. Usually \link{log2} used.
+#' @param log_scale function to use in idf calculation. Usually \link{log} used.
+#' Also worth to try \link{log2}.
+#' @param smooth_idf \code{logical} smooth idf weights by adding one to document frequencies,
+#' as if an extra document was seen containing every term in the collection exactly once. Prevents zero divisions.
+#' @return \link{ddiMatrix} idf scaling diagonal sparse matrix.
 #' @export
-dtm_get_idf <- function(dtm, logScale = log2)
+dtm_get_idf <- function(dtm, log_scale = log, smooth_idf = T)
 {
-  dtm@x = rep(1, length(dtm@x))
-  cs <- colSums(dtm)
-  idf <- logScale(nrow(dtm) / (cs + 1))
-  #, idfProb = pmax(0.01, logScale((nrow(dtm) - cs + 0.5) / (cs + 0.5)))
-  Diagonal(dim(dtm)[2], idf)
+  # abs is needed for case when dtm is matrix from HashCorpus and signed_hash is used!
+  cs <- colSums( abs (sign (dtm) ) )
+  if(smooth_idf)
+    idf <- log_scale(nrow(dtm) / (cs + 1 ))
+  else
+    idf <- log_scale(nrow(dtm) / (cs))
+  #, idfProb = pmax(0.01, log_scale((nrow(dtm) - cs + 0.5) / (cs + 0.5)))
+  Diagonal(dim(dtm)[[2]], idf)
 }
 
 #' @name dtm_get_tf

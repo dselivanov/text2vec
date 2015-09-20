@@ -48,9 +48,19 @@ txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12
 corpus <- create_dict_corpus(txt,
    preprocess_fun = preprocess_fun,
    tokenizer = simple_tokenizer,
-   stemming_fun = stemfun,
    batch_size = 1
    )
+# or if stemming is needed
+preprocess_fun <- function(txt) {
+   txt \%>\%
+     tolower \%>\%
+     # keep only words with latin letters
+     gsub(pattern = "[^a-z]", replacement = " ", x = .) \%>\%
+     # strip whitespaces
+     gsub(pattern = "\\\\s+", replacement = " ", x = .) \%>\%
+     simple_tokenizer \%>\%
+     lapply(SnowballC::wordStem, language = 'en')
+}
 dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
 tdm <- get_tdm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
 }
