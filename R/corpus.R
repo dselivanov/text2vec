@@ -2,19 +2,18 @@
 #' @title RAM-friendly streaming corpus construction. Dictionary or hash based.
 #' @description RAM-friendly streaming corpus construction. Dictionary or hash based.
 #' @param src \code{character} vector or \link{connection} object.
-#' @param preprocess_fun \bold{\code{function}} which \bold{takes \code{character vector}},
-#' do some text preprocessing (usually cleaning) and \bold{return \code{character vector}}.
-#' see \link{simple_preprocess} function for example.
+#' @param preprocess_fun \bold{\code{function}} which takes \code{character vector}
+#' and \bold{do all preprocessing} (including stemming if needed). See "Details" section.
+#' usually \code{preprocess_fun} should return \code{character vector}.
 #' @param tokenizer \bold{\code{function}} which takes \bold{takes \code{character vector}},
 #' split it into tokens and \bold{return \link{list} of \code{character vector}s}.
 #' @param ngram \code{vector} of \bold{length = 2}. The lower and upper boundary of the range of
 #' n-values for different n-grams to be extracted.
 #' All values of n such that \code{min_n <= n <= max_n} will be used.
-#' @param stemming_fun \bold{\code{function}} which takes \bold{\code{list} of \code{character vector}s},
-#' stem each word in each vector and return \bold{\code{list} of \code{character vector}s}.
-#' See \link{SnowballC::wordStem} for example.
 #' @param hash_size \code{integer >= 0 } - number of hash-buckets
 #' for hashing trick (feature hashing). Preferably power of 2 number.
+#' @param signed_hash \code{boolean} value. Indicating whether to use second hash-function
+#' to reduce impact of collisions.
 #' @param batch_size \code{integer} - how many documents we want to convert
 #' into vector representation per one fetching from connection.
 #' Generally setting this to large number speeding up DTM construction,
@@ -22,15 +21,36 @@
 #' @param limit \code{integer} - maximum number of documents we want to
 #' transform into vector representation.
 #' @param progress \code{logical} - show progress bar
-#' @return corpus object, stored outside of R's heap.(XPtr - external pointer). We can add documents into this corpus
-#' by reference - no copy at all. See source code for details.
-#' @details For examples see  \link{get_dtm}.
+#' @return corpus object, stored outside of R's heap.(XPtr - external pointer).
+#' We can add documents into this corpus by reference - no copy at all.
+#' See source code for details.
+#' @details Usually preprocessing involve following steps:
+#'
+#' 1) convert text to UTF-8, see \link{iconv}, \link{enc2utf}
+#'
+#' 2) convert text to lower case, see \link{tolower}
+#'
+#' 3) remove / replace (usually by whitespase) all irrelevant symbols
+#'  see \link{gsub} and \code{strigni} or \code{stringr} packages.
+#'
+#' 4) strip extra/trailing whitespaces, so you can easily tokenize text in next step.
+#' see \link{simple_preprocess} function (and its source code) for example.
+#' \code{preprocess_fun} should return \code{character vector} as output. This output
+#' will used as input to \code{tokenizer} function.
+#'
+#' Also [very optionally] after this you can add stemming step. For this you should
+#' tokenize text yourself (see \link{simple_tokenizer}) and then apply some stemming
+#' function to each word. For stemming see \link{SnowballC::wordStem}.
+#' In this case \code{preprocess_fun} will return \code{list} of \code{character} vectors so
+#' there will be nothing to do in \code{tokenizer} function. So you should set \code{tokenizer}
+#' to \link{identity} function.
+#'
+#' For full process example see \link{get_dtm}.
 #' @export
 create_dict_corpus <- function(src,
                           preprocess_fun = identity,
                           tokenizer = simple_tokenizer,
                           ngram = c('min_n' = 1L, 'max_n' = 1L),
-                          stemming_fun = identity,
                           batch_size = 10,
                           limit = NULL,
                           skip = 0,
@@ -44,14 +64,13 @@ create_dict_corpus.connection <- function(src,
                                      preprocess_fun = identity,
                                      tokenizer = simple_tokenizer,
                                      ngram = c('min_n' = 1L, 'max_n' = 1L),
-                                     stemming_fun = identity,
                                      batch_size = 10,
                                      limit = NULL,
                                      skip = 0,
                                      progress = T) {
   on.exit(close(src))
   corpus <- new(DictCorpus)
-  fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, ngram, stemming_fun, batch_size, limit, skip, progress)
+  fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, skip, progress)
 }
 
 #' @aliases create_dict_corpus
@@ -60,13 +79,12 @@ create_dict_corpus.character <- function(src,
                                     preprocess_fun = identity,
                                     tokenizer = simple_tokenizer,
                                     ngram = c('min_n' = 1L, 'max_n' = 1L),
-                                    stemming_fun = identity,
                                     batch_size = 10,
                                     limit = NULL,
                                     skip = 0,
                                     progress = T) {
   corpus <- new(DictCorpus)
-  fill_corpus_character(src, corpus, preprocess_fun, tokenizer, ngram, stemming_fun, batch_size, limit, progress)
+  fill_corpus_character(src, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, progress)
 }
 
 #' @rdname create_dict_corpus
@@ -75,13 +93,14 @@ create_hash_corpus <- function(src,
                                preprocess_fun = identity,
                                tokenizer = simple_tokenizer,
                                ngram = c('min_n' = 1L, 'max_n' = 1L),
-                               stemming_fun = identity,
                                hash_size = 2**18,
+                               signed_hash = F,
                                batch_size = 10,
                                limit = NULL,
                                skip = 0,
                                progress = T) {
-  if(!is.numeric(hash_size)) stop("hash_size should be integer from 1 to 2^32")
+  if(!is.numeric(hash_size) || hash_size > 2^31)
+    stop("hash_size should be integer from 1 to 2^31")
   UseMethod("create_hash_corpus")
 }
 
@@ -92,15 +111,15 @@ create_hash_corpus.connection <- function(src,
                                          preprocess_fun = identity,
                                          tokenizer = simple_tokenizer,
                                          ngram = c('min_n' = 1L, 'max_n' = 1L),
-                                         stemming_fun = identity,
                                          hash_size = 2**18,
+                                         signed_hash = F,
                                          batch_size = 10,
                                          limit = NULL,
                                          skip = 0,
                                          progress = T) {
   on.exit(close(src))
-  corpus <- new(HashCorpus, hash_size)
-  fill_corpus_connection(src, corpus, preprocess_fun, tokenizer, ngram, stemming_fun, batch_size, limit, skip, progress)
+  corpus <- new(HashCorpus, hash_size, signed_hash)
+  fill_corpus_connection(src, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, skip, progress)
 }
 
 #' @aliases create_hash_corpus
@@ -109,16 +128,16 @@ create_hash_corpus.character <- function(src,
                                          preprocess_fun = identity,
                                          tokenizer = simple_tokenizer,
                                          ngram = c('min_n' = 1L, 'max_n' = 1L),
-                                         stemming_fun = identity,
                                          hash_size = 2**18,
+                                         signed_hash = F,
                                          batch_size = 10,
                                          limit = NULL,
                                          progress = T) {
-  corpus <- new(HashCorpus, hash_size)
-  fill_corpus_character(src, corpus, preprocess_fun, tokenizer, ngram, stemming_fun, batch_size, limit, progress)
+  corpus <- new(HashCorpus, hash_size, signed_hash)
+  fill_corpus_character(src, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, progress)
 }
 
-fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, ngram, stemming_fun, batch_size, limit, progress) {
+fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, progress) {
   if(all(ngram > 0) && length(ngram) == 2) {
     ngram <- as.integer(ngram)
     ngram_min = ngram[[1]]
@@ -145,7 +164,7 @@ fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, ngram,
       setTxtProgressBar(pb, loaded_count)
     }
     t1 <- Sys.time()
-    val <- get_word_list(src[i1 : i2], preprocess_fun, tokenizer, stemming_fun)
+    val <- get_word_list(src[i1 : i2], preprocess_fun, tokenizer)
     timing <- timing + difftime(Sys.time(), t1, units = 'secs')
     corpus$insert_document_batch(val, ngram_min, ngram_max, "_")
     loaded_count <- loaded_count + batch_size
@@ -155,7 +174,7 @@ fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, ngram,
   corpus
 }
 
-fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, ngram, stemming_fun, batch_size, limit, skip, progress) {
+fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, skip, progress) {
 
   if(all(ngram > 0) && length(ngram) == 2) {
     ngram <- as.integer(ngram)
@@ -194,7 +213,7 @@ fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, ngram
       if (loaded_count %% 1000 == 0 && isTRUE(progress))
         print(paste(loaded_count, "lines loaded"))
     }
-    val <- get_word_list(docs, preprocess_fun, tokenizer, stemming_fun)
+    val <- get_word_list(docs, preprocess_fun, tokenizer)
     corpus$insert_document_batch(val, ngram_min, ngram_max, "_")
   }
   if(is.numeric(limit) && isTRUE(progress)) close(pb)
@@ -203,10 +222,8 @@ fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, ngram
 
 get_word_list <- function(char_vec,
                           preprocess_fun = identity,
-                          tokenizer = simple_tokenizer,
-                          stemming_fun = identity) {
+                          tokenizer = simple_tokenizer) {
   char_vec %>%
     preprocess_fun %>%
-    tokenizer %>%
-    stemming_fun
+    (function(x) if(is.list(x)) x else tokenizer(x))
 }

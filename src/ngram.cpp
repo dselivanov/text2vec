@@ -1,8 +1,8 @@
 #include "tmlite.h"
 using namespace Rcpp;
 using namespace std;
-//implements n-gram counting
-void ngram_count(const vector<string> &terms,
+//implements n-gram generation and processing
+void ngram(const vector<string> &terms,
            std::function<void(string)> process_ngram,
            int n_min = 1, int n_max = 1,
            const string delim = "_") {

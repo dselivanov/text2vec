@@ -30,9 +30,20 @@ void process_term_dict (const string &term,
 void process_term_hash (const string &term,
                         unordered_map<uint32_t, int> &term_count_map,
                         uint32_t buckets_size,
-                        std::function<uint32_t(string)> hash_fun) {
-  uint32_t term_id = hash_fun(term);
-  ++term_count_map[term_id];
+                        int signned_hash = 0) {
+  uint32_t term_id = murmurhash3_hash(term) % buckets_size;
+
+  if(signned_hash) {
+    if(murmurhash3_sign(term) >= 0) {
+      ++term_count_map[term_id];
+    }
+    else {
+      --term_count_map[term_id];
+    }
+  }
+  else {
+    ++term_count_map[term_id];
+  }
 }
 
 class Document {
@@ -181,7 +192,7 @@ public:
       std::function<void(string)> process_term_fun = [&](string x) {
         process_term_dict (x, term_count_map, this->dict, this->global_terms);
       };
-      ngram_count(terms,
+      ngram(terms,
                   process_term_fun,
                   ngram_min, ngram_max, ngram_delim);
     }
@@ -212,16 +223,11 @@ public:
 class HashCorpus: public Corpus {
 public:
   // constructor
-  HashCorpus(uint32_t size) {
+  HashCorpus(uint32_t size, int use_signed_hash) {
     doc_count = 0;
     token_count = 0;
     buckets_size = size;
-    // & mean capture all variables by reference
-    // = mean capture all variables by value
-    hash_fun = [=](string x) {
-        std::hash<string> std_hash_fun;
-        return std_hash_fun(x) % buckets_size;
-      };
+    signed_hash = use_signed_hash;
   };
   // total number of tokens in corpus
   int get_token_count() {return this->get_token_count();};
@@ -232,23 +238,24 @@ public:
 
     unordered_map<uint32_t, int> term_count_map;
     // simple unigrams
-    // ngram_count also can process unigrams,
+    // ngram also can process unigrams,
     // but following "if" state used for performance reasons
     if(ngram_min == 1 && ngram_max == 1) {
       // iterate trhough input global_terms
       for (auto term : terms) {
-        process_term_hash(term, term_count_map, this-> buckets_size, this -> hash_fun);
+        process_term_hash(term, term_count_map, this-> buckets_size, this -> signed_hash);
       }
     }
     // harder case - n-grams
     else {
       //lamda which defines how to process each ngram term
       std::function<void(string)> process_term_fun = [&](string x) {
-        process_term_hash(x, term_count_map, this-> buckets_size, this -> hash_fun);
+        process_term_hash(x, term_count_map, this-> buckets_size, this -> signed_hash);
       };
-      ngram_count(terms,
+      ngram(terms,
                   process_term_fun,
-                  ngram_min, ngram_max, ngram_delim);
+                  ngram_min, ngram_max,
+                  ngram_delim);
     }
 
     insert_dtm_doc(term_count_map);
@@ -274,11 +281,8 @@ public:
   }
 
 private:
-  // we use std::hash
-  // investigate approaches to use murmurhash3 from digest package instead
-  //std::hash<string> hash_fn;
-  std::function<uint32_t(string)> hash_fun;
   uint32_t buckets_size;
+  int signed_hash;
 };
 
 RCPP_MODULE(DictCorpus) {
@@ -295,7 +299,7 @@ RCPP_MODULE(DictCorpus) {
 
 RCPP_MODULE(HashCorpus) {
   class_< HashCorpus >( "HashCorpus" )
-  .constructor<uint32_t>()
+  .constructor<uint32_t, int>()
   .property( "token_count", &HashCorpus::get_token_count )
   .method( "get_doc_count", &HashCorpus::get_doc_count )
   .method( "insert_document", &HashCorpus::insert_document )

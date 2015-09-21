@@ -5,6 +5,7 @@
 #' @useDynLib tmlite
 #' @import Matrix
 #' @import Rcpp
+#' @import digest
 #' @importFrom magrittr %>%
 NULL
 

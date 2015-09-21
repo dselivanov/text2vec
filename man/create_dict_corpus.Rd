@@ -7,20 +7,19 @@
 \usage{
 create_dict_corpus(src, preprocess_fun = identity,
   tokenizer = simple_tokenizer, ngram = c(min_n = 1L, max_n = 1L),
-  stemming_fun = identity, batch_size = 10, limit = NULL, skip = 0,
-  progress = T)
+  batch_size = 10, limit = NULL, skip = 0, progress = T)
 
 create_hash_corpus(src, preprocess_fun = identity,
   tokenizer = simple_tokenizer, ngram = c(min_n = 1L, max_n = 1L),
-  stemming_fun = identity, hash_size = 2^18, batch_size = 10,
-  limit = NULL, skip = 0, progress = T)
+  hash_size = 2^18, signed_hash = F, batch_size = 10, limit = NULL,
+  skip = 0, progress = T)
 }
 \arguments{
 \item{src}{\code{character} vector or \link{connection} object.}
 
-\item{preprocess_fun}{\bold{\code{function}} which \bold{takes \code{character vector}},
-do some text preprocessing (usually cleaning) and \bold{return \code{character vector}}.
-see \link{simple_preprocess} function for example.}
+\item{preprocess_fun}{\bold{\code{function}} which takes \code{character vector}
+and \bold{do all preprocessing} (including stemming if needed). See "Details" section.
+usually \code{preprocess_fun} should return \code{character vector}.}
 
 \item{tokenizer}{\bold{\code{function}} which takes \bold{takes \code{character vector}},
 split it into tokens and \bold{return \link{list} of \code{character vector}s}.}
@@ -28,10 +27,6 @@ split it into tokens and \bold{return \link{list} of \code{character vector}s}.}
 \item{ngram}{\code{vector} of \bold{length = 2}. The lower and upper boundary of the range of
 n-values for different n-grams to be extracted.
 All values of n such that \code{min_n <= n <= max_n} will be used.}
-
-\item{stemming_fun}{\bold{\code{function}} which takes \bold{\code{list} of \code{character vector}s},
-stem each word in each vector and return \bold{\code{list} of \code{character vector}s}.
-See \link{SnowballC::wordStem} for example.}
 
 \item{batch_size}{\code{integer} - how many documents we want to convert
 into vector representation per one fetching from connection.
@@ -45,15 +40,40 @@ transform into vector representation.}
 
 \item{hash_size}{\code{integer >= 0 } - number of hash-buckets
 for hashing trick (feature hashing). Preferably power of 2 number.}
+
+\item{signed_hash}{\code{boolean} value. Indicating whether to use second hash-function
+to reduce impact of collisions.}
 }
 \value{
-corpus object, stored outside of R's heap.(XPtr - external pointer). We can add documents into this corpus
-by reference - no copy at all. See source code for details.
+corpus object, stored outside of R's heap.(XPtr - external pointer).
+We can add documents into this corpus by reference - no copy at all.
+See source code for details.
 }
 \description{
 RAM-friendly streaming corpus construction. Dictionary or hash based.
 }
 \details{
-For examples see  \link{get_dtm}.
+Usually preprocessing involve following steps:
+
+1) convert text to UTF-8, see \link{iconv}, \link{enc2utf}
+
+2) convert text to lower case, see \link{tolower}
+
+3) remove / replace (usually by whitespase) all irrelevant symbols
+ see \link{gsub} and \code{strigni} or \code{stringr} packages.
+
+4) strip extra/trailing whitespaces, so you can easily tokenize text in next step.
+see \link{simple_preprocess} function (and its source code) for example.
+\code{preprocess_fun} should return \code{character vector} as output. This output
+will used as input to \code{tokenizer} function.
+
+Also [very optionally] after this you can add stemming step. For this you should
+tokenize text yourself (see \link{simple_tokenizer}) and then apply some stemming
+function to each word. For stemming see \link{SnowballC::wordStem}.
+In this case \code{preprocess_fun} will return \code{list} of \code{character} vectors so
+there will be nothing to do in \code{tokenizer} function. So you should set \code{tokenizer}
+to \link{identity} function.
+
+For full process example see \link{get_dtm}.
 }
 
