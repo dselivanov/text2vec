@@ -1,15 +1,14 @@
 #' @name get_dtm
-#' @title DTM ( TDM ) construction
-#' @description Creates Document-Term-Matrix/Term-Document-Matrix from TmliteCorpus.
-#' @param corpus - TmliteCorpus input corpus.
-#' It can be obtained via \link{create_dict_corpus} function
-#' @param dictionary - \link{character} or \link{NULL} -  use only words from this dict
+#' @title Creates Document-Term matrix construction
+#' @description Creates Document-Term matrix from Corpus object.
+#' @param corpus HashCorpus or DictCorpus object. See \link{create_dict_corpus} for details.
+#' @param dictionary \link{character} or \link{NULL} -  use only words from this dict
 #' dictionary in Document-Term-Matrix construction.
 #' NULL if all words should be used.
-#' @param stopwords - \link{character} or \link{NULL} - words to remove from DTM ( TDM )
-#' @param type - character, one of \link{dgCMatrix}, \link{dgTMatrix},
-#' \code{LDA_C} - Blei's lda-c format (list of 2*doc_terms_size), see \link{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
-#' \code{LIL} - same as LDA-C, but without terms count. Useful for Minhash algorithm.
+#' @param stopwords \link{character} or \link{NULL} - words to remove from DTM
+#' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "LDA_C", "LIL")}.
+#' "LDA_C" - Blei's lda-c format (list of 2*doc_terms_size), see \link{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
+#' "LIL" - same as LDA-C, but without terms count. Useful for Minhash algorithm.
 #' @examples
 #' preprocess_fun <- function(txt) {
 #'    txt %>%
@@ -19,8 +18,6 @@
 #'      # strip whitespaces
 #'      gsub(pattern = "\\s+", replacement = " ", x = .)
 #' }
-#' stemfun <- function(txt_char_vec, lang = 'en')
-#'  lapply(txt_char_vec, function(x) SnowballC::wordStem(x, language = lang))
 #' # or use simple_preprocess() insted
 #' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
 #' corpus <- create_dict_corpus(txt,
@@ -29,6 +26,8 @@
 #'    batch_size = 1
 #'    )
 #' # or if stemming is needed
+#' stemfun <- function(txt_char_vec, lang = 'en')
+#'  lapply(txt_char_vec, function(x) SnowballC::wordStem(x, language = lang))
 #' preprocess_fun <- function(txt) {
 #'    txt %>%
 #'      tolower %>%
@@ -40,7 +39,6 @@
 #'      lapply(SnowballC::wordStem, language = 'en')
 #' }
 #' dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
-#' tdm <- get_tdm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
 #' @export
 get_dtm <- function(corpus, dictionary = NULL, stopwords = NULL,
                     type = c("dgCMatrix", "dgTMatrix", "LDA_C", "LIL")) {
@@ -75,13 +73,6 @@ get_dtm <- function(corpus, dictionary = NULL, stopwords = NULL,
       warning("for LDA-C format we currently didn't filter stopwords, and don't use dictionary")
     dtm
   }
-}
-
-#' @describeIn get_dtm
-#' @export
-get_tdm <- function(corpus, dictionary = NULL, stopwords = NULL,
-                    type = c("dgCMatrix", "dgTMatrix", "LDA_C")) {
-  t(get_dtm(corpus, dictionary = dictionary, stopwords = stopwords))
 }
 
 #' @name dtm_get_idf
@@ -135,8 +126,9 @@ dtm_get_tf <- function(dtm, type = c('tf', 'binary'))
 {
   type <- match.arg(type)
   tf <- switch(type,
-               tf = 1 / rowSums(dtm),
-               binary = 1 / rowSums(dtm > 0)
+               # abs is needed for case when dtm is matrix from HashCorpus and signed_hash is used!
+               tf = 1 / rowSums(abs(dtm)),
+               binary = 1 / rowSums(dtm != 0)
   )
   Diagonal(dim(dtm)[1], tf)
 }

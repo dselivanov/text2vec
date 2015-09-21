@@ -2,36 +2,27 @@
 % Please edit documentation in R/matrix.R
 \name{get_dtm}
 \alias{get_dtm}
-\alias{get_tdm}
-\title{DTM ( TDM ) construction}
+\title{Creates Document-Term matrix construction}
 \usage{
 get_dtm(corpus, dictionary = NULL, stopwords = NULL, type = c("dgCMatrix",
   "dgTMatrix", "LDA_C", "LIL"))
-
-get_tdm(corpus, dictionary = NULL, stopwords = NULL, type = c("dgCMatrix",
-  "dgTMatrix", "LDA_C"))
 }
 \arguments{
-\item{corpus}{- TmliteCorpus input corpus.
-It can be obtained via \link{create_dict_corpus} function}
+\item{corpus}{HashCorpus or DictCorpus object. See \link{create_dict_corpus} for details.}
 
-\item{dictionary}{- \link{character} or \link{NULL} -  use only words from this dict
+\item{dictionary}{\link{character} or \link{NULL} -  use only words from this dict
 dictionary in Document-Term-Matrix construction.
 NULL if all words should be used.}
 
-\item{stopwords}{- \link{character} or \link{NULL} - words to remove from DTM ( TDM )}
+\item{stopwords}{\link{character} or \link{NULL} - words to remove from DTM}
 
-\item{type}{- character, one of \link{dgCMatrix}, \link{dgTMatrix},
-\code{LDA_C} - Blei's lda-c format (list of 2*doc_terms_size), see \link{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
-\code{LIL} - same as LDA-C, but without terms count. Useful for Minhash algorithm.}
+\item{type}{character, one of \code{c("dgCMatrix", "dgTMatrix", "LDA_C", "LIL")}.
+"LDA_C" - Blei's lda-c format (list of 2*doc_terms_size), see \link{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
+"LIL" - same as LDA-C, but without terms count. Useful for Minhash algorithm.}
 }
 \description{
-Creates Document-Term-Matrix/Term-Document-Matrix from TmliteCorpus.
+Creates Document-Term matrix from Corpus object.
 }
-\section{Functions}{
-\itemize{
-\item \code{get_tdm}: 
-}}
 \examples{
 preprocess_fun <- function(txt) {
    txt \%>\%
@@ -41,8 +32,6 @@ preprocess_fun <- function(txt) {
      # strip whitespaces
      gsub(pattern = "\\\\s+", replacement = " ", x = .)
 }
-stemfun <- function(txt_char_vec, lang = 'en')
- lapply(txt_char_vec, function(x) SnowballC::wordStem(x, language = lang))
 # or use simple_preprocess() insted
 txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
 corpus <- create_dict_corpus(txt,
@@ -51,6 +40,8 @@ corpus <- create_dict_corpus(txt,
    batch_size = 1
    )
 # or if stemming is needed
+stemfun <- function(txt_char_vec, lang = 'en')
+ lapply(txt_char_vec, function(x) SnowballC::wordStem(x, language = lang))
 preprocess_fun <- function(txt) {
    txt \%>\%
      tolower \%>\%
@@ -62,6 +53,5 @@ preprocess_fun <- function(txt) {
      lapply(SnowballC::wordStem, language = 'en')
 }
 dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
-tdm <- get_tdm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
 }
 
