@@ -6,6 +6,7 @@
 #' @import Matrix
 #' @import Rcpp
 #' @import digest
+#' @importFrom stringr str_split fixed coll regex boundary
 #' @importFrom magrittr %>%
 NULL
 
