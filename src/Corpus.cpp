@@ -3,27 +3,41 @@
 void process_term_dict (const string &term,
                         unordered_map<uint32_t, int> &term_count_map,
                         unordered_map<string, int> &dict,
-                        vector<string> &terms_vec
-) {
+                        vector<string> &terms_vec,
+                        int flag_dict_fixed) {
   typename unordered_map < string, int > :: const_iterator term_iterator;
   term_iterator = dict.find(term);
-  // id of last observed unique term
-  // we use incremented ids, so set new index dict.size()
-  // and then grow dict => insert new term
   int term_id;
-  // new unobserved term - add to dictionary
+  // new unobserved term
   if(term_iterator == dict.end()) {
-    term_id = dict.size();
-    dict.insert(make_pair(term, term_id));
-    // keep word in order (we don't want to use bi-directional map)
-    terms_vec.push_back(term);
+    // here we will process document using user-supplied dictionary
+    if(flag_dict_fixed) {
+      // DO NOTHING!
+      // because term is not in our predefined dictionary
+      // so this term is not relevant to us
+    }
+    // here we will precess document and grow dictionary
+    else {
+      // get new term id
+      // we use incremented ids, so set new id to dict.size()
+      term_id = dict.size();
+      // insert term into dictionary
+      dict.insert(make_pair(term, term_id));
+      // keep terms in the same order we insert them into dictionary
+      // (we don't want to use bi-directional map)
+      terms_vec.push_back(term);
+      // increment count for input term
+      // actually this mean term_count_map[term_id] = 1
+      // (as map initialized by zeros by default)
+      ++term_count_map[term_id];
+    }
   }
   // dictionary already contains document => get index
   else {
     term_id = term_iterator -> second;
+    // increment count for input term
+    ++term_count_map[term_id];
   }
-  // increment count for input term
-  ++term_count_map[term_id];
 }
 
 // implements hashing trick
@@ -48,6 +62,7 @@ void process_term_hash (const string &term,
 
 class Document {
 public:
+  //contructor
   Document(const unordered_map<uint32_t, int> &doc_map, int doc_num) {
     doc_len = doc_map.size();
 
@@ -65,9 +80,13 @@ public:
     doc_id = doc_num;
     // Rprintf("doc %d inserted, len = %d, first: %d->%d \n", doc_num, doc_len, doc_map.begin()->first, doc_map.begin()->second);
   };
+  //global term ids (shared across Coprpus)
   vector<uint32_t> term_ids;
+  // counts for each uniqe term
   vector<int> term_counts;
+  // document length (number of unique terms)
   int doc_len;
+  // document id
   int doc_id;
 };
 
@@ -121,7 +140,7 @@ protected:
     else
       dtm.slot("Dimnames") = List::create(R_NilValue, global_terms);
     return dtm;
-    }
+  }
 
 
   SEXP get_dtm_lda_c() {
@@ -160,16 +179,27 @@ protected:
 
 class DictCorpus: public Corpus {
 public:
-  // constructor
+  // default constructor
   DictCorpus() {
     token_count = 0;
     doc_count = 0;
+    flag_dict_fixed = 0;
+  };
+  // contructor for corpus with user-defined dictionary
+  DictCorpus(const unordered_map<string, int> user_defined_dict ) {
+    token_count = 0;
+    doc_count = 0;
+    dict = user_defined_dict;
+    flag_dict_fixed = 1;
   };
   // total number of tokens in corpus
   int get_token_count() {return this->get_token_count();};
 
   // dictionary
   unordered_map<string, int> dict;
+  // logical flag should we grow dictionary or use not (use user-supplied)
+  // we should set up this flag in constructor call
+  int flag_dict_fixed;
 
   // total number of documents in corpus
   int get_doc_count() { return doc_count; };
@@ -193,8 +223,8 @@ public:
         process_term_dict (x, term_count_map, this->dict, this->global_terms);
       };
       ngram(terms,
-                  process_term_fun,
-                  ngram_min, ngram_max, ngram_delim);
+            process_term_fun,
+            ngram_min, ngram_max, ngram_delim);
     }
     // add row - update sparse matrix values
     insert_dtm_doc(term_count_map);
@@ -253,9 +283,9 @@ public:
         process_term_hash(x, term_count_map, this-> buckets_size, this -> signed_hash);
       };
       ngram(terms,
-                  process_term_fun,
-                  ngram_min, ngram_max,
-                  ngram_delim);
+            process_term_fun,
+            ngram_min, ngram_max,
+            ngram_delim);
     }
 
     insert_dtm_doc(term_count_map);
@@ -287,7 +317,10 @@ private:
 
 RCPP_MODULE(DictCorpus) {
   class_< DictCorpus >( "DictCorpus" )
+
   .constructor()
+  .constructor<unordered_map<string, int>>()
+
   .field_readonly( "dict", &DictCorpus::dict )
   .property( "token_count", &DictCorpus::get_token_count )
   .method( "get_doc_count", &DictCorpus::get_doc_count )
