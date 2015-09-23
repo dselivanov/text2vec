@@ -186,10 +186,27 @@ public:
     flag_dict_fixed = 0;
   };
   // contructor for corpus with user-defined dictionary
-  DictCorpus(const unordered_map<string, int> user_defined_dict ) {
+  DictCorpus(IntegerVector dict_R ) {
+
     token_count = 0;
     doc_count = 0;
-    dict = user_defined_dict;
+    // make unordered_map<string, int> dictionary
+    // from R's named integer vector
+    // allocate memory
+    vector<string> keys = dict_R.names();
+    vector<int> values = as<vector<int>>(dict_R);
+    this->global_terms.resize(dict_R.size());
+    // we know dict size, so lets reserve buckets this number
+    // and if we will lucky no rehash will needed
+    this->dict.reserve(dict_R.size());
+    //convert R dict represenation to C++ represenation
+    // also fill terms in right order
+    for (int i = 0; i < dict_R.size(); i++) {
+      //grow dictionary
+      dict.insert(make_pair(keys[i], values[i]));
+      // fill terms in order we add them in dctionary!
+      this->global_terms[ values[i] ] = keys[i];
+    }
     flag_dict_fixed = 1;
   };
   // total number of tokens in corpus
@@ -213,14 +230,14 @@ public:
     if(ngram_min == 1 && ngram_max == 1) {
       // iterate trhough input global_terms
       for (auto term : terms) {
-        process_term_dict (term, term_count_map, this->dict, this->global_terms);
+        process_term_dict (term, term_count_map, this->dict, this->global_terms, this->flag_dict_fixed);
       }
     }
     // harder case - n-grams
     else {
       //lamda which defines how to process each ngram term
       std::function<void(string)> process_term_fun = [&](string x) {
-        process_term_dict (x, term_count_map, this->dict, this->global_terms);
+        process_term_dict (x, term_count_map, this->dict, this->global_terms, this->flag_dict_fixed);
       };
       ngram(terms,
             process_term_fun,
@@ -317,26 +334,24 @@ private:
 
 RCPP_MODULE(DictCorpus) {
   class_< DictCorpus >( "DictCorpus" )
-
   .constructor()
-  .constructor<unordered_map<string, int>>()
-
-  .field_readonly( "dict", &DictCorpus::dict )
-  .property( "token_count", &DictCorpus::get_token_count )
-  .method( "get_doc_count", &DictCorpus::get_doc_count )
-  .method( "insert_document", &DictCorpus::insert_document )
-  .method( "insert_document_batch", &DictCorpus::insert_document_batch )
-  .method( "get_dtm", &DictCorpus::get_dtm )
+  .constructor<IntegerVector>()
+  .field_readonly( "dict", &DictCorpus::dict, "dictionary - unique terms with corresponding indices")
+  .property( "token_count", &DictCorpus::get_token_count, "returns number of tokens in corpus" )
+  .method( "document_count", &DictCorpus::get_doc_count, "returns number of documents in corpus")
+  .method( "insert_document", &DictCorpus::insert_document, "inserts new document (character vector) into corpus" )
+  .method( "insert_document_batch", &DictCorpus::insert_document_batch, "inserts multiple documents (list of character vectors) into corpus" )
+  .method( "get_dtm", &DictCorpus::get_dtm, "construct Document-Term matrix (various forms) from corpus" )
   ;
 }
 
 RCPP_MODULE(HashCorpus) {
   class_< HashCorpus >( "HashCorpus" )
   .constructor<uint32_t, int>()
-  .property( "token_count", &HashCorpus::get_token_count )
-  .method( "get_doc_count", &HashCorpus::get_doc_count )
-  .method( "insert_document", &HashCorpus::insert_document )
-  .method( "insert_document_batch", &HashCorpus::insert_document_batch )
-  .method( "get_dtm", &HashCorpus::get_dtm )
+  .property( "token_count", &HashCorpus::get_token_count, "returns number of tokens in corpus" )
+  .method( "document_count", &HashCorpus::get_doc_count, "returns number of documents in corpus")
+  .method( "insert_document", &HashCorpus::insert_document, "inserts new document (character vector) into corpus" )
+  .method( "insert_document_batch", &HashCorpus::insert_document_batch, "inserts multiple documents (list of character vectors) into corpus" )
+  .method( "get_dtm", &HashCorpus::get_dtm, "construct Document-Term matrix (various forms) from corpus" )
   ;
 }
