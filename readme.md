@@ -48,8 +48,8 @@ If you like it, you can **help**:
 ### Short-term plans
 - add tests
 - ~~add n-gram tokenizers~~ [already done](https://github.com/dselivanov/tmlite/issues/6)
-- ~~add methods for tokenization in C++ (at the moment tokenization takes almost half of runtime)~~ [see these benchmarks](https://github.com/dselivanov/tmlite/issues/2). It will make sense to switch to `stringi` or `stringr`
-- ~~switch to murmur3 hash and add second hash function to reduce probability of collision~~ done, thanks to @[wush978](https://github.com/wush978/FeatureHashing/issues/96)
+- ~~add methods for tokenization in C++ (at the moment tokenization takes almost half of runtime)~~ [see these benchmarks](https://github.com/dselivanov/tmlite/issues/2). ~~It will make sense to switch to `stringi` or `stringr`~~ - [done](https://github.com/dselivanov/tmlite/issues/18)
+- ~~switch to murmur3 hash and add second hash function to reduce probability of collision~~ [done](https://github.com/dselivanov/tmlite/issues/8), thanks to @[wush978](https://github.com/wush978/FeatureHashing/issues/96)
 - push dictionary and stopwords filtering into C++ code
 
 ### Middle-term plans
