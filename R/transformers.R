@@ -1,4 +1,4 @@
-#' @name dtm_transform
+#' @name transform
 #' @title Creates transformed Document-Term matrix.
 #' @description Transform Document-Term matrix using one of the package-included
 #' transformers or user-specified custom transformer.
@@ -15,17 +15,17 @@
 #' # create dtm
 #' dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] ) %>%
 #' # filter out very common and very uncommon terms
-#'  dtm_transform(filter_commons_transformer, c(0.001, 0.975))
+#'  transform(filter_commons_transformer, c(0.001, 0.975))
 #'
 #' # simple term-frequency transormation
-#' dtm_transformed_tf <- dtm %>%
-#'  dtm_transform(tf_transformer)
+#' transformed_tf <- dtm %>%
+#'  transform(tf_transformer)
 #'
 #' # tf-idf transormation
-#' dtm_transformed_tfidf <- dtm %>%
-#'  dtm_transform(tfidf_transformer)
+#' transformed_tfidf <- dtm %>%
+#'  transform(tfidf_transformer)
 #' @export
-dtm_transform <- function(dtm, transformer, ...) {
+transform.Matrix <- function(dtm, transformer, ...) {
   res <- transformer(dtm, ...)
   if( !inherits(res, "Matrix") )
     stop("transformer should produce object of dgCMatrix class")
@@ -78,7 +78,7 @@ filter_commons_transformer <- function (dtm, term_freq = c(uncommon = 0.001, com
 #'
 #' @param idf - \link{ddiMatrix} \link{Diagonal} matrix for idf-scaling. See \link{dtm_get_idf}.
 #' If not provided ( \code{NULL} ) - idf will be calculated form current data.
-#' @seealso \link{dtm_get_idf}, examples provided in \link{dtm_transform}
+#' @seealso \link{dtm_get_idf}, examples provided in \link{transform}
 #' @export
 tf_transformer <- function(dtm) {
   dtm_get_tf(dtm, type = 'tf') %*% dtm
