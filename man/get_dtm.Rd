@@ -26,17 +26,15 @@ Creates Document-Term matrix from Corpus object.
 \examples{
 preprocess_fun <- function(txt) {
    txt \%>\%
-     tolower \%>\%
-     # keep only words with latin letters
-     gsub(pattern = "[^a-z]", replacement = " ", x = .) \%>\%
-     # strip whitespaces
-     gsub(pattern = "\\\\s+", replacement = " ", x = .)
+     tolower
 }
 # or use simple_preprocess() insted
 txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
 corpus <- create_dict_corpus(txt,
    preprocess_fun = preprocess_fun,
-   tokenizer = simple_tokenizer,
+   #split text by word boundaries
+   tokenizer = regexp_tokenizer,
+   # by small pieces - call underlying C++ code for each document
    batch_size = 1
    )
 # or if stemming is needed
@@ -45,11 +43,9 @@ stemfun <- function(txt_char_vec, lang = 'en')
 preprocess_fun <- function(txt) {
    txt \%>\%
      tolower \%>\%
-     # keep only words with latin letters
-     gsub(pattern = "[^a-z]", replacement = " ", x = .) \%>\%
-     # strip whitespaces
-     gsub(pattern = "\\\\s+", replacement = " ", x = .) \%>\%
-     simple_tokenizer \%>\%
+     #split text by word boundaries
+     regexp_tokenizer \%>\%
+     # stem with Porter stemmer
      lapply(SnowballC::wordStem, language = 'en')
 }
 dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
