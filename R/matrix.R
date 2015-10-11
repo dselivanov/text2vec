@@ -12,17 +12,15 @@
 #' @examples
 #' preprocess_fun <- function(txt) {
 #'    txt %>%
-#'      tolower %>%
-#'      # keep only words with latin letters
-#'      gsub(pattern = "[^a-z]", replacement = " ", x = .) %>%
-#'      # strip whitespaces
-#'      gsub(pattern = "\\s+", replacement = " ", x = .)
+#'      tolower
 #' }
 #' # or use simple_preprocess() insted
 #' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
 #' corpus <- create_dict_corpus(txt,
 #'    preprocess_fun = preprocess_fun,
-#'    tokenizer = simple_tokenizer,
+#'    #split text by word boundaries
+#'    tokenizer = regexp_tokenizer,
+#'    # by small pieces - call underlying C++ code for each document
 #'    batch_size = 1
 #'    )
 #' # or if stemming is needed
@@ -31,11 +29,9 @@
 #' preprocess_fun <- function(txt) {
 #'    txt %>%
 #'      tolower %>%
-#'      # keep only words with latin letters
-#'      gsub(pattern = "[^a-z]", replacement = " ", x = .) %>%
-#'      # strip whitespaces
-#'      gsub(pattern = "\\s+", replacement = " ", x = .) %>%
-#'      simple_tokenizer %>%
+#'      #split text by word boundaries
+#'      regexp_tokenizer %>%
+#'      # stem with Porter stemmer
 #'      lapply(SnowballC::wordStem, language = 'en')
 #' }
 #' dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
@@ -119,8 +115,8 @@ dtm_get_idf <- function(dtm, log_scale = log, smooth_idf = T)
 #' tf_scale_matrix <- dtm_get_tf(dtm, type = 'tf')
 #' dtm_tf <- tf_scale_matrix %*% dtm
 #' dtm_tf_idf <- dtm_get_tf %*% m %*% dtm_get_idf(dtm)
-#' # The same result we can obtain using transform_dtm function with parameter type = 'tfidf'
-#' dtm_tf_idf_2 <- transform_dtm(dtm, type='tfidf')
+#' # The same result we can obtain using transform function with parameter type = 'tfidf'
+#' dtm_tf_idf_2 <- transform(dtm, type='tfidf')
 #' identical(dtm_tf_idf, dtm_tf_idf_2)
 dtm_get_tf <- function(dtm, type = c('tf', 'binary'))
 {

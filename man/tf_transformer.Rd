@@ -41,6 +41,6 @@ idf  = log (# documents in the corpus) / (# documents where the term appears + 1
 \item \code{binary_transformer}: 
 }}
 \seealso{
-\link{dtm_get_idf}, examples provided in \link{dtm_transform}
+\link{dtm_get_idf}, examples provided in \link{transform}
 }
 

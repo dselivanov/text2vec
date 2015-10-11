@@ -18,8 +18,12 @@
 #' into vector representation per one fetching from connection.
 #' Generally setting this to large number speeding up DTM construction,
 #' but more RAM intensive.
+#' @param dict user-defined dictionary. \code{NULL} in case when we should build corpus from
+#' \code{src}. Or \bold{ordered} \code{character vector} when we want to reconstruct it from train data.
+#' Usually \code{dict} obtained from previous corpus construction via \code{source_corpus$dict} call.
+#' See \link{DictCorpus}.
 #' @param limit \code{integer} - maximum number of documents we want to
-#' transform into vector representation.
+#' transform to vector representation.
 #' @param progress \code{logical} - show progress bar
 #' @return corpus object, stored outside of R's heap.(XPtr - external pointer).
 #' We can add documents into this corpus by reference - no copy at all.
@@ -52,6 +56,7 @@ create_dict_corpus <- function(src,
                           tokenizer = simple_tokenizer,
                           ngram = c('min_n' = 1L, 'max_n' = 1L),
                           batch_size = 10,
+                          dict = NULL,
                           limit = NULL,
                           skip = 0,
                           progress = T) {
@@ -65,11 +70,22 @@ create_dict_corpus.connection <- function(src,
                                      tokenizer = simple_tokenizer,
                                      ngram = c('min_n' = 1L, 'max_n' = 1L),
                                      batch_size = 10,
+                                     dict = NULL,
                                      limit = NULL,
                                      skip = 0,
                                      progress = T) {
   on.exit(close(src))
-  corpus <- new(DictCorpus)
+
+  # CHECK dict and create corpus object
+  if(is.null(dict))
+    corpus <- new(DictCorpus)
+  else if(
+    is.character(dict)
+    # also we can check whether all terms are unique
+  )
+    corpus <- new(DictCorpus, dict)
+  else
+    stop("dict should be ordered character vector")
   fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, skip, progress)
 }
 
@@ -80,10 +96,21 @@ create_dict_corpus.character <- function(src,
                                     tokenizer = simple_tokenizer,
                                     ngram = c('min_n' = 1L, 'max_n' = 1L),
                                     batch_size = 10,
+                                    dict = NULL,
                                     limit = NULL,
                                     skip = 0,
                                     progress = T) {
-  corpus <- new(DictCorpus)
+  # CHECK dict and create corpus object
+  if(is.null(dict))
+    corpus <- new(DictCorpus)
+  else if(
+    is.character(dict)
+    # also we can check whether all terms are unique
+  )
+    corpus <- new(DictCorpus, dict)
+  else
+    stop("dict should be ordered character vector")
+
   fill_corpus_character(src, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, progress)
 }
 
@@ -225,5 +252,6 @@ get_word_list <- function(char_vec,
                           tokenizer = simple_tokenizer) {
   char_vec %>%
     preprocess_fun %>%
+    # we recieve list and assume it represents tokenized documents - terms
     (function(x) if(is.list(x)) x else tokenizer(x))
 }

@@ -29,8 +29,8 @@ dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
 tf_scale_matrix <- dtm_get_tf(dtm, type = 'tf')
 dtm_tf <- tf_scale_matrix \%*\% dtm
 dtm_tf_idf <- dtm_get_tf \%*\% m \%*\% dtm_get_idf(dtm)
-# The same result we can obtain using transform_dtm function with parameter type = 'tfidf'
-dtm_tf_idf_2 <- transform_dtm(dtm, type='tfidf')
+# The same result we can obtain using transform function with parameter type = 'tfidf'
+dtm_tf_idf_2 <- transform(dtm, type='tfidf')
 identical(dtm_tf_idf, dtm_tf_idf_2)
 }
 

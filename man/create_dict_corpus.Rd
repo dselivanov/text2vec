@@ -7,7 +7,7 @@
 \usage{
 create_dict_corpus(src, preprocess_fun = identity,
   tokenizer = simple_tokenizer, ngram = c(min_n = 1L, max_n = 1L),
-  batch_size = 10, limit = NULL, skip = 0, progress = T)
+  batch_size = 10, dict = NULL, limit = NULL, skip = 0, progress = T)
 
 create_hash_corpus(src, preprocess_fun = identity,
   tokenizer = simple_tokenizer, ngram = c(min_n = 1L, max_n = 1L),
@@ -33,8 +33,13 @@ into vector representation per one fetching from connection.
 Generally setting this to large number speeding up DTM construction,
 but more RAM intensive.}
 
+\item{dict}{user-defined dictionary. \code{NULL} in case when we should build corpus from
+\code{src}. Or \bold{ordered} \code{character vector} when we want to reconstruct it from train data.
+Usually \code{dict} obtained from previous corpus construction via \code{source_corpus$dict} call.
+See \link{DictCorpus}.}
+
 \item{limit}{\code{integer} - maximum number of documents we want to
-transform into vector representation.}
+transform to vector representation.}
 
 \item{progress}{\code{logical} - show progress bar}
 
