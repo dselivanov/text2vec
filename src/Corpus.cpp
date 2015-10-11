@@ -10,13 +10,12 @@ void process_term_dict (const string &term,
   int term_id;
   // new unobserved term
   if(term_iterator == dict.end()) {
-    // here we will process document using user-supplied dictionary
+    // here we will process term using user-supplied dictionary
     if(flag_dict_fixed) {
       // DO NOTHING!
       // because term is not in our predefined dictionary
-      // so this term is not relevant to us
     }
-    // here we will precess document and grow dictionary
+    // here we will precess term and grow dictionary
     else {
       // get new term id
       // we use incremented ids, so set new id to dict.size()
@@ -32,7 +31,7 @@ void process_term_dict (const string &term,
       ++term_count_map[term_id];
     }
   }
-  // dictionary already contains document => get index
+  // dictionary already contains term => get index
   else {
     term_id = term_iterator -> second;
     // increment count for input term
@@ -59,7 +58,10 @@ void process_term_hash (const string &term,
     ++term_count_map[term_id];
   }
 }
-
+// Document is map! (term_id -> term_count)
+// but we represent it by two corresponding vectors
+// this done for simplicity in further steps
+// also we strore some additional metadata - see comments in code
 class Document {
 public:
   //contructor
@@ -186,32 +188,38 @@ public:
     flag_dict_fixed = 0;
   };
   // contructor for corpus with user-defined dictionary
-  DictCorpus(IntegerVector dict_R ) {
+  DictCorpus(CharacterVector dict_R ) {
 
     token_count = 0;
     doc_count = 0;
+    int dict_size = dict_R.size();
+    int i = 0;
     // make unordered_map<string, int> dictionary
     // from R's named integer vector
     // allocate memory
-    vector<string> keys = dict_R.names();
-    vector<int> values = as<vector<int>>(dict_R);
-    this->global_terms.resize(dict_R.size());
+    this->global_terms.resize(dict_size);
     // we know dict size, so lets reserve buckets this number
     // and if we will lucky no rehash will needed
-    this->dict.reserve(dict_R.size());
+    this->dict.reserve(dict_size);
     //convert R dict represenation to C++ represenation
     // also fill terms in right order
-    for (int i = 0; i < dict_R.size(); i++) {
+    for (auto val:dict_R) {
       //grow dictionary
-      dict.insert(make_pair(keys[i], values[i]));
+      dict.insert(make_pair(as<string>(val), i));
       // fill terms in order we add them in dctionary!
-      this->global_terms[ values[i] ] = keys[i];
+      this->global_terms[ i ] = as<string>(val);
+      i++;
     }
     flag_dict_fixed = 1;
   };
   // total number of tokens in corpus
   int get_token_count() {return this->get_token_count();};
-
+  CharacterVector get_dict() {
+    CharacterVector dict_R(dict.size());
+    for(auto i:dict)
+      dict_R[ i.second ] = i.first;
+    return dict_R;
+  }
   // dictionary
   unordered_map<string, int> dict;
   // logical flag should we grow dictionary or use not (use user-supplied)
@@ -335,8 +343,9 @@ private:
 RCPP_MODULE(DictCorpus) {
   class_< DictCorpus >( "DictCorpus" )
   .constructor()
-  .constructor<IntegerVector>()
-  .field_readonly( "dict", &DictCorpus::dict, "dictionary - unique terms with corresponding indices")
+  .constructor<CharacterVector>()
+  //.field_readonly( "dict", &DictCorpus::dict, "dictionary - unique terms with corresponding indices")
+  .property( "dict", &DictCorpus::get_dict, "dictionary - unique terms")
   .property( "token_count", &DictCorpus::get_token_count, "returns number of tokens in corpus" )
   .method( "document_count", &DictCorpus::get_doc_count, "returns number of documents in corpus")
   .method( "insert_document", &DictCorpus::insert_document, "inserts new document (character vector) into corpus" )

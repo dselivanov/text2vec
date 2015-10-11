@@ -19,7 +19,7 @@
 #' Generally setting this to large number speeding up DTM construction,
 #' but more RAM intensive.
 #' @param dict user-defined dictionary. \code{NULL} in case when we should build corpus from
-#' \code{src} or \code{integer vector} with names. Names are terms, values are term indices.
+#' \code{src}. Or \bold{ordered} \code{character vector} when we want to reconstruct it from train data.
 #' Usually \code{dict} obtained from previous corpus construction via \code{source_corpus$dict} call.
 #' See \link{DictCorpus}.
 #' @param limit \code{integer} - maximum number of documents we want to
@@ -80,21 +80,12 @@ create_dict_corpus.connection <- function(src,
   if(is.null(dict))
     corpus <- new(DictCorpus)
   else if(
-    # all term ids are integer
-    is.integer(dict) &&
-    # have names (terms exists)
-    !is.null(names(dict)) &&
-    # index starts from zero
-    min(dict) == 0 &&
-    # maximum index equal to number of terms
-    max(dict) == (length(dict) - 1)
+    is.character(dict)
     # also we can check whether all terms are unique
   )
     corpus <- new(DictCorpus, dict)
   else
-    stop("dict vector of integers, starting from 0 (values represents indexes of terms)
-         and contain names, which are actual terms")
-
+    stop("dict should be ordered character vector")
   fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, skip, progress)
 }
 
@@ -113,20 +104,12 @@ create_dict_corpus.character <- function(src,
   if(is.null(dict))
     corpus <- new(DictCorpus)
   else if(
-    # all term ids are integer
-    is.integer(dict) &&
-    # have names (terms exists)
-    !is.null(names(dict)) &&
-    # index starts from zero
-    min(dict) == 0 &&
-    # maximum index equal to number of terms
-    max(dict) == (length(dict) - 1)
+    is.character(dict)
     # also we can check whether all terms are unique
   )
     corpus <- new(DictCorpus, dict)
   else
-    stop("dict vector of integers, starting from 0 (values represents indexes of terms)
-         and contain names, which are actual terms")
+    stop("dict should be ordered character vector")
 
   fill_corpus_character(src, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, progress)
 }

@@ -34,7 +34,7 @@ Generally setting this to large number speeding up DTM construction,
 but more RAM intensive.}
 
 \item{dict}{user-defined dictionary. \code{NULL} in case when we should build corpus from
-\code{src} or \code{integer vector} with names. Names are terms, values are term indices.
+\code{src}. Or \bold{ordered} \code{character vector} when we want to reconstruct it from train data.
 Usually \code{dict} obtained from previous corpus construction via \code{source_corpus$dict} call.
 See \link{DictCorpus}.}
 
