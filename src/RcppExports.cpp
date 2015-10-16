@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // ngram
 CharacterVector ngram(CharacterVector terms, int n_min, int n_max, std::string delim);
-RcppExport SEXP tmlite_ngram(SEXP termsSEXP, SEXP n_minSEXP, SEXP n_maxSEXP, SEXP delimSEXP) {
+RcppExport SEXP text2vec_ngram(SEXP termsSEXP, SEXP n_minSEXP, SEXP n_maxSEXP, SEXP delimSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;

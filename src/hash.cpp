@@ -1,4 +1,4 @@
-#include "tmlite.h"
+#include "text2vec.h"
 // header from digest package
 #include <pmurhashAPI.h>
 

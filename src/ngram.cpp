@@ -1,4 +1,4 @@
-#include "tmlite.h"
+#include "text2vec.h"
 using namespace Rcpp;
 using namespace std;
 //implements n-gram generation and processing

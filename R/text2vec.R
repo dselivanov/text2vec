@@ -1,8 +1,8 @@
-#' The tmlite package.
+#' The text2vec package.
 #'
 #' @docType package
-#' @name tmlite
-#' @useDynLib tmlite
+#' @name text2vec
+#' @useDynLib text2vec
 #' @import Matrix
 #' @import Rcpp
 #' @import digest

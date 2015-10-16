@@ -1,4 +1,4 @@
-#include "tmlite.h"
+#include "text2vec.h"
 
 // SEXP get_cooccurence_matrix(CharacterVector sentence, int window_size, std::function<double(int)> weighting_fun = linear_inverse_decay) {
 
