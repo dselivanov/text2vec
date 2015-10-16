@@ -1,4 +1,4 @@
-#include "tmlite.h"
+#include "text2vec.h"
 // header from digest package
 #include <pmurhashAPI.h>
 
@@ -10,4 +10,11 @@ uint32_t murmurhash3_hash (const string &str) {
 
 int murmurhash3_sign (const string &str) {
   return (int)PMurHash32(MURMURHASH3_SIGN_SEED, str.c_str(), str.size());
+}
+
+uint32_t fast_int_hash(uint32_t a) {
+  a = ((a >> 16) ^ a) * 0x45d9f3b;
+  a = ((a >> 16) ^ a) * 0x45d9f3b;
+  a = ((a >> 16) ^ a);
+  return a;
 }

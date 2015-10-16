@@ -1,8 +1,8 @@
-#' The tmlite package.
+#' The text2vec package.
 #'
 #' @docType package
-#' @name tmlite
-#' @useDynLib tmlite
+#' @name text2vec
+#' @useDynLib text2vec
 #' @import Matrix
 #' @import Rcpp
 #' @import digest
@@ -18,7 +18,14 @@ NULL
 NULL
 
 #' Rcpp module: HashCorpus
-#' Exposes C++ functions to construct Document-Term Matrix
+#' Exposes C++ functions to construct hashed Document-Term Matrix
 #' @name HashCorpus
+#' @export
+NULL
+
+#' Rcpp module: GloveCorpus
+#' Exposes C++ functions to construct word cooccurence matrix
+#' and train GloVe model for word embeddings
+#' @name GloveCorpus
 #' @export
 NULL

@@ -1,4 +1,4 @@
-#include "tmlite.h"
+#include "text2vec.h"
 
 void process_term_dict (const string &term,
                         unordered_map<uint32_t, int> &term_count_map,

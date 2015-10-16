@@ -3,6 +3,6 @@
 
 #'@export
 ngram <- function(terms, n_min = 1L, n_max = 1L, delim = "_") {
-    .Call('tmlite_ngram', PACKAGE = 'tmlite', terms, n_min, n_max, delim)
+    .Call('text2vec_ngram', PACKAGE = 'text2vec', terms, n_min, n_max, delim)
 }
 
