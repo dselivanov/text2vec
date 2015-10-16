@@ -3,9 +3,9 @@
 \name{HashCorpus}
 \alias{HashCorpus}
 \title{Rcpp module: HashCorpus
-Exposes C++ functions to construct Document-Term Matrix}
+Exposes C++ functions to construct hashed Document-Term Matrix}
 \description{
 Rcpp module: HashCorpus
-Exposes C++ functions to construct Document-Term Matrix
+Exposes C++ functions to construct hashed Document-Term Matrix
 }
 
