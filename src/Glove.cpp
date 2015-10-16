@@ -50,13 +50,18 @@ public:
   }
   // TODO add weighting_fun parameter, like this:
   // std::function<double(int)> weighting_fun = linear_inverse_decay
-  void insert_sentence(CharacterVector sentence, int window_size) {
+  void insert_sentence(CharacterVector sentence, int window_size, int verbose = 1) {
     int K = sentence.size();
     int main_word_index, context_word_index;
     double increment = 0.0;
+    // size_t non_zero_count = 0;
     typename unordered_map < string, int > :: const_iterator main_word_iterator, context_word_iterator;
     // typename unordered_map < string, int > :: const_iterator context_word_iterator;
     for(int i = 0; i < K; i++) {
+
+      tokens_number++;
+      if( verbose && tokens_number % 1000000 == 0)
+        Rprintf("%d tokens processed, matrix size = %d\n", tokens_number, cooc_matrix.size() );
       main_word_iterator = this->truncated_dict.find(  as<string>(sentence[i]) );
       // if main word in dict
       if(main_word_iterator != this->truncated_dict.end()) {
@@ -72,8 +77,17 @@ public:
               context_word_index = context_word_iterator->second;
               // calculate cooccurence increment for particular position j of context word
               increment = weighting_fun(j);
-              this->cooc_matrix[make_pair(main_word_index, context_word_index)] += increment;
-              this->cooc_matrix[make_pair(context_word_index, main_word_index)] += increment;
+              // map stores only elements above diagonal because
+              // our matrix is symmetrical
+              if(main_word_index < context_word_index) {
+                this->cooc_matrix[make_pair(main_word_index, context_word_index)] += increment;
+              }
+              else {
+                // also we are not interested in context words equal to main word
+                // diagonal elememts will be zeros
+                if(main_word_index != context_word_index)
+                  this->cooc_matrix[make_pair(context_word_index, main_word_index)] += increment;
+              }
             }
           }
         }
@@ -86,24 +100,33 @@ public:
   }
   S4 get_cooc_matrix() {
     // non-zero values count
-    int N = cooc_matrix.size();
+    size_t N = cooc_matrix.size();
     // matrix dimensions
     int dim_size = truncated_dict.size();
 
     // result triplet sparse matrix
     S4 triplet_cooc_matrix("dgTMatrix");
     // index vectors
-    IntegerVector cooc_i(N);
-    IntegerVector cooc_j(N);
+    IntegerVector cooc_i(2*N);
+    IntegerVector cooc_j(2*N);
     // value vector
-    NumericVector cooc_x(N);
+    NumericVector cooc_x(2*N);
 
-    int i = 0;
+    int n = 0, i, j;
+    double x;
     for(auto it : cooc_matrix) {
-      cooc_i[i] = it.first.first;
-      cooc_j[i] = it.first.second;
-      cooc_x[i] = it.second;
-      i++;
+      i = it.first.first;
+      j = it.first.second;
+      x = it.second;
+      // fill first half of our symmetric cooccurence matrix
+      cooc_i[n] = i;
+      cooc_j[n] = j;
+      cooc_x[n] = x;
+      // fill second half of our symmetric cooccurence matrix
+      cooc_i[n+N] = j;
+      cooc_j[n+N] = i;
+      cooc_x[n+N] = x;
+      n++;
     }
     // construct matrix
     triplet_cooc_matrix.slot("i") = cooc_i;
@@ -124,7 +147,7 @@ private:
   unordered_map< string, pair<int, int>> full_dict;
   unordered_map< string, int> truncated_dict;
   unordered_map< pair< int, int >, double > cooc_matrix;
-
+  size_t tokens_number = 0;
   inline double weighting_fun(int offset) {
     return 1.0 / offset;
   }
