@@ -27,6 +27,5 @@ LinkingTo:
     digest
 Suggests:
     SnowballC,
-    data.table,
     knitr,
     testthat

@@ -1,6 +1,6 @@
-#' @name create_dict_corpus
-#' @title RAM-friendly streaming corpus construction. Dictionary or hash based.
-#' @description RAM-friendly streaming corpus construction. Dictionary or hash based.
+#' @name create_vocab_corpus
+#' @title RAM-friendly streaming corpus construction. Vocabulary or hash based.
+#' @description RAM-friendly streaming corpus construction. Vocabulary or hash based.
 #' @param src \code{character} vector or \link{connection} object.
 #' @param preprocess_fun \bold{\code{function}} which takes \code{character vector}
 #' and \bold{do all preprocessing} (including stemming if needed). See "Details" section.
@@ -18,10 +18,10 @@
 #' into vector representation per one fetching from connection.
 #' Generally setting this to large number speeding up DTM construction,
 #' but more RAM intensive.
-#' @param dict user-defined dictionary. \code{NULL} in case when we should build corpus from
+#' @param vocab user-defined vocabulary. \code{NULL} in case when we should build corpus from
 #' \code{src}. Or \bold{ordered} \code{character vector} when we want to reconstruct it from train data.
-#' Usually \code{dict} obtained from previous corpus construction via \code{source_corpus$dict} call.
-#' See \link{DictCorpus}.
+#' Usually \code{vocab} obtained from previous corpus construction via \code{source_corpus$vocab} call.
+#' See \link{VocabCorpus}.
 #' @param limit \code{integer} - maximum number of documents we want to
 #' transform to vector representation.
 #' @param progress \code{logical} - show progress bar
@@ -51,70 +51,70 @@
 #'
 #' For full process example see \link{get_dtm}.
 #' @export
-create_dict_corpus <- function(src,
+create_vocab_corpus <- function(src,
                           preprocess_fun = identity,
                           tokenizer = simple_tokenizer,
                           ngram = c('min_n' = 1L, 'max_n' = 1L),
                           batch_size = 10,
-                          dict = NULL,
+                          vocab = NULL,
                           limit = NULL,
                           skip = 0,
                           progress = T) {
-  UseMethod("create_dict_corpus")
+  UseMethod("create_vocab_corpus")
 }
 
-#' @aliases create_dict_corpus
+#' @aliases create_vocab_corpus
 #' @export
-create_dict_corpus.connection <- function(src,
+create_vocab_corpus.connection <- function(src,
                                      preprocess_fun = identity,
                                      tokenizer = simple_tokenizer,
                                      ngram = c('min_n' = 1L, 'max_n' = 1L),
                                      batch_size = 10,
-                                     dict = NULL,
+                                     vocab = NULL,
                                      limit = NULL,
                                      skip = 0,
                                      progress = T) {
   on.exit(close(src))
 
-  # CHECK dict and create corpus object
-  if(is.null(dict))
-    corpus <- new(DictCorpus)
+  # CHECK vocab and create corpus object
+  if(is.null(vocab))
+    corpus <- new(VocabCorpus)
   else if(
-    is.character(dict)
+    is.character(vocab)
     # also we can check whether all terms are unique
   )
-    corpus <- new(DictCorpus, dict)
+    corpus <- new(VocabCorpus, vocab)
   else
-    stop("dict should be ordered character vector")
+    stop("vocab should be ordered character vector")
   fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, skip, progress)
 }
 
-#' @aliases create_dict_corpus
+#' @aliases create_vocab_corpus
 #' @export
-create_dict_corpus.character <- function(src,
+create_vocab_corpus.character <- function(src,
                                     preprocess_fun = identity,
                                     tokenizer = simple_tokenizer,
                                     ngram = c('min_n' = 1L, 'max_n' = 1L),
                                     batch_size = 10,
-                                    dict = NULL,
+                                    vocab = NULL,
                                     limit = NULL,
                                     skip = 0,
                                     progress = T) {
-  # CHECK dict and create corpus object
-  if(is.null(dict))
-    corpus <- new(DictCorpus)
+  # CHECK vocab and create corpus object
+  if(is.null(vocab))
+    corpus <- new(VocabCorpus)
   else if(
-    is.character(dict)
+    is.character(vocab)
     # also we can check whether all terms are unique
   )
-    corpus <- new(DictCorpus, dict)
+    corpus <- new(VocabCorpus, vocab)
   else
-    stop("dict should be ordered character vector")
+    stop("vocab should be ordered character vector")
 
   fill_corpus_character(src, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, progress)
 }
 
-#' @rdname create_dict_corpus
+#' @rdname create_vocab_corpus
 #' @export
 create_hash_corpus <- function(src,
                                preprocess_fun = identity,
