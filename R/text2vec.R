@@ -12,9 +12,9 @@
 NULL
 
 
-#' Rcpp module: DictCorpus
+#' Rcpp module: VocabCorpus
 #' Exposes C++ functions to construct Document-Term Matrix
-#' @name DictCorpus
+#' @name VocabCorpus
 #' @export
 NULL
 
@@ -28,5 +28,11 @@ NULL
 #' Exposes C++ functions to construct word cooccurence matrix
 #' and train GloVe model for word embeddings
 #' @name GloveCorpus
+#' @export
+NULL
+
+#' Rcpp module: Vocabulary
+#' Exposes C++ functions to construct Vocabulary
+#' @name Vocabulary
 #' @export
 NULL
