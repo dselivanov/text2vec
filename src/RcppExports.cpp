@@ -5,17 +5,3 @@
 
 using namespace Rcpp;
 
-// ngram
-CharacterVector ngram(CharacterVector terms, int n_min, int n_max, std::string delim);
-RcppExport SEXP text2vec_ngram(SEXP termsSEXP, SEXP n_minSEXP, SEXP n_maxSEXP, SEXP delimSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< CharacterVector >::type terms(termsSEXP);
-    Rcpp::traits::input_parameter< int >::type n_min(n_minSEXP);
-    Rcpp::traits::input_parameter< int >::type n_max(n_maxSEXP);
-    Rcpp::traits::input_parameter< std::string >::type delim(delimSEXP);
-    __result = Rcpp::wrap(ngram(terms, n_min, n_max, delim));
-    return __result;
-END_RCPP
-}

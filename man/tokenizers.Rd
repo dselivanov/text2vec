@@ -2,14 +2,11 @@
 % Please edit documentation in R/tokenizers.R
 \name{tokenizers}
 \alias{regexp_tokenizer}
-\alias{simple_tokenizer}
 \alias{tokenizers}
 \title{Tokenization functions, which performs string splitting
 by regular expression or fixed string.}
 \usage{
 regexp_tokenizer(string, pattern = boundary("word"))
-
-simple_tokenizer(string, pattern = " ")
 }
 \arguments{
 \item{string}{\link{character} vector}

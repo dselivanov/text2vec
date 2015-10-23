@@ -19,10 +19,14 @@ Imports:
     Rcpp (>= 0.11),
     digest(>= 0.6.8),
     magrittr(>= 1.5),
-    stringr(>= 1.0.0)
+    stringr(>= 1.0.0),
+    RcppParallel
 LinkingTo:
     Rcpp,
+    RcppParallel,
     digest
 Suggests:
     SnowballC,
-    knitr
+    data.table,
+    knitr,
+    testthat
