@@ -3,34 +3,11 @@
 #include <vector>
 #include <functional>
 #include <unordered_map>
+#include <RcppParallel.h>
+
 using namespace Rcpp;
+using namespace RcppParallel;
 using namespace std;
-
-// borrowed from FeatureHashing package
-// https://github.com/wush978/FeatureHashing/blob/ea7cc034b0dbdfa6fc742fcebaa7dc4025f5364e/src/digest.c
-// seeds for hashing trick
-const uint32_t MURMURHASH3_HASH_SEED = 3120602769LL;
-const uint32_t MURMURHASH3_SIGN_SEED = 79193439LL;
-
-// feature hash
-uint32_t murmurhash3_hash (const string &str);
-
-// feature sign hash
-int      murmurhash3_sign (const string &str);
-
-// fast integer hashing
-uint32_t fast_int_hash(uint32_t a);
-
-namespace std {
-template <>
-struct hash<std::pair<int, int>>
-{
-  inline size_t operator()(const std::pair<int, int>& k) const
-  {
-    return fast_int_hash(k.first) + fast_int_hash(k.second);
-  }
-};
-}
 
 void process_term_dict (const string &term,
                                unordered_map<uint32_t, int> &term_count_map,

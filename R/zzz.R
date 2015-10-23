@@ -1,3 +1,3 @@
-loadModule("DictCorpus", TRUE)
+loadModule("VocabCorpus", TRUE)
 loadModule("HashCorpus", TRUE)
 loadModule("GloveCorpus", TRUE)

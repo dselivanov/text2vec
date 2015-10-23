@@ -20,10 +20,3 @@ regexp_tokenizer <- function (string, pattern = boundary("word"))
 {
   str_split(string = string, pattern = pattern)
 }
-
-#' @rdname tokenizers
-#' @export
-simple_tokenizer <- function (string, pattern = " ")
-{
-  str_split(string = string, pattern = fixed(pattern))
-}
