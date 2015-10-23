@@ -22,9 +22,9 @@ namespace std {
 // SEXP get_cooccurence_matrix(CharacterVector sentence, int window_size, std::function<double(int)> weighting_fun = linear_inverse_decay) {
 class GloveCorpus {
 public:
-  GloveCorpus() {};
+  GloveCorpus(): tokens_number(0) {};
   // constructor with dictionary
-  GloveCorpus(CharacterVector dict_R) {
+  GloveCorpus(CharacterVector dict_R): tokens_number(0) {
     int dict_size = dict_R.size(),
       i = 0;
     this->truncated_dict.reserve(dict_size);
@@ -167,9 +167,9 @@ private:
   unordered_map< string, pair<int, int>> full_dict;
   unordered_map< string, int> truncated_dict;
   unordered_map< pair< int, int >, double > cooc_matrix;
-  size_t tokens_number = 0;
+  size_t tokens_number;
   inline double weighting_fun(int offset) {
-    return 1.0 / offset;
+    return 1.0 / (double)offset;
   }
 
 };
