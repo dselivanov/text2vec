@@ -1,5 +1,4 @@
-#include "text2vec.h"
-
+#include "Document.hpp"
 class Corpus {
 public:
 
@@ -14,44 +13,17 @@ public:
 protected:
   int token_count;
   vector<Document> docs;
-  vector<string> global_terms;
   //document counter
   int doc_count;
   // number of tokens
-  void insert_dtm_doc(const unordered_map<uint32_t, int> &term_count_map) {
+  void insert_dtm_doc(const unordered_map<uint32_t, uint32_t> &term_count_map) {
     Document doc(term_count_map, doc_count);
     docs.push_back(doc);
     doc_count++;
     token_count += term_count_map.size();
   }
 
-  SEXP get_dtm_dgT(int ncol) {
-    int i = 0;
-    NumericVector dtm_x(token_count);
-    IntegerVector dtm_i(token_count);
-    IntegerVector dtm_j(token_count);
-
-    for (auto doc: docs) {
-      for (int j = 0; j < doc.doc_len; j++) {
-        dtm_i[i] = doc.doc_id;
-        dtm_j[i] = doc.term_ids[j];
-        dtm_x[i] = doc.term_counts[j];
-        i++;
-      }
-    }
-
-    S4 dtm("dgTMatrix");
-    dtm.slot("i") = dtm_i;
-    dtm.slot("j") = dtm_j;
-    dtm.slot("x") = dtm_x;
-    dtm.slot("Dim") = IntegerVector::create(doc_count, ncol) ;
-    if(this->global_terms.empty())
-      dtm.slot("Dimnames") = List::create(R_NilValue, R_NilValue);
-    else
-      dtm.slot("Dimnames") = List::create(R_NilValue, global_terms);
-    return dtm;
-  }
-
+  SEXP get_dtm_dgT();
 
   SEXP get_dtm_lda_c() {
     List lda_c_dtm(doc_count);

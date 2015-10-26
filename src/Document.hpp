@@ -1,5 +1,4 @@
 #include "text2vec.h"
-
 // Document is map! (term_id -> term_count)
 // but we represent it by two corresponding vectors
 // this done for simplicity in further steps
@@ -7,7 +6,7 @@
 class Document {
 public:
   //contructor
-  Document(const unordered_map<uint32_t, int> &doc_map, int doc_num) {
+  Document(const unordered_map<uint32_t, uint32_t> &doc_map, int doc_num) {
     doc_len = doc_map.size();
 
     vector<uint32_t> term(doc_len);
