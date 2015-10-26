@@ -1,5 +1,7 @@
 #include "hash.h"
 #include "Corpus.hpp"
+using namespace Rcpp;
+using namespace std;
 
 // implements hashing trick
 void process_term_hash (const string &term,

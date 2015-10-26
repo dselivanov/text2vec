@@ -1,6 +1,7 @@
 #include "text2vec.h"
 using namespace Rcpp;
 using namespace std;
+
 //implements n-gram generation and processing
 void ngram_generator(const CharacterVector terms,
            std::function<void(const string)> term_handler,

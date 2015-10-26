@@ -1,4 +1,6 @@
 #include "text2vec.h"
+using namespace Rcpp;
+using namespace std;
 
 class TermStat {
 public:
@@ -48,8 +50,9 @@ public:
   ngram_min(ngram_min), ngram_max(ngram_max),
   token_count(0), sentence_count(0),
   ngram_delim(ngram_delim) {
-    this->insert_term = [&](const string term) {
-      term_handler(term, full_vocab, temp_document_word_set);
+    this->insert_term = [&](const string &term) {
+      this->token_count++;
+      term_handler(term, this->full_vocab, this->temp_document_word_set);
     };
   }
 
