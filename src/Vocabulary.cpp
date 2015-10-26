@@ -1,4 +1,6 @@
 #include "Vocabulary.hpp"
+using namespace Rcpp;
+using namespace std;
 
 RCPP_MODULE(Vocabulary) {
   class_< Vocabulary >( "Vocabulary" )

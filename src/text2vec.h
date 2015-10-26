@@ -5,8 +5,6 @@
 #include <unordered_map>
 #include <RcppParallel.h>
 
-using namespace Rcpp;
-using namespace RcppParallel;
 using namespace std;
 
 void process_term_dict (const string &term,
@@ -21,7 +19,7 @@ void process_term_hash (const string &term,
                         int signned_hash);
 
 // n-gram generator
-void ngram_generator(const CharacterVector terms,
+void ngram_generator(const Rcpp::CharacterVector terms,
            std::function<void(const string)> process_ngram,
            uint32_t n_min, uint32_t n_max,
            // delimiter for terms concatenation

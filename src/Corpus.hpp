@@ -1,4 +1,7 @@
 #include "Document.hpp"
+using namespace Rcpp;
+using namespace std;
+
 class Corpus {
 public:
 
