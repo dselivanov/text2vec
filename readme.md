@@ -1,4 +1,5 @@
-[![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=master)](https://travis-ci.org/dselivanov/text2vec)
+[![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=redesign)](https://travis-ci.org/dselivanov/text2vec)
+[![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://badges.mit-license.org)
 # Quick reference
 **[Quick reference](https://github.com/dselivanov/text2vec/wiki/Quick-reference)** is based on kaggle's [Bag of Words Meets Bags of Popcorn](https://www.kaggle.com/c/word2vec-nlp-tutorial) competition data - [labeledTrainData.tsv.zip](https://www.kaggle.com/c/word2vec-nlp-tutorial/download/labeledTrainData.tsv.zip).
 
