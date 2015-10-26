@@ -8,7 +8,7 @@ test_that("Vocabulary construction", {
   prep_fun <- function(x) x %>% tolower %>%  str_split(boundary("word"))
   lst <- movie_review[['review']][train_ind] %>% prep_fun
 
-  vocab <- new(Vocabulary)
+  vocab <- new(Vocabulary, 1, 1, "_")
   vocab$insert_sentence_batch(lst)
   vocab_stat <- vocab$vocab_stat()
 

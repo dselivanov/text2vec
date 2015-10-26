@@ -3,7 +3,7 @@
 class TermStat {
 public:
   TermStat(uint32_t term_id):
-    term_id(term_id), term_global_count(1), document_term_count(0) {
+  term_id(term_id), term_global_count(1), document_term_count(0) {
     // document_term_count(make_pair(document_id, ))
   };
   uint32_t term_id;
@@ -15,35 +15,53 @@ public:
   //double document_share;
 };
 
+
+inline void term_handler (const string &term,
+                        unordered_map< string, TermStat> &vocab,
+                        unordered_set< string> &temp_doc_set) {
+  typename unordered_map < string, TermStat > :: iterator term_iterator;
+  temp_doc_set.insert(term);
+  term_iterator = vocab.find(term);
+  int term_id;
+  // new unobserved term
+  if(term_iterator == vocab.end()) {
+    // here we will precess term and grow dictionary
+    // get new term id
+    // we use incremented ids, so set new id to dict.size()
+    term_id = vocab.size();
+    // insert term into dictionary
+    vocab.insert(make_pair(term, TermStat( vocab.size()) ));
+  }
+  // dictionary already contains term => get index
+  else {
+    term_iterator->second.term_global_count++;
+  }
+}
+
+
 class Vocabulary {
 public:
-  Vocabulary(): sentence_count(0), token_count(0) {}
 
-// insert single sentence (vector<string>) into vocabulary
-  void insert_sentence(const CharacterVector sentence) {
-    // increase number of handled sentences
-    this->sentence_count++;
-    // clear set of terms for this sentence/document
-    temp_document_word_set.clear();
+  Vocabulary(uint32_t ngram_min,
+             uint32_t ngram_max,
+             const string ngram_delim = "_"):
+  ngram_min(ngram_min), ngram_max(ngram_max),
+  token_count(0), sentence_count(0),
+  ngram_delim(ngram_delim) {
+    this->insert_term = [&](const string term) {
+      term_handler(term, full_vocab, temp_document_word_set);
+    };
+  }
 
-    string s;
-    //typename unordered_map <  string, pair<int, int> > :: iterator term_iterator;
-    typename unordered_map <  string, TermStat > :: iterator term_iterator;
-    for(int i = 0; i < sentence.size(); i++) {
-      token_count++;
-       s = sentence[i];
-       // add term to document bag-of-words
-       temp_document_word_set.insert(s);
+  void insert_sentence(const CharacterVector terms) {
 
-       term_iterator = this->full_vocab.find(s);
-       if(term_iterator == this->full_vocab.end())
-         this->full_vocab.insert(make_pair(s, TermStat( this->full_vocab.size()) ) );
-       else {
-         term_iterator->second.term_global_count++;
-       }
-    }
+    this->temp_document_word_set.clear();
 
-    for ( auto it: temp_document_word_set) {
+    ngram_generator(terms, this->insert_term, ngram_min, ngram_max, ngram_delim);
+
+    typename unordered_map < string, TermStat > :: iterator term_iterator;
+
+    for ( auto it: this->temp_document_word_set) {
       term_iterator = full_vocab.find(it);
       if(term_iterator != full_vocab.end())
         term_iterator->second.document_term_count++;
@@ -91,9 +109,16 @@ public:
   //      else Rprintf("warning : vocab already exists - do nothing\n");
   //  }
 private:
-  unordered_map<string, TermStat> full_vocab;
-  //unordered_map< string, int> vocab;
+  unordered_map< string, TermStat > full_vocab;
+
+  uint32_t ngram_min;
+  uint32_t ngram_max;
+  const string ngram_delim;
+
   uint32_t sentence_count;
   uint32_t token_count;
-  unordered_set<string> temp_document_word_set;
+  unordered_set< string > temp_document_word_set;
+
+  std::function<void(const string)> insert_term;
+
 };
