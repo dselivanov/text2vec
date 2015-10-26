@@ -10,7 +10,6 @@ Description: Fast and memory-friendly tools for text vectorization.
 License: MIT + file LICENSE
 URL: https://github.com/dselivanov/text2vec
 BugReports: https://github.com/dselivanov/text2vec/issues
-VignetteBuilder: knitr
 SystemRequirements: C++11
 Depends:
     R (>= 3.1.0),
@@ -27,5 +26,4 @@ LinkingTo:
     digest
 Suggests:
     SnowballC,
-    knitr,
     testthat
