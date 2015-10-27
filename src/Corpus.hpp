@@ -21,7 +21,7 @@ public:
 protected:
   // token counter
   uint32_t token_count;
-
+  size_t nnz;
   //document counter
   int doc_count;
 
@@ -38,10 +38,10 @@ protected:
     Document doc(term_count_map, doc_count);
     docs.push_back(doc);
     doc_count++;
-    //token_count += term_count_map.size();
+    nnz += term_count_map.size();
   }
 
-  SEXP get_dtm_dgT();
+  SEXP get_dtm_triplet();
 
   SEXP get_dtm_lda_c() {
     List lda_c_dtm(doc_count);

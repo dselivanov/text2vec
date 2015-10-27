@@ -29,7 +29,8 @@ class VocabCorpus: public Corpus {
 public:
   // contructor for corpus with user-defined vocabulary
   VocabCorpus(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, string delim ) {
-
+    verbose = 1;
+    nnz = 0;
     token_count = 0;
     doc_count = 0;
     cooc_tokens_number = 0;
@@ -194,7 +195,7 @@ public:
     return triplet_cooc_matrix;
   }
 
-  SEXP get_dtm_dgT() {
+  SEXP get_dtm_triplet() {
     size_t ncol = this->vocab.size();
 
     vector<string> terms;
@@ -204,9 +205,9 @@ public:
       terms[it.second] = it.first;
 
     int i = 0;
-    NumericVector dtm_x(token_count);
-    IntegerVector dtm_i(token_count);
-    IntegerVector dtm_j(token_count);
+    NumericVector dtm_x(this->nnz);
+    IntegerVector dtm_i(this->nnz);
+    IntegerVector dtm_j(this->nnz);
 
     for (auto doc: docs) {
       for (int j = 0; j < doc.doc_len; j++) {
@@ -230,7 +231,7 @@ public:
   SEXP get_dtm(IntegerVector type) {
     switch (type[0]) {
     case 0:
-      return get_dtm_dgT ();
+      return get_dtm_triplet ();
     case 1:
       return get_dtm_lda_c();
     case 2:
@@ -240,7 +241,7 @@ public:
     }
   }
 private:
-  int verbose = 1;
+  int verbose;
   //#####Glove related
   uint64_t cooc_tokens_number;
   // vocabulary
