@@ -105,11 +105,9 @@ dtm_get_idf <- function(dtm, log_scale = log, smooth_idf = T)
 #' @param dtm \code{sparseMatrix} - Document-Term-Matrix
 #' @param type \code{c('tf', 'binary')} - type of TF scaling matrix
 #' Formula for tf :
-#' \deqn{tf = \fraq {# word appears in document}{# words in document}}{%
-#' tf = (# word appears in document) / (# words in document) }
+#' \code{tf = (Number word appears in document) / (Number words in document)}
 #  For binary:
-#' \deqn{tf = {Does word appears in document (binary encoding): 0 if not appears, 1 if appears}}{%
-#' tf = (Does word appears in document (binary encoding): 0 if not appears, 1 if appears)}
+#' \code{tf = Does word appears in document (binary encoding): (0 if not appears), (1 if appears)}
 #' @examples
 #' \dontrun{
 #' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "),

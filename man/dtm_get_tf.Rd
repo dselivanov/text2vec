@@ -11,10 +11,8 @@ dtm_get_tf(dtm, type = c("tf", "binary"))
 
 \item{type}{\code{c('tf', 'binary')} - type of TF scaling matrix
 Formula for tf :
-\deqn{tf = \fraq {# word appears in document}{# words in document}}{%
-tf = (# word appears in document) / (# words in document) }
-\deqn{tf = {Does word appears in document (binary encoding): 0 if not appears, 1 if appears}}{%
-tf = (Does word appears in document (binary encoding): 0 if not appears, 1 if appears)}}
+\code{tf = (Number word appears in document) / (Number words in document)}
+\code{tf = Does word appears in document (binary encoding): (0 if not appears), (1 if appears)}}
 }
 \description{
 Creates TermFrequency (tf) scaling matrix from Document-Term-Matrix
