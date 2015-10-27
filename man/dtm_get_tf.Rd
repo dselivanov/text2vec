@@ -7,23 +7,23 @@
 dtm_get_tf(dtm, type = c("tf", "binary"))
 }
 \arguments{
-\item{dtm}{\link{sparseMatrix} - Document-Term-Matrix}
+\item{dtm}{\code{sparseMatrix} - Document-Term-Matrix}
 
-\item{type}{type of scaling. Formula for tf :
+\item{type}{\code{c('tf', 'binary')} - type of TF scaling matrix
+Formula for tf :
 \deqn{tf = \fraq {# word appears in document}{# words in document}}{%
 tf = (# word appears in document) / (# words in document) }
 \deqn{tf = {Does word appears in document (binary encoding): 0 if not appears, 1 if appears}}{%
 tf = (Does word appears in document (binary encoding): 0 if not appears, 1 if appears)}}
-
-\item{type}{\code{c('tf', 'binary')} - type of TF scaling matrix}
 }
 \description{
 Creates TermFrequency (tf) scaling matrix from Document-Term-Matrix
 }
 \examples{
 \dontrun{
-txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
-corpus <- create_dict_corpus(txt,
+txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "),
+ paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
+corpus <- create_vocab_corpus(txt,
    tokenizer = regexp_tokenizer
    )
 dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )

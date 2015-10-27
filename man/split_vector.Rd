@@ -12,9 +12,10 @@ split_vector(vector, splits, granularity = 1)
 \item{splits}{\link{integer} - controls number of parallel jobs you have planned.
 Usually should be equal to number of cores in the machine.}
 
-\item{granularity}{\link{integer} -  granularity is useful for management of granularity of splits.
-If you expect that computational time on each chunk of your data will be distributed nerarly uniformly,
-granularity = 1 is good choice because of little overheads in syncronizing parallel processes.}
+\item{granularity}{\link{integer} -  granularity is useful for management of granularity
+of splits. If you expect that computational time on each chunk of your data will
+be distributed nerarly uniformly, granularity = 1 is good choice because of little overheads
+in syncronizing parallel processes.}
 }
 \value{
 \link{list} each element is a \link{integer} \link{vector} pair.
@@ -28,7 +29,7 @@ Parameters granularity and splits controls the numer of chunks in returned list.
 Number of chunks in resulted list in general is equal granularity * splits
 }
 \examples{
-# Split vector into 4 chunks. splits paramenter usually should be equal to number of cores in the machine.
+# Split vector into 4 chunks.
 splits <- split_vector(vector = runif(100), granularity = 2, splits = 2)
 }
 

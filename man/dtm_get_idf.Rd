@@ -7,16 +7,17 @@
 dtm_get_idf(dtm, log_scale = log, smooth_idf = T)
 }
 \arguments{
-\item{dtm}{\link{dgCMatrix-class} - Document-Term matrix.}
+\item{dtm}{\code{dgCMatrix} - Document-Term matrix.}
 
 \item{log_scale}{function to use in idf calculation. Usually \link{log} used.
 Also worth to try \link{log2}.}
 
 \item{smooth_idf}{\code{logical} smooth idf weights by adding one to document frequencies,
-as if an extra document was seen containing every term in the collection exactly once. Prevents zero divisions.}
+as if an extra document was seen containing every term in the collection exactly once.
+Prevents zero divisions.}
 }
 \value{
-\link{ddiMatrix} idf scaling diagonal sparse matrix.
+\code{ddiMatrix} idf scaling diagonal sparse matrix.
 }
 \description{
 Creates Inverse Document-Frequency (idf) scaling matrix from Document-Term matrix.

@@ -1,13 +1,14 @@
 #' @name get_dtm
 #' @title Creates Document-Term matrix construction
 #' @description Creates Document-Term matrix from Corpus object.
-#' @param corpus HashCorpus or DictCorpus object. See \link{create_dict_corpus} for details.
+#' @param corpus HashCorpus or DictCorpus object. See \link{create_vocab_corpus} for details.
 #' @param dictionary \link{character} or \link{NULL} -  use only words from this dict
 #' dictionary in Document-Term-Matrix construction.
 #' NULL if all words should be used.
 #' @param stopwords \link{character} or \link{NULL} - words to remove from DTM
 #' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "LDA_C", "LIL")}.
-#' "LDA_C" - Blei's lda-c format (list of 2*doc_terms_size), see \link{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
+#' "LDA_C" - Blei's lda-c format (list of 2*doc_terms_size),
+#' see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
 #' "LIL" - same as LDA-C, but without terms count. Useful for Minhash algorithm.
 #' @examples
 #' \dontrun{
@@ -15,8 +16,9 @@
 #'    txt %>%
 #'      tolower
 #' }
-#' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
-#' corpus <- create_dict_corpus(txt,
+#' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "),
+#'  paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
+#' corpus <- create_vocab_corpus(txt,
 #'    preprocess_fun = preprocess_fun,
 #'    #split text by word boundaries
 #'    tokenizer = regexp_tokenizer,
@@ -77,12 +79,13 @@ get_dtm <- function(corpus, dictionary = NULL, stopwords = NULL,
 #' @description Creates Inverse Document-Frequency (idf) scaling matrix from Document-Term matrix.
 #' idf = log (# documents in the corpus) / (# documents where the term appears + 1)
 #' For examples see  \link{get_dtm}
-#' @param dtm \link{dgCMatrix-class} - Document-Term matrix.
+#' @param dtm \code{dgCMatrix} - Document-Term matrix.
 #' @param log_scale function to use in idf calculation. Usually \link{log} used.
 #' Also worth to try \link{log2}.
 #' @param smooth_idf \code{logical} smooth idf weights by adding one to document frequencies,
-#' as if an extra document was seen containing every term in the collection exactly once. Prevents zero divisions.
-#' @return \link{ddiMatrix} idf scaling diagonal sparse matrix.
+#' as if an extra document was seen containing every term in the collection exactly once.
+#' Prevents zero divisions.
+#' @return \code{ddiMatrix} idf scaling diagonal sparse matrix.
 #' @export
 dtm_get_idf <- function(dtm, log_scale = log, smooth_idf = T)
 {
@@ -99,18 +102,19 @@ dtm_get_idf <- function(dtm, log_scale = log, smooth_idf = T)
 #' @name dtm_get_tf
 #' @title TermFrequency scaling matrix construction from Document-Term-Matrix
 #' @description Creates TermFrequency (tf) scaling matrix from Document-Term-Matrix
-#' @param type type of scaling. Formula for tf :
+#' @param dtm \code{sparseMatrix} - Document-Term-Matrix
+#' @param type \code{c('tf', 'binary')} - type of TF scaling matrix
+#' Formula for tf :
 #' \deqn{tf = \fraq {# word appears in document}{# words in document}}{%
 #' tf = (# word appears in document) / (# words in document) }
 #  For binary:
 #' \deqn{tf = {Does word appears in document (binary encoding): 0 if not appears, 1 if appears}}{%
 #' tf = (Does word appears in document (binary encoding): 0 if not appears, 1 if appears)}
-#' @param dtm \link{sparseMatrix} - Document-Term-Matrix
-#' @param type \code{c('tf', 'binary')} - type of TF scaling matrix
 #' @examples
 #' \dontrun{
-#' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
-#' corpus <- create_dict_corpus(txt,
+#' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "),
+#'  paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
+#' corpus <- create_vocab_corpus(txt,
 #'    tokenizer = regexp_tokenizer
 #'    )
 #' dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
