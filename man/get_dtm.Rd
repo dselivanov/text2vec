@@ -8,7 +8,7 @@ get_dtm(corpus, dictionary = NULL, stopwords = NULL, type = c("dgCMatrix",
   "dgTMatrix", "LDA_C", "LIL"))
 }
 \arguments{
-\item{corpus}{HashCorpus or DictCorpus object. See \link{create_dict_corpus} for details.}
+\item{corpus}{HashCorpus or DictCorpus object. See \link{create_vocab_corpus} for details.}
 
 \item{dictionary}{\link{character} or \link{NULL} -  use only words from this dict
 dictionary in Document-Term-Matrix construction.
@@ -17,7 +17,8 @@ NULL if all words should be used.}
 \item{stopwords}{\link{character} or \link{NULL} - words to remove from DTM}
 
 \item{type}{character, one of \code{c("dgCMatrix", "dgTMatrix", "LDA_C", "LIL")}.
-"LDA_C" - Blei's lda-c format (list of 2*doc_terms_size), see \link{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
+"LDA_C" - Blei's lda-c format (list of 2*doc_terms_size),
+see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
 "LIL" - same as LDA-C, but without terms count. Useful for Minhash algorithm.}
 }
 \description{
@@ -29,8 +30,9 @@ preprocess_fun <- function(txt) {
    txt \%>\%
      tolower
 }
-txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
-corpus <- create_dict_corpus(txt,
+txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "),
+ paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
+corpus <- create_vocab_corpus(txt,
    preprocess_fun = preprocess_fun,
    #split text by word boundaries
    tokenizer = regexp_tokenizer,

@@ -13,26 +13,28 @@ tfidf_transformer(dtm, idf = NULL)
 binary_transformer(dtm)
 }
 \arguments{
-\item{dtm}{\link{dgCMatrix} - Document-Term matrix}
+\item{dtm}{\code{dgCMatrix} - Document-Term matrix}
 
-\item{idf}{- \link{ddiMatrix} \link{Diagonal} matrix for idf-scaling. See \link{dtm_get_idf}.
+\item{idf}{- \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling. See \link{dtm_get_idf}.
 If not provided ( \code{NULL} ) - idf will be calculated form current data.}
 }
 \description{
 \code{tf_transformer} scales each document vector by # of terms in corresponding document.
 
-\deqn{tf = \fraq {# word appears in document}{# words in document}}{%
-tf = (# word appears in document) / (# words in document) }
+\deqn{tf = \fraq {Number word appears in document}{Number words in document}}{%
+tf = (Number word appears in document) / (Number words in document) }
 
 \code{binary_transformer} store 1 if document contains term and 0 otherwise.
 
-\deqn{binary = {Does word appears in document (binary encoding): 0 if not appears, 1 if appears}}{%
+\deqn{binary = {Does word appears in document (binary encoding):
+0 if not appears, 1 if appears}}{%
 tf = (Does word appears in document (binary encoding): 0 if not appears, 1 if appears)}
 
 \code{tfidf_transformer}
 
-\deqn{idf = {log (# documents in the corpus) / (# documents where the term appears + 1)}}{%
-idf  = log (# documents in the corpus) / (# documents where the term appears + 1)}
+\deqn{idf = {log (Number documents in the corpus) /
+(Number documents where the term appears + 1)}}{%
+idf  = log (Number documents in the corpus) / (Number documents where the term appears + 1)}
 }
 \section{Functions}{
 \itemize{
@@ -41,6 +43,6 @@ idf  = log (# documents in the corpus) / (# documents where the term appears + 1
 \item \code{binary_transformer}: 
 }}
 \seealso{
-\link{dtm_get_idf}, examples provided in \link{transform}
+\link{dtm_get_idf}, examples provided in \link{mutate}
 }
 

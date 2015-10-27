@@ -30,21 +30,17 @@
 #' See source code for details.
 #' @details Usually preprocessing involve following steps:
 #'
-#' 1) convert text to UTF-8, see \link{iconv}, \link{enc2utf}
+#' 1) convert text to UTF-8, see \link{iconv}, \link{enc2utf8}
 #'
-#' 2) convert text to lower case, see \link{tolower}
-#'
-#' 3) remove / replace (usually by whitespase) all irrelevant symbols
-#'  see \link{gsub} and \code{strigni} or \code{stringr} packages.
-#'
-#' 4) strip extra/trailing whitespaces, so you can easily tokenize text in next step.
-#' see \link{simple_preprocess} function (and its source code) for example.
+#' 2) Preprocess - convert text to lower case, etc. See \link{tolower},
+#' \code{stringr::str_replace}
 #' \code{preprocess_fun} should return \code{character vector} as output. This output
 #' will used as input to \code{tokenizer} function.
+#' 3) tokenize text - see \code{stringr::str_split} for example
 #'
 #' Also [very optionally] after this you can add stemming step. For this you should
 #' tokenize text yourself (see \link{regexp_tokenizer}) and then apply some stemming
-#' function to each word. For stemming see \link{SnowballC::wordStem}.
+#' function to each word. For stemming see \code{SnowballC::wordStem}.
 #' In this case \code{preprocess_fun} will return \code{list} of \code{character} vectors so
 #' there will be nothing to do in \code{tokenizer} function. So you should set \code{tokenizer}
 #' to \link{identity} function.
@@ -85,7 +81,7 @@ create_vocab_corpus.connection <- function(src,
   }
 
   corpus <- new(VocabCorpus, vocab, ngram_min, ngram_max, "_")
-  fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, batch_size, limit, progress)
+  fill_corpus_connection(src, corpus, preprocess_fun, tokenizer, batch_size, limit, progress)
 }
 
 #' @aliases create_vocab_corpus

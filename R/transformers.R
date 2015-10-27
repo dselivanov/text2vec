@@ -1,33 +1,34 @@
-#' @name transform
+#' @name mutate
 #' @title Creates transformed Document-Term matrix.
 #' @description Transform Document-Term matrix using one of the package-included
 #' transformers or user-specified custom transformer.
 #' For example see \link{dtm_get_tf}
-#' @param dtm \link{sparseMatrix} - Document-Term-Matrix
+#' @param dtm \code{sparseMatrix} - Document-Term-Matrix
 #' @param transformer - transormation function. Usually one of \link{filter_commons_transformer},
-#' \link{tf_transformer}, \link{idf_transformer}, \link{binary_transformer}.
+#' \link{tf_transformer}, \link{tfidf_transformer}, \link{binary_transformer}.
 #' @param ... - transformer parameters
 #' @examples
 #' \dontrun{
-#' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
+#' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "),
+#'    paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
 #' corpus <- create_vocab_corpus(txt,
 #'    tokenizer = regexp_tokenizer
 #'    )
 #' # create dtm
 #' dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] ) %>%
 #' # filter out very common and very uncommon terms
-#'  transform(filter_commons_transformer, c(0.001, 0.975))
+#'  mutate(filter_commons_transformer, c(0.001, 0.975))
 #'
 #' # simple term-frequency transormation
 #' transformed_tf <- dtm %>%
-#'  transform(tf_transformer)
+#'  mutate(tf_transformer)
 #'
 #' # tf-idf transormation
 #' transformed_tfidf <- dtm %>%
-#'  transform(tfidf_transformer)
+#'  mutate(tfidf_transformer)
 #'  }
 #' @export
-transform.Matrix <- function(dtm, transformer, ...) {
+mutate <- function(dtm, transformer, ...) {
   res <- transformer(dtm, ...)
   if( !inherits(res, "Matrix") )
     stop("transformer should produce object of dgCMatrix class")
@@ -38,7 +39,7 @@ transform.Matrix <- function(dtm, transformer, ...) {
 #' @title remove (un)common terms from Document-Term matrix
 #' @description Creates reduced Document-Term matrix - throws out
 #' very common and very uncommon words.
-#' @param dtm \link{dgCMatrix} - Document-Term Matrix
+#' @param dtm \code{dgCMatrix} - Document-Term Matrix
 #' @param term_freq - \code{numeric} vector of 2 values in c(0, 1) range
 #' First element corresponds to frequency of uncommon words,
 #' second element corresponds to frequency of common words.
@@ -62,25 +63,27 @@ filter_commons_transformer <- function (dtm, term_freq = c(uncommon = 0.001, com
 #' @description
 #' \code{tf_transformer} scales each document vector by # of terms in corresponding document.
 #'
-#' \deqn{tf = \fraq {# word appears in document}{# words in document}}{%
-#' tf = (# word appears in document) / (# words in document) }
+#' \deqn{tf = \fraq {Number word appears in document}{Number words in document}}{%
+#' tf = (Number word appears in document) / (Number words in document) }
 #'
 #' \code{binary_transformer} store 1 if document contains term and 0 otherwise.
 #'
-#' \deqn{binary = {Does word appears in document (binary encoding): 0 if not appears, 1 if appears}}{%
+#' \deqn{binary = {Does word appears in document (binary encoding):
+#' 0 if not appears, 1 if appears}}{%
 #' tf = (Does word appears in document (binary encoding): 0 if not appears, 1 if appears)}
 
 #'
 #' \code{tfidf_transformer}
 #'
-#' \deqn{idf = {log (# documents in the corpus) / (# documents where the term appears + 1)}}{%
-#' idf  = log (# documents in the corpus) / (# documents where the term appears + 1)}
+#' \deqn{idf = {log (Number documents in the corpus) /
+#' (Number documents where the term appears + 1)}}{%
+#' idf  = log (Number documents in the corpus) / (Number documents where the term appears + 1)}
 #'
-#' @param dtm \link{dgCMatrix} - Document-Term matrix
+#' @param dtm \code{dgCMatrix} - Document-Term matrix
 #'
-#' @param idf - \link{ddiMatrix} \link{Diagonal} matrix for idf-scaling. See \link{dtm_get_idf}.
+#' @param idf - \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling. See \link{dtm_get_idf}.
 #' If not provided ( \code{NULL} ) - idf will be calculated form current data.
-#' @seealso \link{dtm_get_idf}, examples provided in \link{transform}
+#' @seealso \link{dtm_get_idf}, examples provided in \link{mutate}
 #' @export
 tf_transformer <- function(dtm) {
   dtm_get_tf(dtm, type = 'tf') %*% dtm

@@ -1,7 +1,7 @@
 #' @name tokenizers
 #' @title Tokenization functions, which performs string splitting
 #' by regular expression or fixed string.
-#' @details Uses \link{str_split} under the hood. (which build on top of \link{stri_split}).
+#' @details Uses \link{str_split} under the hood(which build on top of \code{stringi::stri_split}).
 #' Actually just a wrapper for \code{str_split} which is very consistent flexible and robust.
 #' See \link{str_split} and \link{modifiers} for details.
 #' @param string \link{character} vector

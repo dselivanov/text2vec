@@ -8,7 +8,7 @@ filter_commons_transformer(dtm, term_freq = c(uncommon = 0.001, common =
   0.975))
 }
 \arguments{
-\item{dtm}{\link{dgCMatrix} - Document-Term Matrix}
+\item{dtm}{\code{dgCMatrix} - Document-Term Matrix}
 
 \item{term_freq}{- \code{numeric} vector of 2 values in c(0, 1) range
 First element corresponds to frequency of uncommon words,

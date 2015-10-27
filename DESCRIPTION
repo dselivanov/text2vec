@@ -11,6 +11,7 @@ License: MIT + file LICENSE
 URL: https://github.com/dselivanov/text2vec
 BugReports: https://github.com/dselivanov/text2vec/issues
 SystemRequirements: C++11
+LazyData: true
 Depends:
     R (>= 3.1.0),
     Matrix
