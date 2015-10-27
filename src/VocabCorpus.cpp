@@ -2,8 +2,8 @@
 RCPP_MODULE(VocabCorpus) {
   class_< VocabCorpus >( "VocabCorpus" )
   .constructor<CharacterVector, uint32_t, uint32_t, string >()
-  .property( "vocab", &VocabCorpus::get_vocab, "vocabulary - unique terms")
-  .property( "token_count", &VocabCorpus::get_token_count, "returns number of tokens in corpus" )
+  .method( "vocab", &VocabCorpus::get_vocab, "vocabulary - unique terms")
+  .method( "token_count", &VocabCorpus::get_token_count, "returns number of tokens in corpus" )
   .method( "document_count", &VocabCorpus::get_doc_count, "returns number of documents in corpus")
   .method( "insert_document", &VocabCorpus::insert_document, "inserts new document (character vector) into corpus" )
   .method( "insert_document_batch", &VocabCorpus::insert_document_batch, "inserts multiple documents (list of character vectors) into corpus" )
