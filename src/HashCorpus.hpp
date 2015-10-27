@@ -59,13 +59,13 @@ public:
     //Rprintf("token_count = %d\n", token_count);
   }
 
-  SEXP get_dtm_dgT() {
+  SEXP get_dtm_triplet() {
     size_t ncol = this->buckets_size;
 
     int i = 0;
-    NumericVector dtm_x(token_count);
-    IntegerVector dtm_i(token_count);
-    IntegerVector dtm_j(token_count);
+    NumericVector dtm_x(this->nnz);
+    IntegerVector dtm_i(this->nnz);
+    IntegerVector dtm_j(this->nnz);
 
     for (auto doc: docs) {
       for (int j = 0; j < doc.doc_len; j++) {
@@ -90,7 +90,7 @@ public:
   SEXP get_dtm(int type) {
     switch (type) {
     case 0:
-      return get_dtm_dgT ();
+      return get_dtm_triplet ();
     case 1:
       return get_dtm_lda_c();
     case 2:
