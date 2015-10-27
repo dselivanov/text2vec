@@ -10,11 +10,11 @@
 #' "LDA_C" - Blei's lda-c format (list of 2*doc_terms_size), see \link{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
 #' "LIL" - same as LDA-C, but without terms count. Useful for Minhash algorithm.
 #' @examples
+#' \dontrun{
 #' preprocess_fun <- function(txt) {
 #'    txt %>%
 #'      tolower
 #' }
-#' # or use simple_preprocess() insted
 #' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
 #' corpus <- create_dict_corpus(txt,
 #'    preprocess_fun = preprocess_fun,
@@ -35,6 +35,7 @@
 #'      lapply(SnowballC::wordStem, language = 'en')
 #' }
 #' dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
+#' }
 #' @export
 get_dtm <- function(corpus, dictionary = NULL, stopwords = NULL,
                     type = c("dgCMatrix", "dgTMatrix", "LDA_C", "LIL")) {
@@ -76,7 +77,7 @@ get_dtm <- function(corpus, dictionary = NULL, stopwords = NULL,
 #' @description Creates Inverse Document-Frequency (idf) scaling matrix from Document-Term matrix.
 #' idf = log (# documents in the corpus) / (# documents where the term appears + 1)
 #' For examples see  \link{get_dtm}
-#' @param dtm \link{dgCMatrix} - Document-Term matrix.
+#' @param dtm \link{dgCMatrix-class} - Document-Term matrix.
 #' @param log_scale function to use in idf calculation. Usually \link{log} used.
 #' Also worth to try \link{log2}.
 #' @param smooth_idf \code{logical} smooth idf weights by adding one to document frequencies,
@@ -107,9 +108,10 @@ dtm_get_idf <- function(dtm, log_scale = log, smooth_idf = T)
 #' @param dtm \link{sparseMatrix} - Document-Term-Matrix
 #' @param type \code{c('tf', 'binary')} - type of TF scaling matrix
 #' @examples
+#' \dontrun{
 #' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
 #' corpus <- create_dict_corpus(txt,
-#'    tokenizer = simple_tokenizer
+#'    tokenizer = regexp_tokenizer
 #'    )
 #' dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
 #' tf_scale_matrix <- dtm_get_tf(dtm, type = 'tf')
@@ -118,6 +120,7 @@ dtm_get_idf <- function(dtm, log_scale = log, smooth_idf = T)
 #' # The same result we can obtain using transform function with parameter type = 'tfidf'
 #' dtm_tf_idf_2 <- transform(dtm, type='tfidf')
 #' identical(dtm_tf_idf, dtm_tf_idf_2)
+#' }
 dtm_get_tf <- function(dtm, type = c('tf', 'binary'))
 {
   type <- match.arg(type)

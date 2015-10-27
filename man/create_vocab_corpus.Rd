@@ -5,17 +5,22 @@
 \alias{create_vocab_corpus}
 \title{RAM-friendly streaming corpus construction. Vocabulary or hash based.}
 \usage{
-create_vocab_corpus(src, preprocess_fun = identity,
-  tokenizer = simple_tokenizer, ngram = c(min_n = 1L, max_n = 1L),
-  batch_size = 10, vocab = NULL, limit = NULL, skip = 0, progress = T)
+create_vocab_corpus(src, vocab, preprocess_fun = identity,
+  tokenizer = regexp_tokenizer, ngram = c(min_n = 1L, max_n = 1L),
+  batch_size = 10, limit = NULL, progress = T)
 
 create_hash_corpus(src, preprocess_fun = identity,
-  tokenizer = simple_tokenizer, ngram = c(min_n = 1L, max_n = 1L),
+  tokenizer = regexp_tokenizer, ngram = c(min_n = 1L, max_n = 1L),
   hash_size = 2^18, signed_hash = F, batch_size = 10, limit = NULL,
-  skip = 0, progress = T)
+  progress = T)
 }
 \arguments{
 \item{src}{\code{character} vector or \link{connection} object.}
+
+\item{vocab}{user-defined vocabulary. \code{NULL} in case when we should build corpus from
+\code{src}. Or \bold{ordered} \code{character vector} when we want to reconstruct it from train data.
+Usually \code{vocab} obtained from previous corpus construction via \code{source_corpus$vocab} call.
+See \link{VocabCorpus}.}
 
 \item{preprocess_fun}{\bold{\code{function}} which takes \code{character vector}
 and \bold{do all preprocessing} (including stemming if needed). See "Details" section.
@@ -32,11 +37,6 @@ All values of n such that \code{min_n <= n <= max_n} will be used.}
 into vector representation per one fetching from connection.
 Generally setting this to large number speeding up DTM construction,
 but more RAM intensive.}
-
-\item{vocab}{user-defined vocabulary. \code{NULL} in case when we should build corpus from
-\code{src}. Or \bold{ordered} \code{character vector} when we want to reconstruct it from train data.
-Usually \code{vocab} obtained from previous corpus construction via \code{source_corpus$vocab} call.
-See \link{VocabCorpus}.}
 
 \item{limit}{\code{integer} - maximum number of documents we want to
 transform to vector representation.}
@@ -73,7 +73,7 @@ see \link{simple_preprocess} function (and its source code) for example.
 will used as input to \code{tokenizer} function.
 
 Also [very optionally] after this you can add stemming step. For this you should
-tokenize text yourself (see \link{simple_tokenizer}) and then apply some stemming
+tokenize text yourself (see \link{regexp_tokenizer}) and then apply some stemming
 function to each word. For stemming see \link{SnowballC::wordStem}.
 In this case \code{preprocess_fun} will return \code{list} of \code{character} vectors so
 there will be nothing to do in \code{tokenizer} function. So you should set \code{tokenizer}

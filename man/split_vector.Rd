@@ -4,18 +4,17 @@
 \alias{split_vector}
 \title{Generating indexes for splitting vector into chunks}
 \usage{
-split_vector(vector, parallerismLevel = 1,
-  splits = ceiling(detectCores()/2))
+split_vector(vector, splits, granularity = 1)
 }
 \arguments{
 \item{vector}{\link{list} or \link{vector} to split}
 
-\item{parallerismLevel}{\link{integer} -  parallerismLevel is useful for management of granularity of splits.
-If you expect that computational time on each chunk of your data will be distributed nerarly uniformly,
-parallerismLevel = 1 is good choice because of little overheads in syncronizing parallel processes.}
-
 \item{splits}{\link{integer} - controls number of parallel jobs you have planned.
 Usually should be equal to number of cores in the machine.}
+
+\item{granularity}{\link{integer} -  granularity is useful for management of granularity of splits.
+If you expect that computational time on each chunk of your data will be distributed nerarly uniformly,
+granularity = 1 is good choice because of little overheads in syncronizing parallel processes.}
 }
 \value{
 \link{list} each element is a \link{integer} \link{vector} pair.
@@ -25,11 +24,11 @@ First element in pair is lower index, second element is upper index.
 Generating indexes for splitting vector into chunks for parallel processing.
 }
 \details{
-Parameters parallerismLevel and splits controls the numer of chunks in returned list.
-Number of chunks in resulted list in general is equal parallerismLevel * splits
+Parameters granularity and splits controls the numer of chunks in returned list.
+Number of chunks in resulted list in general is equal granularity * splits
 }
 \examples{
 # Split vector into 4 chunks. splits paramenter usually should be equal to number of cores in the machine.
-splits <- split_vector(vector = runif(100), parallerismLevel = 2, splits = 2)
+splits <- split_vector(vector = runif(100), granularity = 2, splits = 2)
 }
 

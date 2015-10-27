@@ -19,8 +19,7 @@ void process_term_hash (const string &term,
                         int signned_hash);
 
 // n-gram generator
-void ngram_generator(const Rcpp::CharacterVector terms,
-           std::function<void(const string)> process_ngram,
-           uint32_t n_min, uint32_t n_max,
+vector<string> get_ngrams(const Rcpp::CharacterVector terms,
+           uint32_t ngram_min, uint32_t ngram_max,
            // delimiter for terms concatenation
-           const string delim);
+           const string ngram_delim);

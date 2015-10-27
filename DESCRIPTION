@@ -15,6 +15,7 @@ Depends:
     R (>= 3.1.0),
     Matrix
 Imports:
+    methods,
     Rcpp (>= 0.11),
     digest(>= 0.6.8),
     magrittr(>= 1.5),

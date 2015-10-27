@@ -8,9 +8,10 @@
 #' \link{tf_transformer}, \link{idf_transformer}, \link{binary_transformer}.
 #' @param ... - transformer parameters
 #' @examples
+#' \dontrun{
 #' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
-#' corpus <- create_dict_corpus(txt,
-#'    tokenizer = simple_tokenizer
+#' corpus <- create_vocab_corpus(txt,
+#'    tokenizer = regexp_tokenizer
 #'    )
 #' # create dtm
 #' dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] ) %>%
@@ -24,6 +25,7 @@
 #' # tf-idf transormation
 #' transformed_tfidf <- dtm %>%
 #'  transform(tfidf_transformer)
+#'  }
 #' @export
 transform.Matrix <- function(dtm, transformer, ...) {
   res <- transformer(dtm, ...)

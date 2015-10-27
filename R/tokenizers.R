@@ -10,9 +10,10 @@
 #' Each element of list containts vector of tokens.
 #' @examples
 #' doc <- c("first  second", "bla, bla, blaa")
-#' regexp_tokenizer(doc, pattern = boundary(type = "word"))
+#' # split by words
+#' regexp_tokenizer(doc, pattern = stringr::boundary("word"))
 #' #faster, but far less general - perform split by a fixed single whitespace symbol.
-#' simple_tokenizer(doc, pattern = " ")
+#' regexp_tokenizer(doc, pattern = stringr::fixed(" "))
 
 #' @rdname tokenizers
 #' @export
