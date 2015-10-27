@@ -41,7 +41,7 @@ public:
       if(term_iterator == this->full_vocab.end()) {
         term_id = this->full_vocab.size();
         // insert term into dictionary
-        this->full_vocab.insert(make_pair(it, TermStat( this->full_vocab.size()) ));
+        this->full_vocab.insert(make_pair(it, TermStat( term_id ) ));
       }
       else {
         term_iterator->second.term_global_count++;
@@ -100,5 +100,5 @@ private:
 
   uint32_t sentence_count;
   uint32_t token_count;
-  unordered_set< string > temp_document_word_set;
+  RCPP_UNORDERED_SET< string > temp_document_word_set;
 };
