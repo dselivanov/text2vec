@@ -43,7 +43,7 @@
 #' will used as input to \code{tokenizer} function.
 #'
 #' Also [very optionally] after this you can add stemming step. For this you should
-#' tokenize text yourself (see \link{simple_tokenizer}) and then apply some stemming
+#' tokenize text yourself (see \link{regexp_tokenizer}) and then apply some stemming
 #' function to each word. For stemming see \link{SnowballC::wordStem}.
 #' In this case \code{preprocess_fun} will return \code{list} of \code{character} vectors so
 #' there will be nothing to do in \code{tokenizer} function. So you should set \code{tokenizer}
@@ -52,79 +52,77 @@
 #' For full process example see \link{get_dtm}.
 #' @export
 create_vocab_corpus <- function(src,
-                          preprocess_fun = identity,
-                          tokenizer = simple_tokenizer,
-                          ngram = c('min_n' = 1L, 'max_n' = 1L),
-                          batch_size = 10,
-                          vocab = NULL,
-                          limit = NULL,
-                          skip = 0,
-                          progress = T) {
+                                vocab,
+                                preprocess_fun = identity,
+                                tokenizer = regexp_tokenizer,
+                                ngram = c('min_n' = 1L, 'max_n' = 1L),
+                                batch_size = 10,
+                                limit = NULL,
+                                progress = T) {
   UseMethod("create_vocab_corpus")
 }
 
 #' @aliases create_vocab_corpus
 #' @export
 create_vocab_corpus.connection <- function(src,
-                                     preprocess_fun = identity,
-                                     tokenizer = simple_tokenizer,
-                                     ngram = c('min_n' = 1L, 'max_n' = 1L),
-                                     batch_size = 10,
-                                     vocab = NULL,
-                                     limit = NULL,
-                                     skip = 0,
-                                     progress = T) {
+                                           vocab,
+                                           preprocess_fun = identity,
+                                           tokenizer = regexp_tokenizer,
+                                           ngram = c('min_n' = 1L, 'max_n' = 1L),
+                                           batch_size = 10,
+                                           limit = NULL,
+                                           progress = T) {
   on.exit(close(src))
-
   # CHECK vocab and create corpus object
-  if(is.null(vocab))
-    corpus <- new(VocabCorpus)
-  else if(
-    is.character(vocab)
-    # also we can check whether all terms are unique
-  )
-    corpus <- new(VocabCorpus, vocab)
-  else
-    stop("vocab should be ordered character vector")
-  fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, skip, progress)
+  stopifnot(is.character(vocab))
+
+  if(all(ngram > 0) && length(ngram) == 2) {
+    ngram <- as.integer(ngram)
+    ngram_min = ngram[[1]]
+    ngram_max = ngram[[2]]
+  } else {
+    stop("ngram should be integer vector of length = 2. For example ngram = c(1L, 2L)" )
+  }
+
+  corpus <- new(VocabCorpus, vocab, ngram_min, ngram_max, "_")
+  fill_corpus_connection(con, corpus, preprocess_fun, tokenizer, batch_size, limit, progress)
 }
 
 #' @aliases create_vocab_corpus
 #' @export
 create_vocab_corpus.character <- function(src,
-                                    preprocess_fun = identity,
-                                    tokenizer = simple_tokenizer,
-                                    ngram = c('min_n' = 1L, 'max_n' = 1L),
-                                    batch_size = 10,
-                                    vocab = NULL,
-                                    limit = NULL,
-                                    skip = 0,
-                                    progress = T) {
+                                          vocab,
+                                          preprocess_fun = identity,
+                                          tokenizer = regexp_tokenizer,
+                                          ngram = c('min_n' = 1L, 'max_n' = 1L),
+                                          batch_size = 10,
+                                          limit = NULL,
+                                          progress = T) {
   # CHECK vocab and create corpus object
-  if(is.null(vocab))
-    corpus <- new(VocabCorpus)
-  else if(
-    is.character(vocab)
-    # also we can check whether all terms are unique
-  )
-    corpus <- new(VocabCorpus, vocab)
-  else
-    stop("vocab should be ordered character vector")
+  stopifnot(is.character(vocab))
 
-  fill_corpus_character(src, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, progress)
+  if(all(ngram > 0) && length(ngram) == 2) {
+    ngram <- as.integer(ngram)
+    ngram_min = ngram[[1]]
+    ngram_max = ngram[[2]]
+  } else {
+    stop("ngram should be integer vector of length = 2. For example ngram = c(1L, 2L)" )
+  }
+
+  corpus <- new(VocabCorpus, vocab, ngram_min, ngram_max, "_")
+  fill_corpus_character(src, corpus, preprocess_fun, tokenizer, batch_size, limit, progress)
 }
 
 #' @rdname create_vocab_corpus
 #' @export
 create_hash_corpus <- function(src,
                                preprocess_fun = identity,
-                               tokenizer = simple_tokenizer,
+                               tokenizer = regexp_tokenizer,
                                ngram = c('min_n' = 1L, 'max_n' = 1L),
                                hash_size = 2**18,
                                signed_hash = F,
                                batch_size = 10,
                                limit = NULL,
-                               skip = 0,
                                progress = T) {
   if(!is.numeric(hash_size) || hash_size > 2^31)
     stop("hash_size should be integer from 1 to 2^31")
@@ -136,35 +134,15 @@ create_hash_corpus <- function(src,
 #' @export
 create_hash_corpus.connection <- function(src,
                                          preprocess_fun = identity,
-                                         tokenizer = simple_tokenizer,
+                                         tokenizer = regexp_tokenizer,
                                          ngram = c('min_n' = 1L, 'max_n' = 1L),
                                          hash_size = 2**18,
                                          signed_hash = F,
                                          batch_size = 10,
                                          limit = NULL,
-                                         skip = 0,
                                          progress = T) {
   on.exit(close(src))
-  corpus <- new(HashCorpus, hash_size, signed_hash)
-  fill_corpus_connection(src, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, skip, progress)
-}
 
-#' @aliases create_hash_corpus
-#' @export
-create_hash_corpus.character <- function(src,
-                                         preprocess_fun = identity,
-                                         tokenizer = simple_tokenizer,
-                                         ngram = c('min_n' = 1L, 'max_n' = 1L),
-                                         hash_size = 2**18,
-                                         signed_hash = F,
-                                         batch_size = 10,
-                                         limit = NULL,
-                                         progress = T) {
-  corpus <- new(HashCorpus, hash_size, signed_hash)
-  fill_corpus_character(src, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, progress)
-}
-
-fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, progress) {
   if(all(ngram > 0) && length(ngram) == 2) {
     ngram <- as.integer(ngram)
     ngram_min = ngram[[1]]
@@ -172,6 +150,37 @@ fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, ngram,
   } else {
     stop("ngram should be integer vector of length = 2. For example ngram = c(1L, 2L)" )
   }
+
+  corpus <- new(HashCorpus, hash_size, signed_hash, ngram_min, ngram_max, "_")
+  fill_corpus_connection(src, corpus, preprocess_fun, tokenizer, batch_size, limit, progress)
+}
+
+#' @aliases create_hash_corpus
+#' @export
+create_hash_corpus.character <- function(src,
+                                         preprocess_fun = identity,
+                                         tokenizer = regexp_tokenizer,
+                                         ngram = c('min_n' = 1L, 'max_n' = 1L),
+                                         hash_size = 2**18,
+                                         signed_hash = F,
+                                         batch_size = 10,
+                                         limit = NULL,
+                                         progress = T) {
+
+  if(all(ngram > 0) && length(ngram) == 2) {
+    ngram <- as.integer(ngram)
+    ngram_min = ngram[[1]]
+    ngram_max = ngram[[2]]
+  } else {
+    stop("ngram should be integer vector of length = 2. For example ngram = c(1L, 2L)" )
+  }
+
+  corpus <- new(HashCorpus, hash_size, signed_hash, ngram_min, ngram_max, "_")
+
+  fill_corpus_character(src, corpus, preprocess_fun, tokenizer, batch_size, limit, progress)
+}
+
+fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, batch_size, limit, progress) {
 
   len <- length(src)
   if(!is.numeric(limit)) {
@@ -193,7 +202,7 @@ fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, ngram,
     t1 <- Sys.time()
     val <- get_word_list(src[i1 : i2], preprocess_fun, tokenizer)
     timing <- timing + difftime(Sys.time(), t1, units = 'secs')
-    corpus$insert_document_batch(val, ngram_min, ngram_max, "_")
+    corpus$insert_document_batch(val)
     loaded_count <- loaded_count + batch_size
   }
   # print(timing)
@@ -201,15 +210,7 @@ fill_corpus_character <- function(src, corpus, preprocess_fun, tokenizer, ngram,
   corpus
 }
 
-fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, ngram, batch_size, limit, skip, progress) {
-
-  if(all(ngram > 0) && length(ngram) == 2) {
-    ngram <- as.integer(ngram)
-    ngram_min = ngram[[1]]
-    ngram_max = ngram[[2]]
-  } else {
-    stop("ngram should be integer vector of length = 2. For example ngram = c(1L, 2L)" )
-  }
+fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, batch_size, limit, progress) {
 
   if(is.numeric(limit)) {
     lim <- limit
@@ -222,8 +223,6 @@ fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, ngram
       pb <- txtProgressBar(min = 0, max = limit, style = 3)
     else print("No progess will shown - don't know length of the input stream")
   }
-  if(is.numeric(skip) && skip > 0)
-    readLines(con = con, n = skip, warn = F);
   # readLines() call is the BOTTLENECK
   # TODO:
   # switch to readr::read_lines() when
@@ -241,7 +240,7 @@ fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, ngram
         print(paste(loaded_count, "lines loaded"))
     }
     val <- get_word_list(docs, preprocess_fun, tokenizer)
-    corpus$insert_document_batch(val, ngram_min, ngram_max, "_")
+    corpus$insert_document_batch(val)
   }
   if(is.numeric(limit) && isTRUE(progress)) close(pb)
   corpus
@@ -249,7 +248,7 @@ fill_corpus_connection <- function(con, corpus, preprocess_fun, tokenizer, ngram
 
 get_word_list <- function(char_vec,
                           preprocess_fun = identity,
-                          tokenizer = simple_tokenizer) {
+                          tokenizer = regexp_tokenizer) {
   char_vec %>%
     preprocess_fun %>%
     # we recieve list and assume it represents tokenized documents - terms

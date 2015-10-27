@@ -24,11 +24,11 @@ NULL if all words should be used.}
 Creates Document-Term matrix from Corpus object.
 }
 \examples{
+\dontrun{
 preprocess_fun <- function(txt) {
    txt \%>\%
      tolower
 }
-# or use simple_preprocess() insted
 txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
 corpus <- create_dict_corpus(txt,
    preprocess_fun = preprocess_fun,
@@ -49,5 +49,6 @@ preprocess_fun <- function(txt) {
      lapply(SnowballC::wordStem, language = 'en')
 }
 dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
+}
 }
 

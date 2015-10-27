@@ -7,7 +7,7 @@
 dtm_get_idf(dtm, log_scale = log, smooth_idf = T)
 }
 \arguments{
-\item{dtm}{\link{dgCMatrix} - Document-Term matrix.}
+\item{dtm}{\link{dgCMatrix-class} - Document-Term matrix.}
 
 \item{log_scale}{function to use in idf calculation. Usually \link{log} used.
 Also worth to try \link{log2}.}

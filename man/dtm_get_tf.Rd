@@ -21,9 +21,10 @@ tf = (Does word appears in document (binary encoding): 0 if not appears, 1 if ap
 Creates TermFrequency (tf) scaling matrix from Document-Term-Matrix
 }
 \examples{
+\dontrun{
 txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "), paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
 corpus <- create_dict_corpus(txt,
-   tokenizer = simple_tokenizer
+   tokenizer = regexp_tokenizer
    )
 dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
 tf_scale_matrix <- dtm_get_tf(dtm, type = 'tf')
@@ -32,5 +33,6 @@ dtm_tf_idf <- dtm_get_tf \%*\% m \%*\% dtm_get_idf(dtm)
 # The same result we can obtain using transform function with parameter type = 'tfidf'
 dtm_tf_idf_2 <- transform(dtm, type='tfidf')
 identical(dtm_tf_idf, dtm_tf_idf_2)
+}
 }
 

@@ -11,7 +11,7 @@ public:
 
     vector<uint32_t> term(doc_len);
 
-    vector<int> cnt(doc_map.size());
+    vector<int> cnt(doc_len);
     int i = 0;
     for(auto it:doc_map) {
       term[i] = it.first;

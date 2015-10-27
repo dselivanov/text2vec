@@ -9,21 +9,36 @@ public:
 
   void insert_document_batch( const vector <vector <string> > &docs_batch, int ngram_min, int ngram_max, const string ngram_delim = "_");
 
-  int get_doc_count();
+  // total number of documents in corpus
+  int get_doc_count() { return doc_count; };
 
-  int get_token_count() {return token_count;};
+  // total number of tokens in corpus
+  uint32_t get_token_count() {return token_count;};
+
+  void ngram_generator(const CharacterVector terms,
+                       std::function<void(const string)> term_handler);
 
 protected:
-  int token_count;
-  vector<Document> docs;
+  // token counter
+  uint32_t token_count;
+
   //document counter
   int doc_count;
-  // number of tokens
+
+  // ngram bounds
+  uint32_t ngram_min;
+  uint32_t ngram_max;
+  // ngram concatenation delimiter
+  string ngram_delim;
+
+  // documents
+  vector<Document> docs;
+
   void insert_dtm_doc(const unordered_map<uint32_t, uint32_t> &term_count_map) {
     Document doc(term_count_map, doc_count);
     docs.push_back(doc);
     doc_count++;
-    token_count += term_count_map.size();
+    //token_count += term_count_map.size();
   }
 
   SEXP get_dtm_dgT();
