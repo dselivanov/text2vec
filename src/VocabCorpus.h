@@ -16,9 +16,9 @@ uint32_t fast_int_hash(uint32_t a) {
 // for unordered_map < <int, int>, uint32_t >
 namespace std {
   template <>
-  struct hash<std::pair<int, int>>
+  struct hash<std::pair<uint32_t, uint32_t>>
   {
-    inline size_t operator()(const std::pair<int, int>& k) const
+    inline size_t operator()(const std::pair<uint32_t, uint32_t>& k) const
     {
       return fast_int_hash(k.first) + fast_int_hash(k.second);
     }
@@ -29,30 +29,12 @@ class VocabCorpus: public Corpus {
 public:
   // contructor for corpus with user-defined vocabulary
   VocabCorpus(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, string delim ) {
-    verbose = 1;
-    nnz = 0;
-    token_count = 0;
-    doc_count = 0;
-    cooc_tokens_number = 0;
-
-    ngram_min = n_min;
-    ngram_max = n_max;
-    // ngram concatenation delimiter
-    ngram_delim = delim;
-
-    int vocab_size = vocab_R.size();
-    int i = 0;
-    // we know vocab size, so lets reserve buckets this number
-    // and if we will lucky no rehash will needed
-    this->vocab.reserve(vocab_size);
-    //convert R vocab represenation to C++ represenation
-    // also fill terms in right order
-    for (auto val:vocab_R) {
-      //grow vocabulary
-      vocab.insert(make_pair(as<string>(val), i));
-      // fill terms in order we add them in dctionary!
-      i++;
-    }
+    init(vocab_R, n_min, n_max, delim );
+  };
+  // contructor with window_size for term cooccurence matrix
+  VocabCorpus(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, uint32_t window_size, string delim ) {
+    this->window_size = window_size;
+    init(vocab_R, n_min, n_max, delim );
   };
 
   void insert_terms (vector< string> &terms) {
@@ -89,12 +71,13 @@ public:
 
   void insert_document_cooc(const CharacterVector sentence) {
 
-    int K = sentence.size(), main_word_index, context_word_index;
+    uint32_t main_word_index, context_word_index;
+    size_t K = sentence.size();
     float increment = 0.0;
 
     typename unordered_map < string, uint32_t > :: const_iterator main_word_iterator, context_word_iterator;
 
-    for(int i = 0; i < K; i++) {
+    for(size_t i = 0; i < K; i++) {
       cooc_tokens_number++;
 
       if( this->verbose && cooc_tokens_number % TOKEN_VERBOSE == 0)
@@ -115,8 +98,7 @@ public:
               context_word_index = context_word_iterator->second;
               // calculate cooccurence increment for particular position j of context word
               increment = weighting_fun(j);
-              // map stores only elements above diagonal because
-              // our matrix is symmetrical
+              // map stores only elements above diagonal because our matrix is symmetrical
               if(main_word_index < context_word_index) {
                 this->cooc_matrix[make_pair(main_word_index, context_word_index)] += increment;
               }
@@ -187,11 +169,11 @@ public:
     // set dimensions
     triplet_cooc_matrix.slot("Dim") = IntegerVector::create(dim_size, dim_size);
     // set dimension names
-    vector<string>  triplet_cooc_matrix_names;
-    triplet_cooc_matrix_names.resize( vocab.size() );
+    vector<string>  dimnames;
+    dimnames.resize( vocab.size() );
     for(auto it:vocab)
-      triplet_cooc_matrix_names[it.second] = it.first;
-    triplet_cooc_matrix.slot("Dimnames") = List::create(triplet_cooc_matrix_names, triplet_cooc_matrix_names);
+      dimnames[it.second] = it.first;
+    triplet_cooc_matrix.slot("Dimnames") = List::create(dimnames, dimnames);
     return triplet_cooc_matrix;
   }
 
@@ -247,11 +229,35 @@ private:
   // vocabulary
   unordered_map<string, uint32_t> vocab;
   // term cooccurence matrix
-  unordered_map< pair< int, int >, float > cooc_matrix;
-  int window_size;
+  unordered_map< pair< uint32_t, uint32_t >, float > cooc_matrix;
+  uint32_t window_size;
   size_t cooc_token_count;
   inline float weighting_fun(int offset) {
     return 1.0 / (float)offset;
   }
+  void init(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, string delim ) {
+    this->verbose = 1;
+    this->nnz = 0;
+    this->token_count = 0;
+    this->doc_count = 0;
+    this->cooc_tokens_number = 0;
+    this->ngram_min = n_min;
+    this->ngram_max = n_max;
+    // ngram concatenation delimiter
+    this->ngram_delim = delim;
 
+    size_t vocab_size = vocab_R.size();
+    size_t i = 0;
+    // we know vocab size, so lets reserve buckets this number
+    // and if we will lucky no rehash will needed
+    this->vocab.reserve(vocab_size);
+    //convert R vocab represenation to C++ represenation
+    // also fill terms in right order
+    for (auto val:vocab_R) {
+      //grow vocabulary
+      this->vocab.insert(make_pair(as<string>(val), i));
+      // fill terms in order we add them in dctionary!
+      i++;
+    }
+  }
 };

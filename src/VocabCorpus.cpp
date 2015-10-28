@@ -1,7 +1,10 @@
 #include "VocabCorpus.h"
 RCPP_MODULE(VocabCorpus) {
   class_< VocabCorpus >( "VocabCorpus" )
+  //<terms, ngram_min, ngram_max, ngram_delim>
   .constructor<CharacterVector, uint32_t, uint32_t, string >()
+  //<terms, ngram_min, ngram_max, window_size, ngram_delim>
+  .constructor<CharacterVector, uint32_t, uint32_t, uint32_t, string >()
   .method( "vocab", &VocabCorpus::get_vocab, "vocabulary - unique terms")
   .method( "token_count", &VocabCorpus::get_token_count, "returns number of tokens in corpus" )
   .method( "document_count", &VocabCorpus::get_doc_count, "returns number of documents in corpus")
