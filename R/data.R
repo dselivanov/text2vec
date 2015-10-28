@@ -4,6 +4,7 @@
 #' sentiment analysis. The sentiment of reviews is binary, meaning the IMDB rating < 5
 #' results in a sentiment score of 0, and rating >=7 have a sentiment score of 1.
 #' No individual movie has more than 30 reviews.
+#' Important note: we removed non ASCII symbols from original dataset to satisfy CRAN policy.
 #' @name movie_review
 #' @usage data("movie_review")
 #' @format A data frame with 25000 rows and 3 variables:
