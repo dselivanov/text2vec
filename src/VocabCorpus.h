@@ -1,4 +1,4 @@
-#include "Corpus.hpp"
+#include "Corpus.h"
 # define TOKEN_VERBOSE 1000000
 class VocabCorpus;
 

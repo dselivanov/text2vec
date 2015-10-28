@@ -1,4 +1,4 @@
-#include "Vocabulary.hpp"
+#include "Vocabulary.h"
 using namespace Rcpp;
 using namespace std;
 

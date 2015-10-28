@@ -1,4 +1,4 @@
-#include "Document.hpp"
+#include "Document.h"
 using namespace Rcpp;
 using namespace std;
 

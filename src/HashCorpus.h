@@ -1,5 +1,5 @@
 #include "hash.h"
-#include "Corpus.hpp"
+#include "Corpus.h"
 using namespace Rcpp;
 using namespace std;
 

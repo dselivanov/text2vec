@@ -1,4 +1,4 @@
-#include "HashCorpus.hpp"
+#include "HashCorpus.h"
 
 RCPP_MODULE(HashCorpus) {
   class_< HashCorpus >( "HashCorpus" )

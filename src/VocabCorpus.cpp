@@ -1,4 +1,4 @@
-#include "VocabCorpus.hpp"
+#include "VocabCorpus.h"
 RCPP_MODULE(VocabCorpus) {
   class_< VocabCorpus >( "VocabCorpus" )
   .constructor<CharacterVector, uint32_t, uint32_t, string >()
