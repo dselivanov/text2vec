@@ -13,8 +13,8 @@ test_that("Vocabulary construction", {
   vocab_stat <- vocab$vocab_stat()
 
   expect_equal(length(vocab_stat), 4)
-  expect_equal(length(vocab_stat$term), 19297)
+  expect_equal(length(vocab_stat$term), 17604)
   expect_equal( vocab_stat$term [ which.max(vocab_stat$doc_count) ], 'the')
-  expect_equal( max(vocab_stat$doc_count), 992)
-  expect_equal( max(vocab_stat$term_count), 13224)
+  expect_equal( max(vocab_stat$doc_count), 906)
+  expect_equal( max(vocab_stat$term_count), 11407)
 })
