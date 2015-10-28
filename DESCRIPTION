@@ -10,7 +10,7 @@ Description: Fast and memory-friendly tools for text vectorization.
 License: MIT + file LICENSE
 URL: https://github.com/dselivanov/text2vec
 BugReports: https://github.com/dselivanov/text2vec/issues
-SystemRequirements: C++11
+SystemRequirements: GNU make, C++11
 LazyData: true
 Depends:
     R (>= 3.1.0),
