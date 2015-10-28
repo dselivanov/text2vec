@@ -90,7 +90,7 @@ public:
   void insert_document_cooc(const CharacterVector sentence) {
 
     int K = sentence.size(), main_word_index, context_word_index;
-    double increment = 0.0;
+    float increment = 0.0;
 
     typename unordered_map < string, uint32_t > :: const_iterator main_word_iterator, context_word_iterator;
 
@@ -247,11 +247,11 @@ private:
   // vocabulary
   unordered_map<string, uint32_t> vocab;
   // term cooccurence matrix
-  unordered_map< pair< int, int >, double > cooc_matrix;
+  unordered_map< pair< int, int >, float > cooc_matrix;
   int window_size;
   size_t cooc_token_count;
-  inline double weighting_fun(int offset) {
-    return 1.0 / (double)offset;
+  inline float weighting_fun(int offset) {
+    return 1.0 / (float)offset;
   }
 
 };
