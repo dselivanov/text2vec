@@ -2,14 +2,14 @@
 #'
 #' @docType package
 #' @name text2vec
-#' @useDynLib text2vec
+#' @import methods
 #' @import Matrix
 #' @import Rcpp
-#' @import methods
 #' @import digest
 #' @importFrom RcppParallel RcppParallelLibs
 #' @importFrom stringr str_split fixed coll regex boundary
 #' @importFrom magrittr %>%
+#' @useDynLib text2vec
 NULL
 
 
