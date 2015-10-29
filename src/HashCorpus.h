@@ -23,7 +23,7 @@ public:
   int get_doc_count() { return doc_count; };
 
   // implements hashing trick
-  unordered_map<uint32_t, uint32_t> insert_terms (vector< string> &terms) {
+  void insert_terms (vector< string> &terms) {
     unordered_map<uint32_t, uint32_t> term_count_map;
     for(auto term: terms) {
       this->token_count++;
@@ -40,23 +40,18 @@ public:
         ++term_count_map[term_id];
       }
     }
-    return term_count_map;
+    this->insert_dtm_doc(term_count_map);
   }
+//   void insert_document(const CharacterVector doc) {this->insert_document(doc);};
+//   void insert_document_batch(const ListOf<const CharacterVector> docs_batch) {this->insert_document_batch(docs);};
 
-  void insert_document(const CharacterVector terms) {
-
-    unordered_map<uint32_t, uint32_t> term_count_map;
-
-    vector< string> ngrams = get_ngrams(terms, ngram_min, ngram_max, ngram_delim);
+  void insert_document(const CharacterVector doc) {
+    vector< string > ngrams = get_ngrams(doc);
     insert_terms(ngrams);
-    term_count_map = insert_terms(ngrams);
-    insert_dtm_doc(term_count_map);
   }
-
-  void insert_document_batch(const ListOf< CharacterVector >  docs) {
-    for (auto it:docs)
+  void insert_document_batch(const ListOf<const CharacterVector> docs_batch) {
+    for (auto it:docs_batch)
       insert_document(it);
-    //Rprintf("token_count = %d\n", token_count);
   }
 
   SEXP get_dtm_triplet() {
