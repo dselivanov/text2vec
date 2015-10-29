@@ -1,4 +1,5 @@
 #include "text2vec.h"
+using namespace std;
 // Document is map! (term_id -> term_count)
 // but we represent it by two corresponding vectors
 // this done for simplicity in further steps
