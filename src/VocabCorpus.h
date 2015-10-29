@@ -73,7 +73,7 @@ public:
       if(main_word_iterator != this->vocab.end()) {
         // get main word index from vocab
         main_word_index = main_word_iterator->second;
-        for (int j = 1; j <= this->window_size; j++) {
+        for (uint32_t j = 1; j <= this->window_size; j++) {
           // check sentence bounds
           if( i + j < K) {
             context_word_iterator = this->vocab.find( as<string>(sentence[i + j]) );
