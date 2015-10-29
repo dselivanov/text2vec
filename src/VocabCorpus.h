@@ -1,34 +1,16 @@
 #include "Corpus.h"
+#include "TripletMatrix.h"
 # define TOKEN_VERBOSE 1000000
 class VocabCorpus;
 
 using namespace Rcpp;
 using namespace std;
 
-// fast integer hashing
-uint32_t fast_int_hash(uint32_t a) {
-  a = ((a >> 16) ^ a) * 0x45d9f3b;
-  a = ((a >> 16) ^ a) * 0x45d9f3b;
-  a = ((a >> 16) ^ a);
-  return a;
-}
-
-// for unordered_map < <int, int>, uint32_t >
-namespace std {
-  template <>
-  struct hash<std::pair<uint32_t, uint32_t>>
-  {
-    inline size_t operator()(const std::pair<uint32_t, uint32_t>& k) const
-    {
-      return fast_int_hash(k.first) + fast_int_hash(k.second);
-    }
-  };
-}
-
 class VocabCorpus: public Corpus {
 public:
   // contructor for corpus with user-defined vocabulary
   VocabCorpus(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, string delim ) {
+    cooc_matrix = TripletMatrix<float>();
     init(vocab_R, n_min, n_max, delim );
   };
   // contructor with window_size for term cooccurence matrix
@@ -59,8 +41,11 @@ public:
     this->insert_dtm_doc(term_count_map);
   }
 
-  void insert_document(const CharacterVector terms) {
-    vector< string > ngrams = get_ngrams(terms, ngram_min, ngram_max, ngram_delim);
+  // void insert_document(const CharacterVector doc) {this->insert_document(doc);};
+  // void insert_document_batch(const ListOf<const CharacterVector> docs_batch) {this->insert_document_batch(docs);};
+
+  void insert_document(const CharacterVector doc) {
+    vector< string > ngrams = get_ngrams(doc);
     insert_terms(ngrams);
   }
 
@@ -100,13 +85,16 @@ public:
               increment = weighting_fun(j);
               // map stores only elements above diagonal because our matrix is symmetrical
               if(main_word_index < context_word_index) {
-                this->cooc_matrix[make_pair(main_word_index, context_word_index)] += increment;
+                //this->cooc_matrix[make_pair(main_word_index, context_word_index)] += increment;
+                //this->cooc_matrix[make_pair(main_word_index, context_word_index)] += increment;
+                this->cooc_matrix.add(main_word_index, context_word_index, increment);
               }
               else {
                 // also we are not interested in context words equal to main word
                 // diagonal elememts will be zeros
                 if(main_word_index != context_word_index)
-                  this->cooc_matrix[make_pair(context_word_index, main_word_index)] += increment;
+                  //this->cooc_matrix[make_pair(context_word_index, main_word_index)] += increment;
+                  this->cooc_matrix.add(context_word_index, main_word_index, increment);
               }
             }
           }
@@ -133,48 +121,10 @@ public:
 
   // get term cooccurence matrix
   SEXP get_tcm() {
-    // non-zero values count
-    size_t N = cooc_matrix.size();
-    // matrix dimensions
-    int dim_size = vocab.size();
-
-    // result triplet sparse matrix
-    S4 triplet_cooc_matrix("dgTMatrix");
-    // index vectors
-    IntegerVector cooc_i(2*N);
-    IntegerVector cooc_j(2*N);
-    // value vector
-    NumericVector cooc_x(2*N);
-
-    int n = 0, i, j;
-    double x;
-    for(auto it : cooc_matrix) {
-      i = it.first.first;
-      j = it.first.second;
-      x = it.second;
-      // fill first half of our symmetric cooccurence matrix
-      cooc_i[n] = i;
-      cooc_j[n] = j;
-      cooc_x[n] = x;
-      // fill second half of our symmetric cooccurence matrix
-      cooc_i[n+N] = j;
-      cooc_j[n+N] = i;
-      cooc_x[n+N] = x;
-      n++;
-    }
-    // construct matrix
-    triplet_cooc_matrix.slot("i") = cooc_i;
-    triplet_cooc_matrix.slot("j") = cooc_j;
-    triplet_cooc_matrix.slot("x") = cooc_x;
-    // set dimensions
-    triplet_cooc_matrix.slot("Dim") = IntegerVector::create(dim_size, dim_size);
-    // set dimension names
-    vector<string>  dimnames;
-    dimnames.resize( vocab.size() );
+    vector< string> dimnames(vocab.size());
     for(auto it:vocab)
       dimnames[it.second] = it.first;
-    triplet_cooc_matrix.slot("Dimnames") = List::create(dimnames, dimnames);
-    return triplet_cooc_matrix;
+    return cooc_matrix.get_sparse_symmetrical_triplet_matrix(dimnames, dimnames);
   }
 
   SEXP get_dtm_triplet() {
@@ -229,12 +179,17 @@ private:
   // vocabulary
   unordered_map<string, uint32_t> vocab;
   // term cooccurence matrix
-  unordered_map< pair< uint32_t, uint32_t >, float > cooc_matrix;
+  //unordered_map< pair< uint32_t, uint32_t >, float > cooc_matrix;
+  TripletMatrix<float> cooc_matrix;
+
   uint32_t window_size;
+
   size_t cooc_token_count;
+
   inline float weighting_fun(int offset) {
     return 1.0 / (float)offset;
   }
+
   void init(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, string delim ) {
     this->verbose = 1;
     this->nnz = 0;
@@ -255,7 +210,7 @@ private:
     // also fill terms in right order
     for (auto val:vocab_R) {
       //grow vocabulary
-      this->vocab.insert(make_pair(as<string>(val), i));
+      this->vocab.insert(make_pair(as< string >(val), i));
       // fill terms in order we add them in dctionary!
       i++;
     }
