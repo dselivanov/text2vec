@@ -1,7 +1,7 @@
 #include "Corpus.h"
+#include "Vocabulary.h"
 #include "TripletMatrix.h"
 # define TOKEN_VERBOSE 1000000
-class VocabCorpus;
 
 using namespace Rcpp;
 using namespace std;
@@ -9,14 +9,15 @@ using namespace std;
 class VocabCorpus: public Corpus {
 public:
   // contructor for corpus with user-defined vocabulary
-  VocabCorpus(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, string delim ) {
+  VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max) {
+    //vocabulary = Vocabulary(vocab_R, n_min, n_max, delim);
     cooc_matrix = TripletMatrix<float>();
-    init(vocab_R, n_min, n_max, delim );
+    init(vocab_R, n_min, n_max);
   };
   // contructor with window_size for term cooccurence matrix
-  VocabCorpus(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, uint32_t window_size, string delim ) {
+  VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, uint32_t window_size) {
     this->window_size = window_size;
-    init(vocab_R, n_min, n_max, delim );
+    init(vocab_R, n_min, n_max);
   };
 
   void insert_terms (vector< string> &terms) {
@@ -178,6 +179,7 @@ private:
   uint64_t cooc_tokens_number;
   // vocabulary
   unordered_map<string, uint32_t> vocab;
+  //Vocabulary vocabulary;
   // term cooccurence matrix
   //unordered_map< pair< uint32_t, uint32_t >, float > cooc_matrix;
   TripletMatrix<float> cooc_matrix;
@@ -190,7 +192,8 @@ private:
     return 1.0 / (float)offset;
   }
 
-  void init(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, string delim ) {
+  void init(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max) {
+    //vocab2 = Vocabulary(n_min, n_max, delim);
     this->verbose = 1;
     this->nnz = 0;
     this->token_count = 0;
@@ -199,7 +202,7 @@ private:
     this->ngram_min = n_min;
     this->ngram_max = n_max;
     // ngram concatenation delimiter
-    this->ngram_delim = delim;
+    this->ngram_delim = "_";
 
     size_t vocab_size = vocab_R.size();
     size_t i = 0;

@@ -2,11 +2,6 @@
 using namespace Rcpp;
 using namespace std;
 
-class Vocabulary;
-inline void process_term_vocab (const string &term,
-                                Vocabulary &vocabulary,
-                                unordered_map<uint32_t, uint32_t> &term_count_map);
-
 class TermStat {
 public:
 
@@ -25,23 +20,48 @@ public:
 
 class Vocabulary {
 public:
+  Vocabulary();
+
   Vocabulary(uint32_t ngram_min,
-             uint32_t ngram_max,
-             const string ngram_delim = "_"):
+             uint32_t ngram_max):
+             //const string ngram_delim = "_"):
   ngram_min(ngram_min), ngram_max(ngram_max),
-  ngram_delim(ngram_delim),
-  document_count(0), token_count(0) {};
+  //ngram_delim(ngram_delim),
+  document_count(0), token_count(0) {
+    ngram_delim = "_";
+    };
+
+  void init_vocabulary(const CharacterVector vocab_R,
+             uint32_t ngram_min,
+             uint32_t ngram_max) {
+             //string ngram_delim = "_") {
+    this->ngram_min = ngram_min;
+    this->ngram_max = ngram_max;
+    this->ngram_delim = "_"; // ngram_delim;
+    size_t vocab_size = vocab_R.size();
+    size_t i = 0;
+    // we know vocab size, so lets reserve buckets this number
+    // and if we will lucky no rehash will needed
+    this->vocab.reserve(vocab_size);
+    //convert R vocab represenation to C++ represenation
+    // also fill terms in right order
+    for (auto term:vocab_R) {
+      //grow vocabulary
+      this->vocab.insert(make_pair(as< string >(term), i));
+      i++;
+    }
+  };
 
   void insert_terms (vector< string> &terms) {
     typename unordered_map < string, TermStat > :: iterator term_iterator;
     int term_id;
     for (auto it:terms) {
       this->temp_document_word_set.insert(it);
-      term_iterator = this->full_vocab.find(it);
-      if(term_iterator == this->full_vocab.end()) {
-        term_id = this->full_vocab.size();
+      term_iterator = this->vocab_statistics.find(it);
+      if(term_iterator == this->vocab_statistics.end()) {
+        term_id = this->vocab_statistics.size();
         // insert term into dictionary
-        this->full_vocab.insert(make_pair(it, TermStat( term_id ) ));
+        this->vocab_statistics.insert(make_pair(it, TermStat( term_id ) ));
       }
       else {
         term_iterator->second.term_global_count++;
@@ -95,8 +115,8 @@ public:
 
     typename unordered_map < string, TermStat > :: iterator term_iterator;
     for ( auto it: this->temp_document_word_set) {
-      term_iterator = full_vocab.find(it);
-      if(term_iterator != full_vocab.end())
+      term_iterator = vocab_statistics.find(it);
+      if(term_iterator != vocab_statistics.end())
         term_iterator->second.document_term_count++;
     }
   }
@@ -106,34 +126,36 @@ public:
      insert_document(s);
   }
 
-  List vocab_stat() {
-    size_t N = full_vocab.size();
+  DataFrame get_vocab_statistics() {
+    size_t N = vocab_statistics.size();
     size_t i = 0;
     CharacterVector terms(N);
     IntegerVector term_ids(N);
     IntegerVector term_counts(N);
     IntegerVector doc_counts(N);
 
-    for(auto it:full_vocab) {
+    for(auto it:vocab_statistics) {
       terms[i] = it.first;
       term_ids[i] = it.second.term_id;
       term_counts[i] = it.second.term_global_count;
       doc_counts[i] = it.second.document_term_count;
       i++;
     }
-    return List::create(_["term"] = terms,
+    return DataFrame::create(_["term"] = terms,
                         _["term_id"] = term_ids,
                         _["term_count"] = term_counts,
-                        _["doc_count"] = doc_counts);
+                        _["doc_count"] = doc_counts,
+                        _["stringsAsFactors"] = false );
   }
   void increase_token_count() {token_count++;};
 
 private:
-  unordered_map< string, TermStat > full_vocab;
+  unordered_map< string, TermStat > vocab_statistics;
+  unordered_map< string, uint32_t > vocab;
 
   uint32_t ngram_min;
   uint32_t ngram_max;
-  const string ngram_delim;
+  string ngram_delim;
 
   uint32_t document_count;
   uint32_t token_count;
