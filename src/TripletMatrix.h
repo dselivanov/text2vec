@@ -74,8 +74,8 @@ public:
   // add or increment elements
   void add(uint32_t i, uint32_t j, T increment) {
     if ( this->sparse) {
-      this->nrow = max(i, this->nrow);
-      this->ncol = max(j, this->ncol);
+      this->nrow = max(i + 1, this->nrow);
+      this->ncol = max(j + 1, this->ncol);
       // simply add our increment
       this->sparse_container[make_pair(i, j)] += increment;
     }
@@ -122,7 +122,7 @@ public:
     triplet_matrix.slot("j") = J;
     triplet_matrix.slot("x") = X;
     // set dimensions
-    triplet_matrix.slot("Dim") = IntegerVector::create(nrow, ncol);
+    triplet_matrix.slot("Dim") = IntegerVector::create(max(nrow, (uint32_t)rownames.size()), max(ncol, (uint32_t)colnames.size()));
     // set dimension names
     triplet_matrix.slot("Dimnames") = List::create(rownames, colnames);
     return triplet_matrix;
@@ -159,7 +159,7 @@ public:
     triplet_matrix.slot("j") = J;
     triplet_matrix.slot("x") = X;
     // set dimensions
-    triplet_matrix.slot("Dim") = IntegerVector::create(nrow, ncol);
+    triplet_matrix.slot("Dim") = IntegerVector::create(max(nrow, (uint32_t)rownames.size()), max(ncol, (uint32_t)colnames.size()));
     // set dimension names
     triplet_matrix.slot("Dimnames") = List::create(rownames, colnames);
     return triplet_matrix;
