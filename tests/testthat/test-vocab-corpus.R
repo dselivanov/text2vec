@@ -15,7 +15,6 @@ test_that("Unigran Vocabulary Corpus construction", {
   vocab$insert_document_batch(lst)
   vocab_stat <- vocab$get_vocab_statistics()
   # Vocabulary stats
-  expect_equal(length(vocab_stat), 4)
   expect_equal(length(vocab_stat$term), 17604)
   expect_equal( vocab_stat$term [ which.max(vocab_stat$doc_count) ], 'the')
   expect_equal( max(vocab_stat$doc_count), 906)
