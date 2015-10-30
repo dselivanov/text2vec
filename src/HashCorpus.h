@@ -7,7 +7,8 @@ class HashCorpus: public Corpus {
 public:
   // constructor
   HashCorpus(uint32_t size, int use_signed_hash,
-             uint32_t ngram_min, uint32_t ngram_max, string ngram_delim)
+             uint32_t ngram_min, uint32_t ngram_max)
+             //string ngram_delim)
   {
     doc_count = 0;
     token_count = 0;
@@ -15,7 +16,8 @@ public:
     signed_hash = use_signed_hash;
     this->ngram_min = ngram_min;
     this->ngram_max = ngram_max;
-    this->ngram_delim = ngram_delim;
+    this->ngram_delim = "_";
+    //this->ngram_delim = ngram_delim;
   };
   // total number of tokens in corpus
   int get_token_count() {return this->get_token_count();};
