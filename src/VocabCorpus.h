@@ -125,7 +125,7 @@ public:
     vector< string> dimnames(vocab.size());
     for(auto it:vocab)
       dimnames[it.second] = it.first;
-    return cooc_matrix.get_sparse_symmetrical_triplet_matrix(dimnames, dimnames);
+    return cooc_matrix.get_sparse_triplet_matrix(dimnames, dimnames);
   }
 
   SEXP get_dtm_triplet() {

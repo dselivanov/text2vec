@@ -128,42 +128,6 @@ public:
     return triplet_matrix;
   }
 
-  S4 get_sparse_symmetrical_triplet_matrix(vector< string>  &rownames, vector< string>  &colnames) {
-    // non-zero values count
-    size_t N = this->size();
-
-    // result triplet sparse matrix
-    S4 triplet_matrix("dgTMatrix");
-
-    // index vectors
-    IntegerVector I(2*N), J(2*N);
-    // value vector
-    NumericVector X(2*N);
-
-    uint32_t n = 0;
-    for(auto it : sparse_container) {
-      // fill first half of our symmetric cooccurence matrix
-      I[n] = it.first.first;
-      J[n] = it.first.second;
-      X[n] = it.second;
-      // fill second half of our symmetric cooccurence matrix
-      I[n+N] = I[n];
-      J[n+N] = J[n];
-      X[n+N] = X[n];
-      n++;
-    }
-
-    // construct matrix
-    triplet_matrix.slot("i") = I;
-    triplet_matrix.slot("j") = J;
-    triplet_matrix.slot("x") = X;
-    // set dimensions
-    triplet_matrix.slot("Dim") = IntegerVector::create(max(nrow, (uint32_t)rownames.size()), max(ncol, (uint32_t)colnames.size()));
-    // set dimension names
-    triplet_matrix.slot("Dimnames") = List::create(rownames, colnames);
-    return triplet_matrix;
-  }
-
 private:
   // flag whether matrix is sparse
   int sparse;
