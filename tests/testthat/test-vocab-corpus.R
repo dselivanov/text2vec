@@ -3,9 +3,6 @@ data("movie_review")
 
 train_ind <- 1:1000
 
-
-# VocabCorpus(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, string delim )
-
 prep_fun <- function(x) x %>% tolower %>%  regexp_tokenizer
 lst <- movie_review[['review']][train_ind] %>% prep_fun
 
@@ -23,7 +20,7 @@ test_that("Unigran Vocabulary Corpus construction", {
   vcorpus <- new(VocabCorpus, vocab_stat$term, 1, 1)
   vcorpus$insert_document_batch(lst)
   # dtm
-  m <- vcorpus$get_dtm(0)
+  m <- vcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab_stat$term))
   expect_equal( length(m@x), 123508L)
@@ -41,7 +38,7 @@ test_that("Bigram Vocabulary Corpus construction", {
   vcorpus <- new(VocabCorpus, vocab_stat$term, 2, 2)
   vcorpus$insert_document_batch(lst)
   # dtm
-  m <- vcorpus$get_dtm(0)
+  m <- vcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab_stat$term))
   expect_equal( length(m@x), 190083L)
@@ -57,7 +54,7 @@ test_that("Unigram + Bigram Vocabulary Corpus construction", {
   vcorpus <- new(VocabCorpus, vocab_stat$term, 1, 2)
   vcorpus$insert_document_batch(lst)
   # dtm
-  m <- vcorpus$get_dtm(0)
+  m <- vcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab_stat$term))
   expect_equal( length(m@x), 313591L)

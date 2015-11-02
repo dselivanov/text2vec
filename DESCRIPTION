@@ -18,10 +18,11 @@ Depends:
 Imports:
     Matrix,
     Rcpp (>= 0.11),
-    digest(>= 0.6.8),
-    magrittr(>= 1.5),
-    stringr(>= 1.0.0),
-    RcppParallel
+    RcppParallel (>= 4.3.15),
+    digest (>= 0.6.8),
+    magrittr (>= 1.5),
+    stringr (>= 1.0.0),
+    iterators (>= 1.0.8)
 LinkingTo:
     Rcpp,
     RcppParallel,
