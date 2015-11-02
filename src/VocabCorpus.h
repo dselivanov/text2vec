@@ -1,6 +1,5 @@
 #include "Corpus.h"
 #include "Vocabulary.h"
-#include "TripletMatrix.h"
 # define TOKEN_VERBOSE 1000000
 
 using namespace Rcpp;
@@ -22,8 +21,6 @@ public:
 
   void insert_terms (vector< string> &terms) {
 
-    unordered_map<uint32_t, uint32_t> term_count_map;
-
     typename unordered_map < string, uint32_t > :: const_iterator term_iterator;
 
     for(auto term:terms) {
@@ -35,19 +32,15 @@ public:
       if(term_iterator != this->vocab.end()) {
         uint32_t term_id = term_iterator -> second;
         // increment count for input term
-        ++term_count_map[term_id];
+        dtm.add(doc_count, term_id, 1);
       }
     }
-
-    this->insert_dtm_doc(term_count_map);
   }
-
-  // void insert_document(const CharacterVector doc) {this->insert_document(doc);};
-  // void insert_document_batch(const ListOf<const CharacterVector> docs_batch) {this->insert_document_batch(docs);};
 
   void insert_document(const CharacterVector doc) {
     vector< string > ngrams = get_ngrams(doc);
     insert_terms(ngrams);
+    this->doc_count++;
   }
 
   void insert_document_batch(const ListOf<const CharacterVector> docs_batch) {
@@ -86,15 +79,12 @@ public:
               increment = weighting_fun(j);
               // map stores only elements above diagonal because our matrix is symmetrical
               if(main_word_index < context_word_index) {
-                //this->cooc_matrix[make_pair(main_word_index, context_word_index)] += increment;
-                //this->cooc_matrix[make_pair(main_word_index, context_word_index)] += increment;
                 this->cooc_matrix.add(main_word_index, context_word_index, increment);
               }
               else {
                 // also we are not interested in context words equal to main word
                 // diagonal elememts will be zeros
                 if(main_word_index != context_word_index)
-                  //this->cooc_matrix[make_pair(context_word_index, main_word_index)] += increment;
                   this->cooc_matrix.add(context_word_index, main_word_index, increment);
               }
             }
@@ -127,61 +117,26 @@ public:
       dimnames[it.second] = it.first;
     return cooc_matrix.get_sparse_triplet_matrix(dimnames, dimnames);
   }
-
   SEXP get_dtm_triplet() {
     size_t ncol = this->vocab.size();
-
+    vector<string> dummy_doc_names(0);
     vector<string> terms;
     terms.resize(ncol);
-
     for(auto it:vocab)
       terms[it.second] = it.first;
-
-    int i = 0;
-    NumericVector dtm_x(this->nnz);
-    IntegerVector dtm_i(this->nnz);
-    IntegerVector dtm_j(this->nnz);
-
-    for (auto doc: docs) {
-      for (int j = 0; j < doc.doc_len; j++) {
-        dtm_i[i] = doc.doc_id;
-        dtm_j[i] = doc.term_ids[j];
-        dtm_x[i] = doc.term_counts[j];
-        i++;
-      }
-    }
-
-    S4 dtm("dgTMatrix");
-    dtm.slot("i") = dtm_i;
-    dtm.slot("j") = dtm_j;
-    dtm.slot("x") = dtm_x;
-    dtm.slot("Dim") = IntegerVector::create(doc_count, ncol) ;
-    dtm.slot("Dimnames") = List::create(R_NilValue, terms);
-
-    return dtm;
+    return dtm.get_sparse_triplet_matrix(dummy_doc_names, terms);
   }
 
-  SEXP get_dtm(IntegerVector type) {
-    switch (type[0]) {
-    case 0:
-      return get_dtm_triplet ();
-    case 1:
-      return get_dtm_lda_c();
-    case 2:
-      return get_dtm_minhash();
-    default:
-      return R_NilValue;
-    }
-  }
+  SEXP get_dtm() {return get_dtm_triplet();};
+
 private:
   int verbose;
   //#####Glove related
   uint64_t cooc_tokens_number;
   // vocabulary
   unordered_map<string, uint32_t> vocab;
-  //Vocabulary vocabulary;
+  // Vocabulary vocabulary;
   // term cooccurence matrix
-  //unordered_map< pair< uint32_t, uint32_t >, float > cooc_matrix;
   TripletMatrix<float> cooc_matrix;
 
   uint32_t window_size;

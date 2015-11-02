@@ -1,14 +1,29 @@
-#include "hash.h"
 #include "Corpus.h"
+// header from digest package
+#include <pmurhashAPI.h>
+
 using namespace Rcpp;
 using namespace std;
+
+// seeds for hashing trick
+const uint32_t MURMURHASH3_HASH_SEED = 3120602769LL;
+const uint32_t MURMURHASH3_SIGN_SEED = 79193439LL;
+
+// feature hash
+uint32_t murmurhash3_hash ( string &str) {
+  return PMurHash32(MURMURHASH3_HASH_SEED, str.c_str(), str.size());
+}
+
+// feature sign hash
+int murmurhash3_sign (const string &str) {
+  return (int)PMurHash32(MURMURHASH3_SIGN_SEED, str.c_str(), str.size());
+}
 
 class HashCorpus: public Corpus {
 public:
   // constructor
   HashCorpus(uint32_t size, int use_signed_hash,
              uint32_t ngram_min, uint32_t ngram_max)
-             //string ngram_delim)
   {
     doc_count = 0;
     token_count = 0;
@@ -17,7 +32,6 @@ public:
     this->ngram_min = ngram_min;
     this->ngram_max = ngram_max;
     this->ngram_delim = "_";
-    //this->ngram_delim = ngram_delim;
   };
   // total number of tokens in corpus
   int get_token_count() {return this->get_token_count();};
@@ -26,76 +40,39 @@ public:
 
   // implements hashing trick
   void insert_terms (vector< string> &terms) {
-    unordered_map<uint32_t, uint32_t> term_count_map;
     for(auto term: terms) {
       this->token_count++;
       uint32_t term_id = murmurhash3_hash(term) % buckets_size;
       if(signed_hash) {
         if(murmurhash3_sign(term) >= 0) {
-          ++term_count_map[term_id];
+          dtm.add(doc_count, term_id, 1);
         }
         else {
-          --term_count_map[term_id];
+          dtm.add(doc_count, term_id, -1);
         }
       }
       else {
-        ++term_count_map[term_id];
+        dtm.add(doc_count, term_id, 1);
       }
     }
-    this->insert_dtm_doc(term_count_map);
   }
-//   void insert_document(const CharacterVector doc) {this->insert_document(doc);};
-//   void insert_document_batch(const ListOf<const CharacterVector> docs_batch) {this->insert_document_batch(docs);};
 
   void insert_document(const CharacterVector doc) {
     vector< string > ngrams = get_ngrams(doc);
     insert_terms(ngrams);
+    this->doc_count++;
   }
   void insert_document_batch(const ListOf<const CharacterVector> docs_batch) {
     for (auto it:docs_batch)
       insert_document(it);
   }
-
-  SEXP get_dtm_triplet() {
-    size_t ncol = this->buckets_size;
-
-    int i = 0;
-    NumericVector dtm_x(this->nnz);
-    IntegerVector dtm_i(this->nnz);
-    IntegerVector dtm_j(this->nnz);
-
-    for (auto doc: docs) {
-      for (int j = 0; j < doc.doc_len; j++) {
-        dtm_i[i] = doc.doc_id;
-        dtm_j[i] = doc.term_ids[j];
-        dtm_x[i] = doc.term_counts[j];
-        i++;
-      }
-    }
-
-    S4 dtm("dgTMatrix");
-    dtm.slot("i") = dtm_i;
-    dtm.slot("j") = dtm_j;
-    dtm.slot("x") = dtm_x;
-    dtm.slot("Dim") = IntegerVector::create(doc_count, ncol) ;
-    dtm.slot("Dimnames") = List::create(R_NilValue, R_NilValue);
-
-    return dtm;
-  }
+    SEXP get_dtm_triplet() {
+      vector< string> dummy_names(0);
+      return dtm.get_sparse_triplet_matrix(dummy_names, dummy_names);
+    };
 
   // R's interface to document-term matrix construction
-  SEXP get_dtm(int type) {
-    switch (type) {
-    case 0:
-      return get_dtm_triplet ();
-    case 1:
-      return get_dtm_lda_c();
-    case 2:
-      return get_dtm_minhash();
-    default:
-      return R_NilValue;
-    }
-  }
+  SEXP get_dtm() { return get_dtm_triplet();};
 
 private:
   uint32_t buckets_size;

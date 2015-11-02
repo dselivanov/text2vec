@@ -2,17 +2,10 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "text2vec.h"
 
 using namespace std;
 using namespace Rcpp;
-
-// fast integer hashing
-uint32_t fast_int_hash(uint32_t a) {
-  a = ((a >> 16) ^ a) * 0x45d9f3b;
-  a = ((a >> 16) ^ a) * 0x45d9f3b;
-  a = ((a >> 16) ^ a);
-  return a;
-}
 
 // for unordered_map < <uint32_t, uint32_t>, T >
 namespace std {
@@ -25,6 +18,7 @@ struct hash<std::pair<uint32_t, uint32_t>>
   }
 };
 }
+
 
 template<typename T>
 NumericMatrix convert2Rmat(vector<vector<T> > &mat, size_t ncol) {

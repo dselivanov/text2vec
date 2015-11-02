@@ -6,9 +6,11 @@
 #' @import Matrix
 #' @import Rcpp
 #' @import digest
+#' @import iterators
 #' @importFrom RcppParallel RcppParallelLibs
 #' @importFrom stringr str_split fixed coll regex boundary
 #' @importFrom magrittr %>%
+#' @export magrittr::`%>%`
 #' @useDynLib text2vec
 NULL
 

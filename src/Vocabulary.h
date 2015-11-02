@@ -125,11 +125,16 @@ public:
      insert_document(s);
   }
 
-  CharacterVector get_vocab() {
+  List get_vocab() {
     CharacterVector vocab_R(vocab.size());
     for(auto it:vocab)
       vocab_R[it.second] = it.first;
-    return vocab_R;
+    List res = List::create(
+      _["vocab"] = vocab_R,
+      _["ngram_min"] = this->ngram_min,
+      _["ngram_max"] = this->ngram_max );
+    res.attr("class") = "Vocabulary";
+    return res;
   }
 
   void filter_vocab( uint32_t term_count_min, uint32_t term_count_max,
