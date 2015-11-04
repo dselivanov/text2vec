@@ -22,8 +22,10 @@ int murmurhash3_sign (const string &str) {
 class HashCorpus: public Corpus {
 public:
   // constructor
-  HashCorpus(uint32_t size, int use_signed_hash,
-             uint32_t ngram_min, uint32_t ngram_max)
+  HashCorpus(uint32_t size,
+             uint32_t ngram_min, uint32_t ngram_max,
+             uint32_t win_size,
+             int use_signed_hash)
   {
     doc_count = 0;
     token_count = 0;
@@ -31,6 +33,7 @@ public:
     signed_hash = use_signed_hash;
     this->ngram_min = ngram_min;
     this->ngram_max = ngram_max;
+    this->window_size = win_size;
     this->ngram_delim = "_";
   };
   // total number of tokens in corpus
@@ -38,38 +41,74 @@ public:
   // total number of documents in corpus
   int get_doc_count() { return doc_count; };
 
+  void clear_tcm() {this->tcm.clear();};
+
   // implements hashing trick
-  void insert_terms (vector< string> &terms) {
+  void insert_terms (vector< string> &terms, int flag_grow_dtm ) {
+    uint32_t term_index, context_term_index;
+
+    size_t K = terms.size();
+    size_t i = 0;
+    float increment = 0.0;
+
     for(auto term: terms) {
       this->token_count++;
-      uint32_t term_id = murmurhash3_hash(term) % buckets_size;
-      if(signed_hash) {
-        if(murmurhash3_sign(term) >= 0) {
-          dtm.add(doc_count, term_id, 1);
+      term_index = murmurhash3_hash(term) % buckets_size;
+      // should we grow DTM ?
+      if(flag_grow_dtm) {
+        if(signed_hash && murmurhash3_sign(term) < 0) {
+          dtm.add(doc_count, term_index, -1);
         }
         else {
-          dtm.add(doc_count, term_id, -1);
+          dtm.add(doc_count, term_index, 1);
         }
       }
-      else {
-        dtm.add(doc_count, term_id, 1);
+      //###########################################
+      // cooccurence related
+      // will check 1 == ngram_min == ngram_max on R side
+      // and set window_size = 0 if not
+      // will not go into this loop if window_size == 0
+      for (uint32_t j = 1; j <= this->window_size; j++) {
+        // check doc bounds
+        if( i + j < K) {
+          context_term_index = murmurhash3_hash(terms[i + j]) % buckets_size;
+            // calculate cooccurence increment for particular position j of context word
+            increment = weighting_fun(j);
+            // map stores only elements above diagonal because our matrix is symmetrical
+            if(term_index < context_term_index) {
+              this->tcm.add(term_index, context_term_index, increment);
+            }
+            else {
+              // also we are not interested in context words equal to main word
+              // diagonal elememts will be zeros
+              if(term_index != context_term_index)
+                this->tcm.add(context_term_index, term_index, increment);
+            }
+        }
       }
+      i++;
     }
   }
 
-  void insert_document(const CharacterVector doc) {
+  void insert_document(const CharacterVector doc, int flag_grow_dtm ) {
     vector< string > ngrams = get_ngrams(doc);
-    insert_terms(ngrams);
+    insert_terms(ngrams, flag_grow_dtm);
     this->doc_count++;
   }
-  void insert_document_batch(const ListOf<const CharacterVector> docs_batch) {
+  void insert_document_batch(const ListOf<const CharacterVector> docs_batch, int flag_grow_dtm ) {
     for (auto it:docs_batch)
-      insert_document(it);
+      insert_document(it, flag_grow_dtm);
   }
-    SEXP get_dtm_triplet() {
-      vector< string> dummy_names(0);
-      return dtm.get_sparse_triplet_matrix(dummy_names, dummy_names);
-    };
+  // get term cooccurence matrix
+  SEXP get_tcm() {
+    vector< string> dummy_dimnames(0);
+    return tcm.get_sparse_triplet_matrix(dummy_dimnames, dummy_dimnames);
+  }
+
+  SEXP get_dtm_triplet() {
+    vector< string> dummy_names(0);
+    return dtm.get_sparse_triplet_matrix(dummy_names, dummy_names);
+  };
 
   // R's interface to document-term matrix construction
   SEXP get_dtm() { return get_dtm_triplet();};

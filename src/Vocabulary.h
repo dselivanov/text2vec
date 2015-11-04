@@ -177,23 +177,23 @@ public:
     size_t N = vocab.size();
     size_t i = 0;
     CharacterVector terms(N);
-    IntegerVector term_ids(N);
+    //IntegerVector term_ids(N);
     IntegerVector term_counts(N);
     IntegerVector doc_counts(N);
     NumericVector doc_prop(N);
     for(auto it:vocab) {
       terms[i] = it.first;
-      term_ids[i] = it.second;
+      //term_ids[i] = it.second;
       term_counts[i] = vocab_statistics[it.second].term_global_count;
       doc_counts[i] = vocab_statistics[it.second].document_term_count;
       doc_prop[i] = (double)(vocab_statistics[it.second].document_term_count) / (double)document_count;
       i++;
     }
-    return DataFrame::create(_["term"] = terms,
-                        _["term_id"] = term_ids,
-                        _["term_count"] = term_counts,
-                        _["doc_count"] = doc_counts,
-                        _["doc_prop"] = doc_prop,
+    return DataFrame::create(_["terms"] = terms,
+                        //_["term_id"] = term_ids,
+                        _["terms_counts"] = term_counts,
+                        _["doc_counts"] = doc_counts,
+                        _["doc_proportions"] = doc_prop,
                         _["stringsAsFactors"] = false );
   }
   void increase_token_count() {token_count++;};
