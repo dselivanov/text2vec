@@ -3,60 +3,71 @@ data("movie_review")
 
 train_ind <- 1:1000
 
-prep_fun <- function(x) x %>% tolower %>%  regexp_tokenizer
-lst <- movie_review[['review']][train_ind] %>% prep_fun
-
+# prep_fun <- function(x) x %>% tolower %>%  regexp_tokenizer
+txt <- movie_review[['review']][train_ind]
+get_test_iterator <- function()
+  itoken(txt,
+         preprocess_function = tolower,
+         tokenizer = regexp_tokenizer,
+         progessbar = F)
 test_that("Unigran Vocabulary Corpus construction", {
   # Vocabulary construction
-  vocab <- new(Vocabulary, 1, 1)
-  vocab$insert_document_batch(lst)
-  vocab_stat <- vocab$get_vocab_statistics()
+  iterator <- get_test_iterator()
+  vocab <- vocabulary(iterator,
+                             ngram = c('ngram_min' = 1L,
+                                       'ngram_max' = 1L),
+                             serialize_dir = NULL)
   # Vocabulary stats
-  expect_equal(length(vocab_stat$term), 17604)
-  expect_equal( vocab_stat$term [ which.max(vocab_stat$doc_count) ], 'the')
-  expect_equal( max(vocab_stat$doc_count), 906)
-  expect_equal( max(vocab_stat$term_count), 11407)
+  expect_equal(length(vocab$vocab$terms), 19297)
+  expect_equal( vocab$vocab$terms [ which.max(vocab$vocab$doc_counts) ], 'the')
+  expect_equal( max(vocab$vocab$doc_counts), 992)
+  expect_equal( max(vocab$vocab$terms_counts), 13224)
   # VocabCorpus construction
-  vcorpus <- new(VocabCorpus, vocab_stat$term, 1, 1)
-  vcorpus$insert_document_batch(lst)
+
+  vcorpus <- create_vocab_corpus(get_test_iterator(),
+                                 vocabulary = vocab)
   # dtm
   m <- vcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
-  expect_equal( dim(m)[[2]], length(vocab_stat$term))
-  expect_equal( length(m@x), 123508L)
+  expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
+  expect_equal( length(m@x), 141714L)
 })
 
 test_that("Bigram Vocabulary Corpus construction", {
   # unigram + bigram VocabCorpus construction
-  vocab <- new(Vocabulary, 2, 2)
-  vocab$insert_document_batch(lst)
-  vocab_stat <- vocab$get_vocab_statistics()
+  iterator <- get_test_iterator()
+  vocab <- vocabulary(iterator,
+                      ngram = c('ngram_min' = 2L,
+                                'ngram_max' = 2L),
+                      serialize_dir = NULL)
 
-  expect_equal(sum(grepl("_", vocab_stat$term, fixed = T)), 106781L)
-  expect_equal(length(vocab_stat$term), 106781L)
+  expect_equal(sum(grepl("_", vocab$vocab$terms, fixed = T)), 121333L)
+  expect_equal(length(vocab$vocab$terms), 121333L)
   # VocabCorpus construction
-  vcorpus <- new(VocabCorpus, vocab_stat$term, 2, 2)
-  vcorpus$insert_document_batch(lst)
+  vcorpus <- create_vocab_corpus(get_test_iterator(),
+                                 vocabulary = vocab)
   # dtm
   m <- vcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
-  expect_equal( dim(m)[[2]], length(vocab_stat$term))
-  expect_equal( length(m@x), 190083L)
+  expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
+  expect_equal( length(m@x), 220104L)
 })
 
 test_that("Unigram + Bigram Vocabulary Corpus construction", {
   # unigram + bigram VocabCorpus construction
-  vocab <- new(Vocabulary, 1, 2)
-  vocab$insert_document_batch(lst)
-  vocab_stat <- vocab$get_vocab_statistics()
-  expect_equal(length(vocab_stat$term), 124385L)
+  iterator <- get_test_iterator()
+  vocab <- vocabulary(iterator,
+                      ngram = c('ngram_min' = 1L,
+                                'ngram_max' = 2L),
+                      serialize_dir = NULL)
+  expect_equal(length(vocab$vocab$terms), 140630L)
   # VocabCorpus construction
-  vcorpus <- new(VocabCorpus, vocab_stat$term, 1, 2)
-  vcorpus$insert_document_batch(lst)
+  vcorpus <- create_vocab_corpus(get_test_iterator(),
+                                 vocabulary = vocab)
   # dtm
   m <- vcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
-  expect_equal( dim(m)[[2]], length(vocab_stat$term))
-  expect_equal( length(m@x), 313591L)
+  expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
+  expect_equal( length(m@x), 361818L)
 
 })

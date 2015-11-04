@@ -14,7 +14,11 @@ struct hash<std::pair<uint32_t, uint32_t>>
 {
   inline size_t operator()(const std::pair<uint32_t, uint32_t>& k) const
   {
-    return fast_int_hash(k.first) + fast_int_hash(k.second);
+    size_t f = k.first, s = k.second;
+    //http://stackoverflow.com/a/24693169/1069256
+    //should produce no collisions
+    return f << (CHAR_BIT * sizeof(size_t) / 2) | s;
+    // return fast_int_hash(f) + fast_int_hash(s);
   }
 };
 }
@@ -30,65 +34,25 @@ NumericMatrix convert2Rmat(vector<vector<T> > &mat, size_t ncol) {
 }
 
 template<typename T>
-class TripletMatrix {
+class SparseTripletMatrix {
 public:
   // constructor for sparse matrix
-  TripletMatrix():
-    sparse(1), nrow(0), ncol(0) {};
+  SparseTripletMatrix():
+    nrow(0), ncol(0) {};
 
-  // constructor for dense matrix
-  TripletMatrix(uint32_t nrow, uint32_t ncol):
-    sparse(0), nrow(nrow), ncol(ncol) {
-    dense_container.resize(nrow);
-    for(auto it:dense_container)
-      // resize fills value with 0
-      it.resize(ncol);
-  };
-
-  // constructor for dense matrix with unknown number of rows
-  TripletMatrix(uint32_t ncol):
-    sparse(0), nrow(0), ncol(ncol) {};
-
-  // properties
-  inline int is_sparse() {return this->sparse;};
   inline uint32_t nrows() {return this->nrow;};
   inline uint32_t ncols() {return this->ncol;};
   inline size_t size() {
-    if(this -> sparse)
       return(this->sparse_container.size());
-    else
-      return this->nnz;
   }
-
-  // grow matrix
-  inline void add_row() {
-    this->dense_container.push_back(vector<T>(ncol));
-    nrow++;
-  }
+  void clear() { this->sparse_container.clear(); };
   // add or increment elements
   void add(uint32_t i, uint32_t j, T increment) {
-    if ( this->sparse) {
-      this->nrow = max(i + 1, this->nrow);
-      this->ncol = max(j + 1, this->ncol);
-      // simply add our increment
-      this->sparse_container[make_pair(i, j)] += increment;
-    }
-    else {
-      // out matrix has not enougth rows to insert element with row index i =>
-      // grow matrix, add rows.
-      while(this->nrow < i)
-        add_row();
-      // inserting new element for given pair of indices?
-      if(dense_container[i][j] == 0)
-        nnz++;
-      // add our increment
-      this->dense_container[i][j] += increment;
-    }
+    this->nrow = max(i + 1, this->nrow);
+    this->ncol = max(j + 1, this->ncol);
+    // simply add our increment
+    this->sparse_container[make_pair(i, j)] += increment;
   };
-
-  NumericMatrix get_dense_matrix(vector< string>  &rownames, vector< string>  &colnames) {
-    return convert2Rmat(this->dense_container, this->ncol);
-  }
 
   S4 get_sparse_triplet_matrix(vector< string>  &rownames, vector< string>  &colnames) {
     // non-zero values count
@@ -123,15 +87,11 @@ public:
   }
 
 private:
-  // flag whether matrix is sparse
-  int sparse;
   // dimensionality of matrix
   uint32_t nrow;
   uint32_t ncol;
   // number of non-zero elements in matrix
   size_t nnz;
-  // container for dense matrix
-  vector<vector<T>> dense_container;
   // container for sparse matrix in triplet form
   unordered_map< pair<uint32_t, uint32_t>, T >  sparse_container;
 };

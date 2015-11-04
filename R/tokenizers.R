@@ -1,5 +1,6 @@
 #' @name tokenizers
 #' @title Tokenization functions, which performs string splitting
+#' @description simple wrappers around \code{stringi} and \code{stringr} packafes functionality.
 #' by regular expression or fixed string.
 #' @details Uses \link{str_split} under the hood(which build on top of \code{stringi::stri_split}).
 #' Actually just a wrapper for \code{str_split} which is very consistent flexible and robust.

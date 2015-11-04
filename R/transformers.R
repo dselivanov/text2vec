@@ -82,7 +82,7 @@ tf_transformer <- function(dtm) {
   dtm_get_tf(dtm, type = 'tf') %*% dtm
 }
 
-#' @describeIn tf_transformer
+#' @describeIn tf_transformer Transform Document-Term via TF-IDF scaling
 #' @export
 tfidf_transformer <- function(dtm, idf = NULL) {
   if(inherits(idf, 'ddiMatrix'))
@@ -94,7 +94,7 @@ tfidf_transformer <- function(dtm, idf = NULL) {
   }
 }
 
-#' @describeIn tf_transformer
+#' @describeIn tf_transformer Transform Document-Term into vinary format
 #' @export
 binary_transformer <- function(dtm) {
   dtm_get_tf(dtm, type = 'binary') %*% dtm

@@ -1,4 +1,4 @@
-#include "TripletMatrix.h"
+#include "SparseTripletMatrix.h"
 using namespace Rcpp;
 using namespace std;
 
@@ -10,6 +10,8 @@ public:
   void insert_document(const CharacterVector terms);
 
   void insert_document_batch(const ListOf<const CharacterVector> docs_batch);
+
+  void clear_tcm();
 
   // total number of documents in corpus
   uint32_t get_doc_count() { return doc_count; };
@@ -67,9 +69,20 @@ protected:
   // ngram concatenation delimiter
   string ngram_delim;
 
+  uint32_t window_size;
+
   // documents
-  //vector<Document> docs;
-  TripletMatrix<uint32_t> dtm;
+  SparseTripletMatrix<uint32_t> dtm;
+
+  //#####Glove related
+  uint64_t cooc_tokens_number;
+
+  // term cooccurence matrix
+  SparseTripletMatrix<float> tcm;
+
+  inline float weighting_fun(uint32_t offset) {
+    return 1.0 / (float)offset;
+  }
 
   SEXP get_dtm_triplet();
 };

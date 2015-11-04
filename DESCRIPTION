@@ -13,20 +13,25 @@ BugReports: https://github.com/dselivanov/text2vec/issues
 SystemRequirements: GNU make, C++11
 LazyData: true
 Depends:
-    R (>= 3.1.1),
+    R (>= 3.2.0),
     methods
 Imports:
     Matrix,
     Rcpp (>= 0.11),
-    RcppParallel (>= 4.3.15),
+    RcppParallel (>= 4.3.14),
     digest (>= 0.6.8),
     magrittr (>= 1.5),
     stringr (>= 1.0.0),
-    iterators (>= 1.0.8)
+    iterators (>= 1.0.8),
+    readr(>= 0.2.2)
 LinkingTo:
     Rcpp,
     RcppParallel,
     digest
 Suggests:
     SnowballC,
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 5.0.0

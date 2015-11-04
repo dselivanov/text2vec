@@ -10,7 +10,7 @@
 #' @importFrom RcppParallel RcppParallelLibs
 #' @importFrom stringr str_split fixed coll regex boundary
 #' @importFrom magrittr %>%
-#' @export magrittr::`%>%`
+#' @importFrom readr read_lines read_rds write_rds
 #' @useDynLib text2vec
 NULL
 
@@ -30,5 +30,11 @@ NULL
 #' Rcpp module: Vocabulary
 #' Exposes C++ functions to construct Vocabulary
 #' @name Vocabulary
+#' @export
+NULL
+
+#' Rcpp module: GloveFitter
+#' Exposes C++ functions to fit GloVe model
+#' @name GloveFitter
 #' @export
 NULL
