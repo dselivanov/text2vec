@@ -34,7 +34,7 @@ itoken.character <- function(iterable, preprocess_function, tokenizer, chunks_nu
   it <- idiv(n = length(iterable), chunks = chunks_number)
   max_len = length(iterable)
   if(progessbar)
-    pb <- txtProgressBar(initial = 0, min = 1, max = max_len, style = 3)
+    pb <- txtProgressBar(initial = -1L, min = 0, max = max_len, style = 3)
   env <- environment()
   nextEl <- function() {
     n <- nextElem(it)
@@ -57,7 +57,7 @@ itoken.ifiles <- function(iterable, preprocess_function, tokenizer, progessbar =
   i <- 1
   max_len = attr(iterable, 'length', exact = FALSE)
   if(progessbar)
-    pb <- txtProgressBar(initial = 0, min = 1, max = max_len, style = 3)
+    pb <- txtProgressBar(initial = -1L, min = 0L, max = max_len, style = 3)
   env <- environment()
 
   nextEl <- function() {
