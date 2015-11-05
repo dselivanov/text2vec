@@ -29,7 +29,6 @@ LinkingTo:
     RcppParallel,
     digest
 Suggests:
-    SnowballC,
     testthat,
     knitr,
     rmarkdown
