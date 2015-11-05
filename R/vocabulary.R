@@ -29,6 +29,8 @@
 #' txt <- movie_review[['review']][1:100]
 #' it <- itoken(txt, tolower, regexp_tokenizer, chunks_number = 10)
 #' vocab <- vocabulary(it)
+#' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
+#'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
 #' @export
 vocabulary <- function(iterator,
                               ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
@@ -64,7 +66,45 @@ vocabulary <- function(iterator,
     vocab = vocab$get_vocab_statistics(),
     ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max))
 
-  # class(res) <- c('text2vec_vocabulary', class(res))
   class(res) <- c('text2vec_vocabulary')
   res
+}
+
+#' @name prune_vocabulary
+#' @title Prunes vocabulary.
+#' @description Perform filtering of the input vocabulary and trhrowing out very frequet and
+#' very infrequet terms. Also leaves top `max_number_of_terms` (by count) terms. See examples
+#' in \link{vocabulary} function.
+#' @param vocabulary vocabulary from \link{vocabulary} function output.
+#' @param term_count_min minimum number of occurences over all documents.
+#' @param term_count_max maximum number of occurences over all documents.
+#' @param doc_proportion_min minimum proportion of documents which should contain term.
+#' @param doc_proportion_max maximum proportion of documents which should contain term.
+#' @param max_number_of_terms maximum number of terms in vocabulary.
+#' @seealso \link{vocabulary}
+#' @export
+prune_vocabulary <- function(vocabulary,
+                  term_count_min = 1L,
+                  term_count_max = Inf,
+                  doc_proportion_min = 0.0,
+                  doc_proportion_max = 1.0,
+                  max_number_of_terms = Inf) {
+  if(!inherits(vocabulary, 'text2vec_vocabulary'))
+    stop('vocabulary should be an object of class text2vec_vocabulary')
+
+  vocab <- vocabulary$vocab
+
+  ind <- vocab[['terms_counts']] >= term_count_min &
+    vocab[['terms_counts']] <= term_count_max &
+    vocab[['doc_proportions']] >= doc_proportion_min &
+    vocab[['doc_proportions']] <= doc_proportion_max
+
+  pruned_vocabulary <- vocab[ind, ]
+  pruned_vocabulary <- pruned_vocabulary[order(pruned_vocabulary$terms_counts, decreasing = T),]
+  pruned_vocabulary <- list('vocab' = pruned_vocabulary[1:max_number_of_terms, ],
+                            'ngram' = vocabulary[['ngram']])
+
+  class(pruned_vocabulary) <- 'text2vec_vocabulary'
+
+  pruned_vocabulary
 }
