@@ -35,7 +35,7 @@ vocabulary <- function(iterator,
                               serialize_dir = NULL, ...) {
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
-  vocab <- new(Vocabulary, ngram_min, ngram_max)
+  vocab <- new(VocabularyBuilder, ngram_min, ngram_max)
   i <- 1
 
   write_tokens <- FALSE

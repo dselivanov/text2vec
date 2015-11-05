@@ -27,9 +27,9 @@ NULL
 #' @export
 NULL
 
-#' Rcpp module: Vocabulary
+#' Rcpp module: VocabularyBuilder
 #' Exposes C++ functions to construct Vocabulary
-#' @name Vocabulary
+#' @name VocabularyBuilder
 #' @export
 NULL
 

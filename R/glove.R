@@ -1,7 +1,7 @@
 #' @name glove
 #' @title Perform fit of the GloVe model.
 #' @description Train GloVe word embeddings model via fully asynchronous parallel AdaGrad.
-#' @param object object which represents Term-Coocurence matrix, which used in training.
+#' @param tcm object which represents Term-Coocurence matrix, which used in training.
 #' At the moment only \code{dgTMatrix} or (coercible to \code{dgTMatrix}) is supported.
 #' In future releases we will add support for out-of-core learning and streaming TCM from disk.
 #' @param shuffle \code{logical} whether to perform shuffling before each iteration.
@@ -9,7 +9,7 @@
 #' Generelly good idea for stochastic gradient descent
 #' @seealso \url{http://nlp.stanford.edu/projects/glove/}
 #' @export
-glove <- function(object, shuffle = TRUE, ...) {
+glove <- function(tcm, shuffle = TRUE, ...) {
   UseMethod("glove")
 }
 
@@ -33,10 +33,10 @@ glove <- function(object, shuffle = TRUE, ...) {
 #' See \url{http://rcppcore.github.io/RcppParallel/#grain-size} for details.
 #' @export
 glove.Matrix <- function(tcm,
+                         shuffle = TRUE,
                          word_vectors_size,
                          x_max,
                          num_iters,
-                         shuffle = TRUE,
                          learning_rate = 0.05,
                          verbose = TRUE,
                          convergence_threshold = 0.0,
