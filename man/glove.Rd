@@ -5,14 +5,14 @@
 \alias{glove.Matrix}
 \title{Perform fit of the GloVe model.}
 \usage{
-glove(object, shuffle = TRUE, ...)
+glove(tcm, shuffle = TRUE, ...)
 
-\method{glove}{Matrix}(tcm, word_vectors_size, x_max, num_iters,
-  shuffle = TRUE, learning_rate = 0.05, verbose = TRUE,
+\method{glove}{Matrix}(tcm, shuffle = TRUE, word_vectors_size, x_max,
+  num_iters, learning_rate = 0.05, verbose = TRUE,
   convergence_threshold = 0, grain_size = 100000L, ...)
 }
 \arguments{
-\item{object}{object which represents Term-Coocurence matrix, which used in training.
+\item{tcm}{object which represents Term-Coocurence matrix, which used in training.
 At the moment only \code{dgTMatrix} or (coercible to \code{dgTMatrix}) is supported.
 In future releases we will add support for out-of-core learning and streaming TCM from disk.}
 
@@ -46,7 +46,7 @@ for \code{RcppParallel::parallelReduce}.
 See \url{http://rcppcore.github.io/RcppParallel/#grain-size} for details.}
 }
 \description{
-Train GloVe model via fully asyncroniuos AdaGrad.
+Train GloVe word embeddings model via fully asynchronous parallel AdaGrad.
 }
 \seealso{
 \url{http://nlp.stanford.edu/projects/glove/}

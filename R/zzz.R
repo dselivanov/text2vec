@@ -1,6 +1,6 @@
 loadModule("VocabCorpus", TRUE)
 loadModule("HashCorpus", TRUE)
-loadModule("Vocabulary", TRUE)
+loadModule("VocabularyBuilder", TRUE)
 loadModule("GloveFitter", TRUE)
 
 .onUnload <- function (libpath) {
