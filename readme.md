@@ -1,4 +1,4 @@
-[![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=redesign)](https://travis-ci.org/dselivanov/text2vec)
+[![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=master)](https://travis-ci.org/dselivanov/text2vec)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://badges.mit-license.org)
 # Features
 Unfortunately, current R's infrastructure around text-mining tasks can't provide reliable tools for efficient and memory-friendly analysis pipeline.
