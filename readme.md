@@ -1,39 +1,48 @@
 [![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=redesign)](https://travis-ci.org/dselivanov/text2vec)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://badges.mit-license.org)
-# Quick reference
-**[Quick reference](https://github.com/dselivanov/text2vec/wiki/Quick-reference)** is based on kaggle's [Bag of Words Meets Bags of Popcorn](https://www.kaggle.com/c/word2vec-nlp-tutorial) competition data - [labeledTrainData.tsv.zip](https://www.kaggle.com/c/word2vec-nlp-tutorial/download/labeledTrainData.tsv.zip).
+# Features
+Unfortunately, current R's infrastructure around text-mining tasks can't provide reliable tools for efficient and memory-friendly analysis pipeline.
+**text2vec** is a package which main goal is to provide **efficient framework** with **concise API** for **text analysis** and **natural language processing (NLP)** in R. It is inspired by [gensim](http://radimrehurek.com/gensim/) - excellent matured python library for NLP.
 
-# Key features
-**Note that package is in very alpha version. This doesn't mean the package is not robust, but this means that API can change at any time.**
+## Core functionality
 
-1. Efficient memory-friendly **streaming corpus construction**. **text2vec**'s provides API for construction corporas from `character` vectors and more important - [connections](https://stat.ethz.ch/R-manual/R-devel/library/base/html/connections.html). So it is possible (and easy!) to construct Document-Term matrices for collections of documents thar are don't fit in the memory.
-2. **Fast** - core functions are written in C++, thanks to [Rcpp](https://cran.r-project.org/web/packages/Rcpp/index.html) authors.
-3. Efficient **n-gram generation and processing**.
-4. Flexible and **easy functional-style API**. Easy chaining.
-5. Has two main corpus classes - 
-    - `DictCorpus` - traditional dictionary-based container used for Document-Term matrix construction.
-    - `HashCorpus` - container that implements [feature hashing](https://en.wikipedia.org/wiki/Feature_hashing) or **"hashing trick"**. Similar to [scikit-learn FeatureHasher](http://scikit-learn.org/stable/modules/feature_extraction.html#feature-hashing) and  [gensim corpora.hashdictionary](https://radimrehurek.com/gensim/corpora/hashdictionary.html).
-    
-        > The class HashCorpus is a high-speed, low-memory vectorizer that uses a technique known as feature hashing, or the “hashing trick”. Instead of building a hash table of the features encountered in training, as the vectorizers do, instances of HashCorpus apply a hash function to the features to determine their column index in sample matrices directly. 
-    
-6. **Document-Term matrix is key object**. At the moment it can be extracted from corpus into `dgCMatrix`, `dgTMatrix` or [LDA-C](https://www.cs.princeton.edu/~blei/lda-c/readme.txt) which is standart for [lda](https://cran.r-project.org/web/packages/lda/index.html) package. `dgCMatrix` is default for sparse matrices in R and most of the packages that work with sparse matrices work with `dgCMatrix` matrices, so it will be **easy to interact with other packages**.
+At the moment we cover two following topics:  
 
+1. Fast text vectorization on arbitrary n-grams.
+    - using vocabulary
+    - using feature hashing
+2. State-of-the-art [GloVe](http://www-nlp.stanford.edu/projects/glove/) word embeddings.
 
-# Benchmarks
-- [Comparison with tm and reasons why I started text2vec](https://github.com/dselivanov/text2vec/wiki/Comparison-with-tm)
-- [text2vec vs scikit-learn vectorizers](https://github.com/dselivanov/text2vec/wiki/Comparison-with-scikit-learn-vectorizers)
+## Efficiency  
 
-# Focus
+- Core of the functionality is **carefully written in C++**. Also this means text2vec is **memory friendly**.
+- Some parts are fully **parallelized** using excellent [RcppParallel](http://rcppcore.github.io/RcppParallel/) package. 
+- **Streaming API**, this means users don't have to load all the data into RAM. **text2vec** allows to process stream of chunks.
 
-As unix philosophy says - [Do One Thing and Do It Well](https://en.wikipedia.org/wiki/Unix_philosophy#Do_One_Thing_and_Do_It_Well), so we will focus on one particular problem - infrastructure for text analysis. R ecosystem contains lots of packages that are well suited for working with sparse high-dimensional data (and thus suitable for text modeling). Here are my favourites:
+## API
 
-- [lda](https://cran.r-project.org/web/packages/lda/index.html) blazing fast package for topic modeling.
-- [glmnet](https://cran.r-project.org/web/packages/glmnet/index.html) for L1, L2 linear models.
-- [xgboost](https://cran.r-project.org/web/packages/xgboost/) for gradient boosting. 
-- [LiblineaR](https://cran.r-project.org/web/packages/LiblineaR/index.html) - wrapper of `liblinear` svm library.
-- [irlba](https://cran.r-project.org/web/packages/irlba/index.html) - A fast and memory-efficient method for computing a few approximate singular values and singular vectors of large matrices.
+- Build around [iterator](https://en.wikipedia.org/wiki/Iterator) abstraction.
+- Concise, provides only few functions, which do their job well.
+- Don't (and probably will not in future) provide trivial very high-level functions.
 
-These are all excellent and very efficient packages, so **text2vec** will be focused (at least in the nearest future) not on modeling, but on framework - Document-Matrix construction and manipulation - basis for any text-mining analysis. **text2vec** is partially inspired by [gensim](https://radimrehurek.com/gensim/) - robust and well designed python library for text mining. In the near future we will try to replicate some of its functionality.
+# Terminology and what is under the hood
+
+As stated before, text2vec is built around streaming API and **iterators**, which allows to construct **corpus** from *iterable* objects. Here we touched 2 main concepts:
+
+1. **Corpus**.  In text2vec it is an object, which contains tokens and other information / metainformation which is used for text vectorization and other processing. We can be efficiently insert documents into corpus, because,  technically, **Corpus** is an C++ class, wrapped with *Rcpp-modules* as *reference class* (which has reference semantics!). Usually user should not care about this, but should keep in mind nature of such objects. Particularly important, that user have to remember, that he can't save/serialize such objects using R's `save*()` methods. But good news is that he can easily and efficiently extract corresponding R objects from corpus and work with them in a usual way.
+1. **Iterators**. If you are not familliar with them in `R's` context, I highly recommend to review vignettes of [iterators](https://cran.r-project.org/web/packages/iterators/) package. A big advantage of this abstraction is that  it allows us to be **agnostic of type of input** - we can transparently change it just providing correct iterator.
+
+# Text vectorization
+
+Historically, most of the text-mining and NLP modelling is related to [Bag-of-words](https://en.wikipedia.org/wiki/Bag-of-words_model) or [Bag-of-ngrams](https://en.wikipedia.org/wiki/N-gram). Despite of simplicity these models usually demonstrates good performance on text categorization/classification tasks. But, in contrast to theoretical simplicity and practical efficiency, building *bag-of-words* models involves technical challenges (especially within `R` framework, because of its typical copy-on-modify semantics). Lets briefly review some details of typical analysis pipeline:
+
+1. Usually reseacher have to construct [Document-Term matrix](https://en.wikipedia.org/wiki/Document-term_matrix) (DTM) from imput documents. Or in other words, **vectorize text** - create mapping from words/ngrams to [vector space](https://en.wikipedia.org/wiki/Vector_space_model).
+1. Fit model on this DTM. This can include:
+    - text classification
+    - topic modeling
+    - ...
+1. Tune, validate model.
+1. Apply model on new data.
 
 # Future work
 
@@ -46,18 +55,3 @@ If you like it, you can **help**:
     - package is tested on linux and OS X platforms, so Windows users are especially welcome
 - Fork and start contributing. Vignettes, docs, tests, use cases are very welcome.
 - Or just give me a star on [project page](https://github.com/dselivanov/text2vec) :-)
-
-### Short-term plans
-- add tests
-- ~~add n-gram tokenizers~~ [already done](https://github.com/dselivanov/text2vec/issues/6)
-- ~~add methods for tokenization in C++ (at the moment tokenization takes almost half of runtime)~~ [see these benchmarks](https://github.com/dselivanov/text2vec/issues/2). ~~It will make sense to switch to `stringi` or `stringr`~~ - [done](https://github.com/dselivanov/text2vec/issues/18)
-- ~~switch to murmur3 hash and add second hash function to reduce probability of collision~~ [done](https://github.com/dselivanov/text2vec/issues/8), thanks to @[wush978](https://github.com/wush978/FeatureHashing/issues/96)
-- push dictionary and stopwords filtering into C++ code
-
-### Middle-term plans
-- add **[word2vec](https://code.google.com/p/word2vec/) wrapper**. It is strange, that R community still didn't have it.
-- add corpus serialization
-
-### Long-term plans
-- integrate models like it is done in [gensim](https://radimrehurek.com/gensim/)
-- try to implement out-of-core transformations like [gensim](https://radimrehurek.com/gensim/) does
