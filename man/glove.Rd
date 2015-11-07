@@ -3,12 +3,19 @@
 \name{glove}
 \alias{glove}
 \alias{glove.Matrix}
+\alias{glove.dgTMatrix}
 \title{Perform fit of the GloVe model.}
 \usage{
-glove(tcm, shuffle = TRUE, ...)
+glove(tcm, vocabulary_size, word_vectors_size, x_max, num_iters,
+  shuffle = TRUE, learning_rate = 0.05, verbose = TRUE,
+  convergence_threshold = 0, grain_size = 100000L, ...)
 
-\method{glove}{Matrix}(tcm, shuffle = TRUE, word_vectors_size, x_max,
-  num_iters, learning_rate = 0.05, verbose = TRUE,
+\method{glove}{dgTMatrix}(tcm, vocabulary_size = ncol(tcm), word_vectors_size,
+  x_max, num_iters, shuffle = TRUE, learning_rate = 0.05, verbose = TRUE,
+  convergence_threshold = 0, grain_size = 100000L, ...)
+
+\method{glove}{Matrix}(tcm, vocabulary_size = ncol(tcm), word_vectors_size,
+  x_max, num_iters, shuffle = TRUE, learning_rate = 0.05, verbose = TRUE,
   convergence_threshold = 0, grain_size = 100000L, ...)
 }
 \arguments{
@@ -16,10 +23,7 @@ glove(tcm, shuffle = TRUE, ...)
 At the moment only \code{dgTMatrix} or (coercible to \code{dgTMatrix}) is supported.
 In future releases we will add support for out-of-core learning and streaming TCM from disk.}
 
-\item{shuffle}{\code{logical} whether to perform shuffling before each iteration.}
-
-\item{...}{arguments passed to other methods (not used at the moment).
-Generelly good idea for stochastic gradient descent}
+\item{vocabulary_size}{number of words in underlying Term-Coocurence matrix}
 
 \item{word_vectors_size}{desired dimenson for word vectors}
 
@@ -27,6 +31,8 @@ Generelly good idea for stochastic gradient descent}
 See GloVe paper for details: \url{http://nlp.stanford.edu/pubs/glove.pdf}}
 
 \item{num_iters}{number of AdaGrad epochs}
+
+\item{shuffle}{\code{logical} whether to perform shuffling before each iteration.}
 
 \item{learning_rate}{learning rate for SGD, I don't recommend to modify this parameter,
 AdaGrad will quickly adjust it to optimal.}
@@ -44,10 +50,19 @@ b) \code{cost_previous_iter} / \code{cost_current_iter} - 1 < convergence_thresh
 \item{grain_size}{I don't recommend to adjust this paramenter. This is the grain_size
 for \code{RcppParallel::parallelReduce}.
 See \url{http://rcppcore.github.io/RcppParallel/#grain-size} for details.}
+
+\item{...}{arguments passed to other methods (not used at the moment).
+Generelly good idea for stochastic gradient descent}
 }
 \description{
 Train GloVe word embeddings model via fully asynchronous parallel AdaGrad.
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{dgTMatrix}: fits GloVe model on dgTMatrix - sparse Matrix in triplet form
+
+\item \code{Matrix}: fits GloVe model on Matrix input
+}}
 \seealso{
 \url{http://nlp.stanford.edu/projects/glove/}
 }

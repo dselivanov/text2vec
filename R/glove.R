@@ -4,16 +4,7 @@
 #' @param tcm object which represents Term-Coocurence matrix, which used in training.
 #' At the moment only \code{dgTMatrix} or (coercible to \code{dgTMatrix}) is supported.
 #' In future releases we will add support for out-of-core learning and streaming TCM from disk.
-#' @param shuffle \code{logical} whether to perform shuffling before each iteration.
-#' @param ... arguments passed to other methods (not used at the moment).
-#' Generelly good idea for stochastic gradient descent
-#' @seealso \url{http://nlp.stanford.edu/projects/glove/}
-#' @export
-glove <- function(tcm, shuffle = TRUE, ...) {
-  UseMethod("glove")
-}
-
-#' @rdname glove
+#' @param vocabulary_size number of words in underlying Term-Coocurence matrix
 #' @param word_vectors_size desired dimenson for word vectors
 #' @param x_max maximum number of cooccurences to use in weighting function.
 #' See GloVe paper for details: \url{http://nlp.stanford.edu/pubs/glove.pdf}
@@ -31,19 +22,38 @@ glove <- function(tcm, shuffle = TRUE, ...) {
 #' @param grain_size I don't recommend to adjust this paramenter. This is the grain_size
 #' for \code{RcppParallel::parallelReduce}.
 #' See \url{http://rcppcore.github.io/RcppParallel/#grain-size} for details.
+#' @param shuffle \code{logical} whether to perform shuffling before each iteration.
+#' @param ... arguments passed to other methods (not used at the moment).
+#' Generelly good idea for stochastic gradient descent
+#' @seealso \url{http://nlp.stanford.edu/projects/glove/}
 #' @export
-glove.Matrix <- function(tcm,
-                         shuffle = TRUE,
-                         word_vectors_size,
-                         x_max,
-                         num_iters,
-                         learning_rate = 0.05,
-                         verbose = TRUE,
-                         convergence_threshold = 0.0,
-                         grain_size =  1e5L,
-                         ...) {
-  if( !inherits(tcm, 'dgTMatrix') )
-    tcm <- as(tcm, 'dgTMatrix')
+glove <- function(tcm,
+                  vocabulary_size,
+                  word_vectors_size,
+                  x_max,
+                  num_iters,
+                  shuffle = TRUE,
+                  learning_rate = 0.05,
+                  verbose = TRUE,
+                  convergence_threshold = 0.0,
+                  grain_size =  1e5L,
+                  ...) {
+  UseMethod("glove")
+}
+
+#' @describeIn glove fits GloVe model on dgTMatrix - sparse Matrix in triplet form
+#' @export
+glove.dgTMatrix <- function(tcm,
+                            vocabulary_size = ncol(tcm),
+                            word_vectors_size,
+                            x_max,
+                            num_iters,
+                            shuffle = TRUE,
+                            learning_rate = 0.05,
+                            verbose = TRUE,
+                            convergence_threshold = 0.0,
+                            grain_size =  1e5L,
+                            ...) {
   cost_history <- vector('numeric', num_iters)
   chunk_size <- length (tcm@i)
 
@@ -56,9 +66,13 @@ glove.Matrix <- function(tcm,
         fit$fit_chunk(tcm@i[perm], tcm@j[perm], tcm@x[perm])
       } else
         fit$fit_chunk(tcm@i, tcm@j, tcm@x)
+
+    if(is.nan(cost))
+      stop("Cost becomes NaN, try to use smaller learning_rate.")
+
     cost_history[[i]] <- cost / chunk_size
     if(verbose)
-      print(paste('epoch', i, ', expecrted cost =', round(cost_history[[i]], digits = 4)) )
+      print(paste('epoch', i, ', expected cost =', round(cost_history[[i]], digits = 4)) )
     # reset cost
     fit$set_cost_zero()
     if( i > 1 && (cost_history[[i - 1]] / cost_history[[i]] - 1) < convergence_threshold) {
@@ -71,13 +85,24 @@ glove.Matrix <- function(tcm,
   }
   glove <- c(list('cost_history' = cost_history), fit$get_word_vectors())
 
-#   glove <- fit_glove(tcm@i, tcm@j, tcm@x,
-#                      vocab_size = ,
-#                      word_vectors_size, x_max, num_iters,
-#                      learning_rate,
-#                      verbose,
-#                      convergence_threshold,
-#                      grain_size)
   class(glove) <- "text2vec_glove_fit"
   glove
+}
+
+#' @describeIn glove fits GloVe model on Matrix input
+#' @export
+glove.Matrix <- function(tcm,
+                         vocabulary_size = ncol(tcm),
+                         word_vectors_size,
+                         x_max,
+                         num_iters,
+                         shuffle = TRUE,
+                         learning_rate = 0.05,
+                         verbose = TRUE,
+                         convergence_threshold = 0.0,
+                         grain_size =  1e5L,
+                         ...) {
+  if( !inherits(tcm, 'dgTMatrix') )
+    tcm <- as(tcm, 'dgTMatrix')
+  glove.dgTMatrix(tcm, ... )
 }
