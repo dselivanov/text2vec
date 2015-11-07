@@ -112,10 +112,8 @@ public:
     return tcm.get_sparse_triplet_matrix(dimnames, dimnames);
   }
   SEXP get_dtm_triplet() {
-    size_t ncol = this->vocab.size();
     vector<string> dummy_doc_names(0);
-    vector<string> terms;
-    terms.resize(ncol);
+    vector<string> terms(this->vocab.size());
     for(auto it:vocab)
       terms[it.second] = it.first;
     return dtm.get_sparse_triplet_matrix(dummy_doc_names, terms);

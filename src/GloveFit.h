@@ -5,8 +5,10 @@ using namespace std;
 
 class GloveFit {
 public:
-  GloveFit(size_t vocab_size, size_t word_vec_size,
-           double learning_rate, int x_max):
+  GloveFit(size_t vocab_size,
+           size_t word_vec_size,
+           double learning_rate,
+           int x_max):
   vocab_size(vocab_size), word_vec_size(word_vec_size),
   x_max(x_max), learning_rate(learning_rate) {
 
