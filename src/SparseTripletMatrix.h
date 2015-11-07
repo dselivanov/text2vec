@@ -66,7 +66,7 @@ public:
     // value vector
     NumericVector X(NNZ);
 
-    uint32_t n = 0;
+    size_t n = 0;
     double x;
     for(auto it : sparse_container) {
       // fill first half of our symmetric cooccurence matrix
