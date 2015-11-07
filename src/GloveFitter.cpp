@@ -33,6 +33,7 @@ struct AdaGradIter : public Worker {
 
 
   // dummy constructor
+  // used in first initialization of GloveFitter
   AdaGradIter(GloveFit &fit):
     x_irow(IntegerVector(0)),
     x_icol(IntegerVector(0)),
@@ -110,45 +111,3 @@ RCPP_MODULE(GloveFitter) {
   .method( "fit_chunk", &GloveFitter::fit_chunk, "process TCM data chunk")
   ;
 }
-
-// List fit_glove(const IntegerVector x_irow,
-//                const IntegerVector x_icol,
-//                const NumericVector x_val,
-//                size_t vocab_size,
-//                size_t word_vec_size,
-//                uint32_t x_max,
-//                uint32_t num_iters,
-//                double learning_rate = 0.05,
-//                int verbose = 1,
-//                double convergence_threshold = 0.001,
-//                uint32_t GRAIN_SIZE = 1e5) {
-//
-//   double cost_imrovement = convergence_threshold;
-//
-//   size_t job_size = x_irow.size(), i = 0;
-//
-//   NumericVector cost_history(num_iters);
-//
-//   GloveFit gloveFit(vocab_size,  word_vec_size, learning_rate, x_max);
-//
-//   AdaGradIter adaGradIter(x_irow, x_icol, x_val, gloveFit);
-//
-//   // main fitting loop
-//   while (i < num_iters && cost_imrovement >= convergence_threshold) {
-//
-//     checkUserInterrupt();
-//
-//     adaGradIter.set_cost_zero();
-//
-//     parallelReduce(0, job_size, adaGradIter, GRAIN_SIZE);
-//     cost_history[i] = adaGradIter.global_cost / job_size;
-//     if(i > 0)
-//       cost_imrovement = (cost_history[i - 1] /cost_history[i] ) - 1;
-//
-//     if(verbose)
-//       Rprintf("iter = %d, expected global_cost = %f\n", i + 1, cost_history[i]);
-//     i++;
-//   }
-//   return List::create(_["word_vectors"] = adaGradIter.fit.get_word_vectors(),
-//                       _["cost_history"] = cost_history);
-// }
