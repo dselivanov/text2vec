@@ -101,7 +101,9 @@ prune_vocabulary <- function(vocabulary,
 
   pruned_vocabulary <- vocab[ind, ]
   pruned_vocabulary <- pruned_vocabulary[order(pruned_vocabulary$terms_counts, decreasing = T),]
-  pruned_vocabulary <- list('vocab' = pruned_vocabulary[1:max_number_of_terms, ],
+
+  max_number_of_terms <- min(max_number_of_terms, nrow(pruned_vocabulary))
+  pruned_vocabulary <- list('vocab' = pruned_vocabulary[1 : max_number_of_terms, ],
                             'ngram' = vocabulary[['ngram']])
 
   class(pruned_vocabulary) <- 'text2vec_vocabulary'
