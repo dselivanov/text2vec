@@ -21,6 +21,7 @@ Creates reduced Document-Term matrix - throws out
 very common and very uncommon words.
 }
 \seealso{
-\link{tf_transformer}, \link{tfidf_transformer}, \link{binary_transformer}
+\link{prune_vocabulary}, \link{tf_transformer},
+\link{tfidf_transformer}, \link{binary_transformer}
 }
 

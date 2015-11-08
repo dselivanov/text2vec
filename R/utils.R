@@ -28,3 +28,31 @@ split_vector <- function(vector, splits, granularity = 1) {
                           length.out = splits * granularity + 1))
   mapply(FUN = function(lower, upper) list(c(lower, upper)), knots[-length(knots)], knots[-1] - 1)
 }
+
+#' @name to_lda_c
+#' @title Converts 'dgCMatrix' to 'lda_c' format
+#' @description Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lda_c' format
+#' @param dtm Document-Term matrix
+to_lda_c <- function(dtm) {
+  if(!inherits(dtm, 'dgCMatrix'))
+    dtm <- as(dtm, 'dgCMatrix')
+  Map(f = function(i1,i2, ind, val) rbind(ind[i1 : i2], as.integer(val[i1 : i2])),
+      dtm@p[-length(dtm@p)] + 1L,
+      dtm@p[-1L],
+      MoreArgs = list(ind = dtm@i, val = dtm@x),
+      USE.NAMES = F)
+}
+
+#' @name to_lil
+#' @title Converts 'dgCMatrix' to 'lil' format
+#' @description Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lil' format
+#' @param dtm Document-Term matrix
+to_lil <- function(dtm) {
+  if(!inherits(dtm, 'dgCMatrix'))
+    dtm <- as(dtm, 'dgCMatrix')
+  Map(f = function(i1,i2, ind) ind[i1 : i2],
+      dtm@p[-length(dtm@p)] + 1L,
+      dtm@p[-1L],
+      MoreArgs = list(ind = dtm@i),
+      USE.NAMES = F)
+}

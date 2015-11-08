@@ -1,82 +1,55 @@
 #' @name get_dtm
 #' @title Creates Document-Term matrix construction
 #' @description Creates Document-Term matrix from Corpus object.
-#' @param corpus HashCorpus or DictCorpus object. See \link{create_vocab_corpus} for details.
-#' @param dictionary \link{character} or \link{NULL} -  use only words from this dict
-#' dictionary in Document-Term-Matrix construction.
-#' NULL if all words should be used.
-#' @param stopwords \link{character} or \link{NULL} - words to remove from DTM
-#' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "LDA_C", "LIL")}.
-#' "LDA_C" - Blei's lda-c format (list of 2*doc_terms_size),
+#' @param corpus HashCorxpus or DictCorpus object. See \link{create_vocab_corpus} for details.
+#' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c", "lil")}.
+#' "lda_c" - Blei's lda-c format (list of 2*doc_terms_size),
 #' see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
-#' "LIL" - same as LDA-C, but without terms count. Useful for Minhash algorithm.
+#' "lil" - same as lda_c, but without terms count. Useful for Minhash algorithm.
 #' @examples
 #' \dontrun{
-#' preprocess_fun <- function(txt) {
-#'    txt %>%
-#'      tolower
-#' }
-#' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "),
-#'  paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
-#' corpus <- create_vocab_corpus(txt,
-#'    preprocess_fun = preprocess_fun,
-#'    #split text by word boundaries
-#'    tokenizer = regexp_tokenizer,
-#'    # by small pieces - call underlying C++ code for each document
-#'    batch_size = 1
-#'    )
-#' # or if stemming is needed
-#' stemfun <- function(txt_char_vec, lang = 'en')
-#'  lapply(txt_char_vec, function(x) SnowballC::wordStem(x, language = lang))
-#' preprocess_fun <- function(txt) {
-#'    txt %>%
-#'      tolower %>%
-#'      #split text by word boundaries
-#'      regexp_tokenizer %>%
-#'      # stem with Porter stemmer
-#'      lapply(SnowballC::wordStem, language = 'en')
-#' }
-#' dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
+#' data(moview_review)
+#'
+#' txt <- movie_review[['review']][1:1000]
+#' it <- itoken(txt, tolower, regexp_tokenizer)
+#' vocab <- vocabulary(it)
+#' #remove very common and uncommon words
+#' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
+#'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
+#'
+#' it <- itoken(txt, tolower, regexp_tokenizer)
+#' corpus <- create_vocab_corpus(it, pruned_vocab)
+#' dtm <- get_dtm(corpus, type = 'dgCMatrix' )
+#'
+#' tf_scale_matrix <- dtm_get_tf(dtm, type = 'tf')
+#' dtm_tf <- tf_scale_matrix %*% dtm
+#' dtm_tf_idf <- dtm_get_tf %*% m %*% dtm_get_idf(dtm)
+#'
+#' # The same result we can obtain using transform function with parameter type = 'tfidf'
+#' dtm_tf_idf_2 <- transform(dtm, type='tfidf')
+#' identical(dtm_tf_idf, dtm_tf_idf_2)
 #' }
 #' @export
-get_dtm <- function(corpus, dictionary = NULL, stopwords = NULL,
-                    type = c("dgCMatrix", "dgTMatrix", "LDA_C", "LIL")) {
-  type <- match.arg(type)
-  dtm <- switch(type,
-           dgCMatrix = as(corpus$get_dtm(0L), "dgCMatrix"),
-           dgTMatrix = corpus$get_dtm(0L),
-           LDA_C = corpus$get_dtm(1L),
-           LIL = corpus$get_dtm(2L),
-           NULL
-           )
-  if ( !(type %in% c('LDA_C', 'LIL')) ) {
-    terms <- dtm@Dimnames[[2]]
-    terms_len <- dtm@Dim[[2]]
-
-    if(is.character(dictionary) && length(dictionary) > 0)
-      ind_dict <- terms %in% dictionary
-    else ind_dict <- rep(T, terms_len)
-
-    if(is.character(stopwords) && length(stopwords) > 0)
-      ind_stop <- !(terms %in% stopwords)
-    else ind_stop <- rep(T, terms_len)
-
-    ind <- ind_stop & ind_dict
-
-    if( sum(ind) < terms_len)
-      dtm[,ind]
-    else
-      dtm
-  } else {
-    if(any( !is.null(dictionary),  !is.null(dictionary) ))
-      warning("for LDA-C format we currently didn't filter stopwords, and don't use dictionary")
-    dtm
+get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c", "lil")) {
+  if(inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
+    type <- match.arg(type)
+    dtm <- corpus$get_dtm()
+    switch(type,
+           dgTMatrix = dtm,
+           dgCMatrix = as(dtm, "dgCMatrix"),
+           lda_c = to_lda_c(dtm),
+           lil = to_lil(dtm),
+           NULL)
   }
+  else
+    stop("corpus should be Rcpp_HashCorpus class or Rcpp_VocabCorpus class")
+
 }
 
 #' @name dtm_get_idf
 #' @title Inverse Document-Frequency scaling matrix construction
 #' @description Creates Inverse Document-Frequency (idf) scaling matrix from Document-Term matrix.
+#'  For examples see \link{get_dtm}.
 #' idf = log (# documents in the corpus) / (# documents where the term appears + 1)
 #' For examples see  \link{get_dtm}
 #' @param dtm \code{dgCMatrix} - Document-Term matrix.
@@ -86,6 +59,7 @@ get_dtm <- function(corpus, dictionary = NULL, stopwords = NULL,
 #' as if an extra document was seen containing every term in the collection exactly once.
 #' Prevents zero divisions.
 #' @return \code{ddiMatrix} idf scaling diagonal sparse matrix.
+#' @seealso \link{dtm_get_tf}, \link{get_dtm}
 #' @export
 dtm_get_idf <- function(dtm, log_scale = log, smooth_idf = T)
 {
@@ -101,28 +75,16 @@ dtm_get_idf <- function(dtm, log_scale = log, smooth_idf = T)
 
 #' @name dtm_get_tf
 #' @title TermFrequency scaling matrix construction from Document-Term-Matrix
-#' @description Creates TermFrequency (tf) scaling matrix from Document-Term-Matrix
+#' @description Creates TermFrequency (tf) scaling matrix from Document-Term-Matrix. For examples
+#' see \link{get_dtm}.
 #' @param dtm \code{sparseMatrix} - Document-Term-Matrix
 #' @param type \code{c('tf', 'binary')} - type of TF scaling matrix
 #' Formula for tf :
 #' \code{tf = (Number word appears in document) / (Number words in document)}
 #  For binary:
 #' \code{tf = Does word appears in document (binary encoding): (0 if not appears), (1 if appears)}
-#' @examples
-#' \dontrun{
-#' txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "),
-#'  paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
-#' corpus <- create_vocab_corpus(txt,
-#'    tokenizer = regexp_tokenizer
-#'    )
-#' dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
-#' tf_scale_matrix <- dtm_get_tf(dtm, type = 'tf')
-#' dtm_tf <- tf_scale_matrix %*% dtm
-#' dtm_tf_idf <- dtm_get_tf %*% m %*% dtm_get_idf(dtm)
-#' # The same result we can obtain using transform function with parameter type = 'tfidf'
-#' dtm_tf_idf_2 <- transform(dtm, type='tfidf')
-#' identical(dtm_tf_idf, dtm_tf_idf_2)
-#' }
+#' @seealso \link{dtm_get_idf}, \link{get_dtm}
+#' @export
 dtm_get_tf <- function(dtm, type = c('tf', 'binary'))
 {
   type <- match.arg(type)
