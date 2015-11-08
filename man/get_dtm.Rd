@@ -4,53 +4,41 @@
 \alias{get_dtm}
 \title{Creates Document-Term matrix construction}
 \usage{
-get_dtm(corpus, dictionary = NULL, stopwords = NULL, type = c("dgCMatrix",
-  "dgTMatrix", "LDA_C", "LIL"))
+get_dtm(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c", "lil"))
 }
 \arguments{
-\item{corpus}{HashCorpus or DictCorpus object. See \link{create_vocab_corpus} for details.}
+\item{corpus}{HashCorxpus or DictCorpus object. See \link{create_vocab_corpus} for details.}
 
-\item{dictionary}{\link{character} or \link{NULL} -  use only words from this dict
-dictionary in Document-Term-Matrix construction.
-NULL if all words should be used.}
-
-\item{stopwords}{\link{character} or \link{NULL} - words to remove from DTM}
-
-\item{type}{character, one of \code{c("dgCMatrix", "dgTMatrix", "LDA_C", "LIL")}.
-"LDA_C" - Blei's lda-c format (list of 2*doc_terms_size),
+\item{type}{character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c", "lil")}.
+"lda_c" - Blei's lda-c format (list of 2*doc_terms_size),
 see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
-"LIL" - same as LDA-C, but without terms count. Useful for Minhash algorithm.}
+"lil" - same as lda_c, but without terms count. Useful for Minhash algorithm.}
 }
 \description{
 Creates Document-Term matrix from Corpus object.
 }
 \examples{
 \dontrun{
-preprocess_fun <- function(txt) {
-   txt \%>\%
-     tolower
-}
-txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "),
- paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
-corpus <- create_vocab_corpus(txt,
-   preprocess_fun = preprocess_fun,
-   #split text by word boundaries
-   tokenizer = regexp_tokenizer,
-   # by small pieces - call underlying C++ code for each document
-   batch_size = 1
-   )
-# or if stemming is needed
-stemfun <- function(txt_char_vec, lang = 'en')
- lapply(txt_char_vec, function(x) SnowballC::wordStem(x, language = lang))
-preprocess_fun <- function(txt) {
-   txt \%>\%
-     tolower \%>\%
-     #split text by word boundaries
-     regexp_tokenizer \%>\%
-     # stem with Porter stemmer
-     lapply(SnowballC::wordStem, language = 'en')
-}
-dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] )
+data(moview_review)
+
+txt <- movie_review[['review']][1:1000]
+it <- itoken(txt, tolower, regexp_tokenizer)
+vocab <- vocabulary(it)
+#remove very common and uncommon words
+pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
+ doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
+
+it <- itoken(txt, tolower, regexp_tokenizer)
+corpus <- create_vocab_corpus(it, pruned_vocab)
+dtm <- get_dtm(corpus, type = 'dgCMatrix' )
+
+tf_scale_matrix <- dtm_get_tf(dtm, type = 'tf')
+dtm_tf <- tf_scale_matrix \%*\% dtm
+dtm_tf_idf <- dtm_get_tf \%*\% m \%*\% dtm_get_idf(dtm)
+
+# The same result we can obtain using transform function with parameter type = 'tfidf'
+dtm_tf_idf_2 <- transform(dtm, type='tfidf')
+identical(dtm_tf_idf, dtm_tf_idf_2)
 }
 }
 

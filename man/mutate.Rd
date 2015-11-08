@@ -9,8 +9,9 @@ mutate(dtm, transformer, ...)
 \arguments{
 \item{dtm}{\code{sparseMatrix} - Document-Term-Matrix}
 
-\item{transformer}{- transormation function. Usually one of \link{filter_commons_transformer},
-\link{tf_transformer}, \link{tfidf_transformer}, \link{binary_transformer}.}
+\item{transformer}{- transormation function. Usually one of
+\link{tf_transformer}, \link{tfidf_transformer},
+\link{binary_transformer}, \link{filter_commons_transformer}.}
 
 \item{...}{- transformer parameters}
 }
@@ -21,14 +22,21 @@ For example see \link{dtm_get_tf}
 }
 \examples{
 \dontrun{
-txt <- c(paste(letters[c(4:7, 5:12)], collapse = " "),
-   paste(LETTERS[c(5:9, 7:12) ], collapse = " "))
-corpus <- create_vocab_corpus(txt,
-   tokenizer = regexp_tokenizer
-   )
-# create dtm
-dtm <- get_dtm(corpus, dictionary = letters[4:8], stopwords = letters[5:6] ) \%>\%
-# filter out very common and very uncommon terms
+data(moview_review)
+
+txt <- movie_review[['review']][1:1000]
+it <- itoken(txt, tolower, regexp_tokenizer)
+vocab <- vocabulary(it)
+#remove very common and uncommon words
+pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
+ doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
+
+it <- itoken(txt, tolower, regexp_tokenizer)
+corpus <- create_vocab_corpus(it, pruned_vocab)
+dtm <- get_dtm(corpus, type = 'dgCMatrix' )
+
+dtm_filtered <- dtm \%>\%
+ # filter out very common and very uncommon terms
  mutate(filter_commons_transformer, c(0.001, 0.975))
 
 # simple term-frequency transormation
@@ -36,8 +44,9 @@ transformed_tf <- dtm \%>\%
  mutate(tf_transformer)
 
 # tf-idf transormation
+idf <- dtm_get_idf(dtm)
 transformed_tfidf <- dtm \%>\%
- mutate(tfidf_transformer)
+ mutate(tfidf_transformer, idf)
  }
 }
 

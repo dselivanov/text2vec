@@ -21,7 +21,11 @@ Prevents zero divisions.}
 }
 \description{
 Creates Inverse Document-Frequency (idf) scaling matrix from Document-Term matrix.
+ For examples see \link{get_dtm}.
 idf = log (# documents in the corpus) / (# documents where the term appears + 1)
 For examples see  \link{get_dtm}
+}
+\seealso{
+\link{dtm_get_tf}, \link{get_dtm}
 }
 
