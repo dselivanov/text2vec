@@ -6,6 +6,9 @@
 \usage{
 to_lil(dtm)
 }
+\arguments{
+\item{dtm}{Document-Term matrix}
+}
 \description{
 Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lil' format
 }
