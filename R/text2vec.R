@@ -14,7 +14,6 @@
 #' @useDynLib text2vec
 NULL
 
-
 #' Rcpp module: VocabCorpus
 #' Exposes C++ functions to construct Document-Term Matrix
 #' @name VocabCorpus
