@@ -17,7 +17,7 @@ public:
     grad_sq_w_i.resize(vocab_size);
     grad_sq_w_j.resize(vocab_size);
 
-    for(int i = 0; i < vocab_size; i++) {
+    for(size_t i = 0; i < vocab_size; i++) {
       w_i[i].resize(word_vec_size);
       w_j[i].resize(word_vec_size);
       grad_sq_w_i[i].resize(word_vec_size);
