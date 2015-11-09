@@ -131,7 +131,7 @@ private:
 
   void init(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max) {
     //vocab2 = Vocabulary(n_min, n_max, delim);
-    this->verbose = 1;
+    this->verbose = 0;
     this->nnz = 0;
     this->token_count = 0;
     this->doc_count = 0;
