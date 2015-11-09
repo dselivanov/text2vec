@@ -22,7 +22,10 @@
 #' @param grain_size I don't recommend to adjust this paramenter. This is the grain_size
 #' for \code{RcppParallel::parallelReduce}.
 #' See \url{http://rcppcore.github.io/RcppParallel/#grain-size} for details.
-#' @param shuffle \code{logical} whether to perform shuffling before each iteration.
+#' @param shuffle \code{logical} whether to perform shuffling before each SGS iteration.
+#' Generally this is good idea to set \code{shuffle = TRUE}. But from my experience,
+#' it don't improve global cost in this particular case. Please report, if you find that
+#' shuffling improves score.
 #' @param ... arguments passed to other methods (not used at the moment).
 #' Generelly good idea for stochastic gradient descent
 #' @seealso \url{http://nlp.stanford.edu/projects/glove/}
@@ -32,7 +35,7 @@ glove <- function(tcm,
                   word_vectors_size,
                   x_max,
                   num_iters,
-                  shuffle = TRUE,
+                  shuffle = FALSE,
                   learning_rate = 0.05,
                   verbose = TRUE,
                   convergence_threshold = 0.0,
@@ -48,7 +51,7 @@ glove.dgTMatrix <- function(tcm,
                             word_vectors_size,
                             x_max,
                             num_iters,
-                            shuffle = TRUE,
+                            shuffle = FALSE,
                             learning_rate = 0.05,
                             verbose = TRUE,
                             convergence_threshold = 0.0,
@@ -96,7 +99,7 @@ glove.Matrix <- function(tcm,
                          word_vectors_size,
                          x_max,
                          num_iters,
-                         shuffle = TRUE,
+                         shuffle = FALSE,
                          learning_rate = 0.05,
                          verbose = TRUE,
                          convergence_threshold = 0.0,
