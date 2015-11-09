@@ -2,12 +2,13 @@
 % Please edit documentation in R/matrix.R
 \name{get_dtm}
 \alias{get_dtm}
-\title{Creates Document-Term matrix construction}
+\title{Creates Document-Term matrix}
 \usage{
 get_dtm(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c", "lil"))
 }
 \arguments{
-\item{corpus}{HashCorxpus or DictCorpus object. See \link{create_vocab_corpus} for details.}
+\item{corpus}{HashCorpus or VocabCorpus object.
+See \link{create_vocab_corpus}, \link{create_hash_corpus} for details.}
 
 \item{type}{character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c", "lil")}.
 "lda_c" - Blei's lda-c format (list of 2*doc_terms_size),

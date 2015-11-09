@@ -1,7 +1,8 @@
 #' @name get_dtm
-#' @title Creates Document-Term matrix construction
+#' @title Creates Document-Term matrix
 #' @description Creates Document-Term matrix from Corpus object.
-#' @param corpus HashCorxpus or DictCorpus object. See \link{create_vocab_corpus} for details.
+#' @param corpus HashCorpus or VocabCorpus object.
+#' See \link{create_vocab_corpus}, \link{create_hash_corpus} for details.
 #' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c", "lil")}.
 #' "lda_c" - Blei's lda-c format (list of 2*doc_terms_size),
 #' see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
@@ -44,6 +45,39 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c", "lil")) 
   else
     stop("corpus should be Rcpp_HashCorpus class or Rcpp_VocabCorpus class")
 
+}
+
+#' @name get_tcm
+#' @title Creates Term-Coocurnce matrix construction
+#' @description Creates Term-Coocurnce matrix from Corpus object.
+#' @param corpus HashCorpus or VocabCorpus object.
+#' See \link{create_vocab_corpus}, \link{create_hash_corpus} for details.
+#' @seealso \link{create_vocab_corpus}, \link{create_hash_corpus}
+#' @examples
+#' \dontrun{
+#' txt <- movie_review[['review']][1:1000]
+#' it <- itoken(txt, tolower, regexp_tokenizer)
+#' vocab <- vocabulary(it)
+#' #remove very common and uncommon words
+#' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
+#'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 5000)
+#'
+#' it <- itoken(txt, tolower, regexp_tokenizer)
+#' corpus <- create_vocab_corpus(it, pruned_vocab, grow_dtm = FALSE, skip_grams_window = 5)
+#' tcm <- get_tcm(corpus)
+#' dim(tcm)
+#' }
+#' @export
+get_tcm <- function(corpus) {
+  if(inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
+    tcm <- corpus$get_tcm()
+    dim_names <- colnames(tcm)
+    tcm <- tcm + t(tcm)
+    dimnames(tcm) <- list(dim_names, dim_names)
+    tcm
+  }
+  else
+    stop("corpus should be Rcpp_HashCorpus class or Rcpp_VocabCorpus class")
 }
 
 #' @name dtm_get_idf
@@ -89,7 +123,8 @@ dtm_get_tf <- function(dtm, type = c('tf', 'binary'))
 {
   type <- match.arg(type)
   tf <- switch(type,
-               # abs is needed for case when dtm is matrix from HashCorpus and signed_hash is used!
+               # abs is needed for case when dtm is
+               # matrix from HashCorpus and signed_hash is used!
                tf = 1 / rowSums(abs(dtm)),
                binary = 1 / rowSums(dtm != 0)
   )
