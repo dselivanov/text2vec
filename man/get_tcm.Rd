@@ -24,7 +24,6 @@ pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
 
 it <- itoken(txt, tolower, regexp_tokenizer)
 corpus <- create_vocab_corpus(it, pruned_vocab, grow_dtm = FALSE, skip_grams_window = 5)
-temp <- corpus$get_tcm()
 tcm <- get_tcm(corpus)
 dim(tcm)
 }
