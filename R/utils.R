@@ -56,3 +56,7 @@ to_lil <- function(dtm) {
       MoreArgs = list(ind = dtm@i),
       USE.NAMES = F)
 }
+
+
+#' @export
+magrittr::`%>%`
