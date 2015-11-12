@@ -11,6 +11,7 @@ Description: Fast and memory-friendly tools for text vectorization and
 Authors@R: person("Dmitriy", "Selivanov", role = c("aut", "cre"),
     email = "selivanov.dmitriy@gmail.com")
 Maintainer: Dmitriy Selivanov <selivanov.dmitriy@gmail.com>
+Encoding: UTF-8
 SystemRequirements: GNU make, C++11
 Depends:
     R (>= 3.2.0),
