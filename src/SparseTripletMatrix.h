@@ -54,7 +54,7 @@ public:
     this->sparse_container[make_pair(i, j)] += increment;
   };
 
-  S4 get_sparse_triplet_matrix(vector< string>  &rownames, vector< string>  &colnames) {
+  SEXP get_sparse_triplet_matrix(vector< string>  &rownames, vector< string>  &colnames) {
     // non-zero values count
     size_t NNZ = this->size();
 
@@ -67,7 +67,6 @@ public:
     NumericVector X(NNZ);
 
     size_t n = 0;
-    double x;
     for(auto it : sparse_container) {
       // fill first half of our symmetric cooccurence matrix
       I[n] = it.first.first;
