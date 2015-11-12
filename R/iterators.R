@@ -9,7 +9,7 @@
 #' @examples
 #' data("movie_review")
 #' txt <- movie_review[['review']][1:100]
-#' it <- itoken(txt, tolower, regexp_tokenizer, chunks_number = 7)
+#' it <- itoken(txt, tolower, word_tokenizer, chunks_number = 7)
 #' @export
 itoken <- function(iterable, ...) {
   UseMethod("itoken")
@@ -29,7 +29,7 @@ itoken <- function(iterable, ...) {
 #' @param chunks_number \code{integer}, the number of pieces that object should be divided into.
 #' @param progessbar \code{logical} indicates whether to show progress bar.
 #' @export
-itoken.character <- function(iterable, preprocess_function, tokenizer, chunks_number = 8, progessbar = TRUE, ...) {
+itoken.character <- function(iterable, preprocess_function, tokenizer, chunks_number = 10, progessbar = TRUE, ...) {
   i <- 1
   it <- idiv(n = length(iterable), chunks = chunks_number)
   max_len = length(iterable)
