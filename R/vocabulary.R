@@ -27,7 +27,7 @@
 #' @examples
 #' data("movie_review")
 #' txt <- movie_review[['review']][1:100]
-#' it <- itoken(txt, tolower, regexp_tokenizer, chunks_number = 10)
+#' it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
 #' vocab <- vocabulary(it)
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
@@ -41,15 +41,15 @@ vocabulary <- function(iterator,
   i <- 1
 
   write_tokens <- FALSE
-  if( !is.null(serialize_dir))
-    if(!dir.exists(serialize_dir) )
+  if ( !is.null(serialize_dir) )
+    if ( !dir.exists(serialize_dir) )
       stop("serialize_dir does not exist")
   else {
     base_path <- paste0(serialize_dir, '/part-')
     write_tokens <- TRUE
   }
 
-  while(TRUE) {
+  while (TRUE) {
     # iterate
     tokens = try(nextElem(iterator), silent = TRUE)
     # check end of iterator
@@ -57,7 +57,7 @@ vocabulary <- function(iterator,
     # insert into vocabulary
     vocab$insert_document_batch(tokens)
     # write tokens to disk
-    if(write_tokens)
+    if (write_tokens)
       write_rds(tokens, paste0(base_path, i), ...)
     i <- i + 1
   }
@@ -89,7 +89,7 @@ prune_vocabulary <- function(vocabulary,
                   doc_proportion_min = 0.0,
                   doc_proportion_max = 1.0,
                   max_number_of_terms = Inf) {
-  if(!inherits(vocabulary, 'text2vec_vocabulary'))
+  if (!inherits(vocabulary, 'text2vec_vocabulary'))
     stop('vocabulary should be an object of class text2vec_vocabulary')
 
   vocab <- vocabulary$vocab
@@ -103,7 +103,7 @@ prune_vocabulary <- function(vocabulary,
   pruned_vocabulary <- pruned_vocabulary[order(pruned_vocabulary$terms_counts, decreasing = T),]
 
   max_number_of_terms <- min(max_number_of_terms, nrow(pruned_vocabulary))
-  pruned_vocabulary <- list('vocab' = pruned_vocabulary[1 : max_number_of_terms, ],
+  pruned_vocabulary <- list('vocab' = pruned_vocabulary[1:max_number_of_terms, ],
                             'ngram' = vocabulary[['ngram']])
 
   class(pruned_vocabulary) <- 'text2vec_vocabulary'

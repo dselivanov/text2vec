@@ -3,32 +3,34 @@
 \name{tokenizers}
 \alias{regexp_tokenizer}
 \alias{tokenizers}
+\alias{word_tokenizer}
 \title{Tokenization functions, which performs string splitting}
 \usage{
-regexp_tokenizer(string, pattern = boundary("word"))
+word_tokenizer(string)
+
+regexp_tokenizer(string, pattern)
 }
 \arguments{
-\item{string}{\link{character} vector}
+\item{string}{\code{character} vector}
 
-\item{pattern}{\link{character} pattern symbol. Also can be one of \link{modifiers}.}
+\item{pattern}{\code{character} pattern symbol. Also can be one of \link{modifiers}.}
 }
 \value{
-\link{list} of \link{character} vectors.
+\code{list} of \code{character} vectors.
 Each element of list containts vector of tokens.
 }
 \description{
-simple wrappers around \code{stringi} and \code{stringr} packafes functionality.
-by regular expression or fixed string.
+simple wrappers around \code{stringi} and \code{stringr} packages functionality.
 }
 \details{
 Uses \link{str_split} under the hood(which build on top of \code{stringi::stri_split}).
-Actually just a wrapper for \code{str_split} which is very consistent flexible and robust.
+Actually just a wrapper for \code{str_split} which is very consistent, flexible and robust.
 See \link{str_split} and \link{modifiers} for details.
 }
 \examples{
 doc <- c("first  second", "bla, bla, blaa")
 # split by words
-regexp_tokenizer(doc, pattern = stringr::boundary("word"))
+word_tokenizer(doc)
 #faster, but far less general - perform split by a fixed single whitespace symbol.
 regexp_tokenizer(doc, pattern = stringr::fixed(" "))
 }

@@ -37,3 +37,6 @@ NULL
 #' @name GloveFitter
 #' @export
 NULL
+
+#' @export
+magrittr::`%>%`

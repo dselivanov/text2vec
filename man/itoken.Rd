@@ -10,7 +10,7 @@
 itoken(iterable, ...)
 
 \method{itoken}{character}(iterable, preprocess_function, tokenizer,
-  chunks_number = 8, progessbar = TRUE, ...)
+  chunks_number = 10, progessbar = TRUE, ...)
 
 \method{itoken}{ifiles}(iterable, preprocess_function, tokenizer,
   progessbar = TRUE, ...)
@@ -46,7 +46,7 @@ following functions : \link{vocabulary}, \link{create_vocab_corpus},
 \examples{
 data("movie_review")
 txt <- movie_review[['review']][1:100]
-it <- itoken(txt, tolower, regexp_tokenizer, chunks_number = 7)
+it <- itoken(txt, tolower, word_tokenizer, chunks_number = 7)
 }
 \seealso{
 \link{vocabulary}, \link{create_vocab_corpus}, \link{create_hash_corpus}

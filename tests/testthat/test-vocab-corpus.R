@@ -3,12 +3,12 @@ data("movie_review")
 
 train_ind <- 1:1000
 
-# prep_fun <- function(x) x %>% tolower %>%  regexp_tokenizer
+# prep_fun <- function(x) x %>% tolower %>%  word_tokenizer
 txt <- movie_review[['review']][train_ind]
 get_test_iterator <- function()
   itoken(txt,
          preprocess_function = tolower,
-         tokenizer = regexp_tokenizer,
+         tokenizer = word_tokenizer,
          progessbar = F)
 test_that("Unigran Vocabulary Corpus construction", {
   # Vocabulary construction
