@@ -11,6 +11,7 @@
 #' @importFrom stringr str_split fixed coll regex boundary
 #' @importFrom magrittr %>%
 #' @importFrom readr read_lines read_rds write_rds
+#' @importFrom utils setTxtProgressBar txtProgressBar
 #' @useDynLib text2vec
 NULL
 
