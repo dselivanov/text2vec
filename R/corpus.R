@@ -22,22 +22,22 @@ create_vocab_corpus <- function(iterator,
                                 vocabulary,
                                 grow_dtm = TRUE,
                                 skip_grams_window = 0L) {
-  if(!grow_dtm && skip_grams_window == 0L)
+  if (!grow_dtm && skip_grams_window == 0L)
     stop("At least one of the arguments 'grow_dtm', 'skip_grams_window' should
          satisfy grow_dtm == TRUE or skip_grams_window > 0")
 
-  if(!inherits(iterator, 'iter'))
+  if (!inherits(iterator, 'iter'))
     stop("iterator argument should be iterator over list of tokens (class 'iter')")
 
-  if(is.numeric(skip_grams_window)) {
-    if( vocabulary$ngram[["ngram_min"]] == 1 && vocabulary$ngram[["ngram_max"]] == 1 )
+  if (is.numeric(skip_grams_window)) {
+    if ( vocabulary$ngram[["ngram_min"]] == 1 && vocabulary$ngram[["ngram_max"]] == 1 )
       vocab_corpus <- new(VocabCorpus,
                     vocab = vocabulary$vocab$terms,
                     ngram_min = vocabulary$ngram[["ngram_min"]],
                     ngram_max = vocabulary$ngram[["ngram_max"]],
                     window_size = skip_grams_window)
     else {
-      if(skip_grams_window > 0)
+      if (skip_grams_window > 0)
         warning("skip_grams_window can be speciefied only when 1 == ngram_min == ngram_max
                 (at least at the moment). Setting skip_grams_window = 0...")
       vocab_corpus <- new(VocabCorpus,
@@ -49,9 +49,15 @@ create_vocab_corpus <- function(iterator,
 
   }
 
-  while(TRUE) {
+  while (TRUE) {
     val = try(nextElem(iterator), silent = T)
-    if (class(val) == "try-error") break
+    if (class(val) == "try-error") {
+      if (attributes(val)$condition$message == "StopIteration")
+        break
+      # handle other errors
+      else
+        stop(attributes(val)$condition$message)
+    }
     vocab_corpus$insert_document_batch(val, grow_dtm)
   }
   vocab_corpus
@@ -72,11 +78,11 @@ create_hash_corpus <- function(iterator,
   hash_size <- feature_hasher$hash_size
   signed_hash <- feature_hasher$signed_hash
 
-  if(!inherits(iterator, 'iter'))
+  if (!inherits(iterator, 'iter'))
     stop("iterator argument should be iterator over list of tokens (class 'iter')")
 
-  if(is.numeric(skip_grams_window)) {
-    if(ngram_min == 1 && ngram_max == 1 )
+  if (is.numeric(skip_grams_window)) {
+    if (ngram_min == 1 && ngram_max == 1 )
       hash_corpus <- new(HashCorpus,
                     hash_size = hash_size,
                     ngram_min = ngram_min,
@@ -84,7 +90,7 @@ create_hash_corpus <- function(iterator,
                     window_size = skip_grams_window,
                     signed_hash)
     else {
-      if(skip_grams_window > 0) {
+      if (skip_grams_window > 0) {
         warning("skip_grams_window can be speciefied only when 1 == ngram_min == ngram_max
                 (at least at the moment). Setting skip_grams_window = 0...")
       }
@@ -97,9 +103,15 @@ create_hash_corpus <- function(iterator,
                     signed_hash)
     }
   }
-  while(TRUE) {
+  while (TRUE) {
     val = try(nextElem(iterator), silent = T)
-    if (class(val) == "try-error") break
+    if (class(val) == "try-error") {
+      if (attributes(val)$condition$message == "StopIteration")
+        break
+      # handle other errors
+      else
+        stop(attributes(val)$condition$message)
+    }
     hash_corpus$insert_document_batch(val, grow_dtm)
   }
   hash_corpus

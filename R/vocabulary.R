@@ -53,7 +53,13 @@ vocabulary <- function(iterator,
     # iterate
     tokens = try(nextElem(iterator), silent = TRUE)
     # check end of iterator
-    if (class(tokens) == "try-error") break
+    if (class(tokens) == "try-error") {
+      if (attributes(tokens)$condition$message == "StopIteration")
+        break
+      # handle other errors
+      else
+        stop(attributes(tokens)$condition$message)
+    }
     # insert into vocabulary
     vocab$insert_document_batch(tokens)
     # write tokens to disk
