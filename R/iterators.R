@@ -114,7 +114,7 @@ ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines,
       else
         res <- reader_function(file_paths[[i]], ...)
     else
-      stop('StopIteration i(ser)files', call. = FALSE)
+      stop('StopIteration', call. = FALSE)
     i <<- i + 1
     res
   }
