@@ -14,7 +14,7 @@ public:
 //   };
   // contructor with window_size for term cooccurence matrix
   VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, uint32_t window_size = 0) {
-    tcm = SparseTripletMatrix<float>();
+    tcm = SparseTripletMatrix<float>(vocab_R.size(), vocab_R.size());
     this->window_size = window_size;
     init(vocab_R, n_min, n_max);
   };

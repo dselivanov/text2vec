@@ -35,6 +35,8 @@ public:
     this->ngram_max = ngram_max;
     this->window_size = win_size;
     this->ngram_delim = "_";
+
+    tcm = SparseTripletMatrix<float>(size, size);
   };
   // total number of tokens in corpus
   int get_token_count() {return this->get_token_count();};
