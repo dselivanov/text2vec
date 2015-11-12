@@ -33,20 +33,20 @@ itoken.character <- function(iterable, preprocess_function, tokenizer, chunks_nu
   i <- 1
   it <- idiv(n = length(iterable), chunks = chunks_number)
   max_len = length(iterable)
-  if(progessbar)
-    pb <- txtProgressBar(initial = -1L, min = 0, max = max_len, style = 3)
+  if (progessbar)
+    pb <- txtProgressBar(initial = -1L, min = 0, max = max_len, style = 2)
   env <- environment()
   nextEl <- function() {
     n <- nextElem(it)
     ix <- seq(i, length = n)
 
-    if(progessbar)
+    if (progessbar)
       eval(setTxtProgressBar(pb, min(i, max_len)), enclos = env)
 
     i <<- i + n
     iterable[ix] %>% preprocess_function %>% tokenizer
   }
-  obj <- list(nextElem=nextEl)
+  obj <- list(nextElem = nextEl)
   class(obj) <- c('itoken', 'abstractiter', 'iter')
   obj
 }
@@ -56,8 +56,8 @@ itoken.character <- function(iterable, preprocess_function, tokenizer, chunks_nu
 itoken.ifiles <- function(iterable, preprocess_function, tokenizer, progessbar = TRUE, ...) {
   i <- 1
   max_len = attr(iterable, 'length', exact = FALSE)
-  if(progessbar)
-    pb <- txtProgressBar(initial = -1L, min = 0L, max = max_len, style = 3)
+  if (progessbar)
+    pb <- txtProgressBar(initial = -1L, min = 0L, max = max_len, style = 2)
   env <- environment()
 
   nextEl <- function() {
@@ -66,7 +66,7 @@ itoken.ifiles <- function(iterable, preprocess_function, tokenizer, progessbar =
       preprocess_function %>%
       tokenizer
 
-    if(progessbar)
+    if (progessbar)
       eval(setTxtProgressBar(pb, min(i, max_len)), enclos = env)
 
     i <<- i + 1
@@ -102,24 +102,24 @@ itoken.iserfiles <- function(iterable, progessbar = TRUE, ...) {
 #' @export
 ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines, ...) {
   exists_echeck <- sapply(file_paths, file.exists)
-  if(!any(exists_echeck)) {
+  if (!any(exists_echeck)) {
     stop(paste("file(s)", paste(file_paths[!exists_echeck], collapse = '\n'), "don't exist" ))
   }
   i <- 1
   N <- length(file_paths)
   nextEl <- function() {
-    if(i <= N)
-      if(serialized)
+    if (i <= N)
+      if (serialized)
         res <- read_rds(path = file_paths[[i]])
       else
         res <- reader_function(file_paths[[i]], ...)
     else
-      stop('StopIteration i(ser)files', call.=FALSE)
+      stop('StopIteration i(ser)files', call. = FALSE)
     i <<- i + 1
     res
   }
   obj <- list(nextElem = nextEl)
-  if(serialized)
+  if (serialized)
     class(obj) <- c('iserfiles', 'abstractiter', 'iter')
   else
     class(obj) <- c('ifiles', 'abstractiter', 'iter')
@@ -135,8 +135,8 @@ ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines,
 #' dir_files_iterator <- idir(path = ".")
 #' @export
 idir <- function(path, serialized = FALSE, ...) {
-  if(dir.exists(path)) {
-    fls <-list.files(path, full.names = T)
+  if (dir.exists(path)) {
+    fls <- list.files(path, full.names = T)
     return( ifiles(fls, serialized, ...) )
   } else {
     stop( paste(path, "directory doesn't exist") )
