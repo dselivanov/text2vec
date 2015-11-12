@@ -1,22 +1,22 @@
 Package: text2vec
 Type: Package
-Title: Simple and fast text mining framework
 Version: 0.1
-Date: 2015-09-09
+Date: 2015-11-11
+Title: Fast text mining framework
+License: MIT + file LICENSE
+Description: Fast and memory-friendly tools for text vectorization and
+    learning word embeddings (GloVe). Package provides source-agnostic
+    streaming API, which allows to perform analysis of collections
+    of documents, which are much larger the available RAM.
 Authors@R: person("Dmitriy", "Selivanov", role = c("aut", "cre"),
     email = "selivanov.dmitriy@gmail.com")
 Maintainer: Dmitriy Selivanov <selivanov.dmitriy@gmail.com>
-Description: Fast and memory-friendly tools for text vectorization.
-License: MIT + file LICENSE
-URL: https://github.com/dselivanov/text2vec
-BugReports: https://github.com/dselivanov/text2vec/issues
 SystemRequirements: GNU make, C++11
-LazyData: true
 Depends:
     R (>= 3.2.0),
     methods
 Imports:
-    Matrix,
+    Matrix (>= 1.1),
     Rcpp (>= 0.11),
     RcppParallel (>= 4.3.14),
     digest (>= 0.6.8),
@@ -31,6 +31,10 @@ LinkingTo:
 Suggests:
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    glmnet
+URL: https://github.com/dselivanov/text2vec
+BugReports: https://github.com/dselivanov/text2vec/issues
 VignetteBuilder: knitr
+LazyData: true
 RoxygenNote: 5.0.0
