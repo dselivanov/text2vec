@@ -3,7 +3,7 @@
 
 # Tutorials
 
-1. [Vectorization](http://dsnotes.com/blog/2015/11/09/text2vec/).
+1. [Vectorization](http://dsnotes.com/blog,%20text2vec/2015/11/09/text2vec/).
 2. GloVe coming soon.
 
 # Features
