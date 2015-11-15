@@ -9,6 +9,10 @@
 #' @param x_max maximum number of cooccurences to use in weighting function.
 #' See GloVe paper for details: \url{http://nlp.stanford.edu/pubs/glove.pdf}
 #' @param num_iters number of AdaGrad epochs
+#' @param shuffle \code{logical} whether to perform shuffling before each SGS iteration.
+#' Generally this is good idea to set \code{shuffle = TRUE}. But from my experience,
+#' it don't improve global cost in this particular case. Please report, if you find that
+#' shuffling improves score.
 #' @param learning_rate learning rate for SGD, I don't recommend to modify this parameter,
 #' AdaGrad will quickly adjust it to optimal.
 #' @param verbose whether to display training inforamtion
@@ -22,10 +26,9 @@
 #' @param grain_size I don't recommend to adjust this paramenter. This is the grain_size
 #' for \code{RcppParallel::parallelReduce}.
 #' See \url{http://rcppcore.github.io/RcppParallel/#grain-size} for details.
-#' @param shuffle \code{logical} whether to perform shuffling before each SGS iteration.
-#' Generally this is good idea to set \code{shuffle = TRUE}. But from my experience,
-#' it don't improve global cost in this particular case. Please report, if you find that
-#' shuffling improves score.
+#' @param max_cost the maximum absolute value of calculated
+#' gradient for any single co-occurrence pair. Try to set to smaller vaue if you have
+#' problems with numerical stability.
 #' @param ... arguments passed to other methods (not used at the moment).
 #' Generelly good idea for stochastic gradient descent
 #' @seealso \url{http://nlp.stanford.edu/projects/glove/}
@@ -40,6 +43,7 @@ glove <- function(tcm,
                   verbose = TRUE,
                   convergence_threshold = 0.0,
                   grain_size =  1e5L,
+                  max_cost = 10.0,
                   ...) {
   UseMethod("glove")
 }
@@ -56,29 +60,30 @@ glove.dgTMatrix <- function(tcm,
                             verbose = TRUE,
                             convergence_threshold = 0.0,
                             grain_size =  1e5L,
+                            max_cost = 10.0,
                             ...) {
   cost_history <- vector('numeric', num_iters)
-  chunk_size <- length (tcm@i)
+  chunk_size <- length(tcm@i)
 
-  fit <- new(GloveFitter, ncol(tcm), word_vectors_size, x_max, learning_rate, grain_size)
+  fit <- new(GloveFitter, ncol(tcm), word_vectors_size, x_max, learning_rate, grain_size, max_cost)
   i <- 1
-  while(i <= num_iters) {
+  while (i <= num_iters) {
     cost <-
-      if(shuffle) {
+      if (shuffle) {
         perm <- sample( chunk_size )
         fit$fit_chunk(tcm@i[perm], tcm@j[perm], tcm@x[perm])
       } else
         fit$fit_chunk(tcm@i, tcm@j, tcm@x)
 
-    if(is.nan(cost))
-      stop("Cost becomes NaN, try to use smaller learning_rate.")
+    if (is.nan(cost))
+      stop("Cost becomes NaN, try to use smaller learning_rate or smaller max_cost.")
 
     cost_history[[i]] <- cost / chunk_size
-    if(verbose)
+    if (verbose)
       print(paste('epoch', i, ', expected cost =', round(cost_history[[i]], digits = 4)) )
     # reset cost
     fit$set_cost_zero()
-    if( i > 1 && (cost_history[[i - 1]] / cost_history[[i]] - 1) < convergence_threshold) {
+    if ( i > 1 && (cost_history[[i - 1]] / cost_history[[i]] - 1) < convergence_threshold) {
       message(paste("Early stopping. Improvement at iterartion", i,
                     "is less then convergence_threshold"))
       break;
@@ -104,8 +109,9 @@ glove.Matrix <- function(tcm,
                          verbose = TRUE,
                          convergence_threshold = 0.0,
                          grain_size =  1e5L,
+                         max_cost = 10.0,
                          ...) {
-  if( !inherits(tcm, 'dgTMatrix') )
+  if ( !inherits(tcm, 'dgTMatrix') )
     tcm <- as(tcm, 'dgTMatrix')
   glove.dgTMatrix(tcm, ... )
 }

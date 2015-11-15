@@ -8,15 +8,15 @@
 \usage{
 glove(tcm, vocabulary_size, word_vectors_size, x_max, num_iters,
   shuffle = FALSE, learning_rate = 0.05, verbose = TRUE,
-  convergence_threshold = 0, grain_size = 100000L, ...)
+  convergence_threshold = 0, grain_size = 100000L, max_cost = 10, ...)
 
 \method{glove}{dgTMatrix}(tcm, vocabulary_size = ncol(tcm), word_vectors_size,
   x_max, num_iters, shuffle = FALSE, learning_rate = 0.05, verbose = TRUE,
-  convergence_threshold = 0, grain_size = 100000L, ...)
+  convergence_threshold = 0, grain_size = 100000L, max_cost = 10, ...)
 
 \method{glove}{Matrix}(tcm, vocabulary_size = ncol(tcm), word_vectors_size,
   x_max, num_iters, shuffle = FALSE, learning_rate = 0.05, verbose = TRUE,
-  convergence_threshold = 0, grain_size = 100000L, ...)
+  convergence_threshold = 0, grain_size = 100000L, max_cost = 10, ...)
 }
 \arguments{
 \item{tcm}{object which represents Term-Coocurence matrix, which used in training.
@@ -53,6 +53,10 @@ b) \code{cost_previous_iter} / \code{cost_current_iter} - 1 < convergence_thresh
 \item{grain_size}{I don't recommend to adjust this paramenter. This is the grain_size
 for \code{RcppParallel::parallelReduce}.
 See \url{http://rcppcore.github.io/RcppParallel/#grain-size} for details.}
+
+\item{max_cost}{the maximum absolute value of calculated
+gradient for any single co-occurrence pair. Try to set to smaller vaue if you have
+problems with numerical stability.}
 
 \item{...}{arguments passed to other methods (not used at the moment).
 Generelly good idea for stochastic gradient descent}

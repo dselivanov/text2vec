@@ -8,9 +8,10 @@ public:
   GloveFit(size_t vocab_size,
            size_t word_vec_size,
            double learning_rate,
-           int x_max):
+           int x_max,
+           double max_cost):
   vocab_size(vocab_size), word_vec_size(word_vec_size),
-  x_max(x_max), learning_rate(learning_rate) {
+  x_max(x_max), learning_rate(learning_rate), max_cost(max_cost) {
 
     w_i.resize(vocab_size);
     w_j.resize(vocab_size);
@@ -40,8 +41,9 @@ public:
 
   inline double weighting_fun(double x, double x_max, double alpha) {
     if(x < x_max)
-      return pow(x / x_max, alpha);  else
-        return 1.0;
+      return pow(x / x_max, alpha);
+    else
+      return 1.0;
   }
 
   inline double adagrad_iterate( size_t begin,
@@ -49,27 +51,34 @@ public:
                                  const RVector<int> &x_irow,
                                  const RVector<int> &x_icol,
                                  const RVector<double> &x_val) {
-    double global_cost = 0;
+
+    double global_cost = 0, weight, cost_inner, wcost, cost;
+    double grad_b_i, grad_b_j, grad_k_i, grad_k_j;
 
     for (size_t i = begin; i < end; i++) {
 
-      double weight = weighting_fun(x_val[i], x_max, 0.75);
+      weight = weighting_fun(x_val[i], x_max, 0.75);
 
-      double cost_inner = inner_product(w_i[ x_irow[i] ].begin(), w_i[ x_irow[i] ].end() ,
+      cost_inner = inner_product(w_i[ x_irow[i] ].begin(), w_i[ x_irow[i] ].end() ,
                                         w_j[ x_icol[i]].begin(),
                                         // init with (b_i + b_j - log(x_ij))
                                         b_i[ x_irow[i] ] + b_j[ x_icol[i] ] - log( x_val[i] ) );
 
-      double wcost = weight * cost_inner;
+      //clip cost for numerical stability
+      if (cost_inner > this->max_cost)
+        cost_inner = max_cost;
+      else if (cost_inner < -(this->max_cost))
+        cost_inner = -max_cost;
 
-      double cost = wcost * cost_inner;
+      wcost = weight * cost_inner;
+
+      cost = wcost * cost_inner;
 
       global_cost += 0.5 * cost;
 
       //Compute gradients for bias terms
-      double grad_b_i = wcost;
-      double grad_b_j = wcost;
-      double grad_k_i, grad_k_j;
+      grad_b_i = wcost;
+      grad_b_j = wcost;
 
       // Compute gradients for word vector terms.
       for (int k = 0; k < word_vec_size; k++) {
@@ -123,6 +132,9 @@ private:
   int word_vec_size;
   int x_max;
   double learning_rate;
+  // see https://github.com/maciejkula/glove-python/pull/9#issuecomment-68058795
+  // clips the cost for numerical stability
+  double max_cost;
   // word vecrtors
   vector<vector<double> > w_i;
   vector<vector<double> > w_j;

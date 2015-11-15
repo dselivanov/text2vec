@@ -74,9 +74,10 @@ public:
             size_t word_vec_size,
             uint32_t x_max,
             double learning_rate,
-            uint32_t grain_size):
+            uint32_t grain_size,
+            double max_cost):
   GRAIN_SIZE(grain_size),
-  gloveFit(vocab_size,  word_vec_size, learning_rate, x_max),
+  gloveFit(vocab_size,  word_vec_size, learning_rate, x_max, max_cost),
   adaGradIter(gloveFit)
   {}
 
@@ -104,8 +105,8 @@ private:
 
 RCPP_MODULE(GloveFitter) {
   class_< GloveFitter >( "GloveFitter" )
-  //<vocab_size, word_vec_size, x_max, learning_rate, grain_size>
-  .constructor<size_t, size_t, uint32_t, double, uint32_t>()
+  //<vocab_size, word_vec_size, x_max, learning_rate, grain_size, max_cost>
+  .constructor<size_t, size_t, uint32_t, double, uint32_t, double>()
   .method( "get_word_vectors", &GloveFitter::get_word_vectors, "returns word vectors")
   .method( "set_cost_zero", &GloveFitter::set_cost_zero, "sets cost to zero")
   .method( "fit_chunk", &GloveFitter::fit_chunk, "process TCM data chunk")
