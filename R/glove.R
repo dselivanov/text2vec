@@ -44,6 +44,7 @@ glove <- function(tcm,
                   convergence_threshold = 0.0,
                   grain_size =  1e5L,
                   max_cost = 10.0,
+                  alpha = 0.75,
                   ...) {
   UseMethod("glove")
 }
@@ -61,26 +62,30 @@ glove.dgTMatrix <- function(tcm,
                             convergence_threshold = 0.0,
                             grain_size =  1e5L,
                             max_cost = 10.0,
+                            alpha = 0.75,
                             ...) {
   cost_history <- vector('numeric', num_iters)
   chunk_size <- length(tcm@i)
 
-  fit <- new(GloveFitter, ncol(tcm), word_vectors_size, x_max, learning_rate, grain_size, max_cost)
+  fit <- new(GloveFitter, ncol(tcm), word_vectors_size, x_max, learning_rate, grain_size, max_cost, alpha)
   i <- 1
   while (i <= num_iters) {
-    cost <-
-      if (shuffle) {
-        perm <- sample( chunk_size )
-        fit$fit_chunk(tcm@i[perm], tcm@j[perm], tcm@x[perm])
-      } else
-        fit$fit_chunk(tcm@i, tcm@j, tcm@x)
+
+    iter_time <- system.time(
+      cost <-
+        if (shuffle) {
+          perm <- sample( chunk_size )
+          fit$fit_chunk(tcm@i[perm], tcm@j[perm], tcm@x[perm])
+        } else
+          fit$fit_chunk(tcm@i, tcm@j, tcm@x)
+    )
 
     if (is.nan(cost))
       stop("Cost becomes NaN, try to use smaller learning_rate or smaller max_cost.")
 
     cost_history[[i]] <- cost / chunk_size
     if (verbose)
-      print(paste('epoch', i, ', expected cost =', round(cost_history[[i]], digits = 4)) )
+      print(paste('epoch', i, ', expected cost =', round(cost_history[[i]], digits = 4), 'elapsed =', round(iter_time[['elapsed']], 2)) )
     # reset cost
     fit$set_cost_zero()
     if ( i > 1 && (cost_history[[i - 1]] / cost_history[[i]] - 1) < convergence_threshold) {
@@ -110,6 +115,7 @@ glove.Matrix <- function(tcm,
                          convergence_threshold = 0.0,
                          grain_size =  1e5L,
                          max_cost = 10.0,
+                         alpha = 0.75,
                          ...) {
   if ( !inherits(tcm, 'dgTMatrix') )
     tcm <- as(tcm, 'dgTMatrix')

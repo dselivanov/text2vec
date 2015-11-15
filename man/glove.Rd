@@ -8,15 +8,18 @@
 \usage{
 glove(tcm, vocabulary_size, word_vectors_size, x_max, num_iters,
   shuffle = FALSE, learning_rate = 0.05, verbose = TRUE,
-  convergence_threshold = 0, grain_size = 100000L, max_cost = 10, ...)
+  convergence_threshold = 0, grain_size = 100000L, max_cost = 10,
+  alpha = 0.75, ...)
 
 \method{glove}{dgTMatrix}(tcm, vocabulary_size = ncol(tcm), word_vectors_size,
   x_max, num_iters, shuffle = FALSE, learning_rate = 0.05, verbose = TRUE,
-  convergence_threshold = 0, grain_size = 100000L, max_cost = 10, ...)
+  convergence_threshold = 0, grain_size = 100000L, max_cost = 10,
+  alpha = 0.75, ...)
 
 \method{glove}{Matrix}(tcm, vocabulary_size = ncol(tcm), word_vectors_size,
   x_max, num_iters, shuffle = FALSE, learning_rate = 0.05, verbose = TRUE,
-  convergence_threshold = 0, grain_size = 100000L, max_cost = 10, ...)
+  convergence_threshold = 0, grain_size = 100000L, max_cost = 10,
+  alpha = 0.75, ...)
 }
 \arguments{
 \item{tcm}{object which represents Term-Coocurence matrix, which used in training.
