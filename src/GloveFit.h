@@ -9,9 +9,10 @@ public:
            size_t word_vec_size,
            double learning_rate,
            int x_max,
-           double max_cost):
+           double max_cost,
+           double alpha):
   vocab_size(vocab_size), word_vec_size(word_vec_size),
-  x_max(x_max), learning_rate(learning_rate), max_cost(max_cost) {
+  x_max(x_max), learning_rate(learning_rate), max_cost(max_cost), alpha(alpha) {
 
     w_i.resize(vocab_size);
     w_j.resize(vocab_size);
@@ -54,16 +55,16 @@ public:
 
     double global_cost = 0, weight, cost_inner, wcost, cost;
     double grad_b_i, grad_b_j, grad_k_i, grad_k_j;
-
+    size_t x_irow_i, x_icol_i;
     for (size_t i = begin; i < end; i++) {
+      x_irow_i = x_irow[i];
+      x_icol_i = x_icol[i];
+      weight = weighting_fun(x_val[i], x_max, this->alpha);
 
-      weight = weighting_fun(x_val[i], x_max, 0.75);
-
-      cost_inner = inner_product(w_i[ x_irow[i] ].begin(), w_i[ x_irow[i] ].end() ,
-                                        w_j[ x_icol[i]].begin(),
+      cost_inner = inner_product(w_i[ x_irow_i ].begin(), w_i[ x_irow_i ].end() ,
+                                        w_j[ x_icol_i].begin(),
                                         // init with (b_i + b_j - log(x_ij))
-                                        b_i[ x_irow[i] ] + b_j[ x_icol[i] ] - log( x_val[i] ) );
-
+                                        b_i[ x_irow_i ] + b_j[ x_icol_i ] - log( x_val[i] ) );
       //clip cost for numerical stability
       if (cost_inner > this->max_cost)
         cost_inner = max_cost;
@@ -83,25 +84,25 @@ public:
       // Compute gradients for word vector terms.
       for (int k = 0; k < word_vec_size; k++) {
 
-        grad_k_i = wcost * w_j[ x_icol[i] ][ k ];
-        grad_k_j = wcost * w_i[ x_irow[i] ][ k ];
+        grad_k_i = wcost * w_j[ x_icol_i ][ k ];
+        grad_k_j = wcost * w_i[ x_irow_i ][ k ];
 
         // Perform adaptive updates for word vectors
-        w_i[ x_irow[i] ][ k ] -= (learning_rate * grad_k_i / sqrt( grad_sq_w_i[ x_irow[i] ][ k ] ) );
-        w_j[ x_icol[i] ][ k ] -= (learning_rate * grad_k_j / sqrt( grad_sq_w_j[ x_icol[i] ][ k ] ) );
+        w_i[ x_irow_i ][ k ] -= (learning_rate * grad_k_i / sqrt( grad_sq_w_i[ x_irow_i ][ k ] ) );
+        w_j[ x_icol_i ][ k ] -= (learning_rate * grad_k_j / sqrt( grad_sq_w_j[ x_icol_i ][ k ] ) );
 
         // Update squared gradient sums for word vectors
-        grad_sq_w_i[ x_irow[i] ][ k ] += grad_k_i * grad_k_i;
-        grad_sq_w_j[ x_icol[i] ][ k ] += grad_k_j * grad_k_j;
+        grad_sq_w_i[ x_irow_i ][ k ] += grad_k_i * grad_k_i;
+        grad_sq_w_j[ x_icol_i ][ k ] += grad_k_j * grad_k_j;
       }
 
       // Perform adaptive updates for bias terms
-      b_i[ x_irow[i] ] -= (learning_rate * grad_b_i / sqrt( grad_sq_b_i[ x_irow[i] ] ));
-      b_j[ x_icol[i] ] -= (learning_rate * grad_b_j / sqrt( grad_sq_b_j[ x_icol[i] ] ));
+      b_i[ x_irow_i ] -= (learning_rate * grad_b_i / sqrt( grad_sq_b_i[ x_irow_i ] ));
+      b_j[ x_icol_i ] -= (learning_rate * grad_b_j / sqrt( grad_sq_b_j[ x_icol_i ] ));
 
       // Update squared gradient sums for biases
-      grad_sq_b_i[ x_irow[i] ] += grad_b_i * grad_b_i;
-      grad_sq_b_j[ x_icol[i] ] += grad_b_j * grad_b_j;
+      grad_sq_b_i[ x_irow_i ] += grad_b_i * grad_b_i;
+      grad_sq_b_j[ x_icol_i ] += grad_b_j * grad_b_j;
     }
     return global_cost;
   }
@@ -135,6 +136,7 @@ private:
   // see https://github.com/maciejkula/glove-python/pull/9#issuecomment-68058795
   // clips the cost for numerical stability
   double max_cost;
+  double alpha;
   // word vecrtors
   vector<vector<double> > w_i;
   vector<vector<double> > w_j;
