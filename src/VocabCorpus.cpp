@@ -11,5 +11,6 @@ RCPP_MODULE(VocabCorpus) {
   .method( "get_tcm", &VocabCorpus::get_tcm, "construct Term-Cooccurence matrix" )
   .method( "get_dtm", &VocabCorpus::get_dtm, "construct Document-Term matrix (various forms) from corpus" )
   .method( "clear_tcm", &VocabCorpus::clear_tcm, "clear Term-Cooccurence < pair<i, j>, x > unordered_map" )
+  .method( "get_tcm_size", &VocabCorpus::get_tcm_size, "returns current tcm size (number of non-zero elements)" )
   ;
 }

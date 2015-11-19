@@ -12,5 +12,6 @@ RCPP_MODULE(HashCorpus) {
   .method( "get_dtm", &HashCorpus::get_dtm, "construct Document-Term matrix from corpus (triplet form - dgTMatrix)" )
   .method( "get_dtm", &HashCorpus::get_tcm, "construct Term-Cooccurence matrix from corpus (triplet form - dgTMatrix)" )
   .method( "clear_tcm", &HashCorpus::clear_tcm, "construct Document-Term matrix (various forms) from corpus" )
+  .method( "get_tcm_size", &HashCorpus::get_tcm_size, "returns current tcm size (number of non-zero elements)" )
   ;
 }
