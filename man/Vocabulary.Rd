@@ -15,6 +15,10 @@ vocabulary(src, ngram = c(ngram_min = 1L, ngram_max = 1L), ...)
   serialize_dir = NULL, ...)
 }
 \arguments{
+\item{src}{iterator over \code{list} of \code{character} vectors - documents from which
+user want construct vocabulary. Or, alternatively,
+\code{character} vector = user-defined vocabulary terms (which will be used "as is").}
+
 \item{ngram}{\code{integer} vector. The lower and upper boundary of the range of
 n-values for different n-grams to be extracted. All values of n such that
 ngram_min <= n <= ngram_max will be used.}
@@ -23,8 +27,6 @@ ngram_min <= n <= ngram_max will be used.}
 
 \item{serialize_dir}{As a \bold{side effect}, we can save tokenized texts in serialized form to disk.
 So, \code{serialize_dir} is a \code{character} - path where to save tokenized input files.}
-
-\item{iterator}{iterator over \code{list} of \code{character} vectors.}
 }
 \value{
 \code{text2vec_vocabulary} object,

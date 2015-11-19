@@ -2,7 +2,9 @@
 #' @title Creates vocabulary (unique terms)
 #' @description collects unique terms and corresponding statistics from object.
 #' See \code{value} section.
-#' @param iterator iterator over \code{list} of \code{character} vectors.
+#' @param src iterator over \code{list} of \code{character} vectors - documents from which
+#' user want construct vocabulary. Or, alternatively,
+#' \code{character} vector = user-defined vocabulary terms (which will be used "as is").
 #' @param ngram \code{integer} vector. The lower and upper boundary of the range of
 #' n-values for different n-grams to be extracted. All values of n such that
 #' ngram_min <= n <= ngram_max will be used.
@@ -30,7 +32,6 @@
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
 #' @export
-
 vocabulary <- function(src,
                        ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                        ...) {
