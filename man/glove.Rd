@@ -11,15 +11,12 @@ glove(tcm, vocabulary_size, word_vectors_size, x_max, num_iters,
   convergence_threshold = 0, grain_size = 100000L, max_cost = 10,
   alpha = 0.75, ...)
 
-\method{glove}{dgTMatrix}(tcm, vocabulary_size = ncol(tcm), word_vectors_size,
+\method{glove}{dgTMatrix}(tcm, vocabulary_size = nrow(tcm), word_vectors_size,
   x_max, num_iters, shuffle = FALSE, learning_rate = 0.05, verbose = TRUE,
   convergence_threshold = 0, grain_size = 100000L, max_cost = 10,
   alpha = 0.75, ...)
 
-\method{glove}{Matrix}(tcm, vocabulary_size = ncol(tcm), word_vectors_size,
-  x_max, num_iters, shuffle = FALSE, learning_rate = 0.05, verbose = TRUE,
-  convergence_threshold = 0, grain_size = 100000L, max_cost = 10,
-  alpha = 0.75, ...)
+\method{glove}{Matrix}(tcm, ...)
 }
 \arguments{
 \item{tcm}{object which represents Term-Coocurence matrix, which used in training.
@@ -60,6 +57,9 @@ See \url{http://rcppcore.github.io/RcppParallel/#grain-size} for details.}
 \item{max_cost}{the maximum absolute value of calculated
 gradient for any single co-occurrence pair. Try to set to smaller vaue if you have
 problems with numerical stability.}
+
+\item{alpha}{alpha in weighting function formula :
+\eqn{f(x) = 1 if x > x_max; else (x/x_max)^alpha }}
 
 \item{...}{arguments passed to other methods (not used at the moment).
 Generelly good idea for stochastic gradient descent}
