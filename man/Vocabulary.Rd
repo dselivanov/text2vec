@@ -2,22 +2,29 @@
 % Please edit documentation in R/vocabulary.R
 \name{vocabulary}
 \alias{vocabulary}
-\title{Creates vocabulary (unique terms) from iterator.}
+\alias{vocabulary.character}
+\alias{vocabulary.itoken}
+\title{Creates vocabulary (unique terms)}
 \usage{
-vocabulary(iterator, ngram = c(ngram_min = 1L, ngram_max = 1L),
+vocabulary(src, ngram = c(ngram_min = 1L, ngram_max = 1L), ...)
+
+\method{vocabulary}{character}(src, ngram = c(ngram_min = 1L, ngram_max = 1L),
+  ...)
+
+\method{vocabulary}{itoken}(src, ngram = c(ngram_min = 1L, ngram_max = 1L),
   serialize_dir = NULL, ...)
 }
 \arguments{
-\item{iterator}{iterator over \code{list} of \code{character} vectors.}
-
 \item{ngram}{\code{integer} vector. The lower and upper boundary of the range of
 n-values for different n-grams to be extracted. All values of n such that
 ngram_min <= n <= ngram_max will be used.}
 
-\item{serialize_dir}{As a side effect, we can save tokenized texts in serialized form to disk.
+\item{...}{arguments passed to other methods (inculding \link{write_rds} function).}
+
+\item{serialize_dir}{As a \bold{side effect}, we can save tokenized texts in serialized form to disk.
 So, \code{serialize_dir} is a \code{character} - path where to save tokenized input files.}
 
-\item{...}{arguments passed to other methods (inculding \link{write_rds} function).}
+\item{iterator}{iterator over \code{list} of \code{character} vectors.}
 }
 \value{
 \code{text2vec_vocabulary} object,
@@ -36,9 +43,17 @@ which is actually a \code{list} with following fields:
 2. \bold{ngram} - \code{integer} vector, the lower and upper boundary of the range of n-gram-values.
 }
 \description{
-collects unique terms and corresponding statistics from iterator.
+collects unique terms and corresponding statistics from object.
 See \code{value} section.
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{character}: creates \code{text2vec_vocabulary} from predefined
+character vector. Terms will be inserted \bold{as is}, without any checks
+(ngrams numner, ngram delimiters, etc.).
+
+\item \code{itoken}: collects unique terms and corresponding statistics from object.
+}}
 \examples{
 data("movie_review")
 txt <- movie_review[['review']][1:100]

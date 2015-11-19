@@ -1,13 +1,11 @@
 #' @name vocabulary
-#' @title Creates vocabulary (unique terms) from iterator.
-#' @description collects unique terms and corresponding statistics from iterator.
+#' @title Creates vocabulary (unique terms)
+#' @description collects unique terms and corresponding statistics from object.
 #' See \code{value} section.
 #' @param iterator iterator over \code{list} of \code{character} vectors.
 #' @param ngram \code{integer} vector. The lower and upper boundary of the range of
 #' n-values for different n-grams to be extracted. All values of n such that
 #' ngram_min <= n <= ngram_max will be used.
-#' @param serialize_dir As a side effect, we can save tokenized texts in serialized form to disk.
-#' So, \code{serialize_dir} is a \code{character} - path where to save tokenized input files.
 #' @param  ... arguments passed to other methods (inculding \link{write_rds} function).
 #' @return \code{text2vec_vocabulary} object,
 #' which is actually a \code{list} with following fields:
@@ -32,7 +30,46 @@
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
 #' @export
-vocabulary <- function(iterator,
+
+vocabulary <- function(src,
+                       ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                       ...) {
+  UseMethod("vocabulary")
+}
+
+#' @describeIn vocabulary creates \code{text2vec_vocabulary} from predefined
+#' character vector. Terms will be inserted \bold{as is}, without any checks
+#' (ngrams numner, ngram delimiters, etc.).
+#' @export
+vocabulary.character <- function(src,
+                                 ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                                 ...) {
+
+  ngram_min <- as.integer( ngram[[1]] )
+  ngram_max <- as.integer( ngram[[2]] )
+  vocab_length = length(src)
+
+  res <- list(
+    # keep structure similar to `vocabulary.itoken` object. not used at the moment,
+    # but we should keep same structure (keep in mind prune_vocabulary)
+    vocab = data.frame('terms' = src,
+                       'terms_counts' = rep(NA_integer_, vocab_length),
+                       'doc_counts' = rep(NA_integer_, vocab_length),
+                       'doc_proportions' = rep(NA_real_, vocab_length),
+                       stringsAsFactors = FALSE
+                       ),
+    ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max)
+  )
+
+  class(res) <- c('text2vec_vocabulary')
+  res
+}
+
+#' @describeIn vocabulary collects unique terms and corresponding statistics from object.
+#' @param serialize_dir As a \bold{side effect}, we can save tokenized texts in serialized form to disk.
+#' So, \code{serialize_dir} is a \code{character} - path where to save tokenized input files.
+#' @export
+vocabulary.itoken <- function(src,
                               ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                               serialize_dir = NULL, ...) {
   ngram_min <- as.integer( ngram[[1]] )
@@ -51,7 +88,7 @@ vocabulary <- function(iterator,
 
   while (TRUE) {
     # iterate
-    tokens = try(nextElem(iterator), silent = TRUE)
+    tokens = try(nextElem(src), silent = TRUE)
     # check end of iterator
     if (class(tokens) == "try-error") {
       if (attributes(tokens)$condition$message == "StopIteration")
