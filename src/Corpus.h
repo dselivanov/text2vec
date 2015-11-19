@@ -13,6 +13,8 @@ public:
 
   void clear_tcm();
 
+  size_t get_tcm_size();
+
   // total number of documents in corpus
   uint32_t get_doc_count() { return doc_count; };
 

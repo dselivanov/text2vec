@@ -96,6 +96,7 @@ public:
   int get_doc_count() { return this->get_doc_count(); };
 
   void clear_tcm() {this->tcm.clear();};
+  size_t get_tcm_size() {return tcm.size();};
 
   CharacterVector get_vocab() {
     CharacterVector vocab_R(vocab.size());
@@ -103,7 +104,6 @@ public:
       vocab_R[ i.second ] = i.first;
     return vocab_R;
   }
-
   // get term cooccurence matrix
   SEXP get_tcm() {
     vector< string> dimnames(vocab.size());

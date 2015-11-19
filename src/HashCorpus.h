@@ -44,6 +44,7 @@ public:
   int get_doc_count() { return doc_count; };
 
   void clear_tcm() {this->tcm.clear();};
+  size_t get_tcm_size() {return tcm.size();};
 
   // implements hashing trick
   void insert_terms (vector< string> &terms, int flag_grow_dtm ) {
