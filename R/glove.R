@@ -29,6 +29,8 @@
 #' @param max_cost the maximum absolute value of calculated
 #' gradient for any single co-occurrence pair. Try to set to smaller vaue if you have
 #' problems with numerical stability.
+#' @param alpha alpha in weighting function formula :
+#' \eqn{f(x) = 1 if x > x_max; else (x/x_max)^alpha }
 #' @param ... arguments passed to other methods (not used at the moment).
 #' Generelly good idea for stochastic gradient descent
 #' @seealso \url{http://nlp.stanford.edu/projects/glove/}
@@ -52,7 +54,7 @@ glove <- function(tcm,
 #' @describeIn glove fits GloVe model on dgTMatrix - sparse Matrix in triplet form
 #' @export
 glove.dgTMatrix <- function(tcm,
-                            vocabulary_size = ncol(tcm),
+                            vocabulary_size = nrow(tcm),
                             word_vectors_size,
                             x_max,
                             num_iters,
@@ -67,7 +69,7 @@ glove.dgTMatrix <- function(tcm,
   cost_history <- vector('numeric', num_iters)
   chunk_size <- length(tcm@i)
 
-  fit <- new(GloveFitter, ncol(tcm), word_vectors_size, x_max, learning_rate, grain_size, max_cost, alpha)
+  fit <- new(GloveFitter, vocabulary_size, word_vectors_size, x_max, learning_rate, grain_size, max_cost, alpha)
   i <- 1
   while (i <= num_iters) {
 
@@ -105,17 +107,6 @@ glove.dgTMatrix <- function(tcm,
 #' @describeIn glove fits GloVe model on Matrix input
 #' @export
 glove.Matrix <- function(tcm,
-                         vocabulary_size = ncol(tcm),
-                         word_vectors_size,
-                         x_max,
-                         num_iters,
-                         shuffle = FALSE,
-                         learning_rate = 0.05,
-                         verbose = TRUE,
-                         convergence_threshold = 0.0,
-                         grain_size =  1e5L,
-                         max_cost = 10.0,
-                         alpha = 0.75,
                          ...) {
   if ( !inherits(tcm, 'dgTMatrix') )
     tcm <- as(tcm, 'dgTMatrix')
