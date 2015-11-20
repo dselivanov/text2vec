@@ -53,7 +53,7 @@ public:
                                  const RVector<int> &x_icol,
                                  const RVector<double> &x_val) {
 
-    double global_cost = 0, weight, cost_inner, wcost, cost;
+    double global_cost = 0.0, weight, cost_inner, cost;
     double grad_b_i, grad_b_j, grad_k_i, grad_k_j;
     size_t x_irow_i, x_icol_i;
     for (size_t i = begin; i < end; i++) {
@@ -71,21 +71,20 @@ public:
       else if (cost_inner < -(this->max_cost))
         cost_inner = -max_cost;
 
-      wcost = weight * cost_inner;
+      cost = weight * cost_inner;
 
-      cost = wcost * cost_inner;
-
-      global_cost += 0.5 * cost;
+      // add cost^2
+      global_cost += 0.5 * cost * cost_inner;
 
       //Compute gradients for bias terms
-      grad_b_i = wcost;
-      grad_b_j = wcost;
+      grad_b_i = cost;
+      grad_b_j = cost;
 
       // Compute gradients for word vector terms.
       for (int k = 0; k < word_vec_size; k++) {
 
-        grad_k_i = wcost * w_j[ x_icol_i ][ k ];
-        grad_k_j = wcost * w_i[ x_irow_i ][ k ];
+        grad_k_i = cost * w_j[ x_icol_i ][ k ];
+        grad_k_j = cost * w_i[ x_irow_i ][ k ];
 
         // Perform adaptive updates for word vectors
         w_i[ x_irow_i ][ k ] -= (learning_rate * grad_k_i / sqrt( grad_sq_w_i[ x_irow_i ][ k ] ) );
