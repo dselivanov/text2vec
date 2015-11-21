@@ -4,6 +4,7 @@ struct AdaGradIter : public Worker {
   RVector<int> x_irow;
   RVector<int> x_icol;
   RVector<double> x_val;
+  RVector<int> iter_order;
 
   GloveFit &fit;
 
@@ -23,10 +24,12 @@ struct AdaGradIter : public Worker {
   void init(const IntegerVector &x_irowR,
             const IntegerVector &x_icolR,
             const NumericVector &x_valR,
+            const IntegerVector &iter_orderR,
             GloveFit &fit) {
     x_irow = RVector<int>(x_irowR);
     x_icol = RVector<int>(x_icolR);
     x_val  = RVector<double> (x_valR);
+    iter_order = RVector<int> (iter_orderR);
     fit = fit;
     global_cost = 0;
   }
@@ -38,16 +41,19 @@ struct AdaGradIter : public Worker {
     x_irow(IntegerVector(0)),
     x_icol(IntegerVector(0)),
     x_val(NumericVector(0)),
+    iter_order(IntegerVector(0)),
     fit(fit) {};
 
   // constructors
   AdaGradIter(const IntegerVector &x_irowR,
               const IntegerVector &x_icolR,
               const NumericVector &x_valR,
+              const IntegerVector &iter_orderR,
               GloveFit &fit):
     x_irow(x_irowR),
     x_icol(x_icolR),
     x_val(x_valR),
+    iter_order(iter_orderR),
     fit(fit),
     global_cost(0) {}
 
@@ -55,12 +61,13 @@ struct AdaGradIter : public Worker {
     x_irow(AdaGradIter.x_irow),
     x_icol(AdaGradIter.x_icol),
     x_val(AdaGradIter.x_val),
+    iter_order(AdaGradIter.iter_order),
     fit(AdaGradIter.fit),
     global_cost(0) {}
 
   // process just the elements of the range
   void operator()(size_t begin, size_t end) {
-    global_cost += this->fit.adagrad_iterate(begin, end, x_irow, x_icol, x_val);
+    global_cost += this->fit.adagrad_iterate(begin, end, x_irow, x_icol, x_val, iter_order);
   }
   // join my value with that of another global_cost
   void join(const AdaGradIter& rhs) {
@@ -84,8 +91,10 @@ public:
 
   double fit_chunk(const IntegerVector x_irow,
                    const IntegerVector  x_icol,
-                   const NumericVector x_val) {
-    this->adaGradIter.init(x_irow, x_icol, x_val, gloveFit);
+                   const NumericVector x_val,
+                   const IntegerVector iter_order) {
+
+    this->adaGradIter.init(x_irow, x_icol, x_val, iter_order, gloveFit);
     parallelReduce(0, x_irow.size(), adaGradIter, GRAIN_SIZE);
     double res = this->adaGradIter.global_cost;
     return (res);

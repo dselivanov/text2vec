@@ -51,20 +51,36 @@ public:
                                  size_t end,
                                  const RVector<int> &x_irow,
                                  const RVector<int> &x_icol,
-                                 const RVector<double> &x_val) {
+                                 const RVector<double> &x_val,
+                                 const RVector<int> &iter_order) {
 
     double global_cost = 0.0, weight, cost_inner, cost;
     double grad_b_i, grad_b_j, grad_k_i, grad_k_j;
-    size_t x_irow_i, x_icol_i;
+    size_t x_irow_i, x_icol_i, i_iter_order;
+
+    int flag_do_shuffle = 0;
+
+    if ( iter_order.length() == x_irow.length() )
+      flag_do_shuffle = 1;
+
     for (size_t i = begin; i < end; i++) {
-      x_irow_i = x_irow[i];
-      x_icol_i = x_icol[i];
-      weight = weighting_fun(x_val[i], x_max, this->alpha);
+
+      if( flag_do_shuffle )
+        // IMPORTANT NOTE
+        // subtract 1 here, because we expecte 1-based indices from R
+        // sample.int() returns 1-based shuffling indices
+        i_iter_order = iter_order [ i ] - 1;
+      else
+        i_iter_order = i;
+
+      x_irow_i = x_irow[ i_iter_order ];
+      x_icol_i = x_icol[ i_iter_order ];
+      weight = weighting_fun(x_val[ i_iter_order ], x_max, this->alpha);
 
       cost_inner = inner_product(w_i[ x_irow_i ].begin(), w_i[ x_irow_i ].end() ,
                                         w_j[ x_icol_i].begin(),
                                         // init with (b_i + b_j - log(x_ij))
-                                        b_i[ x_irow_i ] + b_j[ x_icol_i ] - log( x_val[i] ) );
+                                        b_i[ x_irow_i ] + b_j[ x_icol_i ] - log( x_val[ i_iter_order ] ) );
       //clip cost for numerical stability
       if (cost_inner > this->max_cost)
         cost_inner = max_cost;

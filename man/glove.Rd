@@ -7,14 +7,14 @@
 \title{Perform fit of the GloVe model.}
 \usage{
 glove(tcm, vocabulary_size, word_vectors_size, x_max, num_iters,
-  shuffle = FALSE, learning_rate = 0.05, verbose = TRUE,
+  shuffle_seed = NA_integer_, learning_rate = 0.05, verbose = TRUE,
   convergence_threshold = 0, grain_size = 100000L, max_cost = 10,
   alpha = 0.75, ...)
 
 \method{glove}{dgTMatrix}(tcm, vocabulary_size = nrow(tcm), word_vectors_size,
-  x_max, num_iters, shuffle = FALSE, learning_rate = 0.05, verbose = TRUE,
-  convergence_threshold = 0, grain_size = 100000L, max_cost = 10,
-  alpha = 0.75, ...)
+  x_max, num_iters, shuffle_seed = NA_integer_, learning_rate = 0.05,
+  verbose = TRUE, convergence_threshold = 0, grain_size = 100000L,
+  max_cost = 10, alpha = 0.75, ...)
 
 \method{glove}{Matrix}(tcm, ...)
 }
@@ -32,10 +32,11 @@ See GloVe paper for details: \url{http://nlp.stanford.edu/pubs/glove.pdf}}
 
 \item{num_iters}{number of AdaGrad epochs}
 
-\item{shuffle}{\code{logical} whether to perform shuffling before each SGS iteration.
-Generally this is good idea to set \code{shuffle = TRUE}. But from my experience,
-it don't improve global cost in this particular case. Please report, if you find that
-shuffling improves score.}
+\item{shuffle_seed}{\code{logical} whether to perform shuffling before each SGD iteration.
+Generally this is good idea, but from my experience, in this particular case,
+it doesn't improve convergence. So, there is  no shuffling by default:
+\code{shuffle_seed = NA_integer_}. Please report, if you find that
+shuffling improves your score.}
 
 \item{learning_rate}{learning rate for SGD, I don't recommend to modify this parameter,
 AdaGrad will quickly adjust it to optimal.}
