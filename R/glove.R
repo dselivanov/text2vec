@@ -9,10 +9,11 @@
 #' @param x_max maximum number of cooccurences to use in weighting function.
 #' See GloVe paper for details: \url{http://nlp.stanford.edu/pubs/glove.pdf}
 #' @param num_iters number of AdaGrad epochs
-#' @param shuffle \code{logical} whether to perform shuffling before each SGS iteration.
-#' Generally this is good idea to set \code{shuffle = TRUE}. But from my experience,
-#' it don't improve global cost in this particular case. Please report, if you find that
-#' shuffling improves score.
+#' @param shuffle_seed \code{logical} whether to perform shuffling before each SGD iteration.
+#' Generally this is good idea, but from my experience, in this particular case,
+#' it doesn't improve convergence. So, there is  no shuffling by default:
+#' \code{shuffle_seed = NA_integer_}. Please report, if you find that
+#' shuffling improves your score.
 #' @param learning_rate learning rate for SGD, I don't recommend to modify this parameter,
 #' AdaGrad will quickly adjust it to optimal.
 #' @param verbose whether to display training inforamtion
@@ -40,7 +41,7 @@ glove <- function(tcm,
                   word_vectors_size,
                   x_max,
                   num_iters,
-                  shuffle = FALSE,
+                  shuffle_seed = NA_integer_,
                   learning_rate = 0.05,
                   verbose = TRUE,
                   convergence_threshold = 0.0,
@@ -58,7 +59,7 @@ glove.dgTMatrix <- function(tcm,
                             word_vectors_size,
                             x_max,
                             num_iters,
-                            shuffle = FALSE,
+                            shuffle_seed = NA_integer_,
                             learning_rate = 0.05,
                             verbose = TRUE,
                             convergence_threshold = 0.0,
@@ -69,35 +70,52 @@ glove.dgTMatrix <- function(tcm,
   cost_history <- vector('numeric', num_iters)
   chunk_size <- length(tcm@i)
 
+  # create glove object
   fit <- new(GloveFitter, vocabulary_size, word_vectors_size, x_max, learning_rate, grain_size, max_cost, alpha)
+
+  flag_do_shuffle = !is.na(shuffle_seed)
+  # seed for shuffle
+  if ( flag_do_shuffle  )
+    set.seed(shuffle_seed)
+
   i <- 1
   while (i <= num_iters) {
 
-    iter_time <- system.time(
-      cost <-
-        if (shuffle) {
-          perm <- sample( chunk_size )
-          fit$fit_chunk(tcm@i[perm], tcm@j[perm], tcm@x[perm])
-        } else
-          fit$fit_chunk(tcm@i, tcm@j, tcm@x)
-    )
+    start_time <- Sys.time()
+
+    iter_order <-
+      if ( flag_do_shuffle )
+        sample.int( chunk_size, replace = F )
+      else
+        #fit$fit_chunk will not use it when size == 0
+        vector(mode = 'integer', length = 0L)
+
+    cost <- fit$fit_chunk(tcm@i, tcm@j, tcm@x, iter_order)
 
     if (is.nan(cost))
       stop("Cost becomes NaN, try to use smaller learning_rate or smaller max_cost.")
 
     cost_history[[i]] <- cost / chunk_size
+
     if (verbose)
-      print(paste('epoch', i, ', expected cost =', round(cost_history[[i]], digits = 4), 'elapsed =', round(iter_time[['elapsed']], 2)) )
-    # reset cost
+      print(paste0('epoch ', i,
+                   ', expected cost = ', round(cost_history[[i]], digits = 4),
+                   ', elapsed = ', difftime(Sys.time(), start_time, units = 'secs') %>% round(3),
+                   'sec' ) )
+    # reset cost for nex iteration
     fit$set_cost_zero()
     if ( i > 1 && (cost_history[[i - 1]] / cost_history[[i]] - 1) < convergence_threshold) {
-      message(paste("Early stopping. Improvement at iterartion", i,
+      message(paste("Success: early stopping. Improvement at iterartion", i,
                     "is less then convergence_threshold"))
       break;
     }
 
     i <- i + 1
   }
+  # restore RNG state
+  if ( flag_do_shuffle  )
+    set.seed(NULL)
+
   glove <- c(list('cost_history' = cost_history), fit$get_word_vectors())
 
   class(glove) <- "text2vec_glove_fit"
@@ -110,5 +128,6 @@ glove.Matrix <- function(tcm,
                          ...) {
   if ( !inherits(tcm, 'dgTMatrix') )
     tcm <- as(tcm, 'dgTMatrix')
+
   glove.dgTMatrix(tcm, ... )
 }
