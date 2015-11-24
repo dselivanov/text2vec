@@ -74,6 +74,34 @@ Train GloVe word embeddings model via fully asynchronous parallel AdaGrad.
 
 \item \code{Matrix}: fits GloVe model on Matrix input
 }}
+\examples{
+\dontrun{
+text8 <- read_lines('./text8')
+it <- itoken(text8, preprocess_function = identity,
+             tokenizer = function(x) str_split(x, fixed(" ")))
+vocab <- vocabulary(it) \%>\%
+ prune_vocabulary(term_count_min = 5)
+
+it <- itoken(text8, preprocess_function = identity,
+             tokenizer = function(x) str_split(x, fixed(" ")))
+
+corpus <- create_vocab_corpus(iterator = it,
+                              vocabulary = vocab,
+                              grow_dtm = FALSE,
+                              skip_grams_window = 5)
+tcm <- get_tcm(corpus)
+
+RcppParallel::setThreadOptions(numThreads = 8)
+fit <- glove(tcm = tcm, shuffle_seed = 1L, word_vectors_size = 50,
+              x_max = 10, learning_rate = 0.2,
+              num_iters = 50, grain_size = 1e5,
+              max_cost = 100, convergence_threshold = 0.01)
+word_vectors <- fit$word_vectors[[1]] + fit$word_vectors[[2]]
+rownames(word_vectors) <- rownames(tcm)
+qlst <- prepare_analog_questions('./questions-words.txt', rownames(word_vectors))
+res <- check_accuracy(questions_lst = qlst, m_word_vectors = word_vectors)
+}
+}
 \seealso{
 \url{http://nlp.stanford.edu/projects/glove/}
 }
