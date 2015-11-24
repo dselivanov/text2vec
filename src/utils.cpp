@@ -40,7 +40,6 @@ void fill_vec_val(vector<double>  &vec, double val) {
     vec[i] = val;
 }
 
-
 vector<string> get_ngrams(const CharacterVector terms,
                           uint32_t ngram_min,
                           uint32_t ngram_max,
@@ -49,7 +48,7 @@ vector<string> get_ngrams(const CharacterVector terms,
   // for terms ["a", "b", "c", "d"] and n_min = 1, n_max = 2
   // will build 1:3-grams in following order
   //"a"     "a_b"   "a_b_c" "b"     "b_c"   "b_c_d" "c"     "c_d"   "d"
-  size_t len = terms.size();
+  uint32_t len = terms.size();
 
   // special case for unigram to speed up a little bit
   if(ngram_min == 1 && ngram_max == 1) {
@@ -58,9 +57,13 @@ vector<string> get_ngrams(const CharacterVector terms,
 
   // calculate res size
   size_t out_len = 0;
-  if(len >= ngram_min)
-    for(size_t i = ngram_min; i <= ngram_max; i++)
-      out_len += (len - i) + 1;
+
+  uint32_t i1 = min(len, ngram_min);
+  uint32_t i2 = min(len, ngram_max);
+
+  for(size_t i = i1; i <= i2; i++)
+    out_len += (len - i) + 1;
+
   vector< string> res(out_len);
 
   string k_gram;
@@ -84,3 +87,11 @@ vector<string> get_ngrams(const CharacterVector terms,
   }
   return res;
 }
+
+// //' @export
+// // [[Rcpp::export]]
+// CharacterVector get_ngrams_R(const CharacterVector terms,
+//                              uint32_t ngram_min,
+//                              uint32_t ngram_max) {
+//   return wrap(get_ngrams(terms, ngram_min, ngram_max, "_"));
+// }
