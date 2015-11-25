@@ -40,6 +40,8 @@ public:
     fill_vec_val(grad_sq_b_j, 1.0);
   };
 
+  static inline int is_odd(size_t ind) { return ind & 1; }
+
   inline double weighting_fun(double x, double x_max, double alpha) {
     if(x < x_max)
       return pow(x / x_max, alpha);
@@ -65,16 +67,25 @@ public:
 
     for (size_t i = begin; i < end; i++) {
 
-      if( flag_do_shuffle )
+      if ( flag_do_shuffle )
         // IMPORTANT NOTE
         // subtract 1 here, because we expecte 1-based indices from R
         // sample.int() returns 1-based shuffling indices
         i_iter_order = iter_order [ i ] - 1;
       else
         i_iter_order = i;
+      // we assume input matrix initially is **symmetrical and upper-triangular**
+      // adagrad_iterate will be called 2 times - on this upper-triangular matrix and on transposed one.
+      // So if we want to iterate with random order we will swap indices to
+      // emulate upper-diagonal and lower-diagonal elements
+      if ( is_odd( i ) ) {
+        x_irow_i = x_irow[ i_iter_order ];
+        x_icol_i = x_icol[ i_iter_order ];
+      } else {
+        x_irow_i = x_icol[ i_iter_order ];
+        x_icol_i = x_irow[ i_iter_order ];
+      }
 
-      x_irow_i = x_irow[ i_iter_order ];
-      x_icol_i = x_icol[ i_iter_order ];
       weight = weighting_fun(x_val[ i_iter_order ], x_max, this->alpha);
 
       cost_inner = inner_product(w_i[ x_irow_i ].begin(), w_i[ x_irow_i ].end() ,
