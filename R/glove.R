@@ -60,8 +60,8 @@
 #'               max_cost = 100, convergence_threshold = 0.01)
 #' word_vectors <- fit$word_vectors[[1]] + fit$word_vectors[[2]]
 #' rownames(word_vectors) <- rownames(tcm)
-#' qlst <- prepare_analog_questions('./questions-words.txt', rownames(word_vectors))
-#' res <- check_accuracy(questions_lst = qlst, m_word_vectors = word_vectors)
+#' qlst <- prepare_analogue_questions('./questions-words.txt', rownames(word_vectors))
+#' res <- check_analogue_accuracy(questions_lst = qlst, m_word_vectors = word_vectors)
 #' }
 
 
