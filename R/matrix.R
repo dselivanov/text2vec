@@ -32,7 +32,7 @@
 #' }
 #' @export
 get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c", "lil")) {
-  if(inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
+  if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
     type <- match.arg(type)
     dtm <- corpus$get_dtm()
     switch(type,
@@ -69,10 +69,10 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c", "lil")) 
 #' }
 #' @export
 get_tcm <- function(corpus) {
-  if(inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
+  if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
     tcm <- corpus$get_tcm()
     dim_names <- colnames(tcm)
-    tcm <- tcm + t(tcm)
+    # tcm <- tcm + t(tcm)
     dimnames(tcm) <- list(dim_names, dim_names)
     tcm
   }
@@ -98,8 +98,8 @@ get_tcm <- function(corpus) {
 dtm_get_idf <- function(dtm, log_scale = log, smooth_idf = T)
 {
   # abs is needed for case when dtm is matrix from HashCorpus and signed_hash is used!
-  cs <- colSums( abs (sign (dtm) ) )
-  if(smooth_idf)
+  cs <- colSums( abs(sign(dtm) ) )
+  if (smooth_idf)
     idf <- log_scale(nrow(dtm) / (cs + 1 ))
   else
     idf <- log_scale(nrow(dtm) / (cs))
@@ -128,5 +128,5 @@ dtm_get_tf <- function(dtm, type = c('tf', 'binary'))
                tf = 1 / rowSums(abs(dtm)),
                binary = 1 / rowSums(dtm != 0)
   )
-  Diagonal(dim(dtm)[1], tf)
+  Diagonal(dim(dtm)[[1]], tf)
 }

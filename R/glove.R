@@ -110,27 +110,31 @@ glove.dgTMatrix <- function(tcm,
   i <- 1
   while (i <= num_iters) {
 
-    start_time <- Sys.time()
-
     iter_order <-
       if ( flag_do_shuffle )
         sample.int( chunk_size, replace = F )
       else
-        #fit$fit_chunk will not use it when size == 0
+        #will be not used in fit$fit_chunk when length(iter_order) == 0
         vector(mode = 'integer', length = 0L)
 
-    cost <- fit$fit_chunk(tcm@i, tcm@j, tcm@x, iter_order)
+    cost <-
+      # upper-diagonal elements
+      fit$fit_chunk(tcm@i, tcm@j, tcm@x, iter_order) +
+      # lower-diagonal elements
+      fit$fit_chunk(tcm@j, tcm@i, tcm@x, iter_order)
 
     if (is.nan(cost))
       stop("Cost becomes NaN, try to use smaller learning_rate or smaller max_cost.")
 
-    cost_history[[i]] <- cost / chunk_size
+    cost_history[[i]] <- cost / chunk_size / 2
 
-    if (verbose)
-      print(paste0('epoch ', i,
-                   ', expected cost = ', round(cost_history[[i]], digits = 4),
-                   ', elapsed = ', difftime(Sys.time(), start_time, units = 'secs') %>% round(3),
-                   'sec' ) )
+    if (verbose) {
+      msg <- sprintf("%s - epoch %d, expected cost %.4f",
+                     as.character(Sys.time()),
+                     i,
+                     cost_history[[i]])
+      message(msg)
+    }
     # reset cost for nex iteration
     fit$set_cost_zero()
     if ( i > 1 && (cost_history[[i - 1]] / cost_history[[i]] - 1) < convergence_threshold) {
