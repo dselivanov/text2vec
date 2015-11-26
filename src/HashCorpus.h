@@ -39,12 +39,12 @@ public:
     tcm = SparseTripletMatrix<float>(size, size);
   };
   // total number of tokens in corpus
-  int get_token_count() {return this->get_token_count();};
-  // total number of documents in corpus
-  int get_doc_count() { return doc_count; };
+  // total number of tokens in corpus
+  int get_token_count() {return this -> token_count;};
+  int get_doc_count() { return this -> doc_count; };
 
   void clear_tcm() {this->tcm.clear();};
-  size_t get_tcm_size() {return tcm.size();};
+  size_t get_tcm_size() {return this->tcm.size();};
 
   // implements hashing trick
   void insert_terms (vector< string> &terms, int flag_grow_dtm ) {

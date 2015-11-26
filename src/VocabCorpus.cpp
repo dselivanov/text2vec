@@ -4,8 +4,8 @@ RCPP_MODULE(VocabCorpus) {
   //<vocab, ngram_min, ngram_max, window_size = 0>
   .constructor<CharacterVector, uint32_t, uint32_t, uint32_t >()
   .method( "vocab", &VocabCorpus::get_vocab, "vocabulary - unique terms")
-  .method( "token_count", &VocabCorpus::get_token_count, "returns number of tokens in corpus" )
-  .method( "document_count", &VocabCorpus::get_doc_count, "returns number of documents in corpus")
+  .method( "get_token_count", &VocabCorpus::get_token_count, "returns number of tokens in corpus" )
+  .method( "get_doc_count", &VocabCorpus::get_doc_count, "returns number of documents in corpus")
   .method( "insert_document", &VocabCorpus::insert_document, "inserts new document (character vector) into corpus" )
   .method( "insert_document_batch", &VocabCorpus::insert_document_batch, "inserts multiple documents (list of character vectors) into corpus" )
   .method( "get_tcm", &VocabCorpus::get_tcm, "construct Term-Cooccurence matrix" )

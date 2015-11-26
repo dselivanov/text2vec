@@ -92,11 +92,11 @@ public:
   }
 
   // total number of tokens in corpus
-  int get_token_count() {return this->get_token_count();};
-  int get_doc_count() { return this->get_doc_count(); };
+  int get_token_count() {return this -> token_count;};
+  int get_doc_count() { return this -> doc_count; };
 
   void clear_tcm() {this->tcm.clear();};
-  size_t get_tcm_size() {return tcm.size();};
+  size_t get_tcm_size() {return this->tcm.size();};
 
   CharacterVector get_vocab() {
     CharacterVector vocab_R(vocab.size());
