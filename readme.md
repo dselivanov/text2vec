@@ -4,7 +4,7 @@
 # Tutorials
 
 1. [Vectorization](http://dsnotes.com/blog/text2vec/2015/11/09/text2vec/).
-2. GloVe coming soon.
+2. [GloVe on english wikipedia](dsnotes.com/blog/text2vec/2015/12/01/glove-enwiki/).
 
 # Features
 
