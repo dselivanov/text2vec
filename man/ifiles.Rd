@@ -7,7 +7,7 @@
 \usage{
 ifiles(file_paths, serialized = FALSE, reader_function = read_lines, ...)
 
-idir(path, serialized = FALSE, ...)
+idir(path, serialized = FALSE, reader_function = read_lines, ...)
 }
 \arguments{
 \item{file_paths}{\code{character} paths of input files}

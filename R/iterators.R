@@ -134,10 +134,10 @@ ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines,
 #' @examples
 #' dir_files_iterator <- idir(path = ".")
 #' @export
-idir <- function(path, serialized = FALSE, ...) {
+idir <- function(path, serialized = FALSE, reader_function = read_lines, ...) {
   if (dir.exists(path)) {
     fls <- list.files(path, full.names = T)
-    return( ifiles(fls, serialized, ...) )
+    return( ifiles(fls, serialized, reader_function = read_lines, ...) )
   } else {
     stop( paste(path, "directory doesn't exist") )
   }
