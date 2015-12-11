@@ -17,13 +17,13 @@
 #' splits <- split_vector(vector = runif(100), granularity = 2, splits = 2)
 #' @export
 split_vector <- function(vector, splits, granularity = 1) {
-  if(! is.vector(vector)) stop("vector must be vector or list")
+  if ( !is.vector(vector)) stop("vector must be vector or list")
   if (length(vector) < splits * granularity) {
     warning("Length of input is too small for splitting for a given number
             of splits and level of parallerism. Assuming no splits.")
-    return (list(c(1, length(vector))))
+    return(list(c(1, length(vector))))
   }
-  chunkSize = length(vector) %/% (splits * granularity)
+  #chunkSize = length(vector) %/% (splits * granularity)
   knots = ceiling(seq.int(from = 1, to = length(vector) + 1,
                           length.out = splits * granularity + 1))
   mapply(FUN = function(lower, upper) list(c(lower, upper)), knots[-length(knots)], knots[-1] - 1)
@@ -34,9 +34,9 @@ split_vector <- function(vector, splits, granularity = 1) {
 #' @description Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lda_c' format
 #' @param dtm Document-Term matrix
 to_lda_c <- function(dtm) {
-  if(!inherits(dtm, 'dgCMatrix'))
-    dtm <- as(dtm, 'dgCMatrix')
-  Map(f = function(i1,i2, ind, val) rbind(ind[i1 : i2], as.integer(val[i1 : i2])),
+  if (!inherits(dtm, 'dgCMatrix'))
+    dtm <- as(dtm, 'dgCMatrix') %>% t
+  Map(f = function(i1,i2, ind, val) rbind(ind[i1:i2], as.integer(val[i1:i2])),
       dtm@p[-length(dtm@p)] + 1L,
       dtm@p[-1L],
       MoreArgs = list(ind = dtm@i, val = dtm@x),
@@ -48,9 +48,9 @@ to_lda_c <- function(dtm) {
 #' @description Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lil' format
 #' @param dtm Document-Term matrix
 to_lil <- function(dtm) {
-  if(!inherits(dtm, 'dgCMatrix'))
-    dtm <- as(dtm, 'dgCMatrix')
-  Map(f = function(i1,i2, ind) ind[i1 : i2],
+  if (!inherits(dtm, 'dgCMatrix'))
+    dtm <- as(dtm, 'dgCMatrix') %>% t
+  Map(f = function(i1,i2, ind) ind[i1:i2],
       dtm@p[-length(dtm@p)] + 1L,
       dtm@p[-1L],
       MoreArgs = list(ind = dtm@i),
