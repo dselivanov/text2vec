@@ -137,7 +137,7 @@ ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines,
 idir <- function(path, serialized = FALSE, reader_function = read_lines, ...) {
   if (dir.exists(path)) {
     fls <- list.files(path, full.names = T)
-    return( ifiles(fls, serialized, reader_function = read_lines, ...) )
+    return( ifiles(fls, serialized, reader_function = reader_function, ...) )
   } else {
     stop( paste(path, "directory doesn't exist") )
   }
