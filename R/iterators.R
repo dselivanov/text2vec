@@ -86,6 +86,36 @@ itoken.iserfiles <- function(iterable, progessbar = TRUE, ...) {
                 progessbar = progessbar, ...)
 }
 
+#' @rdname itoken
+#' @export
+itoken.ilines <- function(iterable, preprocess_function, tokenizer, ...) {
+
+  nextEl <- function()
+    nextElem(iterable) %>%
+    preprocess_function %>%
+    tokenizer
+
+  obj <- list(nextElem = nextEl)
+  class(obj) <- c('itoken', 'abstractiter', 'iter')
+  obj
+}
+
+#' @name ilines
+#' @title Creates iterator over lines of connection/file
+#' @description Result of this function usually used in \link{itoken} function.
+#' @param con \code{connection} object or a character string.
+#' @param n \code{integer}, the maximum number of lines to read per iteration.
+#' Negative values indicate that one should read up to the end of the connection.
+#' The default value is 1.
+#' @param ... arguments passed to \code{readLines} function.
+#' @seealso \link{itoken}
+#' @export
+ilines <- function(con, n, ...) {
+  obj <- ireadLines(con = con, n = n, ...)
+  class(obj) <- c('ilines', 'abstractiter', 'iter')
+  obj
+}
+
 #' @name ifiles
 #' @title Creates iterator over text/serialized files from the disk
 #' @description Result of this function usually used in \link{itoken} function.
