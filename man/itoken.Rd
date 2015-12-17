@@ -4,6 +4,7 @@
 \alias{itoken}
 \alias{itoken.character}
 \alias{itoken.ifiles}
+\alias{itoken.ilines}
 \alias{itoken.iserfiles}
 \title{Creates iterator over input object.}
 \usage{
@@ -16,6 +17,8 @@ itoken(iterable, ...)
   progessbar = TRUE, ...)
 
 \method{itoken}{iserfiles}(iterable, progessbar = TRUE, ...)
+
+\method{itoken}{ilines}(iterable, preprocess_function, tokenizer, ...)
 }
 \arguments{
 \item{iterable}{an object from which to generate an iterator.}
