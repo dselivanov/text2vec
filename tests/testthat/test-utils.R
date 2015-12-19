@@ -1,7 +1,6 @@
 context("text2vec utils - tokenization, etc.")
-data(movie_review)
 
-txt <- tolower(movie_review[['review']][[1]])
+txt <- tolower(movie_review$review[[1]])
 
 txt_first_10 <- c("with", "all", "this", "stuff",
              "going", "down", "at", "the",

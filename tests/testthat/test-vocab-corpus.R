@@ -1,15 +1,15 @@
-context("Vocabulary Corpus construction")
-data("movie_review")
+context("vocabulary-corpus construction")
 
 train_ind <- 1:1000
 
-# prep_fun <- function(x) x %>% tolower %>%  word_tokenizer
 txt <- movie_review[['review']][train_ind]
+
 get_test_iterator <- function()
   itoken(txt,
          preprocess_function = tolower,
          tokenizer = word_tokenizer,
          progessbar = F)
+
 test_that("Unigran Vocabulary Corpus construction", {
   # Vocabulary construction
   iterator <- get_test_iterator()
@@ -19,7 +19,7 @@ test_that("Unigran Vocabulary Corpus construction", {
                              serialize_dir = NULL)
   # Vocabulary stats
   expect_equal(length(vocab$vocab$terms), 19297)
-  expect_equal( vocab$vocab$terms [ which.max(vocab$vocab$doc_counts) ], 'the')
+  expect_equal( vocab$vocab$terms[ which.max(vocab$vocab$doc_counts) ], 'the')
   expect_equal( max(vocab$vocab$doc_counts), 992)
   expect_equal( max(vocab$vocab$terms_counts), 13224)
   # VocabCorpus construction
