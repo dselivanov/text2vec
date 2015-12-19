@@ -112,21 +112,17 @@ dtm_get_idf <- function(dtm, log_scale = log, smooth_idf = T)
 #' @description Creates TermFrequency (tf) scaling matrix from Document-Term-Matrix. For examples
 #' see \link{get_dtm}.
 #' @param dtm \code{sparseMatrix} - Document-Term-Matrix
-#' @param type \code{c('tf', 'binary')} - type of TF scaling matrix
-#' Formula for tf :
-#' \code{tf = (Number word appears in document) / (Number words in document)}
-#  For binary:
-#' \code{tf = Does word appears in document (binary encoding): (0 if not appears), (1 if appears)}
+#' @param norm \code{character} - Norm used to normalize term vectors. 'l1' by default, i.e.
+#' scale by bumber of words in document.
 #' @seealso \link{dtm_get_idf}, \link{get_dtm}
 #' @export
-dtm_get_tf <- function(dtm, type = c('tf', 'binary'))
+dtm_get_tf <- function(dtm, norm = c('l1', 'l2'))
 {
-  type <- match.arg(type)
-  tf <- switch(type,
-               # abs is needed for case when dtm is
-               # matrix from HashCorpus and signed_hash is used!
-               tf = 1 / rowSums(abs(dtm)),
-               binary = 1 / rowSums(dtm != 0)
-  )
-  Diagonal(dim(dtm)[[1]], tf)
+  norm <- match.arg(norm)
+  norm_vec <- switch(norm,
+                     # abs is needed for case when dtm is
+                     # matrix from HashCorpus and signed_hash is used!
+                     l1 = rowSums(abs(dtm)),
+                     l2 = rowSums(dtm ^ 2))
+  Diagonal(dim(dtm)[[1]], 1 / norm_vec)
 }
