@@ -4,15 +4,13 @@
 \alias{dtm_get_tf}
 \title{TermFrequency scaling matrix construction from Document-Term-Matrix}
 \usage{
-dtm_get_tf(dtm, type = c("tf", "binary"))
+dtm_get_tf(dtm, norm = c("l1", "l2"))
 }
 \arguments{
 \item{dtm}{\code{sparseMatrix} - Document-Term-Matrix}
 
-\item{type}{\code{c('tf', 'binary')} - type of TF scaling matrix
-Formula for tf :
-\code{tf = (Number word appears in document) / (Number words in document)}
-\code{tf = Does word appears in document (binary encoding): (0 if not appears), (1 if appears)}}
+\item{norm}{\code{character} - Norm used to normalize term vectors. 'l1' by default, i.e.
+scale by bumber of words in document.}
 }
 \description{
 Creates TermFrequency (tf) scaling matrix from Document-Term-Matrix. For examples

@@ -6,14 +6,21 @@
 \alias{tfidf_transformer}
 \title{Scales Document-Term matrix}
 \usage{
-tf_transformer(dtm)
+tf_transformer(dtm, sublinear_tf = FALSE, norm = c("l1", "l2"))
 
-tfidf_transformer(dtm, idf = NULL)
+tfidf_transformer(dtm, idf = NULL, sublinear_tf = FALSE, norm = c("l1",
+  "l2"))
 
 binary_transformer(dtm)
 }
 \arguments{
 \item{dtm}{\code{dgCMatrix} - Document-Term matrix}
+
+\item{sublinear_tf}{\code{logical}, \code{FALSE} by default.
+Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).}
+
+\item{norm}{\code{character} - Norm used to normalize term vectors. 'l1' by default, i.e.
+scale by bumber of words in document.}
 
 \item{idf}{- \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling. See \link{dtm_get_idf}.
 If not provided ( \code{NULL} ) - idf will be calculated form current data.}
@@ -21,7 +28,8 @@ If not provided ( \code{NULL} ) - idf will be calculated form current data.}
 \description{
 \code{tf_transformer} scales each document vector by # of terms in corresponding document.
 
-\code{tf = (Number word appears in document) / (Number words in document) }
+\code{tf = (Number word appears in document) / (Number words in document) } or in case 'l2' norm
+\code{tf = (Number word appears in document) ^ 2 / (Number words in document) ^ 2 }
 
 \code{binary_transformer} store 1 if document contains term and 0 otherwise.
 
@@ -34,7 +42,7 @@ If not provided ( \code{NULL} ) - idf will be calculated form current data.}
 \itemize{
 \item \code{tfidf_transformer}: Transform Document-Term via TF-IDF scaling
 
-\item \code{binary_transformer}: Transform Document-Term into vinary format
+\item \code{binary_transformer}: Transform Document-Term into binary format
 }}
 \seealso{
 \link{dtm_get_idf}, examples provided in \link{mutate}

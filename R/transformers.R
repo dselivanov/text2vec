@@ -73,7 +73,9 @@ filter_commons_transformer <- function (dtm, term_freq = c(uncommon = 0.001, com
 #' @description
 #' \code{tf_transformer} scales each document vector by # of terms in corresponding document.
 #'
-#' \code{tf = (Number word appears in document) / (Number words in document) }
+#' \code{tf = (Number word appears in document) / (Number words in document) } or in case 'l2' norm
+
+#' \code{tf = (Number word appears in document) ^ 2 / (Number words in document) ^ 2 }
 #'
 #' \code{binary_transformer} store 1 if document contains term and 0 otherwise.
 #'
@@ -84,29 +86,50 @@ filter_commons_transformer <- function (dtm, term_freq = c(uncommon = 0.001, com
 #'
 #' @param dtm \code{dgCMatrix} - Document-Term matrix
 #'
+#' @param sublinear_tf \code{logical}, \code{FALSE} by default.
+#' Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).
+#'
+#' @param norm \code{character} - Norm used to normalize term vectors. 'l1' by default, i.e.
+#' scale by bumber of words in document.
+#'
 #' @param idf - \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling. See \link{dtm_get_idf}.
 #' If not provided ( \code{NULL} ) - idf will be calculated form current data.
 #' @seealso \link{dtm_get_idf}, examples provided in \link{mutate}
 #' @export
-tf_transformer <- function(dtm) {
-  dtm_get_tf(dtm, type = 'tf') %*% dtm
+tf_transformer <- function(dtm, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
+
+  norm <- match.arg(norm)
+
+  if (sublinear_tf)
+    dtm@x <- 1 + log(dtm@x)
+
+  tf_scale_matrix <- dtm_get_tf(dtm, norm)
+
+  if (norm == 'l2')
+    dtm@x <- dtm@x ^ 2
+
+  tf_scale_matrix %*% dtm
 }
 
 #' @describeIn tf_transformer Transform Document-Term via TF-IDF scaling
 #' @export
-tfidf_transformer <- function(dtm, idf = NULL) {
-  if(inherits(idf, 'ddiMatrix'))
-    dtm_get_tf(dtm, type = 'tf') %*% dtm %*% idf
-  else {
+tfidf_transformer <- function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
+
+  if (!inherits(dtm, 'dgCMatrix'))
+    dtm <- as(dtm, "dgCMatrix")
+
+  tf <- tf_transformer(dtm, sublinear_tf, norm)
+
+  if (!inherits(idf, 'ddiMatrix')) {
     message("idf scaling matrix not provided, calculating it form input matrix")
-    if(!inherits(dtm, 'dgCMatrix'))
-      dtm <- as(dtm, "dgCMatrix")
-    dtm_get_tf(dtm, type = 'tf') %*% dtm %*% dtm_get_idf(dtm)
+    idf <- dtm_get_idf(dtm)
   }
+
+  tf %*% idf
 }
 
-#' @describeIn tf_transformer Transform Document-Term into vinary format
+#' @describeIn tf_transformer Transform Document-Term into binary format
 #' @export
 binary_transformer <- function(dtm) {
-  dtm_get_tf(dtm, type = 'binary') %*% dtm
+  sign(abs(dtm))
 }
