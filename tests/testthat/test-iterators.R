@@ -37,3 +37,9 @@ test_that("ilines", {
   v <- vocabulary(it2)
   expect_equal(nrow(v$vocab), 4562)
 })
+
+test_that("itoken character", {
+  it2 <- itoken(txt_1, preprocess_function = tolower, tokenizer = word_tokenizer, progessbar = F)
+  v <- vocabulary(it2)
+  expect_equal(nrow(v$vocab), 4562)
+})
