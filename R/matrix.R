@@ -3,10 +3,9 @@
 #' @description Creates Document-Term matrix from Corpus object.
 #' @param corpus HashCorpus or VocabCorpus object.
 #' See \link{create_vocab_corpus}, \link{create_hash_corpus} for details.
-#' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c", "lil")}.
+#' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
 #' "lda_c" - Blei's lda-c format (list of 2*doc_terms_size),
 #' see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
-#' "lil" - same as lda_c, but without terms count. Useful for Minhash algorithm.
 #' @examples
 #' \dontrun{
 #' data(moview_review)
@@ -31,7 +30,7 @@
 #' identical(dtm_tf_idf, dtm_tf_idf_2)
 #' }
 #' @export
-get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c", "lil")) {
+get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
   if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
     type <- match.arg(type)
     dtm <- corpus$get_dtm()
@@ -39,7 +38,6 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c", "lil")) 
            dgTMatrix = dtm,
            dgCMatrix = as(dtm, "dgCMatrix"),
            lda_c = to_lda_c(dtm),
-           lil = to_lil(dtm),
            NULL)
   }
   else

@@ -4,16 +4,15 @@
 \alias{get_dtm}
 \title{Creates Document-Term matrix}
 \usage{
-get_dtm(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c", "lil"))
+get_dtm(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c"))
 }
 \arguments{
 \item{corpus}{HashCorpus or VocabCorpus object.
 See \link{create_vocab_corpus}, \link{create_hash_corpus} for details.}
 
-\item{type}{character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c", "lil")}.
+\item{type}{character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
 "lda_c" - Blei's lda-c format (list of 2*doc_terms_size),
-see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
-"lil" - same as lda_c, but without terms count. Useful for Minhash algorithm.}
+see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}}
 }
 \description{
 Creates Document-Term matrix from Corpus object.
