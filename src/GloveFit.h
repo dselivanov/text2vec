@@ -101,7 +101,7 @@ public:
       cost = weight * cost_inner;
 
       // add cost^2
-      global_cost += 0.5 * cost * cost_inner;
+      global_cost += cost * cost_inner;
 
       //Compute gradients for bias terms
       grad_b_i = cost;
@@ -130,7 +130,7 @@ public:
       grad_sq_b_i[ x_irow_i ] += grad_b_i * grad_b_i;
       grad_sq_b_j[ x_icol_i ] += grad_b_j * grad_b_j;
     }
-    return global_cost;
+    return 0.5 * global_cost;
   }
 
   List get_word_vectors() {
@@ -155,24 +155,19 @@ public:
   }
 
 private:
-  int vocab_size;
-  int word_vec_size;
-  int x_max;
-  double learning_rate;
+  size_t vocab_size, word_vec_size;
+  double x_max, learning_rate;
   // see https://github.com/maciejkula/glove-python/pull/9#issuecomment-68058795
   // clips the cost for numerical stability
   double max_cost;
+  // initial learning rate
   double alpha;
   // word vecrtors
-  vector<vector<double> > w_i;
-  vector<vector<double> > w_j;
+  vector<vector<double> > w_i, w_j;
   // word biases
-  vector<double> b_i;
-  vector<double> b_j;
+  vector<double> b_i, b_j;
   // word vectors square gradients
-  vector<vector<double> > grad_sq_w_i;
-  vector<vector<double> > grad_sq_w_j;
+  vector<vector<double> > grad_sq_w_i, grad_sq_w_j;
   // word biases square gradients
-  vector<double> grad_sq_b_i;
-  vector<double> grad_sq_b_j;
+  vector<double> grad_sq_b_i, grad_sq_b_j;
 };

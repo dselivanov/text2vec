@@ -9,18 +9,18 @@ using namespace Rcpp;
 
 // for unordered_map < <uint32_t, uint32_t>, T >
 namespace std {
-template <>
-struct hash<std::pair<uint32_t, uint32_t>>
-{
-  inline size_t operator()(const std::pair<uint32_t, uint32_t>& k) const
+  template <>
+  struct hash<std::pair<uint32_t, uint32_t>>
   {
-    size_t f = k.first, s = k.second;
-    //http://stackoverflow.com/a/24693169/1069256
-    //should produce no collisions
-    return f << (CHAR_BIT * sizeof(size_t) / 2) | s;
-    // return fast_int_hash(f) + fast_int_hash(s);
-  }
-};
+    inline uint64_t operator()(const std::pair<uint32_t, uint32_t>& k) const
+    {
+      //should produce no collisions
+      //http://stackoverflow.com/a/24693169/1069256
+      //return f << (CHAR_BIT * sizeof(size_t) / 2) | s;
+      //http://stackoverflow.com/questions/2768890/how-to-combine-two-32-bit-integers-into-one-64-bit-integer?lq=1
+      return (uint64_t) k.first << 32 | k.second;
+    }
+  };
 }
 
 
