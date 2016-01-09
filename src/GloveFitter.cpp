@@ -67,7 +67,7 @@ struct AdaGradIter : public Worker {
 
   // process just the elements of the range
   void operator()(size_t begin, size_t end) {
-    global_cost += this->fit.adagrad_iterate(begin, end, x_irow, x_icol, x_val, iter_order);
+    global_cost += this->fit.partial_fit(begin, end, x_irow, x_icol, x_val, iter_order);
   }
   // join my value with that of another global_cost
   void join(const AdaGradIter& rhs) {
@@ -86,26 +86,22 @@ public:
             double alpha):
   GRAIN_SIZE(grain_size),
   gloveFit(vocab_size,  word_vec_size, learning_rate, x_max, max_cost, alpha),
-  adaGradIter(gloveFit)
-  {}
+  adaGradIter(gloveFit) {}
+
+  void set_cost_zero() {adaGradIter.set_cost_zero();};
 
   double fit_chunk(const IntegerVector x_irow,
                    const IntegerVector  x_icol,
                    const NumericVector x_val,
                    const IntegerVector iter_order) {
-
     this->adaGradIter.init(x_irow, x_icol, x_val, iter_order, gloveFit);
     parallelReduce(0, x_irow.size(), adaGradIter, GRAIN_SIZE);
-    double res = this->adaGradIter.global_cost;
-    return (res);
-    // return(0);
+    return (this->adaGradIter.global_cost);
   }
 
   List get_word_vectors() {
     return List::create(_["word_vectors"] = adaGradIter.fit.get_word_vectors());
   }
-
-  void set_cost_zero() {adaGradIter.set_cost_zero();};
 
 private:
   uint32_t GRAIN_SIZE;
