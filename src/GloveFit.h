@@ -4,7 +4,7 @@ using namespace Rcpp;
 using namespace std;
 
 class GloveFit {
-public:
+  public:
   GloveFit(size_t vocab_size,
            size_t word_vec_size,
            double learning_rate,
@@ -49,7 +49,7 @@ public:
       return 1.0;
   }
 
-  inline double adagrad_iterate( size_t begin,
+  inline double partial_fit( size_t begin,
                                  size_t end,
                                  const RVector<int> &x_irow,
                                  const RVector<int> &x_icol,
@@ -75,7 +75,7 @@ public:
       else
         i_iter_order = i;
       // we assume input matrix initially is **symmetrical and upper-triangular**
-      // adagrad_iterate will be called 2 times - on this upper-triangular matrix and on transposed one.
+      // partial_fit will be called 2 times - on this upper-triangular matrix and on transposed one.
       // So if we want to iterate with random order we will swap indices to
       // emulate upper-diagonal and lower-diagonal elements
       if ( is_odd( i ) ) {
@@ -153,21 +153,20 @@ public:
                         _["learning_rate"] = this->learning_rate
     );
   }
-
-private:
-  size_t vocab_size, word_vec_size;
-  double x_max, learning_rate;
-  // see https://github.com/maciejkula/glove-python/pull/9#issuecomment-68058795
-  // clips the cost for numerical stability
-  double max_cost;
-  // initial learning rate
-  double alpha;
-  // word vecrtors
-  vector<vector<double> > w_i, w_j;
-  // word biases
-  vector<double> b_i, b_j;
-  // word vectors square gradients
-  vector<vector<double> > grad_sq_w_i, grad_sq_w_j;
-  // word biases square gradients
-  vector<double> grad_sq_b_i, grad_sq_b_j;
+  private:
+    size_t vocab_size, word_vec_size;
+    double x_max, learning_rate;
+    // see https://github.com/maciejkula/glove-python/pull/9#issuecomment-68058795
+    // clips the cost for numerical stability
+    double max_cost;
+    // initial learning rate
+    double alpha;
+    // word vecrtors
+    vector<vector<double> > w_i, w_j;
+    // word biases
+    vector<double> b_i, b_j;
+    // word vectors square gradients
+    vector<vector<double> > grad_sq_w_i, grad_sq_w_j;
+    // word biases square gradients
+    vector<double> grad_sq_b_i, grad_sq_b_j;
 };
