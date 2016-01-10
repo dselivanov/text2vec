@@ -1,8 +1,8 @@
 Package: text2vec
 Type: Package
 Version: 0.2.0
-Date: 2015-11-11
-Title: Fast and modern text mining framework - vectorization and word embeddings
+Date: 2016-01-10
+Title: Fast and Modern Text Mining Framework - Vectorization and Word Embeddings
 License: MIT + file LICENSE
 Description: Very fast and memory-friendly tools for text vectorization and
     learning word embeddings (GloVe). Also package provides source-agnostic

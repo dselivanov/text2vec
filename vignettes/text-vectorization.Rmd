@@ -48,13 +48,11 @@ Lets briefly review some details of typical analysis pipeline:
 Here we will discuss mostly first stage. Underlying texts can take a lot of space, but vectorized ones usually not, because they are stored in form of sparse matrices. In R it is not very easy (from reason above - copy-on-modify semantics) to iteratively grow DTM. So construction of such objects, even for small collections of documents, can become serious hedache for analysts and researchers. It involves reading the whole collection of text documents into RAM and process it as single vector, which easily increase memory consumption by factor of 2 to 4 (to tell the truth, this is quite optimistically). Fortunately, there is a better, text2vec way. Lets check how it works on simple example.
 
 ## Sentiment analysis on IMDB moview review dataset
-**text2vec** provides `movie_review` dataset. It consists of 25000 movie review, each of which marked ad positive or negative. For faster vignette building time in this vignette we will use sample of 5000 reviews.
+**text2vec** provides `movie_review` dataset. It consists of 5000 movie review, each of which marked ad positive or negative.
 ```{r, loading-data, eval=TRUE}
 library(text2vec)
 data("movie_review")
 set.seed(42L)
-N <- 5000
-movie_review <- movie_review[sample(nrow(movie_review), N), ]
 ```
 To represent documents in vector space, first of all we have to create `term -> term_id` mappings. We use termin *term* instead of *word*, because actually it can be arbitrary *ngram*, not just single word. Having set of documents we want represent them as *sparse matrix*, where each row should corresponds to *document* and each column should corresponds to *term*. This can be done in 2 ways: using **vocabulary**, or by **feature hashing** (hashing trick).
 
