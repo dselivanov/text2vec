@@ -1,0 +1,136 @@
+---
+title: "GloVe word embeddings."
+author: "Dmitriy Selivanov"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GloVe word embeddings.}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+# Word embeddings
+
+After Tomas Mikolov et al. released [word2vec](https://code.google.com/p/word2vec/) tool, there was a boom of articles about words vector representations. One of the greatest is [GloVe](http://nlp.stanford.edu/projects/glove/), which did a big thing while explaining how such algorithms work and refolmulating word2vec optimizations as special kind of factoriazation for word cooccurences matrix. 
+
+Here I will briefly introduce GloVe algorithm and show how to use its text2vec implementation.
+
+# Introduction to GloVe algorithm
+
+GloVe algorithm consists of following steps:
+
+1. Collect word cooccurence statistics in a form of word coocurence matrix $X$. Each element $X_{ij}$ of such matrix represents measure of how often *word i* appears in context of *word j*. Usually we scan our corpus in followinf manner: for each term we look for context terms withing some area - *window_size* before and *window_size* after. Also we give less weight for more distand words. Usually  $$decay = 1/offset$$.
+2. Define soft constraint for each word pair: 
+$$w_i^Tw_j + b_i + b_j = log(X_{ij})$$
+Here $w_i$ - vector for main word, $w_j$ - vector for context word, $b_i$, $b_j$ - scalar biases for main and context words.
+3. Define cost function 
+$$J = \sum_{i=1}^V \sum_{j=1}^V \; f(X_{ij}) ( w_i^T w_j + b_i + b_j - \log X_{ij})^2$$
+Here $f$ is a weighting function which help us to prevent learning only from exremly common word pairs. GloVe authors choose following fucntion:
+
+$$
+f(X_{ij}) = 
+\begin{cases}
+(\frac{X_{ij}}{x_{max}})^\alpha & \text{if } X_{ij} < XMAX \\
+1 & \text{otherwise}
+\end{cases}
+$$
+
+# Canonical example - linguistic regularities
+
+Now lets examine how it works. As commonly known word2vec word vectors capture many linguistic regularities. The most canonical example is following. If we will take word vectors for words *paris, france, italy* and perform following operation: 
+$$vector('paris') - vector('france') + vector('italy')$$ 
+resultiong vector will be close to $vector('rome')$.
+
+Lets download some wikipedia data (same data used in ./demo-word.sh in word2vec):
+```{r, eval=FALSE}
+library(text2vec)
+library(readr)
+temp <- tempfile()
+download.file('http://mattmahoney.net/dc/text8.zip', temp)
+wiki <- read_lines(unz(temp, "text8"))
+unlink(temp)
+```
+
+In the next step we will create vocabulary - set of words for which we want to learn word vectors. Note, that all text2vec's functions that operates on raw text data (`vocabulary`, `create_hash_corpus`, `create_vocab_corpus`) have streaming API and you should iterator over tokens as first argument for these functions.
+```{r, eval=FALSE}
+# create iterator over tokens
+it <- itoken(wiki, 
+             # text is already pre-cleaned
+             preprocess_function = identity, 
+             # all words are single whitespace separated
+             tokenizer = function(x) strsplit(x, split = " ", fixed = T))
+# create vocabulary. Terms will be unigrams (simple words).
+vocab <- vocabulary(it, ngram = c(1L, 1L) )
+```
+These words should not be too rare. Fot example we will can't obtain any meaningful word vector for word which we saw only once in entire corpus. Here we will take only words which appear at least 5 times. *text2vec* provides more options to filter vocabulary - see `?prune_vocabulary` function.
+```{r, eval=FALSE}
+vocab <- prune_vocabulary(vocab, term_count_min = 5)
+```
+Now we have `71290` terms in vocalulary and ready to construct Term-Coocurence matrix (*tcm*).
+```{r, eval=FALSE}
+# as said above, we should provide iterator to create_vocab_corpus function
+it <- itoken(wiki, 
+             # text is already pre-cleaned
+             preprocess_function = identity, 
+             # all words are single whitespace separated
+             tokenizer = function(x) strsplit(x, split = " ", fixed = T))
+
+corpus <- create_vocab_corpus(it, 
+                              # use our filtered vocabulary
+                              vocabulary = vocab,
+                              # don't create document-term matrix
+                              grow_dtm = F,
+                              # use window of 5 for context words
+                              skip_grams_window = 15L)
+
+# get term cooccurence matrix from instance of C++ corpus class
+tcm <- get_tcm(corpus)
+```
+Now we have *tcm* matrix and can factorize it via GloVe algorithm.  
+text2vec uses parallel stochastic gradient descend algorithm. By default it use all cores on your machine, but you can specify number of core directly. For example for using 4 threads, call `RcppParallel::setThreadOptions(numThreads = 4)`. 
+
+Finally lets fit our model (it can take several of minutes to fit!):
+```{r, eval = F}
+fit <- glove(tcm = tcm,
+             word_vectors_size = 50,
+             x_max = 10, learning_rate = 0.2,
+             num_iters = 15)
+```
+> 2016-01-10 14:12:37 - epoch 1, expected cost 0.0662  
+2016-01-10 14:12:51 - epoch 2, expected cost 0.0472  
+2016-01-10 14:13:06 - epoch 3, expected cost 0.0429  
+2016-01-10 14:13:21 - epoch 4, expected cost 0.0406  
+2016-01-10 14:13:36 - epoch 5, expected cost 0.0391  
+2016-01-10 14:13:50 - epoch 6, expected cost 0.0381   
+2016-01-10 14:14:05 - epoch 7, expected cost 0.0373  
+2016-01-10 14:14:19 - epoch 8, expected cost 0.0366  
+2016-01-10 14:14:33 - epoch 9, expected cost 0.0362  
+2016-01-10 14:14:47 - epoch 10, expected cost 0.0358  
+2016-01-10 14:15:01 - epoch 11, expected cost 0.0355  
+2016-01-10 14:15:16 - epoch 12, expected cost 0.0351  
+2016-01-10 14:15:30 - epoch 13, expected cost 0.0349  
+2016-01-10 14:15:44 - epoch 14, expected cost 0.0347  
+2016-01-10 14:15:59 - epoch 15, expected cost 0.0345  
+
+And obtain word vectors
+```{r, eval = F}
+word_vectors <- fit$word_vectors[[1]] + fit$word_vectors[[2]]
+rownames(word_vectors) <- rownames(tcm)
+```
+
+Find closest word vectors for our *paris - france + italy* example:
+```{r, eval = F}
+word_vectors_norm <-  sqrt(rowSums(word_vectors ^ 2))
+
+rome <- word_vectors['paris', , drop = F] - 
+  word_vectors['france', , drop = F] + 
+  word_vectors['italy', , drop = F]
+
+cos_dist <- text2vec:::cosine(rome, 
+                              word_vectors, 
+                              word_vectors_norm)
+head(sort(cos_dist[1,], decreasing = T), 5)
+##    paris    venice     genoa      rome  florence
+##0.7811252 0.7763088 0.7048109 0.6696540 0.6580989
+```
+
+You can achieve **much** better results by experimenting with `skip_grams_window` and parameters of `glove()` function (word vectors size, number of iterations, etc.). For more details and large-scale experiments on wikipedia data see this [post](http://dsnotes.com/blog/text2vec/2015/12/01/glove-enwiki/) in my blog.
