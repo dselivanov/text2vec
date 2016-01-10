@@ -15,7 +15,6 @@
 #' @examples
 #' # Split vector into 4 chunks.
 #' splits <- split_vector(vector = runif(100), granularity = 2, splits = 2)
-#' @export
 split_vector <- function(vector, splits, granularity = 1) {
   if ( !is.vector(vector)) stop("vector must be vector or list")
   if (length(vector) < splits * granularity) {
