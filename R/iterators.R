@@ -29,7 +29,7 @@ itoken <- function(iterable, ...) {
 #' @param chunks_number \code{integer}, the number of pieces that object should be divided into.
 #' @param progessbar \code{logical} indicates whether to show progress bar.
 #' @export
-itoken.character <- function(iterable, preprocess_function, tokenizer, chunks_number = 10, progessbar = TRUE, ...) {
+itoken.character <- function(iterable, preprocess_function, tokenizer, chunks_number = 10, progessbar = interactive(), ...) {
   i <- 1
   it <- idiv(n = length(iterable), chunks = chunks_number)
   max_len = length(iterable)
@@ -53,7 +53,7 @@ itoken.character <- function(iterable, preprocess_function, tokenizer, chunks_nu
 
 #' @rdname itoken
 #' @export
-itoken.ifiles <- function(iterable, preprocess_function, tokenizer, progessbar = TRUE, ...) {
+itoken.ifiles <- function(iterable, preprocess_function, tokenizer, progessbar = interactive(), ...) {
   i <- 1
   max_len = attr(iterable, 'length', exact = FALSE)
   if (progessbar)
@@ -79,7 +79,7 @@ itoken.ifiles <- function(iterable, preprocess_function, tokenizer, progessbar =
 
 #' @rdname itoken
 #' @export
-itoken.iserfiles <- function(iterable, progessbar = TRUE, ...) {
+itoken.iserfiles <- function(iterable, progessbar = interactive(), ...) {
   itoken.ifiles(iterable,
                 preprocess_function = identity,
                 tokenizer = identity,
