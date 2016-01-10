@@ -5,7 +5,7 @@ N <- 100
 # create temp files and dirs
 ########################################
 txt_1 <- movie_review$review[1:N]
-txt_2 <- movie_review$review[(N + 1):2*N]
+txt_2 <- movie_review$review[(N + 1):(2 * N)]
 
 tmp_dir <- tempdir()
 temp_file_1 <- tempfile(tmpdir = tmp_dir)
@@ -21,14 +21,14 @@ test_that("ifiles", {
   it <- ifiles(c(temp_file_1, temp_file_2))
   it2 <- itoken(it, preprocess_function = tolower, tokenizer = word_tokenizer, progessbar = F)
   v <- vocabulary(it2)
-  expect_equal(nrow(v$vocab), 6954)
+  expect_equal(nrow(v$vocab), 7448)
 })
 
 test_that("idir", {
   it <- idir(path = tmp_dir)
   it2 <- itoken(it, preprocess_function = tolower, tokenizer = word_tokenizer, progessbar = F)
   v <- vocabulary(it2)
-  expect_equal(nrow(v$vocab), 6954)
+  expect_equal(nrow(v$vocab), 7448)
 })
 
 test_that("ilines", {
