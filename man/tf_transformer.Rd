@@ -44,9 +44,7 @@ If not provided ( \code{NULL} ) - idf will be calculated form current data.}
 
 \item \code{binary_transformer}: Transform Document-Term into binary format
 }}
-\seealso{
-\link{dtm_get_idf}
-#' @examples
+\examples{
 \dontrun{
 data(moview_review)
 
@@ -61,18 +59,21 @@ it <- itoken(txt, tolower, word_tokenizer)
 corpus <- create_vocab_corpus(it, pruned_vocab)
 dtm <- get_dtm(corpus, type = 'dgCMatrix' )
 
-dtm_filtered <- dtm %>%
+dtm_filtered <- dtm \%>\%
  # filter out very common and very uncommon terms
  filter_commons_transformer( c(0.001, 0.975) )
 
 # simple term-frequency transormation
-transformed_tf <- dtm %>%
+transformed_tf <- dtm \%>\%
  tf_transformer
 
 # tf-idf transormation
 idf <- dtm_get_idf(dtm)
-transformed_tfidf <- dtm %>%
+transformed_tfidf <- dtm \%>\%
  tfidf_transformer( idf)
  }
+}
+\seealso{
+\link{dtm_get_idf}
 }
 
