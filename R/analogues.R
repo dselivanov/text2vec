@@ -50,7 +50,7 @@ prepare_analogue_questions <- function(questions_file_path, vocab_terms, verbose
     message(msg)
   }
 
-  setNames(q, sapply(lines[section_name_ind], .subset2, 2))
+  stats::setNames(q, sapply(lines[section_name_ind], .subset2, 2))
 }
 
 #' @name check_analogue_accuracy
