@@ -11,7 +11,7 @@
 #' @seealso \link{prune_vocabulary}, \link{tf_transformer},
 #' \link{tfidf_transformer}, \link{binary_transformer}
 #' @export
-filter_commons_transformer <- function (dtm, term_freq = c(uncommon = 0.001, common = 0.975) )
+filter_commons_transformer <- function(dtm, term_freq = c(uncommon = 0.001, common = 0.975) )
 {
   uncommon = term_freq[[1]]
   common = term_freq[[2]]
@@ -49,7 +49,7 @@ filter_commons_transformer <- function (dtm, term_freq = c(uncommon = 0.001, com
 #' @param idf - \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling. See \link{dtm_get_idf}.
 #' If not provided ( \code{NULL} ) - idf will be calculated form current data.
 #' @seealso \link{dtm_get_idf}
-#' #' @examples
+#' @examples
 #' \dontrun{
 #' data(moview_review)
 #'

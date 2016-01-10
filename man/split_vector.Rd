@@ -28,8 +28,4 @@ Generating indexes for splitting vector into chunks for parallel processing.
 Parameters granularity and splits controls the numer of chunks in returned list.
 Number of chunks in resulted list in general is equal granularity * splits
 }
-\examples{
-# Split vector into 4 chunks.
-splits <- split_vector(vector = runif(100), granularity = 2, splits = 2)
-}
 

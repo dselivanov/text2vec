@@ -12,9 +12,6 @@
 #' Usually should be equal to number of cores in the machine.
 #' @return \link{list} each element is a \link{integer} \link{vector} pair.
 #' First element in pair is lower index, second element is upper index.
-#' @examples
-#' # Split vector into 4 chunks.
-#' splits <- split_vector(vector = runif(100), granularity = 2, splits = 2)
 split_vector <- function(vector, splits, granularity = 1) {
   if ( !is.vector(vector)) stop("vector must be vector or list")
   if (length(vector) < splits * granularity) {
