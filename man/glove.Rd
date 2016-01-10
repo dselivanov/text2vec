@@ -13,7 +13,7 @@ glove(tcm, vocabulary_size, word_vectors_size, x_max, num_iters,
 
 \method{glove}{dgTMatrix}(tcm, vocabulary_size = nrow(tcm), word_vectors_size,
   x_max, num_iters, shuffle_seed = NA_integer_, learning_rate = 0.05,
-  verbose = TRUE, convergence_threshold = 0, grain_size = 100000L,
+  verbose = TRUE, convergence_threshold = -1, grain_size = 100000L,
   max_cost = 10, alpha = 0.75, ...)
 
 \method{glove}{Matrix}(tcm, ...)
