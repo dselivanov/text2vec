@@ -31,6 +31,14 @@ test_that("Unigran Vocabulary Corpus construction", {
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
   expect_equal( length(m@x), 141714L)
+
+  # check classification accuracy
+  fit <- glmnet::cv.glmnet(x = m, y = movie_review[['sentiment']][train_ind],
+                           family = 'binomial',
+                           type.measure = "auc",
+                           nfolds = 4)
+
+  expect_gt(max(fit$cvm), 0.8)
 })
 
 test_that("Bigram Vocabulary Corpus construction", {
