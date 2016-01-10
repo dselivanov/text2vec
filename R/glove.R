@@ -135,7 +135,7 @@ glove.dgTMatrix <- function(tcm,
                      cost_history[[i]])
       message(msg)
     }
-    # reset cost for nex iteration
+    # reset cost for next iteration
     fit$set_cost_zero()
     if ( i > 1 && (cost_history[[i - 1]] / cost_history[[i]] - 1) < convergence_threshold) {
       message(paste("Success: early stopping. Improvement at iterartion", i,
