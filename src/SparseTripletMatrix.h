@@ -38,10 +38,10 @@ class SparseTripletMatrix {
 public:
   // constructor for sparse matrix
   SparseTripletMatrix():
-    nrow(0), ncol(0), fixed_size_flag(0) {};
+    nrow(0), ncol(0) {};
 
   SparseTripletMatrix(uint32_t nrow, uint32_t ncol):
-    nrow(nrow), ncol(ncol), fixed_size_flag(1) {};
+    nrow(nrow), ncol(ncol) {};
 
   inline uint32_t nrows() {return this->nrow;};
   inline uint32_t ncols() {return this->ncol;};
@@ -52,10 +52,8 @@ public:
   // add or increment elements
   void add(uint32_t i, uint32_t j, T increment) {
     // don't know dimensions in advance
-    if(!fixed_size_flag) {
-      this->nrow = max(i + 1, this->nrow);
-      this->ncol = max(j + 1, this->ncol);
-    }
+    this->nrow = max(i + 1, this->nrow);
+    this->ncol = max(j + 1, this->ncol);
     // simply add our increment
     this->sparse_container[make_pair(i, j)] += increment;
   };
@@ -95,8 +93,6 @@ private:
   // dimensionality of matrix
   uint32_t nrow;
   uint32_t ncol;
-  // do we know dimensions in advance?
-  int fixed_size_flag;
   // number of non-zero elements in matrix
   size_t nnz;
   // container for sparse matrix in triplet form
