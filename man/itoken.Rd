@@ -11,12 +11,12 @@
 itoken(iterable, ...)
 
 \method{itoken}{character}(iterable, preprocess_function, tokenizer,
-  chunks_number = 10, progessbar = TRUE, ...)
+  chunks_number = 10, progessbar = interactive(), ...)
 
 \method{itoken}{ifiles}(iterable, preprocess_function, tokenizer,
-  progessbar = TRUE, ...)
+  progessbar = interactive(), ...)
 
-\method{itoken}{iserfiles}(iterable, progessbar = TRUE, ...)
+\method{itoken}{iserfiles}(iterable, progessbar = interactive(), ...)
 
 \method{itoken}{ilines}(iterable, preprocess_function, tokenizer, ...)
 }
