@@ -35,7 +35,8 @@ public:
     this->ngram_max = ngram_max;
     this->window_size = win_size;
     this->ngram_delim = "_";
-
+    // init dtm with ncol = hash_size
+    dtm = SparseTripletMatrix<uint32_t>(0, size);
     tcm = SparseTripletMatrix<float>(size, size);
   };
   // total number of tokens in corpus
