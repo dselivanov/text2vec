@@ -1,5 +1,7 @@
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/text2vec)](http://cran.r-project.org/package=text2vec)
 [![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=master)](https://travis-ci.org/dselivanov/text2vec)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://badges.mit-license.org)
+[![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/text2vec)](http://cran.rstudio.com/package=text2vec)
 
 # Tutorials
 
