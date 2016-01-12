@@ -58,7 +58,7 @@ create_vocab_corpus <- function(iterator,
       else
         stop(attributes(val)$condition$message)
     }
-    vocab_corpus$insert_document_batch(val, grow_dtm)
+    vocab_corpus$insert_document_batch(val)
   }
   vocab_corpus
 }
@@ -112,7 +112,7 @@ create_hash_corpus <- function(iterator,
       else
         stop(attributes(val)$condition$message)
     }
-    hash_corpus$insert_document_batch(val, grow_dtm)
+    hash_corpus$insert_document_batch(val)
   }
   hash_corpus
 }
