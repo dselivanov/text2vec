@@ -81,6 +81,7 @@ public:
   void insert_document(const CharacterVector doc, int flag_grow_dtm) {
     vector< string> ngrams = get_ngrams(doc, this->ngram_min, this->ngram_max, this->ngram_delim);
     insert_terms(ngrams, flag_grow_dtm);
+    this->dtm.increment_nrows();
     this->doc_count++;
   }
 

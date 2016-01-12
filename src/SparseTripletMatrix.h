@@ -43,6 +43,9 @@ public:
   SparseTripletMatrix(uint32_t nrow, uint32_t ncol):
     nrow(nrow), ncol(ncol) {};
 
+  inline void increment_nrows() {this->nrow++;};
+  inline void increment_ncols() {this->ncol++;};
+
   inline uint32_t nrows() {return this->nrow;};
   inline uint32_t ncols() {return this->ncol;};
   inline size_t size() {
@@ -51,9 +54,6 @@ public:
   void clear() { this->sparse_container.clear(); };
   // add or increment elements
   void add(uint32_t i, uint32_t j, T increment) {
-    // don't know dimensions in advance
-    this->nrow = max(i + 1, this->nrow);
-    this->ncol = max(j + 1, this->ncol);
     // simply add our increment
     this->sparse_container[make_pair(i, j)] += increment;
   };
@@ -83,7 +83,9 @@ public:
     triplet_matrix.slot("j") = J;
     triplet_matrix.slot("x") = X;
     // set dimensions
-    triplet_matrix.slot("Dim") = IntegerVector::create(max(nrow, (uint32_t)rownames.size()), max(ncol, (uint32_t)colnames.size()));
+    triplet_matrix.slot("Dim") =
+      IntegerVector::create(max(nrow, (uint32_t)rownames.size()),
+                            max(ncol, (uint32_t)colnames.size()));
     // set dimension names
     triplet_matrix.slot("Dimnames") = List::create(rownames, colnames);
     return triplet_matrix;
