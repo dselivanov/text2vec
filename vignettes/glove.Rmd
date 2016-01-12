@@ -128,7 +128,7 @@ rome <- word_vectors['paris', , drop = F] -
 cos_dist <- text2vec:::cosine(rome, 
                               word_vectors, 
                               word_vectors_norm)
-head(sort(cos_dist[1,], decreasing = T), 5)
+head(sort(cos_dist[1,], decreasing = T), 10)
 ##    paris    venice     genoa      rome  florence
 ##0.7811252 0.7763088 0.7048109 0.6696540 0.6580989
 ```
