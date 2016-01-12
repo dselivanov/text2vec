@@ -97,8 +97,10 @@ public:
   void insert_document(const CharacterVector doc, int flag_grow_dtm ) {
     vector< string> ngrams = get_ngrams(doc, this->ngram_min, this->ngram_max, this->ngram_delim);
     insert_terms(ngrams, flag_grow_dtm);
+    this->dtm.increment_nrows();
     this->doc_count++;
   }
+
   void insert_document_batch(const ListOf<const CharacterVector> docs_batch, int flag_grow_dtm ) {
     for (auto it:docs_batch)
       insert_document(it, flag_grow_dtm);
