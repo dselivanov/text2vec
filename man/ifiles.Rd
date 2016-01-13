@@ -25,8 +25,6 @@ Only one assumption - it should take path as first argument.}
 \item{...}{arguments passed to other methods (inculding \code{reader_function}).}
 
 \item{path}{\code{character} path of directory, from where read ALL the files.}
-
-\item{check}{\code{logical} check whether dir exists before reading}
 }
 \description{
 Result of this function usually used in \link{itoken} function.

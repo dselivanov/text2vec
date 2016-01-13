@@ -165,7 +165,6 @@ ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines,
 
 #' @rdname ifiles
 #' @param path \code{character} path of directory, from where read ALL the files.
-#' @param check \code{logical} check whether dir exists before reading
 #' @examples
 #' dir_files_iterator <- idir(path = ".")
 #' @export
