@@ -5,9 +5,11 @@
 \alias{ifiles}
 \title{Creates iterator over text/serialized files from the disk}
 \usage{
-ifiles(file_paths, serialized = FALSE, reader_function = read_lines, ...)
+ifiles(file_paths, serialized = FALSE, reader_function = read_lines,
+  check = TRUE, ...)
 
-idir(path, serialized = FALSE, reader_function = read_lines, ...)
+idir(path, serialized = FALSE, reader_function = read_lines, check = TRUE,
+  ...)
 }
 \arguments{
 \item{file_paths}{\code{character} paths of input files}
@@ -18,9 +20,13 @@ pre-tokenized list of character vectors, saved to disk in serialized form (.RDat
 \item{reader_function}{\code{function} which will perform reading of text files from disk.
 Only one assumption - it should take path as first argument.}
 
+\item{check}{\code{logical} check whether files exists before reading}
+
 \item{...}{arguments passed to other methods (inculding \code{reader_function}).}
 
 \item{path}{\code{character} path of directory, from where read ALL the files.}
+
+\item{check}{\code{logical} check whether dir exists before reading}
 }
 \description{
 Result of this function usually used in \link{itoken} function.

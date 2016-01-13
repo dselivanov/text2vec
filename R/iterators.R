@@ -124,16 +124,20 @@ ilines <- function(con, n, ...) {
 #' pre-tokenized list of character vectors, saved to disk in serialized form (.RData, .rds files).
 #' @param reader_function \code{function} which will perform reading of text files from disk.
 #' Only one assumption - it should take path as first argument.
+#' @param check \code{logical} check whether files exists before reading
 #' @param ... arguments passed to other methods (inculding \code{reader_function}).
 #' @seealso \link{itoken}
 #' @examples
 #' current_dir_files <- list.files(path = ".", full.names = TRUE)
 #' files_iterator <- ifiles(current_dir_files)
 #' @export
-ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines, ...) {
-  exists_echeck <- sapply(file_paths, file.exists)
-  if (!any(exists_echeck)) {
-    stop(paste("file(s)", paste(file_paths[!exists_echeck], collapse = '\n'), "don't exist" ))
+ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines,
+                   check = TRUE, ...) {
+  if (check) {
+    exists_check <- sapply(file_paths, file.exists)
+    if (!any(exists_check)) {
+      stop(paste("file(s)", paste(file_paths[!exists_check], collapse = '\n'), "don't exist" ))
+    }
   }
   i <- 1
   N <- length(file_paths)
@@ -161,14 +165,15 @@ ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines,
 
 #' @rdname ifiles
 #' @param path \code{character} path of directory, from where read ALL the files.
+#' @param check \code{logical} check whether dir exists before reading
 #' @examples
 #' dir_files_iterator <- idir(path = ".")
 #' @export
-idir <- function(path, serialized = FALSE, reader_function = read_lines, ...) {
-  if (dir.exists(path)) {
-    fls <- list.files(path, full.names = T)
-    return( ifiles(fls, serialized, reader_function = reader_function, ...) )
-  } else {
-    stop( paste(path, "directory doesn't exist") )
-  }
+idir <- function(path, serialized = FALSE, reader_function = read_lines, check = TRUE, ...) {
+  if (check)
+    if (!dir.exists(path))
+      stop( paste(path, "directory doesn't exist") )
+
+  fls <- list.files(path, full.names = T)
+  return( ifiles(fls, serialized, reader_function = reader_function, ...) )
 }
