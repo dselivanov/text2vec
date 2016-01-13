@@ -10,18 +10,37 @@ get_test_iterator <- function()
          tokenizer = word_tokenizer,
          progessbar = F)
 
-test_that("Unigran Vocabulary Corpus construction", {
-  # Vocabulary construction
+test_that("Vocabulary pruning", {
   iterator <- get_test_iterator()
-  vocab <- vocabulary(iterator,
-                             ngram = c('ngram_min' = 1L,
-                                       'ngram_max' = 1L),
-                             serialize_dir = NULL)
+  vocab <- vocabulary(iterator)
   # Vocabulary stats
   expect_equal(length(vocab$vocab$terms), 19297)
   expect_equal( vocab$vocab$terms[ which.max(vocab$vocab$doc_counts) ], 'the')
   expect_equal( max(vocab$vocab$doc_counts), 992)
   expect_equal( max(vocab$vocab$terms_counts), 13224)
+
+  MAX <- 20L
+  PROP_MAX <- 0.05
+  p_vocab <- prune_vocabulary(vocab,
+                              doc_proportion_max = PROP_MAX,
+                              max_number_of_terms = MAX)
+
+  expect_equal( nrow(p_vocab$vocab), MAX)
+  expect_true( all(p_vocab$vocab$doc_proportions <= PROP_MAX))
+
+  # test for https://github.com/dselivanov/text2vec/issues/46
+  vcorpus <- create_vocab_corpus(get_test_iterator(), vocabulary = p_vocab)
+
+  dtm <- get_dtm(vcorpus)
+
+  expect_identical(dim(dtm), c(length(txt), MAX))
+
+})
+
+test_that("Unigran Vocabulary Corpus construction", {
+  # Vocabulary construction
+  iterator <- get_test_iterator()
+  vocab <- vocabulary(iterator)
   # VocabCorpus construction
 
   vcorpus <- create_vocab_corpus(get_test_iterator(),

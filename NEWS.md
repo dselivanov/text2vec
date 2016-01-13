@@ -1,4 +1,8 @@
-# text2vec 0.2 (2016-01-10)
+# text2vec 0.2.1 - development version
+
+1. 2016-01-13 fix for #46, thanks to @[buhrmann](https://github.com/buhrmann) for reporting 
+
+# text2vec 0.2.0 (2016-01-10)
 
 First CRAN release of text2vec.
 
