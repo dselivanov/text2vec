@@ -108,7 +108,7 @@ class GloveFit {
       grad_b_j = cost;
 
       // Compute gradients for word vector terms.
-      for (int k = 0; k < word_vec_size; k++) {
+      for (uint32_t k = 0; k < word_vec_size; k++) {
 
         grad_k_i = cost * w_j[ x_icol_i ][ k ];
         grad_k_j = cost * w_i[ x_irow_i ][ k ];
