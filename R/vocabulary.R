@@ -18,11 +18,10 @@
 #'  \item{\code{terms_counts} }{ \code{integer} vector of term counts across all documents}
 #'  \item{\code{doc_counts}  }{ \code{integer} vector of document counts
 #'                            that contain corresponding term}
-#'  \item{\code{doc_proportions}   }{ \code{numeric} vector of document proportions
-#'                            that contain corresponding term}
 #'}
 #'
 #' 2. \bold{ngram} - \code{integer} vector, the lower and upper boundary of the range of n-gram-values.
+#' 3. \bold{document_count} - \code{integer} number of documents vocabulary was built.
 #'
 #' @examples
 #' data("movie_review")
@@ -56,10 +55,11 @@ vocabulary.character <- function(src,
     vocab = data.frame('terms' = src,
                        'terms_counts' = rep(NA_integer_, vocab_length),
                        'doc_counts' = rep(NA_integer_, vocab_length),
-                       'doc_proportions' = rep(NA_real_, vocab_length),
+                       # 'doc_proportions' = rep(NA_real_, vocab_length),
                        stringsAsFactors = FALSE
                        ),
-    ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max)
+    ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
+    document_count = NA_integer_
   )
 
   class(res) <- c('text2vec_vocabulary')
@@ -108,7 +108,8 @@ vocabulary.itoken <- function(src,
 
   res <- list(
     vocab = vocab$get_vocab_statistics(),
-    ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max))
+    ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
+    document_count = vocab$get_document_count())
 
   class(res) <- c('text2vec_vocabulary')
   res
@@ -124,6 +125,7 @@ vocabulary.itoken <- function(src,
 #' @param term_count_max maximum number of occurences over all documents.
 #' @param doc_proportion_min minimum proportion of documents which should contain term.
 #' @param doc_proportion_max maximum proportion of documents which should contain term.
+#' @param stop_words - \code{character} vector. Word to remove from vocabulary.
 #' @param max_number_of_terms maximum number of terms in vocabulary.
 #' @seealso \link{vocabulary}
 #' @export
@@ -132,23 +134,57 @@ prune_vocabulary <- function(vocabulary,
                   term_count_max = Inf,
                   doc_proportion_min = 0.0,
                   doc_proportion_max = 1.0,
+                  stop_words = character(0),
                   max_number_of_terms = Inf) {
+
   if (!inherits(vocabulary, 'text2vec_vocabulary'))
     stop('vocabulary should be an object of class text2vec_vocabulary')
 
-  vocab <- vocabulary$vocab
+  vocab_df <- vocabulary$vocab
+  vocab_size <- nrow(vocab_df)
 
-  ind <- vocab[['terms_counts']] >= term_count_min &
-    vocab[['terms_counts']] <= term_count_max &
-    vocab[['doc_proportions']] >= doc_proportion_min &
-    vocab[['doc_proportions']] <= doc_proportion_max
+  douments_count <- vocabulary[['document_count']]
 
-  pruned_vocabulary <- vocab[ind, ]
-  pruned_vocabulary <- pruned_vocabulary[order(pruned_vocabulary$terms_counts, decreasing = T),]
+  ind <- rep(TRUE, vocab_size)
 
-  max_number_of_terms <- min(max_number_of_terms, nrow(pruned_vocabulary))
-  pruned_vocabulary <- list('vocab' = pruned_vocabulary[1:max_number_of_terms, ],
-                            'ngram' = vocabulary[['ngram']])
+  doc_proportion <- NULL
+
+  if (term_count_min > 1L)
+    ind <- ind & (vocab_df[['terms_counts']] >= term_count_min)
+  if (is.finite(term_count_max))
+    ind <- ind & (vocab_df[['terms_counts']] <= term_count_max)
+
+  if (doc_proportion_min > 0) {
+    doc_proportion <- vocab_df[['doc_counts']] / douments_count
+    ind <- ind & (doc_proportion >= doc_proportion_min)
+  }
+
+  if (doc_proportion_max < 1.0) {
+    # not calculated in prev ster
+    if (is.null(doc_proportion))
+      doc_proportion <- vocab_df[['doc_counts']] / douments_count
+
+    ind <- ind & (doc_proportion <= doc_proportion_max)
+  }
+
+  pruned_vocabulary <- vocab_df[ind, ]
+
+  # remove stop words if asked
+  if (is.character(stop_words) && length(stop_words) > 0) {
+    non_stop_words_ind <- !(pruned_vocabulary$terms %in% stop_words)
+    pruned_vocabulary <- pruned_vocabulary[non_stop_words_ind, ]
+  }
+
+  # restrict to max number if asked
+  if (is.finite(max_number_of_terms)) {
+    pruned_vocabulary <- pruned_vocabulary[order(pruned_vocabulary$terms_counts, decreasing = T),]
+    max_number_of_terms <- min(max_number_of_terms, nrow(pruned_vocabulary))
+    pruned_vocabulary <- pruned_vocabulary[1:max_number_of_terms, ]
+  }
+
+  pruned_vocabulary <- list('vocab' = pruned_vocabulary,
+                            'ngram' = vocabulary[['ngram']],
+                            'document_count' = vocabulary[['document_count']])
 
   class(pruned_vocabulary) <- 'text2vec_vocabulary'
 

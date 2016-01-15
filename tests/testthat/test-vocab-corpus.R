@@ -19,13 +19,35 @@ test_that("Vocabulary pruning", {
   expect_equal( max(vocab$vocab$doc_counts), 992)
   expect_equal( max(vocab$vocab$terms_counts), 13224)
 
-  MAX <- 20L
+  COUNT_MAX <- 5000L
+  COUNT_MIN <- 20L
+  PROP_MIN <- 0.05
+  PROP_MAX <- 0.95
+  STOP_WORDS <- c('is', 'in', 'it')
+  p_vocab <- prune_vocabulary(vocab,
+                              term_count_min = COUNT_MIN,
+                              term_count_max = COUNT_MAX,
+                              doc_proportion_min = PROP_MIN,
+                              doc_proportion_max = PROP_MAX,
+                              stop_words = STOP_WORDS,
+                              max_number_of_terms = Inf
+                              )
+  # same number of underlying documents
+  expect_identical(p_vocab$document_count, vocab$document_count)
+  # same ngrams
+  expect_identical(p_vocab$ngram, p_vocab$ngram)
+  # number of terms in prunned vocab
+  expect_equal(nrow(p_vocab$vocab), 425L)
+  # check removed stop words
+  expect_false(any(STOP_WORDS %in% p_vocab$terms))
+
   PROP_MAX <- 0.05
+  LIMIT <- 20L
   p_vocab <- prune_vocabulary(vocab,
                               doc_proportion_max = PROP_MAX,
-                              max_number_of_terms = MAX)
+                              max_number_of_terms = LIMIT)
 
-  expect_equal( nrow(p_vocab$vocab), MAX)
+  expect_equal( nrow(p_vocab$vocab), LIMIT)
   expect_true( all(p_vocab$vocab$doc_proportions <= PROP_MAX))
 
   # test for https://github.com/dselivanov/text2vec/issues/46
@@ -33,7 +55,7 @@ test_that("Vocabulary pruning", {
 
   dtm <- get_dtm(vcorpus)
 
-  expect_identical(dim(dtm), c(length(txt), MAX))
+  expect_identical(dim(dtm), c(length(txt), LIMIT))
 
 })
 

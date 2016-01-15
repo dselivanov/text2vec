@@ -38,11 +38,10 @@ which is actually a \code{list} with following fields:
  \item{\code{terms_counts} }{ \code{integer} vector of term counts across all documents}
  \item{\code{doc_counts}  }{ \code{integer} vector of document counts
                            that contain corresponding term}
- \item{\code{doc_proportions}   }{ \code{numeric} vector of document proportions
-                           that contain corresponding term}
 }
 
 2. \bold{ngram} - \code{integer} vector, the lower and upper boundary of the range of n-gram-values.
+3. \bold{document_count} - \code{integer} number of documents vocabulary was built.
 }
 \description{
 collects unique terms and corresponding statistics from object.
