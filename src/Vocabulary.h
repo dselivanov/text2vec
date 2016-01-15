@@ -40,7 +40,7 @@ public:
     this->vocab.reserve(vocab_size);
     //convert R vocab represenation to C++ represenation
     // also fill terms in right order
-    for (auto term:vocab_R) {
+    for (auto term : vocab_R) {
       //grow vocabulary
       this->vocab.insert(make_pair(as< string >(term), i));
       i++;
@@ -58,7 +58,7 @@ public:
 
       if(term_iterator == this->vocab.end()) {
         term_id = this->vocab.size();
-        // insert term into dictionary
+        // insert term into vocabulary
         this->vocab.insert(make_pair(it, term_id ));
         vocab_statistics.push_back(TermStat( term_id ) );
       }
@@ -88,75 +88,24 @@ public:
      insert_document(s);
   }
 
-  List get_vocab() {
-    CharacterVector vocab_R(vocab.size());
-    for(auto it:vocab)
-      vocab_R[it.second] = it.first;
-    List res = List::create(
-      _["vocab"] = vocab_R,
-      _["ngram_min"] = this->ngram_min,
-      _["ngram_max"] = this->ngram_max );
-    res.attr("class") = "Vocabulary";
-    return res;
-  }
-
-  void filter_vocab( uint32_t term_count_min, uint32_t term_count_max,
-                     double doc_proportion_min, double doc_proportion_max,
-                     int keep_stats = 0 ) {
-    uint32_t term_id;
-    TermStat temp;
-    unordered_map < string, uint32_t > new_vocab;
-    vector< TermStat > new_vocab_statistics;
-    size_t i = 0;
-    for(auto it : this->vocab) {
-      term_id = it.second;
-      // filtering
-      if(this->vocab_statistics[term_id].term_global_count > term_count_min &&
-         this->vocab_statistics[term_id].term_global_count < term_count_max &&
-         (double)(this->vocab_statistics[term_id].document_term_count) / (double)document_count > doc_proportion_min &&
-         (double)(this->vocab_statistics[term_id].document_term_count) / (double)document_count < doc_proportion_max
-         )
-      {
-        new_vocab.insert(make_pair(it.first, i));
-        if(keep_stats) {
-          temp = vocab_statistics[it.second];
-          // new term id
-          temp.term_id = i;
-          new_vocab_statistics.push_back(temp);
-        }
-        i++;
-      }
-    }
-
-    this->vocab = new_vocab;
-
-    if(keep_stats)
-      this->vocab_statistics = new_vocab_statistics;
-    else
-      this->vocab_statistics.clear();
-  }
+  int get_document_count() {return(this->document_count);};
 
   DataFrame get_vocab_statistics() {
     size_t N = vocab.size();
     size_t i = 0;
     CharacterVector terms(N);
-    //IntegerVector term_ids(N);
     IntegerVector term_counts(N);
     IntegerVector doc_counts(N);
     NumericVector doc_prop(N);
     for(auto it:vocab) {
       terms[i] = it.first;
-      //term_ids[i] = it.second;
       term_counts[i] = vocab_statistics[it.second].term_global_count;
       doc_counts[i] = vocab_statistics[it.second].document_term_count;
-      doc_prop[i] = (double)(vocab_statistics[it.second].document_term_count) / (double)document_count;
       i++;
     }
     return DataFrame::create(_["terms"] = terms,
-                        //_["term_id"] = term_ids,
                         _["terms_counts"] = term_counts,
                         _["doc_counts"] = doc_counts,
-                        _["doc_proportions"] = doc_prop,
                         _["stringsAsFactors"] = false );
   }
   void increase_token_count() {token_count++;};
@@ -169,7 +118,7 @@ private:
   uint32_t ngram_max;
   string ngram_delim;
 
-  uint32_t document_count;
+  int document_count;
   uint32_t token_count;
   RCPP_UNORDERED_SET< string > temp_document_word_set;
 };

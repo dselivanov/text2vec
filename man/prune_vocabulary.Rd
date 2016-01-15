@@ -6,7 +6,7 @@
 \usage{
 prune_vocabulary(vocabulary, term_count_min = 1L, term_count_max = Inf,
   doc_proportion_min = 0, doc_proportion_max = 1,
-  max_number_of_terms = Inf)
+  stop_words = character(0), max_number_of_terms = Inf)
 }
 \arguments{
 \item{vocabulary}{vocabulary from \link{vocabulary} function output.}
@@ -18,6 +18,8 @@ prune_vocabulary(vocabulary, term_count_min = 1L, term_count_max = Inf,
 \item{doc_proportion_min}{minimum proportion of documents which should contain term.}
 
 \item{doc_proportion_max}{maximum proportion of documents which should contain term.}
+
+\item{stop_words}{- \code{character} vector. Word to remove from vocabulary.}
 
 \item{max_number_of_terms}{maximum number of terms in vocabulary.}
 }
