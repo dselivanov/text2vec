@@ -3,6 +3,8 @@ context("vocabulary-corpus construction")
 train_ind <- 1:1000
 
 txt <- movie_review[['review']][train_ind]
+ids <- movie_review[['id']][train_ind]
+names(txt) <- ids
 
 get_test_iterator <- function()
   itoken(txt,
@@ -54,9 +56,13 @@ test_that("Vocabulary pruning", {
   vcorpus <- create_vocab_corpus(get_test_iterator(), vocabulary = p_vocab)
 
   dtm <- get_dtm(vcorpus)
-
+  # check we keep names for input. see #51
+  expect_equal(rownames(dtm), ids)
   expect_identical(dim(dtm), c(length(txt), LIMIT))
 
+  # check we keep names for input. see #51
+  dtm_lda_c <- get_dtm(vcorpus, 'lda_c')
+  expect_equal(names(dtm_lda_c), ids)
 })
 
 test_that("Unigran Vocabulary Corpus construction", {

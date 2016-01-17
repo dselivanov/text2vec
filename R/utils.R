@@ -30,11 +30,23 @@ split_vector <- function(vector, splits, granularity = 1) {
 #' @description Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lda_c' format
 #' @param dtm Document-Term matrix
 to_lda_c <- function(dtm) {
-  if (!inherits(dtm, 'dgCMatrix'))
-    dtm <- as(dtm, 'dgCMatrix') %>% t
-  Map(f = function(i1,i2, ind, val) rbind(ind[i1:i2], as.integer(val[i1:i2])),
-      dtm@p[-length(dtm@p)] + 1L,
-      dtm@p[-1L],
-      MoreArgs = list(ind = dtm@i, val = dtm@x),
-      USE.NAMES = F)
+  # probably receive dtm in dgTMatrix
+  if (!inherits(dtm, "dgCMatrix"))
+    dtm <- as( dtm, "dgCMatrix")
+
+  # convert to TDM dgCMatrix format
+  # for simpler lda_c conversion below
+  dtm <- t(dtm)
+
+  m_lda_c <-
+    Map(f = function(i1, i2, ind, val) rbind(ind[i1:i2], as.integer(val[i1:i2])),
+        dtm@p[-length(dtm@p)] + 1L,
+        dtm@p[-1L],
+        MoreArgs = list(ind = dtm@i, val = dtm@x),
+        USE.NAMES = F)
+  # preserve names
+  # dtm now TDM (because of transpose above)
+  # so use colnames!
+  names(m_lda_c) <- colnames(dtm)
+  m_lda_c
 }
