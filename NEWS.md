@@ -1,9 +1,13 @@
 # text2vec 0.2.1 - development version
 
 1. 2016-01-13 fix for #46, thanks to @[buhrmann](https://github.com/buhrmann) for reporting 
-2. 2016-01-16 format of vocabulary changed.
+1. 2016-01-16 format of vocabulary changed.
     * do not keep `doc_proportions`. see #52.
     * add `stop_words` argument to `prune_vocabulary`. signature also was changed.
+1. 2016-01-17 fix for #51. if iterator over tokens returns list with names, these names will be:
+    1. stored as `attr(corpus, 'ids')`
+    1. rownames in dtm
+    1. names for dtm list in `lda_c` format
 
 # text2vec 0.2.0 (2016-01-10)
 
