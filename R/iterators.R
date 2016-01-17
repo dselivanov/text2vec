@@ -44,7 +44,7 @@ itoken.character <- function(iterable, preprocess_function, tokenizer, chunks_nu
       eval(setTxtProgressBar(pb, min(i, max_len)), enclos = env)
 
     i <<- i + n
-    iterable[ix] %>% preprocess_function %>% tokenizer
+    get_iter_next_value(iterable[ix], preprocess_function, tokenizer)
   }
   obj <- list(nextElem = nextEl)
   class(obj) <- c('itoken', 'abstractiter', 'iter')
@@ -61,15 +61,12 @@ itoken.ifiles <- function(iterable, preprocess_function, tokenizer, progessbar =
   env <- environment()
 
   nextEl <- function() {
-
-    res <- nextElem(iterable) %>%
-      preprocess_function %>%
-      tokenizer
+    res <- get_iter_next_value(nextElem(iterable), preprocess_function, tokenizer)
 
     if (progessbar)
       eval(setTxtProgressBar(pb, min(i, max_len)), enclos = env)
-
     i <<- i + 1
+
     res
   }
   obj <- list(nextElem = nextEl)
@@ -90,10 +87,9 @@ itoken.iserfiles <- function(iterable, progessbar = interactive(), ...) {
 #' @export
 itoken.ilines <- function(iterable, preprocess_function, tokenizer, ...) {
 
-  nextEl <- function()
-    nextElem(iterable) %>%
-    preprocess_function %>%
-    tokenizer
+  nextEl <- function() {
+    get_iter_next_value(nextElem(iterable), preprocess_function, tokenizer)
+  }
 
   obj <- list(nextElem = nextEl)
   class(obj) <- c('itoken', 'abstractiter', 'iter')
@@ -152,6 +148,7 @@ ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines,
     i <<- i + 1
     res
   }
+
   obj <- list(nextElem = nextEl)
   if (serialized)
     class(obj) <- c('iserfiles', 'abstractiter', 'iter')
@@ -175,4 +172,12 @@ idir <- function(path, serialized = FALSE, reader_function = read_lines, check =
 
   fls <- list.files(path, full.names = T)
   return( ifiles(fls, serialized, reader_function = reader_function, ...) )
+}
+
+get_iter_next_value <- function(iter_val, preprocess_function, tokenizer) {
+  res <- iter_val %>%
+    preprocess_function %>%
+    tokenizer
+  names(res) <- names(iter_val)
+  res
 }

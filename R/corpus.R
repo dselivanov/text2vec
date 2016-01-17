@@ -22,6 +22,8 @@ create_vocab_corpus <- function(iterator,
                                 vocabulary,
                                 grow_dtm = TRUE,
                                 skip_grams_window = 0L) {
+  ids <- character(0)
+
   if (!grow_dtm && skip_grams_window == 0L)
     stop("At least one of the arguments 'grow_dtm', 'skip_grams_window' should
          satisfy grow_dtm == TRUE or skip_grams_window > 0")
@@ -50,7 +52,7 @@ create_vocab_corpus <- function(iterator,
   }
 
   while (TRUE) {
-    val = try(nextElem(iterator), silent = T)
+    val <- try(nextElem(iterator), silent = T)
     if (class(val) == "try-error") {
       if (attributes(val)$condition$message == "StopIteration")
         break
@@ -59,7 +61,9 @@ create_vocab_corpus <- function(iterator,
         stop(attributes(val)$condition$message)
     }
     vocab_corpus$insert_document_batch(val)
+    ids <- c(ids, names(val))
   }
+  attr(vocab_corpus, 'ids') <- ids
   vocab_corpus
 }
 
@@ -72,6 +76,7 @@ create_hash_corpus <- function(iterator,
                                feature_hasher = feature_hasher(),
                                grow_dtm = TRUE,
                                skip_grams_window = 0) {
+  ids <- character(0)
 
   ngram_min <- feature_hasher$ngram[["ngram_min"]]
   ngram_max <- feature_hasher$ngram[["ngram_max"]]
@@ -104,7 +109,7 @@ create_hash_corpus <- function(iterator,
     }
   }
   while (TRUE) {
-    val = try(nextElem(iterator), silent = T)
+    val <- try(nextElem(iterator), silent = T)
     if (class(val) == "try-error") {
       if (attributes(val)$condition$message == "StopIteration")
         break
@@ -113,6 +118,8 @@ create_hash_corpus <- function(iterator,
         stop(attributes(val)$condition$message)
     }
     hash_corpus$insert_document_batch(val)
+    ids <- c(ids, names(val))
   }
+  attr(hash_corpus, 'ids') <- ids
   hash_corpus
 }
