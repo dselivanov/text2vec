@@ -22,8 +22,6 @@ create_vocab_corpus <- function(iterator,
                                 vocabulary,
                                 grow_dtm = TRUE,
                                 skip_grams_window = 0L) {
-  ids <- character(0)
-
   if (!grow_dtm && skip_grams_window == 0L)
     stop("At least one of the arguments 'grow_dtm', 'skip_grams_window' should
          satisfy grow_dtm == TRUE or skip_grams_window > 0")
@@ -31,40 +29,13 @@ create_vocab_corpus <- function(iterator,
   if (!inherits(iterator, 'iter'))
     stop("iterator argument should be iterator over list of tokens (class 'iter')")
 
-  if (is.numeric(skip_grams_window)) {
-    if ( vocabulary$ngram[["ngram_min"]] == 1 && vocabulary$ngram[["ngram_max"]] == 1 )
-      vocab_corpus <- new(VocabCorpus,
-                    vocab = vocabulary$vocab$terms,
-                    ngram_min = vocabulary$ngram[["ngram_min"]],
-                    ngram_max = vocabulary$ngram[["ngram_max"]],
-                    window_size = skip_grams_window)
-    else {
-      if (skip_grams_window > 0)
-        warning("skip_grams_window can be speciefied only when 1 == ngram_min == ngram_max
-                (at least at the moment). Setting skip_grams_window = 0...")
-      vocab_corpus <- new(VocabCorpus,
-                    vocab = vocabulary$vocab$terms,
-                    ngram_min = vocabulary$ngram[["ngram_min"]],
-                    ngram_max = vocabulary$ngram[["ngram_max"]],
-                    window_size = 0)
-    }
-
-  }
-
-  while (TRUE) {
-    val <- try(nextElem(iterator), silent = T)
-    if (class(val) == "try-error") {
-      if (attributes(val)$condition$message == "StopIteration")
-        break
-      # handle other errors
-      else
-        stop(attributes(val)$condition$message)
-    }
-    vocab_corpus$insert_document_batch(val)
-    ids <- c(ids, names(val))
-  }
-  attr(vocab_corpus, 'ids') <- ids
-  vocab_corpus
+  vocab_corpus <- new(VocabCorpus,
+                      vocab = vocabulary$vocab$terms,
+                      ngram_min = vocabulary$ngram[["ngram_min"]],
+                      ngram_max = vocabulary$ngram[["ngram_max"]],
+                      window_size = skip_grams_window)
+  attr(vocab_corpus, 'ids') <- character(0)
+  corpus_insert(vocab_corpus, iterator)
 }
 
 #' @rdname create_vocab_corpus
@@ -76,38 +47,21 @@ create_hash_corpus <- function(iterator,
                                feature_hasher = feature_hasher(),
                                grow_dtm = TRUE,
                                skip_grams_window = 0) {
-  ids <- character(0)
-
-  ngram_min <- feature_hasher$ngram[["ngram_min"]]
-  ngram_max <- feature_hasher$ngram[["ngram_max"]]
-  hash_size <- feature_hasher$hash_size
-  signed_hash <- feature_hasher$signed_hash
 
   if (!inherits(iterator, 'iter'))
     stop("iterator argument should be iterator over list of tokens (class 'iter')")
 
-  if (is.numeric(skip_grams_window)) {
-    if (ngram_min == 1 && ngram_max == 1 )
-      hash_corpus <- new(HashCorpus,
-                    hash_size = hash_size,
-                    ngram_min = ngram_min,
-                    ngram_max = ngram_max,
-                    window_size = skip_grams_window,
-                    signed_hash)
-    else {
-      if (skip_grams_window > 0) {
-        warning("skip_grams_window can be speciefied only when 1 == ngram_min == ngram_max
-                (at least at the moment). Setting skip_grams_window = 0...")
-      }
+  hash_corpus <- new(HashCorpus,
+                     hash_size = feature_hasher$hash_size,
+                     ngram_min = feature_hasher$ngram[["ngram_min"]],
+                     ngram_max = feature_hasher$ngram[["ngram_max"]],
+                     window_size = skip_grams_window,
+                     feature_hasher$signed_hash)
+  attr(hash_corpus, 'ids') <- character(0)
+  corpus_insert(hash_corpus, iterator)
+}
 
-      hash_corpus <- new(HashCorpus,
-                    hash_size = hash_size,
-                    ngram_min = ngram_min,
-                    ngram_max = ngram_max,
-                    window_size = 0,
-                    signed_hash)
-    }
-  }
+corpus_insert <- function(corpus, iterator) {
   while (TRUE) {
     val <- try(nextElem(iterator), silent = T)
     if (class(val) == "try-error") {
@@ -117,9 +71,8 @@ create_hash_corpus <- function(iterator,
       else
         stop(attributes(val)$condition$message)
     }
-    hash_corpus$insert_document_batch(val)
-    ids <- c(ids, names(val))
+    corpus$insert_document_batch(val)
+    attr(corpus, 'ids') <- c(attr(corpus, 'ids'), names(val))
   }
-  attr(hash_corpus, 'ids') <- ids
-  hash_corpus
+  corpus
 }
