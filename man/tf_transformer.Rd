@@ -22,7 +22,7 @@ Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).}
 \item{norm}{\code{character} - Norm used to normalize term vectors. 'l1' by default, i.e.
 scale by bumber of words in document.}
 
-\item{idf}{- \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling. See \link{dtm_get_idf}.
+\item{idf}{- \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling. See \link{get_idf}.
 If not provided ( \code{NULL} ) - idf will be calculated form current data.}
 }
 \description{
@@ -68,12 +68,12 @@ transformed_tf <- dtm \%>\%
  tf_transformer
 
 # tf-idf transormation
-idf <- dtm_get_idf(dtm)
+idf <- get_idf(dtm)
 transformed_tfidf <- dtm \%>\%
  tfidf_transformer( idf)
  }
 }
 \seealso{
-\link{dtm_get_idf}
+\link{get_idf}
 }
 
