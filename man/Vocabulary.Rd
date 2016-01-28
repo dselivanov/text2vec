@@ -12,7 +12,7 @@ vocabulary(src, ngram = c(ngram_min = 1L, ngram_max = 1L), ...)
   ...)
 
 \method{vocabulary}{itoken}(src, ngram = c(ngram_min = 1L, ngram_max = 1L),
-  serialize_dir = NULL, ...)
+  ...)
 }
 \arguments{
 \item{src}{iterator over \code{list} of \code{character} vectors - documents from which
@@ -23,10 +23,7 @@ user want construct vocabulary. Or, alternatively,
 n-values for different n-grams to be extracted. All values of n such that
 ngram_min <= n <= ngram_max will be used.}
 
-\item{...}{arguments passed to other methods (inculding \link{write_rds} function).}
-
-\item{serialize_dir}{As a \bold{side effect}, we can save tokenized texts in serialized form to disk.
-So, \code{serialize_dir} is a \code{character} - path where to save tokenized input files.}
+\item{...}{arguments passed to other methods (inculding \link{saveRDS} function).}
 }
 \value{
 \code{text2vec_vocabulary} object,

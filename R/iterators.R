@@ -1,11 +1,11 @@
 #' @name itoken
 #' @title Creates iterator over input object.
 #' @description Creates iterator over input object. This iterator usually used in
-#' following functions : \link{vocabulary}, \link{create_vocab_corpus},
-#' \link{create_hash_corpus}. See them for details.
+#' following functions : \link{vocabulary}, \link{create_corpus},
+#' \link{vectorizers}. See them for details.
 #' @param iterable an object from which to generate an iterator.
 #' @param ... arguments passed to other methods (not used at the moment).
-#' @seealso \link{vocabulary}, \link{create_vocab_corpus}, \link{create_hash_corpus}
+#' @seealso \link{vocabulary}, \link{create_corpus}, \link{vectorizers}
 #' @examples
 #' data("movie_review")
 #' txt <- movie_review[['review']][1:100]
@@ -29,7 +29,11 @@ itoken <- function(iterable, ...) {
 #' @param chunks_number \code{integer}, the number of pieces that object should be divided into.
 #' @param progessbar \code{logical} indicates whether to show progress bar.
 #' @export
-itoken.character <- function(iterable, preprocess_function, tokenizer, chunks_number = 10, progessbar = interactive(), ...) {
+itoken.character <- function(iterable,
+                             preprocess_function = identity,
+                             tokenizer = function(x) strsplit(x, ' ', TRUE),
+                             chunks_number = 10,
+                             progessbar = interactive(), ...) {
   i <- 1
   it <- idiv(n = length(iterable), chunks = chunks_number)
   max_len = length(iterable)
@@ -53,7 +57,10 @@ itoken.character <- function(iterable, preprocess_function, tokenizer, chunks_nu
 
 #' @rdname itoken
 #' @export
-itoken.ifiles <- function(iterable, preprocess_function, tokenizer, progessbar = interactive(), ...) {
+itoken.ifiles <- function(iterable,
+                          preprocess_function = identity,
+                          tokenizer = function(x) strsplit(x, ' ', TRUE),
+                          progessbar = interactive(), ...) {
   i <- 1
   max_len = attr(iterable, 'length', exact = FALSE)
   if (progessbar)
@@ -74,18 +81,21 @@ itoken.ifiles <- function(iterable, preprocess_function, tokenizer, progessbar =
   obj
 }
 
-#' @rdname itoken
-#' @export
-itoken.iserfiles <- function(iterable, progessbar = interactive(), ...) {
-  itoken.ifiles(iterable,
-                preprocess_function = identity,
-                tokenizer = identity,
-                progessbar = progessbar, ...)
-}
+# #' @rdname itoken
+# #' @export
+# itoken.iserfiles <- function(iterable, progessbar = interactive(), ...) {
+#   itoken.ifiles(iterable,
+#                 preprocess_function = identity,
+#                 tokenizer = identity,
+#                 progessbar = progessbar, ...)
+# }
 
 #' @rdname itoken
 #' @export
-itoken.ilines <- function(iterable, preprocess_function, tokenizer, ...) {
+itoken.ilines <- function(iterable,
+                          preprocess_function = identity,
+                          tokenizer = function(x) strsplit(x, ' ', TRUE),
+                          ...) {
 
   nextEl <- function() {
     get_iter_next_value(nextElem(iterable), preprocess_function, tokenizer)
@@ -113,35 +123,22 @@ ilines <- function(con, n, ...) {
 }
 
 #' @name ifiles
-#' @title Creates iterator over text/serialized files from the disk
+#' @title Creates iterator over text files from the disk
 #' @description Result of this function usually used in \link{itoken} function.
 #' @param file_paths \code{character} paths of input files
-#' @param serialized \code{logical} indicates, whether to read raw text files or
-#' pre-tokenized list of character vectors, saved to disk in serialized form (.RData, .rds files).
 #' @param reader_function \code{function} which will perform reading of text files from disk.
 #' Only one assumption - it should take path as first argument.
-#' @param check \code{logical} check whether files exists before reading
 #' @param ... arguments passed to other methods (inculding \code{reader_function}).
 #' @seealso \link{itoken}
 #' @examples
 #' current_dir_files <- list.files(path = ".", full.names = TRUE)
 #' files_iterator <- ifiles(current_dir_files)
 #' @export
-ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines,
-                   check = TRUE, ...) {
-  if (check) {
-    exists_check <- sapply(file_paths, file.exists)
-    if (!any(exists_check)) {
-      stop(paste("file(s)", paste(file_paths[!exists_check], collapse = '\n'), "don't exist" ))
-    }
-  }
+ifiles <- function(file_paths, reader_function = readLines, ...) {
   i <- 1
   N <- length(file_paths)
   nextEl <- function() {
     if (i <= N)
-      if (serialized)
-        res <- read_rds(path = file_paths[[i]])
-      else
         res <- reader_function(file_paths[[i]], ...)
     else
       stop('StopIteration', call. = FALSE)
@@ -150,10 +147,7 @@ ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines,
   }
 
   obj <- list(nextElem = nextEl)
-  if (serialized)
-    class(obj) <- c('iserfiles', 'abstractiter', 'iter')
-  else
-    class(obj) <- c('ifiles', 'abstractiter', 'iter')
+  class(obj) <- c('ifiles', 'abstractiter', 'iter')
 
   attr(obj, 'length') <- length(file_paths)
 
@@ -165,13 +159,10 @@ ifiles <- function(file_paths, serialized = FALSE, reader_function = read_lines,
 #' @examples
 #' dir_files_iterator <- idir(path = ".")
 #' @export
-idir <- function(path, serialized = FALSE, reader_function = read_lines, check = TRUE, ...) {
-  if (check)
-    if (!dir.exists(path))
-      stop( paste(path, "directory doesn't exist") )
+idir <- function(path, reader_function = readLines, ...) {
 
   fls <- list.files(path, full.names = T)
-  return( ifiles(fls, serialized, reader_function = reader_function, ...) )
+  return( ifiles(fls, reader_function = reader_function, ...) )
 }
 
 get_iter_next_value <- function(iter_val, preprocess_function, tokenizer) {

@@ -5,20 +5,20 @@
 \alias{itoken.character}
 \alias{itoken.ifiles}
 \alias{itoken.ilines}
-\alias{itoken.iserfiles}
 \title{Creates iterator over input object.}
 \usage{
 itoken(iterable, ...)
 
-\method{itoken}{character}(iterable, preprocess_function, tokenizer,
-  chunks_number = 10, progessbar = interactive(), ...)
-
-\method{itoken}{ifiles}(iterable, preprocess_function, tokenizer,
+\method{itoken}{character}(iterable, preprocess_function = identity,
+  tokenizer = function(x) strsplit(x, " ", TRUE), chunks_number = 10,
   progessbar = interactive(), ...)
 
-\method{itoken}{iserfiles}(iterable, progessbar = interactive(), ...)
+\method{itoken}{ifiles}(iterable, preprocess_function = identity,
+  tokenizer = function(x) strsplit(x, " ", TRUE),
+  progessbar = interactive(), ...)
 
-\method{itoken}{ilines}(iterable, preprocess_function, tokenizer, ...)
+\method{itoken}{ilines}(iterable, preprocess_function = identity,
+  tokenizer = function(x) strsplit(x, " ", TRUE), ...)
 }
 \arguments{
 \item{iterable}{an object from which to generate an iterator.}
@@ -43,8 +43,8 @@ Also you can perform tokenization in \code{preprocess_function}
 }
 \description{
 Creates iterator over input object. This iterator usually used in
-following functions : \link{vocabulary}, \link{create_vocab_corpus},
-\link{create_hash_corpus}. See them for details.
+following functions : \link{vocabulary}, \link{create_corpus},
+\link{vectorizers}. See them for details.
 }
 \examples{
 data("movie_review")
@@ -52,6 +52,6 @@ txt <- movie_review[['review']][1:100]
 it <- itoken(txt, tolower, word_tokenizer, chunks_number = 7)
 }
 \seealso{
-\link{vocabulary}, \link{create_vocab_corpus}, \link{create_hash_corpus}
+\link{vocabulary}, \link{create_corpus}, \link{vectorizers}
 }
 
