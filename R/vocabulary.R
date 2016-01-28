@@ -8,7 +8,6 @@
 #' @param ngram \code{integer} vector. The lower and upper boundary of the range of
 #' n-values for different n-grams to be extracted. All values of n such that
 #' ngram_min <= n <= ngram_max will be used.
-#' @param  ... arguments passed to other methods (inculding \link{write_rds} function).
 #' @return \code{text2vec_vocabulary} object,
 #' which is actually a \code{list} with following fields:
 #'
@@ -31,9 +30,7 @@
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
 #' @export
-vocabulary <- function(src,
-                       ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
-                       ...) {
+vocabulary <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)) {
   UseMethod("vocabulary")
 }
 
@@ -41,9 +38,7 @@ vocabulary <- function(src,
 #' character vector. Terms will be inserted \bold{as is}, without any checks
 #' (ngrams numner, ngram delimiters, etc.).
 #' @export
-vocabulary.character <- function(src,
-                                 ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
-                                 ...) {
+vocabulary.character <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)) {
 
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
@@ -67,43 +62,14 @@ vocabulary.character <- function(src,
 }
 
 #' @describeIn vocabulary collects unique terms and corresponding statistics from object.
-#' @param serialize_dir As a \bold{side effect}, we can save tokenized texts in serialized form to disk.
-#' So, \code{serialize_dir} is a \code{character} - path where to save tokenized input files.
 #' @export
-vocabulary.itoken <- function(src,
-                              ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
-                              serialize_dir = NULL, ...) {
+vocabulary.itoken <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)) {
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
   vocab <- new(VocabularyBuilder, ngram_min, ngram_max)
-  i <- 1
 
-  write_tokens <- FALSE
-  if ( !is.null(serialize_dir) )
-    if ( !dir.exists(serialize_dir) )
-      stop("serialize_dir does not exist")
-  else {
-    base_path <- paste0(serialize_dir, '/part-')
-    write_tokens <- TRUE
-  }
-
-  while (TRUE) {
-    # iterate
-    tokens = try(nextElem(src), silent = TRUE)
-    # check end of iterator
-    if (class(tokens) == "try-error") {
-      if (attributes(tokens)$condition$message == "StopIteration")
-        break
-      # handle other errors
-      else
-        stop(attributes(tokens)$condition$message)
-    }
-    # insert into vocabulary
+  foreach(tokens = src) %do% {
     vocab$insert_document_batch(tokens)
-    # write tokens to disk
-    if (write_tokens)
-      write_rds(tokens, paste0(base_path, i), ...)
-    i <- i + 1
   }
 
   res <- list(

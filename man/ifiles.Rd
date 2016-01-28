@@ -3,24 +3,17 @@
 \name{ifiles}
 \alias{idir}
 \alias{ifiles}
-\title{Creates iterator over text/serialized files from the disk}
+\title{Creates iterator over text files from the disk}
 \usage{
-ifiles(file_paths, serialized = FALSE, reader_function = read_lines,
-  check = TRUE, ...)
+ifiles(file_paths, reader_function = readLines, ...)
 
-idir(path, serialized = FALSE, reader_function = read_lines, check = TRUE,
-  ...)
+idir(path, reader_function = readLines, ...)
 }
 \arguments{
 \item{file_paths}{\code{character} paths of input files}
 
-\item{serialized}{\code{logical} indicates, whether to read raw text files or
-pre-tokenized list of character vectors, saved to disk in serialized form (.RData, .rds files).}
-
 \item{reader_function}{\code{function} which will perform reading of text files from disk.
 Only one assumption - it should take path as first argument.}
-
-\item{check}{\code{logical} check whether files exists before reading}
 
 \item{...}{arguments passed to other methods (inculding \code{reader_function}).}
 
