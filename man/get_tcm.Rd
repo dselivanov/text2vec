@@ -8,7 +8,7 @@ get_tcm(corpus)
 }
 \arguments{
 \item{corpus}{HashCorpus or VocabCorpus object.
-See \link{create_vocab_corpus}, \link{create_hash_corpus} for details.}
+See \link{create_corpus}, \link{vectorizers} for details.}
 }
 \description{
 Creates Term-Coocurnce matrix from Corpus object.
@@ -29,6 +29,6 @@ dim(tcm)
 }
 }
 \seealso{
-\link{create_vocab_corpus}, \link{create_hash_corpus}
+\link{create_corpus}
 }
 

@@ -46,9 +46,9 @@ filter_commons_transformer <- function(dtm, term_freq = c(uncommon = 0.001, comm
 #' @param norm \code{character} - Norm used to normalize term vectors. 'l1' by default, i.e.
 #' scale by bumber of words in document.
 #'
-#' @param idf - \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling. See \link{dtm_get_idf}.
+#' @param idf - \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling. See \link{get_idf}.
 #' If not provided ( \code{NULL} ) - idf will be calculated form current data.
-#' @seealso \link{dtm_get_idf}
+#' @seealso \link{get_idf}
 #' @examples
 #' \dontrun{
 #' data(moview_review)
@@ -73,7 +73,7 @@ filter_commons_transformer <- function(dtm, term_freq = c(uncommon = 0.001, comm
 #'  tf_transformer
 #'
 #' # tf-idf transormation
-#' idf <- dtm_get_idf(dtm)
+#' idf <- get_idf(dtm)
 #' transformed_tfidf <- dtm %>%
 #'  tfidf_transformer( idf)
 #'  }
@@ -85,7 +85,7 @@ tf_transformer <- function(dtm, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
   if (sublinear_tf)
     dtm@x <- 1 + log(dtm@x)
 
-  tf_scale_matrix <- dtm_get_tf(dtm, norm)
+  tf_scale_matrix <- get_tf(dtm, norm)
 
   if (norm == 'l2')
     dtm@x <- dtm@x ^ 2
@@ -104,7 +104,7 @@ tfidf_transformer <- function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c('l
 
   if (!inherits(idf, 'ddiMatrix')) {
     message("idf scaling matrix not provided, calculating it form input matrix")
-    idf <- dtm_get_idf(dtm)
+    idf <- get_idf(dtm)
   }
 
   tf %*% idf
