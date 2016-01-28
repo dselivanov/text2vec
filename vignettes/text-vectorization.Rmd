@@ -60,7 +60,7 @@ To represent documents in vector space, first of all we have to create `term -> 
 Lets examine the first choice. He we collect unique terms from all documents and mark them with *unique_id*. `vocabulary()` function designed specially for this purpose.
 ```{r, vocab-iterator, eval=TRUE}
 it <- itoken(movie_review[['review']], preprocess_function = tolower, 
-             tokenizer = word_tokenizer, chunks_number = 10, progessbar = F)
+             tokenizer = word_tokenizer, chunks_number = 10)
 # using unigrams here
 t1 <- Sys.time()
 vocab <- vocabulary(src = it, ngram = c(1L, 1L))
@@ -69,8 +69,10 @@ print( difftime( Sys.time(), t1, units = 'sec'))
 Now we can costruct Document-Term Matrix (DTM). Again, since all functions related to *corpus* construction have streaming API, we have to create *iterator* and provide it to `create_vocab_corpus` function:
 ```{r, vocab_dtm_1, eval=TRUE}
 it <- itoken(movie_review[['review']], preprocess_function = tolower, 
-             tokenizer = word_tokenizer, chunks_number = 10, progessbar = F)
-corpus <- create_vocab_corpus(it, vocabulary = vocab)
+             tokenizer = word_tokenizer, chunks_number = 10)
+vectorizer <- vocab_vectorizer(vocab)
+corpus <- create_corpus(it, vectorizer)
+
 dtm <- get_dtm(corpus)
 ```
 We got DTM matrix. Lets check its dimension:
@@ -97,7 +99,7 @@ fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']],
                  maxit = 1e3)
 print( difftime( Sys.time(), t1, units = 'sec'))
 plot(fit)
-print (paste("max AUC = ", round(max(fit$cvm), 4)))
+print(paste("max AUC = ", round(max(fit$cvm), 4)))
 ```
 
 Note, that training time is quite high. We can reduce it and also significantly improve accuracy.
@@ -112,8 +114,10 @@ pruned_vocab <- prune_vocabulary(vocab, term_count_min = 10,
  doc_proportion_max = 0.5, doc_proportion_min = 0.001)
 
 it <- itoken(movie_review[['review']], preprocess_function = tolower, 
-             tokenizer = word_tokenizer, chunks_number = 10, progessbar = F)
-corpus <- create_vocab_corpus(it, vocabulary = pruned_vocab)
+             tokenizer = word_tokenizer, chunks_number = 10)
+
+vectorizer <- vocab_vectorizer(pruned_vocab)
+corpus <- create_corpus(it, vectorizer)
 dtm <- get_dtm(corpus)
 ```
 
@@ -144,7 +148,7 @@ fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']],
                  maxit = 1e3)
 print( difftime( Sys.time(), t1, units = 'sec'))
 plot(fit)
-print (paste("max AUC = ", round(max(fit$cvm), 4)))
+print(paste("max AUC = ", round(max(fit$cvm), 4)))
 ```
 
 As you can seem we obtain faster training, and larger AUC.
@@ -156,20 +160,21 @@ We will use up to 3-ngrams:
 
 ```{r, ngram_dtm_1}
 it <- itoken(movie_review[['review']], preprocess_function = tolower, 
-             tokenizer = word_tokenizer, chunks_number = 10, progessbar = F)
+             tokenizer = word_tokenizer, chunks_number = 10)
 
 t1 <- Sys.time()
-vocab <- vocabulary(src = it, ngram = c(1L, 3L))
+vocab <- vocabulary(src = it, ngram = c(1L, 3L)) %>% 
+  prune_vocabulary(term_count_min = 10, 
+                   doc_proportion_max = 0.5, 
+                   doc_proportion_min = 0.001)
 
 print( difftime( Sys.time(), t1, units = 'sec'))
 
-vocab <- vocab %>% 
-  prune_vocabulary(term_count_min = 10, doc_proportion_max = 0.5, doc_proportion_min = 0.001)
-
 it <- itoken(movie_review[['review']], preprocess_function = tolower, 
-             tokenizer = word_tokenizer, chunks_number = 10, progessbar = F)
+             tokenizer = word_tokenizer, chunks_number = 10)
 
-corpus <- create_vocab_corpus(it, vocabulary = vocab)
+vectorizer <- vocab_vectorizer(vocab)
+corpus <- create_corpus(it, vectorizer)
 
 print( difftime( Sys.time(), t1, units = 'sec'))
 
@@ -211,11 +216,11 @@ Here I will demonstrate, how to use feature hashing in **text2vec**:
 t1 <- Sys.time()
 
 it <- itoken(movie_review[['review']], preprocess_function = tolower, 
-             tokenizer = word_tokenizer, chunks_number = 10, progessbar = F)
+             tokenizer = word_tokenizer, chunks_number = 10)
 
-fh <- feature_hasher(hash_size = 2**16, ngram = c(1L, 3L))
+vectorizer <- hash_vectorizer(hash_size = 2 ^ 16, ngram = c(1L, 3L))
+corpus <- create_corpus(it, vectorizer)
 
-corpus <- create_hash_corpus(it, feature_hasher = fh)
 print( difftime( Sys.time(), t1, units = 'sec'))
 
 dtm <- corpus %>% 
