@@ -21,11 +21,12 @@ Imports:
     Rcpp (>= 0.11),
     RcppParallel (>= 4.3.14),
     digest (>= 0.6.8),
-    magrittr (>= 1.5),
-    stringr (>= 1.0.0),
     iterators (>= 1.0.8),
-    readr(>= 0.2.2)
-LinkingTo: Rcpp,
+    foreach,
+    stringr (>= 1.0.0),
+    magrittr (>= 1.5)
+LinkingTo:
+    Rcpp,
     RcppParallel,
     digest
 Suggests:

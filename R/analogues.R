@@ -8,7 +8,7 @@
 #' @seealso \link{check_analogue_accuracy}, \link{glove}
 #' @export
 prepare_analogue_questions <- function(questions_file_path, vocab_terms, verbose = TRUE) {
-  lines <- read_lines(questions_file_path) %>%
+  lines <- readLines(questions_file_path) %>%
     tolower %>%
     str_split(fixed(" "))
 
