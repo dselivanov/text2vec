@@ -50,3 +50,37 @@ to_lda_c <- function(dtm) {
   names(m_lda_c) <- colnames(dtm)
   m_lda_c
 }
+
+coerce_dgTMatrix <- function(dtm, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
+  switch(type,
+         dgTMatrix = dtm,
+         dgCMatrix = as(dtm, "dgCMatrix"),
+         lda_c = to_lda_c(dtm),
+         NULL)
+}
+
+rbind_dgTMatrix <- function(...) {
+  res <- new('dgTMatrix')
+  mat_list <- list(...)
+
+  ncols <- vapply(mat_list, ncol, FUN.VALUE = 0L)
+  stopifnot( length(unique(ncols)) == 1)
+
+  all_colnames <- sapply(mat_list, colnames)
+  stopifnot( length(unique(all_colnames)) == 1)
+
+  nrows <- vapply(mat_list, nrow, FUN.VALUE = 0L)
+  offset <- cumsum(c(0L, nrows[-length(nrows)]))
+
+  res@i <- mapply(function(m, offs) m@i + offs,
+                  mat_list, offset,
+                  SIMPLIFY = F) %>%
+    do.call(c, .)
+  res@j <- lapply(mat_list, function(m) m@j) %>% do.call(c, .)
+  res@x <- lapply(mat_list, function(m) m@x) %>% do.call(c, .)
+  res_rownames <- lapply(mat_list, rownames) %>% do.call(c, .)
+
+  res@Dim <- c(sum(nrows), ncols[[1]])
+  res@Dimnames <- list(res_rownames, all_colnames[[1]] )
+  res
+}
