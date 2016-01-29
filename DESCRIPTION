@@ -22,7 +22,7 @@ Imports:
     RcppParallel (>= 4.3.14),
     digest (>= 0.6.8),
     iterators (>= 1.0.8),
-    foreach,
+    foreach(>= 1.4.3),
     stringr (>= 1.0.0),
     magrittr (>= 1.5)
 LinkingTo:
