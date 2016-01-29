@@ -95,8 +95,7 @@ test_that("bi-gram Vocabulary Corpus construction", {
 
   vocab <- vocabulary(iterator,
                       ngram = c('ngram_min' = 2L,
-                                'ngram_max' = 2L),
-                      serialize_dir = NULL)
+                                'ngram_max' = 2L))
 
   expect_equal(sum(grepl("_", vocab$vocab$terms, fixed = T)), 121333L)
   expect_equal(length(vocab$vocab$terms), 121333L)
@@ -116,8 +115,7 @@ test_that("Unigram + Bigram Vocabulary Corpus construction", {
   iterator <- get_test_iterator()
   vocab <- vocabulary(iterator,
                       ngram = c('ngram_min' = 1L,
-                                'ngram_max' = 2L),
-                      serialize_dir = NULL)
+                                'ngram_max' = 2L))
   expect_equal(length(vocab$vocab$terms), 140630L)
   # VocabCorpus construction
   vectorizer <- vocab_vectorizer(vocab)
