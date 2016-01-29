@@ -38,15 +38,10 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
     type <- match.arg(type)
     dtm <- corpus$get_dtm()
     dtm@Dimnames[[1]] <- attr(corpus, 'ids')
-    switch(type,
-           dgTMatrix = dtm,
-           dgCMatrix = as(dtm, "dgCMatrix"),
-           lda_c = to_lda_c(dtm),
-           NULL)
+    coerce_dgTMatrix(dtm, type)
   }
   else
     stop("corpus should be instance of Rcpp_HashCorpus or Rcpp_VocabCorpus classes")
-
 }
 
 #' @name create_dtm
@@ -66,27 +61,43 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' over \code{itoken_list} under the hood.
 #' @return Document-Term Matrix
 #' @seealso \link{itoken}
+#' @examples
+#' data("movie_review")
+#' N_WORKERS <- 4
+#' splits <- split(movie_review$review, rep(1:N_WORKERS, each = nrow(movie_review) / N_WORKERS ))
+#' jobs <- lapply(splits, itoken, tolower, word_tokenizer)
+#' vectorizer <- hash_vectorizer()
+#' doParallel::registerDoParallel(N_WORKERS)
+#' dtm <- create_dtm(jobs, vectorizer, type = 'dgTMatrix'))
 #' @export
 create_dtm <- function(itoken_list,
                        vectorizer,
-                       type = c("dgCMatrix", "dgTMatrix", "lda_c"), ...) {
-
+                       type = c("dgCMatrix", "dgTMatrix", "lda_c"),
+                       ...) {
   type <- match.arg(type)
+
   combine_fun <- switch(type,
                         dgCMatrix = rbind,
-                        dgTMatrix = rbind,
+                        dgTMatrix = rbind_dgTMatrix,
                         lda_c = c)
 
-  dtm <-
-    foreach(it = itoken_list,
-          .combine = combine_fun,
-          .inorder = T,
-          .multicombine = T,
-          ...) %dopar%
-          {
-            corp <- vectorizer(it)
-            dtm_chunk <- get_dtm(corp, 'dgTMatrix')
+  foreach(it = itoken_list,
+        .combine = combine_fun,
+        .inorder = T,
+        .multicombine = T,
+        ...) %dopar%
+        {
+          corp <- vectorizer(it)
+          # get it in triplet form - fastest and most
+          # memory efficient way because internally it
+          # kept in triplet form
+          dtm_chunk <- get_dtm(corp, 'dgTMatrix')
+          # remove corpus and trigger gc()!
+          # this will release a lot of memory
+          rm(corp); gc();
+          if (type != 'dgTMatrix')
+            coerce_dgTMatrix(dtm_chunk, type)
+          else
             dtm_chunk
-          }
-  dtm
+        }
 }
