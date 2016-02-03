@@ -62,13 +62,16 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' @return Document-Term Matrix
 #' @seealso \link{itoken}
 #' @examples
+#' \dontrun{
 #' data("movie_review")
-#' N_WORKERS <- 4
+#' # set to number of cores on your machine
+#' N_WORKERS <- 1
 #' splits <- split(movie_review$review, rep(1:N_WORKERS, each = nrow(movie_review) / N_WORKERS ))
 #' jobs <- lapply(splits, itoken, tolower, word_tokenizer)
 #' vectorizer <- hash_vectorizer()
 #' doParallel::registerDoParallel(N_WORKERS)
-#' dtm <- create_dtm(jobs, vectorizer, type = 'dgTMatrix'))
+#' dtm <- create_dtm(jobs, vectorizer, type = 'dgTMatrix')
+#' }
 #' @export
 create_dtm <- function(itoken_list,
                        vectorizer,
