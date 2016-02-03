@@ -75,8 +75,55 @@ vocabulary.itoken <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)
   res <- list(
     vocab = vocab$get_vocab_statistics(),
     ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
-    document_count = vocab$get_document_count())
+    document_count = vocab$get_document_count()
+  )
 
+  class(res) <- c('text2vec_vocabulary')
+  res
+}
+
+#' @describeIn vocabulary collects unique terms and corresponding statistics from
+#' list of itoken iterators. If parallel backend is registered, it will build vocabulary
+#' in parallel using \link{foreach}.
+#' @param ... additional arguments to \link{foreach} function.
+#' @export
+vocabulary.list <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),  ...) {
+  stopifnot( all( vapply(X = src, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
+
+  foreach(it = src,
+          .combine = combine_vocabulary,
+          .inorder = FALSE,
+          .multicombine = TRUE,
+          ...) %dopar%
+          {
+            vocabulary(it, ngram)
+          }
+}
+
+combine_vocabulary <- function(...) {
+  vocab_list <- list(...)
+  ngram <- vocab_list[[1]][['ngram']]
+
+  # extract vocabulary stats data.frame and rbind them
+  combined_vocab <- vocab_list %>%
+    lapply(function(x) x[['vocab']]) %>%
+    rbindlist
+
+  # reduce by terms
+  combined_vocab <- combined_vocab[, .(terms_counts = sum(terms_counts),
+                                       doc_counts = sum(doc_counts)),
+                                   by = terms]
+  setcolorder(combined_vocab, c('terms', 'terms_counts', 'doc_counts'))
+
+  combined_document_count <- vocab_list %>%
+    vapply(function(x) x[['document_count']], FUN.VALUE = NA_integer_) %>%
+    sum
+
+  res <- list(
+    vocab = combined_vocab,
+    ngram = ngram,
+    document_count = combined_document_count
+  )
   class(res) <- c('text2vec_vocabulary')
   res
 }

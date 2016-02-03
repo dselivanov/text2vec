@@ -4,6 +4,7 @@
 \alias{vocabulary}
 \alias{vocabulary.character}
 \alias{vocabulary.itoken}
+\alias{vocabulary.list}
 \title{Creates vocabulary (unique terms)}
 \usage{
 vocabulary(src, ngram = c(ngram_min = 1L, ngram_max = 1L))
@@ -11,6 +12,8 @@ vocabulary(src, ngram = c(ngram_min = 1L, ngram_max = 1L))
 \method{vocabulary}{character}(src, ngram = c(ngram_min = 1L, ngram_max = 1L))
 
 \method{vocabulary}{itoken}(src, ngram = c(ngram_min = 1L, ngram_max = 1L))
+
+\method{vocabulary}{list}(src, ngram = c(ngram_min = 1L, ngram_max = 1L), ...)
 }
 \arguments{
 \item{src}{iterator over \code{list} of \code{character} vectors - documents from which
@@ -20,6 +23,8 @@ user want construct vocabulary. Or, alternatively,
 \item{ngram}{\code{integer} vector. The lower and upper boundary of the range of
 n-values for different n-grams to be extracted. All values of n such that
 ngram_min <= n <= ngram_max will be used.}
+
+\item{...}{additional arguments to \link{foreach} function.}
 }
 \value{
 \code{text2vec_vocabulary} object,
@@ -47,6 +52,10 @@ character vector. Terms will be inserted \bold{as is}, without any checks
 (ngrams numner, ngram delimiters, etc.).
 
 \item \code{itoken}: collects unique terms and corresponding statistics from object.
+
+\item \code{list}: collects unique terms and corresponding statistics from
+list of itoken iterators. If parallel backend is registered, it will build vocabulary
+in parallel using \link{foreach}.
 }}
 \examples{
 data("movie_review")

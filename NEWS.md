@@ -8,6 +8,9 @@
     1. stored as `attr(corpus, 'ids')`
     1. rownames in dtm
     1. names for dtm list in `lda_c` format
+1. 2016-02-02 high level function for corpus and vocabulary construction. In parallel if any parallel backend was registred.
+    1. construction of vocabulary from list of `itoken`. 
+    1. construction of dtm from list of `itoken`. 
 
 # text2vec 0.2.0 (2016-01-10)
 

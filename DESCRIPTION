@@ -1,13 +1,13 @@
 Package: text2vec
 Type: Package
-Version: 0.2.1
-Date: 2016-01-10
+Version: 0.3.0
+Date: 2016-01-31
 Title: Fast and Modern Text Mining Framework - Vectorization and Word Embeddings
 License: MIT + file LICENSE
 Description: Very fast and memory-friendly tools for text vectorization and
     learning word embeddings (GloVe). Also package provides source-agnostic
     streaming API, which allows to perform analysis of collections
-    of documents, which are much larger the available RAM.
+    of documents, which are much larger than available RAM.
 Authors@R: person("Dmitriy", "Selivanov", role = c("aut", "cre"),
     email = "selivanov.dmitriy@gmail.com")
 Maintainer: Dmitriy Selivanov <selivanov.dmitriy@gmail.com>
@@ -23,6 +23,7 @@ Imports:
     digest (>= 0.6.8),
     iterators (>= 1.0.8),
     foreach(>= 1.4.3),
+    data.table(>= 1.9.6),
     stringr (>= 1.0.0),
     magrittr (>= 1.5)
 LinkingTo:
@@ -33,7 +34,8 @@ Suggests:
     testthat,
     knitr,
     rmarkdown,
-    glmnet
+    glmnet,
+    parallel
 URL: https://github.com/dselivanov/text2vec
 BugReports: https://github.com/dselivanov/text2vec/issues
 VignetteBuilder: knitr

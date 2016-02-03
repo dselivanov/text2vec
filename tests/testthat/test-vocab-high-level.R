@@ -1,0 +1,34 @@
+context("vocabulary-corpus construction")
+
+split_into <- function(vec, nparts) {
+  max_part_len <- ceiling(length(vec) / nparts)
+  suppressWarnings( split(vec, rep(1:nparts, each = max_part_len)) )
+}
+
+get_test_iterator <- function(txt)
+  itoken(txt,
+         preprocess_function = tolower,
+         tokenizer = word_tokenizer,
+         progessbar = F)
+
+train_ind <- 1:1000
+N_WORKER <- 4
+
+txt <- movie_review[['review']][train_ind]
+ids <- movie_review[['id']][train_ind]
+
+txt_splits <- split(txt, N_WORKER)
+
+
+test_that("Vocabulary with foreach", {
+  iterator <- get_test_iterator(txt)
+  vocab_1 <- vocabulary(iterator)
+
+  iterator_list <- lapply(txt_splits, get_test_iterator)
+  vocab_2 <- vocabulary(iterator_list)
+
+  expect_equal(sort(vocab_1$vocab$terms),  sort(vocab_2$vocab$terms))
+  expect_equal(vocab_1$document_count,  vocab_2$document_count)
+  expect_equal(vocab_1$document_count,  max(train_ind))
+  expect_equal(vocab_1$ngram,  vocab_2$ngram)
+})

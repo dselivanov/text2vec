@@ -32,6 +32,18 @@ User should keep in mind, that he/she should split data itself and
 provide list of \link{itoken} iterators. Each element of \code{itoken_list}
 will be handled at separate thread and at the end they will be combined.
 }
+\examples{
+\dontrun{
+data("movie_review")
+# set to number of cores on your machine
+N_WORKERS <- 1
+splits <- split(movie_review$review, rep(1:N_WORKERS, each = nrow(movie_review) / N_WORKERS ))
+jobs <- lapply(splits, itoken, tolower, word_tokenizer)
+vectorizer <- hash_vectorizer()
+doParallel::registerDoParallel(N_WORKERS)
+dtm <- create_dtm(jobs, vectorizer, type = 'dgTMatrix')
+}
+}
 \seealso{
 \link{itoken}
 }
