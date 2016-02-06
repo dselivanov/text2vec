@@ -50,7 +50,7 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' If parallel backend is registered, it will construct DTM in multiple threads.
 #' @details User should keep in mind, that he/she should split data itself and
 #' provide list of \link{itoken} iterators. Each element of \code{itoken_list}
-#' will be handled at separate thread and at the end they will be combined.
+#' will be handled in separate thread and at the end they will be combined.
 #' @param itoken_list \code{list} of iterators over tokens - \code{itoken}.
 #' Each element is a list of tokens = tokenized and normalized strings.
 #' @param vectorizer \code{function} vectorizer function.

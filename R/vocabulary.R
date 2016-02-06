@@ -110,14 +110,12 @@ combine_vocabulary <- function(...) {
     rbindlist
 
   # reduce by terms
-  combined_vocab <- combined_vocab[, .(terms_counts = sum(terms_counts),
-                                       doc_counts = sum(doc_counts)),
+  combined_vocab <- combined_vocab[, .('terms_counts' = sum(terms_counts),
+                                       'doc_counts' = sum(doc_counts)),
                                    by = terms]
   setcolorder(combined_vocab, c('terms', 'terms_counts', 'doc_counts'))
 
-  combined_document_count <- vocab_list %>%
-    vapply(function(x) x[['document_count']], FUN.VALUE = NA_integer_) %>%
-    sum
+  combined_document_count <- sum(vapply(vocab_list, function(x) x[['document_count']], FUN.VALUE = NA_integer_))
 
   res <- list(
     vocab = combined_vocab,

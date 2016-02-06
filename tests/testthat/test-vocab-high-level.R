@@ -17,7 +17,7 @@ N_WORKER <- 4
 txt <- movie_review[['review']][train_ind]
 ids <- movie_review[['id']][train_ind]
 
-txt_splits <- split(txt, N_WORKER)
+txt_splits <- split_into(txt, N_WORKER)
 
 
 test_that("Vocabulary with foreach", {
