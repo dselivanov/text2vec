@@ -126,7 +126,7 @@ dtm <- get_dtm(corpus)
 Also we can (and usually should!) apply **[TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) transofrmation**, which will increase weight for document-specific terms and decrease weight for widely used terms:
 
 ```{r, tfidf_dtm_1}
-dtm <- dtm %>% tfidf_transformer
+dtm <- dtm %>% transformer_tfidf
 dim(dtm)
 ```
 
@@ -180,7 +180,7 @@ print( difftime( Sys.time(), t1, units = 'sec'))
 
 dtm <- corpus %>% 
   get_dtm %>% 
-  tfidf_transformer
+  transformer_tfidf
 
 
 dim(dtm)
@@ -225,7 +225,7 @@ print( difftime( Sys.time(), t1, units = 'sec'))
 
 dtm <- corpus %>% 
   get_dtm %>% 
-  tfidf_transformer
+  transformer_tfidf
 
 dim(dtm)
 
