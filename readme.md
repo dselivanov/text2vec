@@ -26,7 +26,8 @@ At the moment we cover two following topics:
 
 - The core of the functionality is **carefully written in C++**. Also this means text2vec is **memory friendly**.
 - Some parts (GloVe training) are fully **parallelized** using an excellent [RcppParallel](http://rcppcore.github.io/RcppParallel/) package. This means, **parallel features work on OS X, Linux, Windows and Solaris(x86) without any additinal tuning/hacking/tricks**.
-- **Streaming API**, this means users don't have to load all the data into RAM. **text2vec** allows processing streams of chunks.
+- High-level parallelization for text vectorization and vocabulary construction (on top of `foreach` package).
+- **Streaming API** - users don't have to load all the data into RAM. **text2vec** allows processing streams of chunks.
 
 ## API
 
@@ -47,6 +48,5 @@ Project has [issue tracker on github](https://github.com/dselivanov/text2vec/iss
 If you like it, you **can help**:
 
 - Test and leave feedback on [github issuer tracker](https://github.com/dselivanov/text2vec/issues) (preferably) or directly by email.
-    - package is tested on linux and OS X platforms, so Windows users are especially welcome.
 - Fork and start contributing. Vignettes, docs, tests, use cases are very welcome.
 - Or just give me a star on [project page](https://github.com/dselivanov/text2vec) :-)
