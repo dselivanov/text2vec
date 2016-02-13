@@ -82,3 +82,8 @@ rbind_dgTMatrix <- function(...) {
   res@Dimnames <- list(res_rownames, all_colnames[[1]] )
   res
 }
+
+split_into <- function(vec, nparts) {
+  max_part_len <- ceiling(length(vec) / nparts)
+  suppressWarnings( split(vec, rep(1:nparts, each = max_part_len)) )
+}
