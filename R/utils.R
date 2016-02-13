@@ -66,7 +66,7 @@ rbind_dgTMatrix <- function(...) {
   ncols <- vapply(mat_list, ncol, FUN.VALUE = 0L)
   stopifnot( length(unique(ncols)) == 1)
 
-  all_colnames <- sapply(mat_list, colnames)
+  all_colnames <- lapply(mat_list, colnames)
   stopifnot( length(unique(all_colnames)) == 1)
 
   nrows <- vapply(mat_list, nrow, FUN.VALUE = 0L)
