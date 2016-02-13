@@ -22,6 +22,6 @@ very common and very uncommon words.
 }
 \seealso{
 \link{prune_vocabulary}, \link{transformer_tf},
-\link{transformer_tfidf}, \link{binary_transformer}
+\link{transformer_tfidf}, \link{transformer_binary}
 }
 

@@ -9,7 +9,7 @@
 #' Terms, which are observed less than first value or frequency
 #' or more than second will be filtered out
 #' @seealso \link{prune_vocabulary}, \link{transformer_tf},
-#' \link{transformer_tfidf}, \link{binary_transformer}
+#' \link{transformer_tfidf}, \link{transformer_binary}
 #' @export
 transformer_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, common = 0.975) )
 {
@@ -31,7 +31,7 @@ transformer_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, comm
 
 #' \code{tf = (Number word appears in document) ^ 2 / (Number words in document) ^ 2 }
 #'
-#' \code{binary_transformer} store 1 if document contains term and 0 otherwise.
+#' \code{transformer_binary} store 1 if document contains term and 0 otherwise.
 #'
 #'
 #' \code{transformer_tfidf}
