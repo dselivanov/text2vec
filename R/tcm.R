@@ -86,19 +86,24 @@ create_tcm <- function(itoken_list,
 
 mc_reduce <- function(X, FUN,  ...) {
   if (length(X) >= 2) {
-
-    sp <- split(X, ceiling(seq_along(X) / 2))
+    # split into pairs of elements
+    pairs <- split(X, ceiling(seq_along(X) / 2))
 
     X_NEW <-
-      foreach( xx = sp, ...) %dopar% {
-        if (length(xx) == 1) xx[[1]]
+      foreach( pair = pairs, ...) %dopar% {
+        # if length(X) is odd, we will recieve several pairs + single element
+        if (length(pair) == 1)
+          pair[[1]]
         else {
-          FUN(xx[[1]], xx[[2]])
+          FUN(pair[[1]], pair[[2]])
         }
       }
+    # recursive call
     mc_reduce(X_NEW, FUN = FUN, ...)
   }
-  else X[[1]]
+  # finally reduce to single element
+  else
+    X[[1]]
 }
 
 mc_sum <- function(...) {
