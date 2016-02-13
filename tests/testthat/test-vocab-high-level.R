@@ -1,10 +1,5 @@
 context("vocabulary-corpus construction")
 
-split_into <- function(vec, nparts) {
-  max_part_len <- ceiling(length(vec) / nparts)
-  suppressWarnings( split(vec, rep(1:nparts, each = max_part_len)) )
-}
-
 get_test_iterator <- function(txt)
   itoken(txt,
          preprocess_function = tolower,
@@ -17,7 +12,7 @@ N_WORKER <- 4
 txt <- movie_review[['review']][train_ind]
 ids <- movie_review[['id']][train_ind]
 
-txt_splits <- split_into(txt, N_WORKER)
+txt_splits <- text2vec:::split_into(txt, N_WORKER)
 
 
 test_that("Vocabulary with foreach", {
