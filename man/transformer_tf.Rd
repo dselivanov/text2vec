@@ -31,7 +31,7 @@ If not provided ( \code{NULL} ) - idf will be calculated form current data.}
 \code{tf = (Number word appears in document) / (Number words in document) } or in case 'l2' norm
 \code{tf = (Number word appears in document) ^ 2 / (Number words in document) ^ 2 }
 
-\code{binary_transformer} store 1 if document contains term and 0 otherwise.
+\code{transformer_binary} store 1 if document contains term and 0 otherwise.
 
 
 \code{transformer_tfidf}
