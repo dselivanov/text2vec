@@ -67,7 +67,7 @@ create_tcm <- function(itoken_list,
   }
 
   foreach(it = itoken_list,
-          .combine = combine_fun,
+          .combine = mc_sum,
           .inorder = F,
           .multicombine = T,
           ...) %dopar%
@@ -82,4 +82,28 @@ create_tcm <- function(itoken_list,
             rm(corp); gc();
             as(dtm_chunk, 'dgCMatrix')
           }
+}
+
+mc_reduce <- function(X, FUN,  ...) {
+  if (length(X) >= 2) {
+
+    sp <- split(X, ceiling(seq_along(X) / 2))
+
+    X_NEW <-
+      foreach( xx = sp, ...) %dopar% {
+        if (length(xx) == 1) xx[[1]]
+        else {
+          FUN(xx[[1]], xx[[2]])
+        }
+      }
+    mc_reduce(X_NEW, FUN = FUN, ...)
+  }
+  else X[[1]]
+}
+
+mc_sum <- function(...) {
+  mc_reduce(list(...),
+            FUN = function(a, b) {a + b},
+           .inorder = FALSE,
+           .multicombine = TRUE)
 }
