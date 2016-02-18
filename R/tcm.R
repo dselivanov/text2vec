@@ -62,12 +62,8 @@ create_tcm <- function(itoken_list,
                        vectorizer,
                        ...) {
 
-  combine_fun <- function(...) {
-    Reduce(`+`, list(...))
-  }
-
   foreach(it = itoken_list,
-          .combine = mc_sum,
+          .combine = triplet_sum,
           .inorder = F,
           .multicombine = T,
           ...) %dopar%
@@ -80,10 +76,24 @@ create_tcm <- function(itoken_list,
             # remove corpus and trigger gc()!
             # this will release a lot of memory
             rm(corp); gc();
-            as(dtm_chunk, 'dgCMatrix')
+            dtm_chunk
           }
 }
 
+triplet_sum <- function(..., verbose = TRUE) {
+  lst <- list(...)
+
+  if (any(vapply(lst, is.null, FALSE)))
+    stop('Got NULL from one of the jobs.
+          Probably result size >= 2gb and package "parallel" can\'t collect results.
+          Try to split input into more chunks (so result on each chunk must be < 2gb)')
+
+  res <- uniqTsparse(Reduce(`+`, lst))
+  res@Dimnames <- lst[[1]]@Dimnames
+  res
+}
+
+# multicore reduce
 mc_reduce <- function(X, FUN,  ...) {
   if (length(X) >= 2) {
     # split into pairs of elements
@@ -105,10 +115,10 @@ mc_reduce <- function(X, FUN,  ...) {
   else
     X[[1]]
 }
-
-mc_sum <- function(...) {
+# multicore version of triplet_sum
+mc_triplet_sum <- function(...) {
   mc_reduce(list(...),
-            FUN = function(a, b) {a + b},
-           .inorder = FALSE,
-           .multicombine = TRUE)
+            FUN = function(a, b) uniqTsparse(a + b),
+            .inorder = FALSE,
+            .multicombine = TRUE)
 }
