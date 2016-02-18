@@ -57,6 +57,7 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
 #' "lda_c" - Blei's lda-c format (list of 2*doc_terms_size),
 #' see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
+#' @param verbose \code{logical} print status messages
 #' @param ... - arguments to \link{foreach} function which is used to iterate
 #' over \code{itoken_list} under the hood.
 #' @return Document-Term Matrix
@@ -76,13 +77,19 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 create_dtm <- function(itoken_list,
                        vectorizer,
                        type = c("dgCMatrix", "dgTMatrix", "lda_c"),
+                       verbose = FALSE,
                        ...) {
   type <- match.arg(type)
 
-  combine_fun <- switch(type,
-                        dgCMatrix = rbind,
-                        dgTMatrix = rbind_dgTMatrix,
-                        lda_c = c)
+  combine_fun <- function(...) {
+    f <- switch(type,
+                dgCMatrix = rbind,
+                dgTMatrix = rbind_dgTMatrix,
+                lda_c = c)
+    if (verbose)
+      print(paste(Sys.time(), "got results from workers, call combine ..."))
+    f(...)
+  }
 
   foreach(it = itoken_list,
         .combine = combine_fun,
