@@ -91,6 +91,7 @@ vector<string> get_ngrams(const CharacterVector terms,
 //' @export
 //' @name ngrams
 //' @title Generates ngrams
+//' @description Generates ngrams character vector from tokens
 //' @param terms input tokens
 //' @param ngram_min min number of tokens in ngram
 //' @param ngram_max max number of tokens in ngram

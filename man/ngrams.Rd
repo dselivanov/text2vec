@@ -15,4 +15,7 @@ ngrams(terms, ngram_min, ngram_max, sep = "_")
 
 \item{sep}{string separator between tokems}
 }
+\description{
+Generates ngrams character vector from tokens
+}
 
