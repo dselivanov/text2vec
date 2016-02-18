@@ -40,6 +40,7 @@ get_tcm <- function(corpus) {
 #' @param itoken_list \code{list} of iterators over tokens - \code{itoken}.
 #' Each element is a list of tokens = tokenized and normalized strings.
 #' @param vectorizer \code{function} vectorizer function.
+#' @param verbose \code{logical} print status messages
 #' @param ... - arguments to \link{foreach} function which is used to iterate
 #' over \code{itoken_list} under the hood.
 #' @return \code{dgCMatrix} Term-Cooccurence Matrix
@@ -60,10 +61,11 @@ get_tcm <- function(corpus) {
 #' @export
 create_tcm <- function(itoken_list,
                        vectorizer,
+                       verbose = FALSE,
                        ...) {
 
   foreach(it = itoken_list,
-          .combine = triplet_sum,
+          .combine = function(...) triplet_sum(..., verbose = verbose),
           .inorder = F,
           .multicombine = T,
           ...) %dopar%
@@ -80,7 +82,10 @@ create_tcm <- function(itoken_list,
           }
 }
 
-triplet_sum <- function(..., verbose = TRUE) {
+triplet_sum <- function(..., verbose = FALSE) {
+  if (verbose)
+    print(paste(Sys.time(), "got results from workers, call combine ..."))
+
   lst <- list(...)
 
   if (any(vapply(lst, is.null, FALSE)))
@@ -89,11 +94,12 @@ triplet_sum <- function(..., verbose = TRUE) {
           Try to split input into more chunks (so result on each chunk must be < 2gb)')
 
   res <- uniqTsparse(Reduce(`+`, lst))
+  # assume all matrices have same dimnames
   res@Dimnames <- lst[[1]]@Dimnames
   res
 }
 
-# multicore reduce
+# multicore combine
 mc_reduce <- function(X, FUN,  ...) {
   if (length(X) >= 2) {
     # split into pairs of elements

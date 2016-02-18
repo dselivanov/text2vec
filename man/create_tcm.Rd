@@ -4,13 +4,15 @@
 \alias{create_tcm}
 \title{Term-Cooccurence Matrix construction.}
 \usage{
-create_tcm(itoken_list, vectorizer, ...)
+create_tcm(itoken_list, vectorizer, verbose = FALSE, ...)
 }
 \arguments{
 \item{itoken_list}{\code{list} of iterators over tokens - \code{itoken}.
 Each element is a list of tokens = tokenized and normalized strings.}
 
 \item{vectorizer}{\code{function} vectorizer function.}
+
+\item{verbose}{\code{logical} print status messages}
 
 \item{...}{- arguments to \link{foreach} function which is used to iterate
 over \code{itoken_list} under the hood.}
