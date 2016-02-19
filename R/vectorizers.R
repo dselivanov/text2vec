@@ -75,13 +75,14 @@ vocab_vectorizer <- function(vocabulary,
     stop("At least one of the arguments 'grow_dtm', 'skip_grams_window' should
          satisfy grow_dtm == TRUE or skip_grams_window > 0")
 
-  vocab_corpus <- new(VocabCorpus,
-                      vocab = vocabulary$vocab$terms,
-                      ngram_min = vocabulary$ngram[["ngram_min"]],
-                      ngram_max = vocabulary$ngram[["ngram_max"]],
-                      window_size = skip_grams_window)
-
   vectorizer <- function(iterator) {
+
+    vocab_corpus <- new(VocabCorpus,
+                        vocab = vocabulary$vocab$terms,
+                        ngram_min = vocabulary$ngram[["ngram_min"]],
+                        ngram_max = vocabulary$ngram[["ngram_max"]],
+                        window_size = skip_grams_window)
+
     attr(vocab_corpus, 'ids') <- character(0)
     corpus_insert(vocab_corpus, iterator)
   }
