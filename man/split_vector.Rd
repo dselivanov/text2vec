@@ -4,10 +4,10 @@
 \alias{split_vector}
 \title{Generating indexes for splitting vector into chunks}
 \usage{
-split_vector(vector, splits, granularity = 1)
+split_vector(vec, splits, granularity = 1)
 }
 \arguments{
-\item{vector}{\link{list} or \link{vector} to split}
+\item{vec}{\link{list} or \link{vector} to split}
 
 \item{splits}{\link{integer} - controls number of parallel jobs you have planned.
 Usually should be equal to number of cores in the machine.}

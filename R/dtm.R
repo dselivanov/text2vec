@@ -67,10 +67,10 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' data("movie_review")
 #' # set to number of cores on your machine
 #' N_WORKERS <- 1
-#' splits <- split(movie_review$review, rep(1:N_WORKERS, each = nrow(movie_review) / N_WORKERS ))
-#' jobs <- lapply(splits, itoken, tolower, word_tokenizer)
-#' vectorizer <- hash_vectorizer()
 #' doParallel::registerDoParallel(N_WORKERS)
+#' splits <- split_into(movie_review$review, N_WORKERS)
+#' jobs <- lapply(splits, itoken, tolower, word_tokenizer, chunks_number = 1)
+#' vectorizer <- hash_vectorizer()
 #' dtm <- create_dtm(jobs, vectorizer, type = 'dgTMatrix')
 #' }
 #' @export
