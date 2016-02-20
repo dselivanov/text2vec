@@ -2,12 +2,18 @@
 % Please edit documentation in R/tcm.R
 \name{create_tcm}
 \alias{create_tcm}
+\alias{create_tcm.itoken}
+\alias{create_tcm.list}
 \title{Term-Cooccurence Matrix construction.}
 \usage{
-create_tcm(itoken_list, vectorizer, verbose = FALSE, ...)
+create_tcm(itoken_src, vectorizer, verbose = FALSE, ...)
+
+\method{create_tcm}{itoken}(itoken_src, vectorizer, verbose = FALSE, ...)
+
+\method{create_tcm}{list}(itoken_src, vectorizer, verbose = FALSE, ...)
 }
 \arguments{
-\item{itoken_list}{\code{list} of iterators over tokens - \code{itoken}.
+\item{itoken_src}{\code{list} of iterators over tokens - \code{itoken}.
 Each element is a list of tokens = tokenized and normalized strings.}
 
 \item{vectorizer}{\code{function} vectorizer function.}
@@ -15,7 +21,7 @@ Each element is a list of tokens = tokenized and normalized strings.}
 \item{verbose}{\code{logical} print status messages}
 
 \item{...}{- arguments to \link{foreach} function which is used to iterate
-over \code{itoken_list} under the hood.}
+over \code{itoken_src} under the hood.}
 }
 \value{
 \code{dgCMatrix} Term-Cooccurence Matrix
@@ -26,7 +32,7 @@ If parallel backend is registered, it will construct TCM in multiple threads.
 }
 \details{
 User should keep in mind, that he/she should split data itself and
-provide list of \link{itoken} iterators. Each element of \code{itoken_list}
+provide list of \link{itoken} iterators. Each element of \code{itoken_src}
 will be handled in separate thread and at the end they will be combined.
 }
 \examples{

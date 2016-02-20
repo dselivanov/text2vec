@@ -2,13 +2,21 @@
 % Please edit documentation in R/dtm.R
 \name{create_dtm}
 \alias{create_dtm}
+\alias{create_dtm.itoken}
+\alias{create_dtm.list}
 \title{Document-Term Matrix construction.}
 \usage{
-create_dtm(itoken_list, vectorizer, type = c("dgCMatrix", "dgTMatrix",
+create_dtm(itoken_src, vectorizer, type = c("dgCMatrix", "dgTMatrix",
   "lda_c"), verbose = FALSE, ...)
+
+\method{create_dtm}{itoken}(itoken_src, vectorizer, type = c("dgCMatrix",
+  "dgTMatrix", "lda_c"), verbose = FALSE, ...)
+
+\method{create_dtm}{list}(itoken_src, vectorizer, type = c("dgCMatrix",
+  "dgTMatrix", "lda_c"), verbose = FALSE, ...)
 }
 \arguments{
-\item{itoken_list}{\code{list} of iterators over tokens - \code{itoken}.
+\item{itoken_src}{\code{list} of iterators over tokens - \code{itoken}.
 Each element is a list of tokens = tokenized and normalized strings.}
 
 \item{vectorizer}{\code{function} vectorizer function.}
@@ -20,7 +28,7 @@ see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}}
 \item{verbose}{\code{logical} print status messages}
 
 \item{...}{- arguments to \link{foreach} function which is used to iterate
-over \code{itoken_list} under the hood.}
+over \code{itoken_src} under the hood.}
 }
 \value{
 Document-Term Matrix
@@ -31,7 +39,7 @@ If parallel backend is registered, it will construct DTM in multiple threads.
 }
 \details{
 User should keep in mind, that he/she should split data itself and
-provide list of \link{itoken} iterators. Each element of \code{itoken_list}
+provide list of \link{itoken} iterators. Each element of \code{itoken_src}
 will be handled in separate thread and at the end they will be combined.
 }
 \examples{
