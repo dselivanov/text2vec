@@ -35,14 +35,14 @@ get_tcm <- function(corpus) {
 #' @description High-level function for Term-Cooccurence Matrix construction.
 #' If parallel backend is registered, it will construct TCM in multiple threads.
 #' @details User should keep in mind, that he/she should split data itself and
-#' provide list of \link{itoken} iterators. Each element of \code{itoken_list}
+#' provide list of \link{itoken} iterators. Each element of \code{itoken_src}
 #' will be handled in separate thread and at the end they will be combined.
-#' @param itoken_list \code{list} of iterators over tokens - \code{itoken}.
+#' @param itoken_src \code{list} of iterators over tokens - \code{itoken}.
 #' Each element is a list of tokens = tokenized and normalized strings.
 #' @param vectorizer \code{function} vectorizer function.
 #' @param verbose \code{logical} print status messages
 #' @param ... - arguments to \link{foreach} function which is used to iterate
-#' over \code{itoken_list} under the hood.
+#' over \code{itoken_src} under the hood.
 #' @return \code{dgCMatrix} Term-Cooccurence Matrix
 #' @seealso \link{itoken}
 #' @examples
@@ -59,15 +59,27 @@ get_tcm <- function(corpus) {
 #' tcm <- create_tcm(jobs, vectorizer)
 #' }
 #' @export
-create_tcm <- function(itoken_list,
-                       vectorizer,
-                       verbose = FALSE,
-                       ...) {
+create_tcm <- function(itoken_src, vectorizer, verbose = FALSE, ...) {
+  UseMethod("create_tcm")
+}
 
-  foreach(it = itoken_list,
+#' @rdname create_tcm
+#' @export
+create_tcm.itoken <- function(itoken_src, vectorizer, verbose = FALSE, ...) {
+  create_tcm( list(itoken_src), vectorizer, verbose, ...)
+}
+
+#' @rdname create_tcm
+#' @export
+create_tcm.list <- function(itoken_src, vectorizer, verbose = FALSE, ...) {
+
+  foreach(it = itoken_src,
           .combine = function(...) triplet_sum(..., verbose = verbose),
           .inorder = F,
           .multicombine = T,
+          # user already made split for jobs
+          # preschedule = FALSE is much more memory efficient
+          .options.multicore = list(preschedule = FALSE),
           ...) %dopar%
           {
             corp <- vectorizer(it)

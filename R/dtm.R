@@ -49,9 +49,9 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' @description High-level function for Document-Term Matrix construction.
 #' If parallel backend is registered, it will construct DTM in multiple threads.
 #' @details User should keep in mind, that he/she should split data itself and
-#' provide list of \link{itoken} iterators. Each element of \code{itoken_list}
+#' provide list of \link{itoken} iterators. Each element of \code{itoken_src}
 #' will be handled in separate thread and at the end they will be combined.
-#' @param itoken_list \code{list} of iterators over tokens - \code{itoken}.
+#' @param itoken_src \code{list} of iterators over tokens - \code{itoken}.
 #' Each element is a list of tokens = tokenized and normalized strings.
 #' @param vectorizer \code{function} vectorizer function.
 #' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
@@ -59,7 +59,7 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
 #' @param verbose \code{logical} print status messages
 #' @param ... - arguments to \link{foreach} function which is used to iterate
-#' over \code{itoken_list} under the hood.
+#' over \code{itoken_src} under the hood.
 #' @return Document-Term Matrix
 #' @seealso \link{itoken}
 #' @examples
@@ -74,11 +74,31 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' dtm <- create_dtm(jobs, vectorizer, type = 'dgTMatrix')
 #' }
 #' @export
-create_dtm <- function(itoken_list,
-                       vectorizer,
+create_dtm <- function(itoken_src, vectorizer,
                        type = c("dgCMatrix", "dgTMatrix", "lda_c"),
                        verbose = FALSE,
                        ...) {
+  UseMethod("create_dtm")
+}
+
+#' @rdname create_dtm
+#' @export
+create_dtm.itoken <- function(itoken_src, vectorizer,
+                            type = c("dgCMatrix", "dgTMatrix", "lda_c"),
+                            verbose = FALSE,
+                            ...) {
+  create_dtm( list(itoken_src), vectorizer, type, verbose, ...)
+}
+
+#' @rdname create_dtm
+#' @export
+create_dtm.list <- function(itoken_src, vectorizer,
+                       type = c("dgCMatrix", "dgTMatrix", "lda_c"),
+                       verbose = FALSE,
+                       ...) {
+  check_itoken <- sapply(itoken_src, inherits, 'itoken', USE.NAMES = F)
+  stopifnot(all( check_itoken ))
+
   type <- match.arg(type)
 
   combine_fun <- function(...) {
@@ -91,10 +111,13 @@ create_dtm <- function(itoken_list,
     f(...)
   }
 
-  foreach(it = itoken_list,
+  foreach(it = itoken_src,
         .combine = combine_fun,
         .inorder = T,
         .multicombine = T,
+        # user already made split for jobs
+        # preschedule = FALSE is much more memory efficient
+        .options.multicore = list(preschedule = FALSE),
         ...) %dopar%
         {
           corp <- vectorizer(it)
