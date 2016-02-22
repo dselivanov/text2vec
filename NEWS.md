@@ -1,4 +1,4 @@
-# text2vec 0.2.1 - development version
+# text2vec 0.3.0 - development version
 
 1. 2016-01-13 fix for #46, thanks to @[buhrmann](https://github.com/buhrmann) for reporting 
 1. 2016-01-16 format of vocabulary changed.
@@ -13,6 +13,7 @@
     * construction of dtm from list of `itoken`. 
 1. 2016-02-10 rename transformers
     * now all transformers starts with `transformer_*` - more intuitive + simpler usage with autocompletion
+1. 
 
 # text2vec 0.2.0 (2016-01-10)
 
