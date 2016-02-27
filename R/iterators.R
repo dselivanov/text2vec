@@ -26,8 +26,6 @@ itoken <- function(iterable, ...) {
 }
 
 #' @rdname itoken
-#' @param chunks_number \code{integer}, the number of pieces that object should be divided into.
-#' @param progessbar \code{logical} indicates whether to show progress bar.
 #' @export
 itoken.list <- function(iterable,
                         chunks_number = 10,

@@ -8,6 +8,7 @@
 #' @param ngram \code{integer} vector. The lower and upper boundary of the range of
 #' n-values for different n-grams to be extracted. All values of n such that
 #' ngram_min <= n <= ngram_max will be used.
+#' @param stopwords \code{character} vector of stopwords to filter them out
 #' @return \code{text2vec_vocabulary} object,
 #' which is actually a \code{list} with following fields:
 #'
@@ -30,7 +31,8 @@
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
 #' @export
-vocabulary <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)) {
+vocabulary <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                       stopwords = character(0)) {
   UseMethod("vocabulary")
 }
 
@@ -38,7 +40,8 @@ vocabulary <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)) {
 #' character vector. Terms will be inserted \bold{as is}, without any checks
 #' (ngrams numner, ngram delimiters, etc.).
 #' @export
-vocabulary.character <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)) {
+vocabulary.character <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                                 stopwords = character(0)) {
 
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
@@ -47,7 +50,7 @@ vocabulary.character <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 
   res <- list(
     # keep structure similar to `vocabulary.itoken` object. not used at the moment,
     # but we should keep same structure (keep in mind prune_vocabulary)
-    vocab = data.frame('terms' = src,
+    vocab = data.frame('terms' = setdiff(src, stopwords),
                        'terms_counts' = rep(NA_integer_, vocab_length),
                        'doc_counts' = rep(NA_integer_, vocab_length),
                        # 'doc_proportions' = rep(NA_real_, vocab_length),
@@ -63,10 +66,11 @@ vocabulary.character <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 
 
 #' @describeIn vocabulary collects unique terms and corresponding statistics from object.
 #' @export
-vocabulary.itoken <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)) {
+vocabulary.itoken <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                              stopwords = character(0)) {
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
-  vocab <- new(VocabularyBuilder, ngram_min, ngram_max)
+  vocab <- new(VocabularyBuilder, ngram_min, ngram_max, stopwords)
 
   foreach(tokens = src) %do% {
     vocab$insert_document_batch(tokens)
@@ -87,7 +91,8 @@ vocabulary.itoken <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)
 #' in parallel using \link{foreach}.
 #' @param ... additional arguments to \link{foreach} function.
 #' @export
-vocabulary.list <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),  ...) {
+vocabulary.list <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                            stopwords = character(0), ...) {
   stopifnot( all( vapply(X = src, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
 
   foreach(it = src,
@@ -96,7 +101,7 @@ vocabulary.list <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L), 
           .multicombine = TRUE,
           ...) %dopar%
           {
-            vocabulary(it, ngram)
+            vocabulary(it, ngram, stopwords)
           }
 }
 
@@ -136,7 +141,6 @@ combine_vocabulary <- function(...) {
 #' @param term_count_max maximum number of occurences over all documents.
 #' @param doc_proportion_min minimum proportion of documents which should contain term.
 #' @param doc_proportion_max maximum proportion of documents which should contain term.
-#' @param stop_words - \code{character} vector. Word to remove from vocabulary.
 #' @param max_number_of_terms maximum number of terms in vocabulary.
 #' @seealso \link{vocabulary}
 #' @export
@@ -145,7 +149,6 @@ prune_vocabulary <- function(vocabulary,
                   term_count_max = Inf,
                   doc_proportion_min = 0.0,
                   doc_proportion_max = 1.0,
-                  stop_words = character(0),
                   max_number_of_terms = Inf) {
 
   if (!inherits(vocabulary, 'text2vec_vocabulary'))
@@ -179,12 +182,6 @@ prune_vocabulary <- function(vocabulary,
   }
 
   pruned_vocabulary <- vocab_df[ind, ]
-
-  # remove stop words if asked
-  if (is.character(stop_words) && length(stop_words) > 0) {
-    non_stop_words_ind <- !(pruned_vocabulary$terms %in% stop_words)
-    pruned_vocabulary <- pruned_vocabulary[non_stop_words_ind, ]
-  }
 
   # restrict to max number if asked
   if (is.finite(max_number_of_terms)) {

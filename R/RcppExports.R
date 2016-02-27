@@ -8,8 +8,9 @@
 #' @param terms input tokens
 #' @param ngram_min min number of tokens in ngram
 #' @param ngram_max max number of tokens in ngram
+#' @param stopwords character vector of stopwords to filter them out
 #' @param sep string separator between tokems
-ngrams <- function(terms, ngram_min, ngram_max, sep = "_") {
-    .Call('text2vec_ngrams', PACKAGE = 'text2vec', terms, ngram_min, ngram_max, sep)
+ngrams <- function(terms, ngram_min, ngram_max, stopwords = character(), sep = "_") {
+    .Call('text2vec_ngrams', PACKAGE = 'text2vec', terms, ngram_min, ngram_max, stopwords, sep)
 }
 

@@ -77,7 +77,7 @@ public:
   }
 
   void insert_document(const CharacterVector doc) {
-    vector< string> ngrams = get_ngrams(doc, this->ngram_min, this->ngram_max, this->ngram_delim);
+    vector< string> ngrams = get_ngrams(doc, this->ngram_min, this->ngram_max, this->ngram_delim, stopwords);
     insert_terms(ngrams);
     this->dtm.increment_nrows();
     this->doc_count++;
@@ -124,9 +124,7 @@ private:
   int verbose;
   // vocabulary
   unordered_map<string, uint32_t> vocab;
-  // Vocabulary vocabulary;
-
-  size_t cooc_token_count;
+  unordered_set<string> stopwords;
 
   void init(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max) {
     //vocab2 = Vocabulary(n_min, n_max, delim);
