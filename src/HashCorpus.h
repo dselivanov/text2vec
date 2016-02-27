@@ -92,7 +92,7 @@ public:
   }
 
   void insert_document(const CharacterVector doc) {
-    vector< string> ngrams = get_ngrams(doc, this->ngram_min, this->ngram_max, this->ngram_delim);
+    vector< string> ngrams = get_ngrams(doc, this->ngram_min, this->ngram_max, this->ngram_delim, stopwords);
     insert_terms(ngrams);
     this->dtm.increment_nrows();
     this->doc_count++;
@@ -118,5 +118,6 @@ public:
 
 private:
   uint32_t buckets_size;
+  unordered_set<string> stopwords;
   int signed_hash;
 };

@@ -43,18 +43,30 @@ void fill_vec_val(vector<double>  &vec, double val) {
 vector<string> get_ngrams(const CharacterVector terms,
                           uint32_t ngram_min,
                           uint32_t ngram_max,
-                          const string &ngram_delim) {
+                          const string &ngram_delim,
+                          const unordered_set< string > &stopwords) {
   // iterates through input vector by window of size = n_max and build n-grams
   // for terms ["a", "b", "c", "d"] and n_min = 1, n_max = 2
   // will build 1:3-grams in following order
   //"a"     "a_b"   "a_b_c" "b"     "b_c"   "b_c_d" "c"     "c_d"   "d"
-  uint32_t len = terms.size();
+  uint32_t original_len = terms.size();
 
-  // special case for unigram to speed up a little bit
-  if(ngram_min == 1 && ngram_max == 1) {
-    return(as<vector<string>>(terms));
+  // filter out stopwords
+  vector<string> terms_filtered;
+  terms_filtered.reserve(original_len);
+  string s;
+  for(auto it:terms) {
+    s = as<string>(it);
+    if( stopwords.find(s) == stopwords.end())
+      terms_filtered.push_back(s);
   }
 
+  //special case for unigram to speed up a little bit
+  if(ngram_min == 1 && ngram_max == 1) {
+    return(terms_filtered);
+  }
+
+  uint32_t len = terms_filtered.size();
   // calculate res size
   size_t out_len = 0;
 
@@ -64,25 +76,29 @@ vector<string> get_ngrams(const CharacterVector terms,
   for(size_t i = i1; i <= i2; i++)
     out_len += (len - i) + 1;
 
-  vector< string> res(out_len);
+  vector< string> res;
+  res.reserve(out_len);
 
-  string k_gram;
-  size_t k, i = 0, last_observed;
+  string k_gram, current_term;
+  size_t n, k;
   for(size_t j = 0; j < len; j ++ ) {
+    n = 0;
     k = 0;
-    last_observed = j + k;
-    while (k < ngram_max && last_observed < len) {
-      if( k == 0) {
-        k_gram = terms[last_observed];
+    while (n < ngram_max && (j + k) < len) {
+      current_term = terms_filtered[j + k];
+
+      if(stopwords.find(current_term) == stopwords.end()) {
+        if( n == 0) {
+          k_gram = current_term;
+        }
+        else
+          k_gram = k_gram + ngram_delim + current_term;
+        if(n >= ngram_min - 1) {
+          res.push_back(k_gram);
+        }
+        n++;
       }
-      else
-        k_gram = k_gram + ngram_delim + terms[last_observed];
-      if(k >= ngram_min - 1) {
-        res[i] = k_gram;
-        i++;
-      }
-      k = k + 1;
-      last_observed = j + k;
+      k++;
     }
   }
   return res;
@@ -95,13 +111,18 @@ vector<string> get_ngrams(const CharacterVector terms,
 //' @param terms input tokens
 //' @param ngram_min min number of tokens in ngram
 //' @param ngram_max max number of tokens in ngram
+//' @param stopwords character vector of stopwords to filter them out
 //' @param sep string separator between tokems
 // [[Rcpp::export]]
 CharacterVector ngrams(const CharacterVector terms,
                        uint32_t ngram_min,
                        uint32_t ngram_max,
+                       const CharacterVector stopwords = CharacterVector(),
                        const String sep = "_") {
-  return wrap(get_ngrams(terms, ngram_min, ngram_max, sep));
+  unordered_set<string> stopwords_set;
+  for(auto it:stopwords)
+    stopwords_set.insert(as<string>(it));
+  return wrap(get_ngrams(terms, ngram_min, ngram_max, sep, stopwords_set));
 }
 
 // // for unordered_map < <uint32_t, uint32_t>, T >

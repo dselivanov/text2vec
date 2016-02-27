@@ -25,13 +25,12 @@ test_that("Vocabulary pruning", {
   COUNT_MIN <- 20L
   PROP_MIN <- 0.05
   PROP_MAX <- 0.95
-  STOP_WORDS <- c('is', 'in', 'it')
+
   p_vocab <- prune_vocabulary(vocab,
                               term_count_min = COUNT_MIN,
                               term_count_max = COUNT_MAX,
                               doc_proportion_min = PROP_MIN,
                               doc_proportion_max = PROP_MAX,
-                              stop_words = STOP_WORDS,
                               max_number_of_terms = Inf
                               )
   # same number of underlying documents
@@ -39,9 +38,7 @@ test_that("Vocabulary pruning", {
   # same ngrams
   expect_identical(p_vocab$ngram, p_vocab$ngram)
   # number of terms in prunned vocab
-  expect_equal(nrow(p_vocab$vocab), 425L)
-  # check removed stop words
-  expect_false(any(STOP_WORDS %in% p_vocab$terms))
+  expect_equal(nrow(p_vocab$vocab), 428L)
 
   PROP_MAX <- 0.05
   LIMIT <- 20L
@@ -64,6 +61,14 @@ test_that("Vocabulary pruning", {
   # check we keep names for input. see #51
   dtm_lda_c <- get_dtm(vcorpus, 'lda_c')
   expect_equal(names(dtm_lda_c), ids)
+})
+
+test_that("Vocabulary stopwords", {
+  iterator <- get_test_iterator()
+  STOP_WORDS <- c('is', 'in', 'it')
+  vocab <- vocabulary(iterator)
+  # check removed stop words
+  expect_false(any(STOP_WORDS %in% vocab$terms))
 })
 
 test_that("Unigran Vocabulary Corpus construction", {

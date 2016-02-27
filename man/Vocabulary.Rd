@@ -7,13 +7,17 @@
 \alias{vocabulary.list}
 \title{Creates vocabulary (unique terms)}
 \usage{
-vocabulary(src, ngram = c(ngram_min = 1L, ngram_max = 1L))
+vocabulary(src, ngram = c(ngram_min = 1L, ngram_max = 1L),
+  stopwords = character(0))
 
-\method{vocabulary}{character}(src, ngram = c(ngram_min = 1L, ngram_max = 1L))
+\method{vocabulary}{character}(src, ngram = c(ngram_min = 1L, ngram_max = 1L),
+  stopwords = character(0))
 
-\method{vocabulary}{itoken}(src, ngram = c(ngram_min = 1L, ngram_max = 1L))
+\method{vocabulary}{itoken}(src, ngram = c(ngram_min = 1L, ngram_max = 1L),
+  stopwords = character(0))
 
-\method{vocabulary}{list}(src, ngram = c(ngram_min = 1L, ngram_max = 1L), ...)
+\method{vocabulary}{list}(src, ngram = c(ngram_min = 1L, ngram_max = 1L),
+  stopwords = character(0), ...)
 }
 \arguments{
 \item{src}{iterator over \code{list} of \code{character} vectors - documents from which
@@ -23,6 +27,8 @@ user want construct vocabulary. Or, alternatively,
 \item{ngram}{\code{integer} vector. The lower and upper boundary of the range of
 n-values for different n-grams to be extracted. All values of n such that
 ngram_min <= n <= ngram_max will be used.}
+
+\item{stopwords}{\code{character} vector of stopwords to filter them out}
 
 \item{...}{additional arguments to \link{foreach} function.}
 }

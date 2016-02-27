@@ -6,16 +6,17 @@
 using namespace Rcpp;
 
 // ngrams
-CharacterVector ngrams(const CharacterVector terms, uint32_t ngram_min, uint32_t ngram_max, const String sep);
-RcppExport SEXP text2vec_ngrams(SEXP termsSEXP, SEXP ngram_minSEXP, SEXP ngram_maxSEXP, SEXP sepSEXP) {
+CharacterVector ngrams(const CharacterVector terms, uint32_t ngram_min, uint32_t ngram_max, const CharacterVector stopwords, const String sep);
+RcppExport SEXP text2vec_ngrams(SEXP termsSEXP, SEXP ngram_minSEXP, SEXP ngram_maxSEXP, SEXP stopwordsSEXP, SEXP sepSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< const CharacterVector >::type terms(termsSEXP);
     Rcpp::traits::input_parameter< uint32_t >::type ngram_min(ngram_minSEXP);
     Rcpp::traits::input_parameter< uint32_t >::type ngram_max(ngram_maxSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector >::type stopwords(stopwordsSEXP);
     Rcpp::traits::input_parameter< const String >::type sep(sepSEXP);
-    __result = Rcpp::wrap(ngrams(terms, ngram_min, ngram_max, sep));
+    __result = Rcpp::wrap(ngrams(terms, ngram_min, ngram_max, stopwords, sep));
     return __result;
 END_RCPP
 }

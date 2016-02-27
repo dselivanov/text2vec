@@ -21,34 +21,36 @@ public:
   Vocabulary();
 
   Vocabulary(uint32_t ngram_min,
-             uint32_t ngram_max):
+             uint32_t ngram_max,
+             const CharacterVector stopwords):
   ngram_min(ngram_min), ngram_max(ngram_max),
   document_count(0), token_count(0) {
     ngram_delim = "_";
+    for(auto it:stopwords)
+      stopwords_set.insert(as<string>(it));
   };
 
-  void init_vocabulary(const CharacterVector vocab_R,
-             uint32_t ngram_min,
-             uint32_t ngram_max) {
-    this->ngram_min = ngram_min;
-    this->ngram_max = ngram_max;
-    this->ngram_delim = "_";
-    size_t vocab_size = vocab_R.size();
-    size_t i = 0;
-    // we know vocab size, so lets reserve buckets this number
-    // and if we will lucky no rehash will needed
-    this->vocab.reserve(vocab_size);
-    //convert R vocab represenation to C++ represenation
-    // also fill terms in right order
-    for (auto term : vocab_R) {
-      //grow vocabulary
-      this->vocab.insert(make_pair(as< string >(term), i));
-      i++;
-    }
-  };
+//   void init_vocabulary(const CharacterVector vocab_R,
+//              uint32_t ngram_min,
+//              uint32_t ngram_max) {
+//     this->ngram_min = ngram_min;
+//     this->ngram_max = ngram_max;
+//     this->ngram_delim = "_";
+//     size_t vocab_size = vocab_R.size();
+//     size_t i = 0;
+//     // we know vocab size, so lets reserve buckets this number
+//     // and if we will lucky no rehash will needed
+//     this->vocab.reserve(vocab_size);
+//     //convert R vocab represenation to C++ represenation
+//     // also fill terms in right order
+//     for (auto term : vocab_R) {
+//       //grow vocabulary
+//       this->vocab.insert(make_pair(as< string >(term), i));
+//       i++;
+//     }
+//   };
 
   void insert_terms (vector< string> &terms) {
-    typename unordered_map < string, TermStat > :: iterator term_iterator_old;
     typename unordered_map < string, uint32_t > :: iterator term_iterator;
     int term_id;
     for (auto it:terms) {
@@ -72,7 +74,8 @@ public:
   void insert_document(const CharacterVector terms) {
     this->document_count++;
     this->temp_document_word_set.clear();
-    vector< string> ngrams = get_ngrams(terms, this->ngram_min, this->ngram_max, this->ngram_delim);
+    vector< string> ngrams = get_ngrams(terms, this->ngram_min, this->ngram_max,
+                                        this->ngram_delim, this->stopwords_set);
     insert_terms(ngrams);
 
     typename unordered_map < string, uint32_t > :: iterator term_iterator;
@@ -120,5 +123,8 @@ private:
 
   int document_count;
   uint32_t token_count;
-  RCPP_UNORDERED_SET< string > temp_document_word_set;
+  // used for count word-document statistsics in vocab_statistics.
+  // keep words set for document which is currently we processing
+  unordered_set< string > temp_document_word_set;
+  unordered_set< string > stopwords_set;
 };

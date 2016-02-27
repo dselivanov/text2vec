@@ -4,7 +4,7 @@
 \alias{ngrams}
 \title{Generates ngrams}
 \usage{
-ngrams(terms, ngram_min, ngram_max, sep = "_")
+ngrams(terms, ngram_min, ngram_max, stopwords = character(), sep = "_")
 }
 \arguments{
 \item{terms}{input tokens}
@@ -12,6 +12,8 @@ ngrams(terms, ngram_min, ngram_max, sep = "_")
 \item{ngram_min}{min number of tokens in ngram}
 
 \item{ngram_max}{max number of tokens in ngram}
+
+\item{stopwords}{character vector of stopwords to filter them out}
 
 \item{sep}{string separator between tokems}
 }
