@@ -1,10 +1,20 @@
 #' @name itoken
 #' @title Creates iterator over input object.
 #' @description Creates iterator over input object. This iterator usually used in
-#' following functions : \link{vocabulary}, \link{create_corpus},
-#' \link{vectorizers}. See them for details.
+#' following functions : \link{vocabulary}, \link{create_corpus}, \link{create_dtm},
+#' \link{vectorizers}, \link{create_tcm}. See them for details.
 #' @param iterable an object from which to generate an iterator.
 #' @param ... arguments passed to other methods (not used at the moment).
+#' @details S3 methods for creating itoken iterator from list of tokens
+#' \itemize{
+#'  \item{\code{list}}{ - all elemets of input list shouild be character tokens}
+#'  \item{\code{character}}{ - raw text source,
+#'  user have to provide tokenizer function}
+#'  \item{\code{ifiles}}{ - from files,
+#'  user have to provide reader function, tokenizer}
+#'  \item{\code{idir}}{ - from dir, same as ifiles}
+#' }
+#'
 #' @seealso \link{vocabulary}, \link{create_corpus}, \link{vectorizers}
 #' @examples
 #' data("movie_review")
@@ -13,6 +23,37 @@
 #' @export
 itoken <- function(iterable, ...) {
   UseMethod("itoken")
+}
+
+#' @rdname itoken
+#' @param chunks_number \code{integer}, the number of pieces that object should be divided into.
+#' @param progessbar \code{logical} indicates whether to show progress bar.
+#' @export
+itoken.list <- function(iterable,
+                        chunks_number = 10,
+                        progessbar = interactive(), ...) {
+
+  stopifnot( all( vapply(X = iterable, FUN = inherits, FUN.VALUE = FALSE, "character") ) )
+
+  i <- 1
+  it <- idiv(n = length(iterable), chunks = chunks_number)
+  max_len = length(iterable)
+  if (progessbar)
+    pb <- txtProgressBar(initial = -1L, min = 0, max = max_len, style = 3, width = 100)
+  env <- environment()
+  nextEl <- function() {
+    n <- nextElem(it)
+    ix <- seq(i, length = n)
+
+    if (progessbar)
+      eval(setTxtProgressBar(pb, min(i, max_len)), enclos = env)
+
+    i <<- i + n
+    iterable[ix]
+  }
+  obj <- list(nextElem = nextEl)
+  class(obj) <- c('itoken', 'abstractiter', 'iter')
+  obj
 }
 
 #' @rdname itoken

@@ -5,9 +5,13 @@
 \alias{itoken.character}
 \alias{itoken.ifiles}
 \alias{itoken.ilines}
+\alias{itoken.list}
 \title{Creates iterator over input object.}
 \usage{
 itoken(iterable, ...)
+
+\method{itoken}{list}(iterable, chunks_number = 10,
+  progessbar = interactive(), ...)
 
 \method{itoken}{character}(iterable, preprocess_function = identity,
   tokenizer = function(x) strsplit(x, " ", TRUE), chunks_number = 10,
@@ -25,6 +29,10 @@ itoken(iterable, ...)
 
 \item{...}{arguments passed to other methods (not used at the moment).}
 
+\item{chunks_number}{\code{integer}, the number of pieces that object should be divided into.}
+
+\item{progessbar}{\code{logical} indicates whether to show progress bar.}
+
 \item{preprocess_function}{\code{function} which takes chunk of objects -
 \code{character vector} and \bold{do all preprocessing} (including stemming if needed).
 Usually \code{preprocess_function} should return \code{character vector} - vector of
@@ -36,15 +44,22 @@ from preprocess_function, split it into tokens and returns
 Also you can perform tokenization in \code{preprocess_function}
 (actually you should do it when apply any stemming) and then set
 \code{tokenizer} = \code{\link{identity}}.}
-
-\item{chunks_number}{\code{integer}, the number of pieces that object should be divided into.}
-
-\item{progessbar}{\code{logical} indicates whether to show progress bar.}
 }
 \description{
 Creates iterator over input object. This iterator usually used in
-following functions : \link{vocabulary}, \link{create_corpus},
-\link{vectorizers}. See them for details.
+following functions : \link{vocabulary}, \link{create_corpus}, \link{create_dtm},
+\link{vectorizers}, \link{create_tcm}. See them for details.
+}
+\details{
+S3 methods for creating itoken iterator from list of tokens
+\itemize{
+ \item{\code{list}}{ - all elemets of input list shouild be character tokens}
+ \item{\code{character}}{ - raw text source,
+ user have to provide tokenizer function}
+ \item{\code{ifiles}}{ - from files,
+ user have to provide reader function, tokenizer}
+ \item{\code{idir}}{ - from dir, same as ifiles}
+}
 }
 \examples{
 data("movie_review")
