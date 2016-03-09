@@ -26,4 +26,4 @@ vector<string> get_ngrams(const CharacterVector terms,
                           uint32_t ngram_min,
                           uint32_t ngram_max,
                           const string &ngram_delim,
-                          const unordered_set< string > &stopwords);
+                          const RCPP_UNORDERED_SET< string > &stopwords);
