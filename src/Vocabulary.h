@@ -125,6 +125,6 @@ private:
   uint32_t token_count;
   // used for count word-document statistsics in vocab_statistics.
   // keep words set for document which is currently we processing
-  unordered_set< string > temp_document_word_set;
-  unordered_set< string > stopwords_set;
+  RCPP_UNORDERED_SET< string > temp_document_word_set;
+  RCPP_UNORDERED_SET< string > stopwords_set;
 };

@@ -44,7 +44,7 @@ vector<string> get_ngrams(const CharacterVector terms,
                           uint32_t ngram_min,
                           uint32_t ngram_max,
                           const string &ngram_delim,
-                          const unordered_set< string > &stopwords) {
+                          const RCPP_UNORDERED_SET< string > &stopwords) {
   // iterates through input vector by window of size = n_max and build n-grams
   // for terms ["a", "b", "c", "d"] and n_min = 1, n_max = 2
   // will build 1:3-grams in following order
@@ -119,7 +119,7 @@ CharacterVector ngrams(const CharacterVector terms,
                        uint32_t ngram_max,
                        const CharacterVector stopwords = CharacterVector(),
                        const String sep = "_") {
-  unordered_set<string> stopwords_set;
+  RCPP_UNORDERED_SET<string> stopwords_set;
   for(auto it:stopwords)
     stopwords_set.insert(as<string>(it));
   return wrap(get_ngrams(terms, ngram_min, ngram_max, sep, stopwords_set));

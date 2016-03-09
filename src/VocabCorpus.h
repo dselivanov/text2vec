@@ -124,7 +124,7 @@ private:
   int verbose;
   // vocabulary
   unordered_map<string, uint32_t> vocab;
-  unordered_set<string> stopwords;
+  RCPP_UNORDERED_SET<string> stopwords;
 
   void init(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max) {
     //vocab2 = Vocabulary(n_min, n_max, delim);
