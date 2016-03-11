@@ -81,7 +81,8 @@ vocab_vectorizer <- function(vocabulary,
                         vocab = vocabulary$vocab$terms,
                         ngram_min = vocabulary$ngram[["ngram_min"]],
                         ngram_max = vocabulary$ngram[["ngram_max"]],
-                        window_size = skip_grams_window)
+                        window_size = skip_grams_window,
+                        stopwords = vocabulary$stopwords)
 
     attr(vocab_corpus, 'ids') <- character(0)
     corpus_insert(vocab_corpus, iterator)

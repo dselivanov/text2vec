@@ -13,10 +13,10 @@ public:
 //     init(vocab_R, n_min, n_max);
 //   };
   // contructor with window_size for term cooccurence matrix
-  VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, uint32_t window_size = 0) {
+  VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, uint32_t window_size, const CharacterVector stopwords_R) {
     tcm = SparseTripletMatrix<float>(vocab_R.size(), vocab_R.size());
     this->window_size = window_size;
-    init(vocab_R, n_min, n_max);
+    init(vocab_R, n_min, n_max, stopwords_R);
   };
 
   void insert_terms (vector< string> &terms) {
@@ -124,9 +124,8 @@ private:
   int verbose;
   // vocabulary
   unordered_map<string, uint32_t> vocab;
-  RCPP_UNORDERED_SET<string> stopwords;
 
-  void init(CharacterVector vocab_R, uint32_t n_min, uint32_t n_max) {
+  void init(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, const CharacterVector stopwords_R) {
     //vocab2 = Vocabulary(n_min, n_max, delim);
     this->verbose = 0;
     this->nnz = 0;
@@ -138,16 +137,23 @@ private:
     // ngram concatenation delimiter
     this->ngram_delim = "_";
 
-    size_t vocab_size = vocab_R.size();
     size_t i = 0;
     // we know vocab size, so lets reserve buckets this number
     // and if we will lucky no rehash will needed
-    this->vocab.reserve(vocab_size);
-    //convert R vocab represenation to C++ represenation
+    this->vocab.reserve(vocab_R.size());
+    // convert R vocab represenation to C++ represenation
     // also fill terms in right order
     for (auto val:vocab_R) {
       //grow vocabulary
       this->vocab.insert(make_pair(as< string >(val), i));
+      // fill terms in order we add them in dctionary!
+      i++;
+    }
+    // same for stopwords
+    this->stopwords.reserve(stopwords_R.size());
+    for (auto val:stopwords_R) {
+      //grow vocabulary
+      this->stopwords.insert(as< string >(val));
       // fill terms in order we add them in dctionary!
       i++;
     }

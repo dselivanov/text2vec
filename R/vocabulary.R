@@ -50,14 +50,15 @@ vocabulary.character <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 
   res <- list(
     # keep structure similar to `vocabulary.itoken` object. not used at the moment,
     # but we should keep same structure (keep in mind prune_vocabulary)
-    vocab = data.frame('terms' = setdiff(src, stopwords),
+    vocab = data.table('terms' = setdiff(src, stopwords),
                        'terms_counts' = rep(NA_integer_, vocab_length),
                        'doc_counts' = rep(NA_integer_, vocab_length),
                        # 'doc_proportions' = rep(NA_real_, vocab_length),
                        stringsAsFactors = FALSE
                        ),
     ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
-    document_count = NA_integer_
+    document_count = NA_integer_,
+    stopwords = stopwords
   )
 
   class(res) <- c('text2vec_vocabulary')
@@ -77,9 +78,10 @@ vocabulary.itoken <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)
   }
 
   res <- list(
-    vocab = vocab$get_vocab_statistics(),
+    vocab = setDT(vocab$get_vocab_statistics()),
     ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
-    document_count = vocab$get_document_count()
+    document_count = vocab$get_document_count(),
+    stopwords = stopwords
   )
 
   class(res) <- c('text2vec_vocabulary')
@@ -94,8 +96,8 @@ vocabulary.itoken <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)
 vocabulary.list <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                             stopwords = character(0), ...) {
   stopifnot( all( vapply(X = src, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
-
-  foreach(it = src,
+  res =
+    foreach(it = src,
           .combine = combine_vocabulary,
           .inorder = FALSE,
           .multicombine = TRUE,
@@ -103,12 +105,13 @@ vocabulary.list <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
           {
             vocabulary(it, ngram, stopwords)
           }
+  res[['stopwords']] <- stopwords
+  res
 }
 
 combine_vocabulary <- function(...) {
   vocab_list <- list(...)
   ngram <- vocab_list[[1]][['ngram']]
-
   # extract vocabulary stats data.frame and rbind them
   combined_vocab <- vocab_list %>%
     lapply(function(x) x[['vocab']]) %>%
@@ -125,7 +128,8 @@ combine_vocabulary <- function(...) {
   res <- list(
     vocab = combined_vocab,
     ngram = ngram,
-    document_count = combined_document_count
+    document_count = combined_document_count,
+    stopwords = character(0)
   )
   class(res) <- c('text2vec_vocabulary')
   res
@@ -192,7 +196,8 @@ prune_vocabulary <- function(vocabulary,
 
   pruned_vocabulary <- list('vocab' = pruned_vocabulary,
                             'ngram' = vocabulary[['ngram']],
-                            'document_count' = vocabulary[['document_count']])
+                            'document_count' = vocabulary[['document_count']],
+                            'stopwords' = vocabulary[['stopwords']])
 
   class(pruned_vocabulary) <- 'text2vec_vocabulary'
 

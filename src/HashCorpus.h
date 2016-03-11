@@ -118,6 +118,5 @@ public:
 
 private:
   uint32_t buckets_size;
-  RCPP_UNORDERED_SET<string> stopwords;
   int signed_hash;
 };

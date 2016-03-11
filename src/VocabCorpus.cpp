@@ -2,7 +2,7 @@
 RCPP_MODULE(VocabCorpus) {
   class_< VocabCorpus >( "VocabCorpus" )
   //<vocab, ngram_min, ngram_max, window_size = 0>
-  .constructor<CharacterVector, uint32_t, uint32_t, uint32_t >()
+  .constructor<CharacterVector, uint32_t, uint32_t, uint32_t, CharacterVector >()
   .method( "vocab", &VocabCorpus::get_vocab, "vocabulary - unique terms")
   .method( "get_token_count", &VocabCorpus::get_token_count, "returns number of tokens in corpus" )
   .method( "get_doc_count", &VocabCorpus::get_doc_count, "returns number of documents in corpus")
