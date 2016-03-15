@@ -7,20 +7,20 @@
 \alias{vocabulary.list}
 \title{Creates vocabulary (unique terms)}
 \usage{
-vocabulary(src, ngram = c(ngram_min = 1L, ngram_max = 1L),
+vocabulary(itoken_src, ngram = c(ngram_min = 1L, ngram_max = 1L),
   stopwords = character(0))
 
-\method{vocabulary}{character}(src, ngram = c(ngram_min = 1L, ngram_max = 1L),
-  stopwords = character(0))
+\method{vocabulary}{character}(itoken_src, ngram = c(ngram_min = 1L, ngram_max
+  = 1L), stopwords = character(0))
 
-\method{vocabulary}{itoken}(src, ngram = c(ngram_min = 1L, ngram_max = 1L),
-  stopwords = character(0))
+\method{vocabulary}{itoken}(itoken_src, ngram = c(ngram_min = 1L, ngram_max =
+  1L), stopwords = character(0))
 
-\method{vocabulary}{list}(src, ngram = c(ngram_min = 1L, ngram_max = 1L),
-  stopwords = character(0), ...)
+\method{vocabulary}{list}(itoken_src, ngram = c(ngram_min = 1L, ngram_max =
+  1L), stopwords = character(0), ...)
 }
 \arguments{
-\item{src}{iterator over \code{list} of \code{character} vectors - documents from which
+\item{itoken_src}{iterator over \code{list} of \code{character} vectors - documents from which
 user want construct vocabulary. Or, alternatively,
 \code{character} vector = user-defined vocabulary terms (which will be used "as is").}
 
