@@ -53,37 +53,26 @@ unlink(temp)
 In the next step we will create vocabulary - set of words for which we want to learn word vectors. Note, that all text2vec's functions that operates on raw text data (`vocabulary`, `create_hash_corpus`, `create_vocab_corpus`) have streaming API and you should iterator over tokens as first argument for these functions.
 ```{r, eval=FALSE}
 # create iterator over tokens
-it <- itoken(wiki, 
-             # text is already pre-cleaned
-             preprocess_function = identity, 
-             # all words are single whitespace separated
-             tokenizer = function(x) strsplit(x, split = " ", fixed = T))
+tokens <- strsplit(wiki, split = " ", fixed = T)
 # create vocabulary. Terms will be unigrams (simple words).
-vocab <- vocabulary(it, ngram = c(1L, 1L) )
+vocab <- vocabulary( itoken(tokens) )
 ```
 These words should not be too rare. Fot example we will can't obtain any meaningful word vector for word which we saw only once in entire corpus. Here we will take only words which appear at least 5 times. *text2vec* provides more options to filter vocabulary - see `?prune_vocabulary` function.
 ```{r, eval=FALSE}
-vocab <- prune_vocabulary(vocab, term_count_min = 5)
+vocab <- prune_vocabulary(vocab, term_count_min = 5L)
 ```
 Now we have `71290` terms in vocalulary and ready to construct Term-Coocurence matrix (*tcm*).
 ```{r, eval=FALSE}
 # as said above, we should provide iterator to create_vocab_corpus function
-it <- itoken(wiki, 
-             # text is already pre-cleaned
-             preprocess_function = identity, 
-             # all words are single whitespace separated
-             tokenizer = function(x) strsplit(x, split = " ", fixed = T))
-
-corpus <- create_vocab_corpus(it, 
-                              # use our filtered vocabulary
-                              vocabulary = vocab,
-                              # don't create document-term matrix
-                              grow_dtm = F,
-                              # use window of 5 for context words
-                              skip_grams_window = 15L)
-
+it <- itoken(tokens)
+# use our filtered vocabulary
+vectorizer <- vocab_vectorizer(vocab, 
+                               # don't vectorizer input
+                               grow_dtm = FALSE, 
+                               # use window of 5 for context words
+                               skip_grams_window = 5L)
 # get term cooccurence matrix from instance of C++ corpus class
-tcm <- get_tcm(corpus)
+tcm <- create_tcm(it, vectorizer)
 ```
 Now we have *tcm* matrix and can factorize it via GloVe algorithm.  
 text2vec uses parallel stochastic gradient descend algorithm. By default it use all cores on your machine, but you can specify number of core directly. For example for using 4 threads, call `RcppParallel::setThreadOptions(numThreads = 4)`. 

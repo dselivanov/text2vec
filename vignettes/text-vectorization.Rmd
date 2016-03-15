@@ -59,31 +59,43 @@ To represent documents in vector space, first of all we have to create `term -> 
 ### Vocabulary based vectorization
 Lets examine the first choice. He we collect unique terms from all documents and mark them with *unique_id*. `vocabulary()` function designed specially for this purpose.
 ```{r, vocab-iterator, eval=TRUE}
-it <- itoken(movie_review[['review']], preprocess_function = tolower, 
-             tokenizer = word_tokenizer, chunks_number = 10)
-# using unigrams here
-t1 <- Sys.time()
-vocab <- vocabulary(src = it, ngram = c(1L, 1L))
-print( difftime( Sys.time(), t1, units = 'sec'))
+it <- itoken(movie_review[['review']], 
+             preprocess_function = tolower, 
+             tokenizer = word_tokenizer)
+# stopwords
+sw <- c("i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours")
+vocab <- vocabulary(it, stopwords = sw)
+```
+
+Alternatively, if your data fits in RAM, you can once create list of tokens and the reuse it in further steps:
+
+```{r}
+# each element of list represents document
+tokens <- movie_review[['review']] %>% 
+  tolower %>% 
+  word_tokenizer
+# add ids
+names(tokens) <- movie_review$id
+it <- itoken(tokens)
+vocab <- vocabulary(it, stopwords = sw)
 ```
 Now we can costruct Document-Term Matrix (DTM). Again, since all functions related to *corpus* construction have streaming API, we have to create *iterator* and provide it to `create_vocab_corpus` function:
 ```{r, vocab_dtm_1, eval=TRUE}
-it <- itoken(movie_review[['review']], preprocess_function = tolower, 
-             tokenizer = word_tokenizer, chunks_number = 10)
+it <- itoken(tokens)
+# or
+# it <- itoken(movie_review[['review']], tolower, word_tokenizer)
 vectorizer <- vocab_vectorizer(vocab)
-corpus <- create_corpus(it, vectorizer)
-
-dtm <- get_dtm(corpus)
+dtm <- create_dtm(it, vectorizer)
 ```
-We got DTM matrix. Lets check its dimension:
+We got DTM matrix. Lets check its dimension and names:
 ```{r, vocab_dtm_1_dim, eval=TRUE}
 dim(dtm)
+identical(rownames(dtm), movie_review$id)
 ```
 As you can see, it has `r dim(dtm)[[1]]` rows (equal to number of documents) and `r dim(dtm)[[2]]` columns (equal to number of unique terms).
 Now we are ready to fit our first model. Here we will use `glmnet` package to fit *logistic regression* with *L1* penalty.
 ```{r, fit_1, message=FALSE, warning=FALSE, eval=TRUE}
 library(glmnet)
-t1 <- Sys.time()
 fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']], 
                  family = 'binomial', 
                  # lasso penalty
@@ -97,7 +109,6 @@ fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']],
                  # again lower number iterations for faster training
                  # in this vignette
                  maxit = 1e3)
-print( difftime( Sys.time(), t1, units = 'sec'))
 plot(fit)
 print(paste("max AUC = ", round(max(fit$cvm), 4)))
 ```
@@ -113,12 +124,10 @@ We will prune our vocabulary. For example we can find words *"a"*, *"the"*, *"in
 pruned_vocab <- prune_vocabulary(vocab, term_count_min = 10,
  doc_proportion_max = 0.5, doc_proportion_min = 0.001)
 
-it <- itoken(movie_review[['review']], preprocess_function = tolower, 
-             tokenizer = word_tokenizer, chunks_number = 10)
+it <- itoken(tokens)
 
 vectorizer <- vocab_vectorizer(pruned_vocab)
-corpus <- create_corpus(it, vectorizer)
-dtm <- get_dtm(corpus)
+dtm <- create_dtm(it, vectorizer)
 ```
 
 ###  TF-IDF
@@ -127,12 +136,10 @@ Also we can (and usually should!) apply **[TF-IDF](https://en.wikipedia.org/wiki
 
 ```{r, tfidf_dtm_1}
 dtm <- dtm %>% transformer_tfidf
-dim(dtm)
 ```
 
 Now, lets fit out model again:
 ```{r, fit_2, message=FALSE, warning=FALSE, eval=TRUE}
-t1 <- Sys.time()
 fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']], 
                  family = 'binomial', 
                  # lasso penalty
@@ -146,7 +153,6 @@ fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']],
                  # again lower number iterations for faster training
                  # in this vignette
                  maxit = 1e3)
-print( difftime( Sys.time(), t1, units = 'sec'))
 plot(fit)
 print(paste("max AUC = ", round(max(fit$cvm), 4)))
 ```
@@ -159,33 +165,22 @@ Also we can try to use [ngram](https://en.wikipedia.org/wiki/N-gram)s instead of
 We will use up to 3-ngrams:
 
 ```{r, ngram_dtm_1}
-it <- itoken(movie_review[['review']], preprocess_function = tolower, 
-             tokenizer = word_tokenizer, chunks_number = 10)
+it <- itoken(tokens)
 
-t1 <- Sys.time()
-vocab <- vocabulary(src = it, ngram = c(1L, 3L)) %>% 
+vocab <- vocabulary(it, ngram = c(1L, 3L)) %>% 
   prune_vocabulary(term_count_min = 10, 
                    doc_proportion_max = 0.5, 
                    doc_proportion_min = 0.001)
 
-print( difftime( Sys.time(), t1, units = 'sec'))
-
-it <- itoken(movie_review[['review']], preprocess_function = tolower, 
-             tokenizer = word_tokenizer, chunks_number = 10)
-
 vectorizer <- vocab_vectorizer(vocab)
-corpus <- create_corpus(it, vectorizer)
 
-print( difftime( Sys.time(), t1, units = 'sec'))
-
-dtm <- corpus %>% 
-  get_dtm %>% 
+dtm <- tokens %>% 
+  itoken %>% 
+  create_dtm(vectorizer) %>% 
   transformer_tfidf
-
 
 dim(dtm)
 
-t1 <- Sys.time()
 fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']], 
                  family = 'binomial', 
                  # lasso penalty
@@ -199,9 +194,8 @@ fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']],
                  # again lower number iterations for faster training
                  # in this vignette
                  maxit = 1e3)
-print( difftime( Sys.time(), t1, units = 'sec'))
 plot(fit)
-print (paste("max AUC = ", round(max(fit$cvm), 4)))
+print(paste("max AUC = ", round(max(fit$cvm), 4)))
 ```
 
 So improved our model a little bit more. I'm leaving further tuning for the reader.
@@ -213,23 +207,14 @@ If you didn't hear anything about **Feature hashing** (or **hashing trick**), I 
 Here I will demonstrate, how to use feature hashing in **text2vec**:
 
 ```{r, hash_dtm}
-t1 <- Sys.time()
-
-it <- itoken(movie_review[['review']], preprocess_function = tolower, 
-             tokenizer = word_tokenizer, chunks_number = 10)
+it <- itoken(tokens)
 
 vectorizer <- hash_vectorizer(hash_size = 2 ^ 16, ngram = c(1L, 3L))
-corpus <- create_corpus(it, vectorizer)
-
-print( difftime( Sys.time(), t1, units = 'sec'))
-
-dtm <- corpus %>% 
-  get_dtm %>% 
+dtm <- create_dtm(it, vectorizer) %>% 
   transformer_tfidf
 
 dim(dtm)
 
-t1 <- Sys.time()
 fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']], 
                  family = 'binomial', 
                  # lasso penalty
@@ -243,9 +228,8 @@ fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']],
                  # again lower number iterations for faster training
                  # in this vignette
                  maxit = 1e3)
-print( difftime( Sys.time(), t1, units = 'sec'))
 plot(fit)
-print (paste("max AUC = ", round(max(fit$cvm), 4)))
+print(paste("max AUC = ", round(max(fit$cvm), 4)))
 ```
 
 As you can see, we got a little bit worse AUC, but DTM construction time was considerably lower. On large collections of documents this can become a serious argument.

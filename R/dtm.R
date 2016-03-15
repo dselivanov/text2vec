@@ -1,17 +1,16 @@
 #' @name get_dtm
-#' @title Creates Document-Term matrix
-#' @description Creates Document-Term matrix from Corpus object.
+#' @title Extracts Document-Term matrix
+#' @description Extracts Document-Term matrix from Corpus object.
 #' @param corpus HashCorpus or VocabCorpus object.
 #' See \link{create_corpus} for details.
 #' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
 #' "lda_c" - Blei's lda-c format (list of 2*doc_terms_size),
 #' see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
 #' @examples
-#' \dontrun{
 #' N <- 1000
 #' it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
-#'              tokenizer = word_tokenizer, chunks_number = 10)
-#' v <- vocabulary(it, c(1L, 1L) )
+#'              tokenizer = word_tokenizer)
+#' v <- vocabulary(it)
 #'
 #' #remove very common and uncommon words
 #' pruned_vocab = prune_vocabulary(v, term_count_min = 10,
@@ -21,17 +20,9 @@
 #' vectorizer <- vocab_vectorizer(v)
 #' it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
 #'              tokenizer = word_tokenizer, chunks_number = 10)
-#' corpus <- create_corpus(it, vectorizer)
-#' dtm <- get_dtm(corpus)
+#' dtm <- create_dtm(it, vectorizer)
 #'
-#' tf_scale_matrix <- get_tf(dtm, type = 'tf')
-#' dtm_tf <- tf_scale_matrix %*% dtm
-#' dtm_tf_idf <- get_tf %*% m %*% get_idf(dtm)
-#'
-#' # The same result we can obtain using tfidf_transformer function
-#' dtm_tf_idf_2 <- tfidf_transformer(dtm)
-#' identical(dtm_tf_idf, dtm_tf_idf_2)
-#' }
+#' dtm_tfidf <- transformer_tfidf(dtm)
 #' @export
 get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
   if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
@@ -87,7 +78,7 @@ create_dtm.itoken <- function(itoken_src, vectorizer,
                             type = c("dgCMatrix", "dgTMatrix", "lda_c"),
                             verbose = FALSE,
                             ...) {
-  create_dtm( list(itoken_src), vectorizer, type, verbose, ...)
+  suppressWarnings(create_dtm( list(itoken_src), vectorizer, type, verbose, ...))
 }
 
 #' @rdname create_dtm

@@ -2,7 +2,7 @@
 #' @title Creates vocabulary (unique terms)
 #' @description collects unique terms and corresponding statistics from object.
 #' See \code{value} section.
-#' @param src iterator over \code{list} of \code{character} vectors - documents from which
+#' @param itoken_src iterator over \code{list} of \code{character} vectors - documents from which
 #' user want construct vocabulary. Or, alternatively,
 #' \code{character} vector = user-defined vocabulary terms (which will be used "as is").
 #' @param ngram \code{integer} vector. The lower and upper boundary of the range of
@@ -31,7 +31,7 @@
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
 #' @export
-vocabulary <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                        stopwords = character(0)) {
   UseMethod("vocabulary")
 }
@@ -40,17 +40,17 @@ vocabulary <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
 #' character vector. Terms will be inserted \bold{as is}, without any checks
 #' (ngrams numner, ngram delimiters, etc.).
 #' @export
-vocabulary.character <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                                  stopwords = character(0)) {
 
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
-  vocab_length = length(src)
+  vocab_length = length(itoken_src)
 
   res <- list(
     # keep structure similar to `vocabulary.itoken` object. not used at the moment,
     # but we should keep same structure (keep in mind prune_vocabulary)
-    vocab = data.table('terms' = setdiff(src, stopwords),
+    vocab = data.table('terms' = setdiff(itoken_src, stopwords),
                        'terms_counts' = rep(NA_integer_, vocab_length),
                        'doc_counts' = rep(NA_integer_, vocab_length),
                        # 'doc_proportions' = rep(NA_real_, vocab_length),
@@ -67,13 +67,14 @@ vocabulary.character <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 
 
 #' @describeIn vocabulary collects unique terms and corresponding statistics from object.
 #' @export
-vocabulary.itoken <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                               stopwords = character(0)) {
+
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
   vocab <- new(VocabularyBuilder, ngram_min, ngram_max, stopwords)
 
-  foreach(tokens = src) %do% {
+  foreach(tokens = itoken_src) %do% {
     vocab$insert_document_batch(tokens)
   }
 
@@ -93,11 +94,11 @@ vocabulary.itoken <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)
 #' in parallel using \link{foreach}.
 #' @param ... additional arguments to \link{foreach} function.
 #' @export
-vocabulary.list <- function(src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+vocabulary.list <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                             stopwords = character(0), ...) {
-  stopifnot( all( vapply(X = src, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
+  stopifnot( all( vapply(X = itoken_src, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
   res =
-    foreach(it = src,
+    foreach(it = itoken_src,
           .combine = combine_vocabulary,
           .inorder = FALSE,
           .multicombine = TRUE,
