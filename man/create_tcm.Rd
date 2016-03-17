@@ -38,11 +38,22 @@ will be handled in separate thread and at the end they will be combined.
 \examples{
 \dontrun{
 data("movie_review")
+
+# single threadx
+
+tokens <- movie_review$review \%>\% tolower \%>\% word_tokenizer
+it <- itoken(tokens)
+v <- vocabulary(jobs)
+vectorizer <- vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)
+tcm <- create_tcm(itoken(tokens), vectorizer)
+
+# parallel version
+
 # set to number of cores on your machine
 N_WORKERS <- 1
-splits <- split(movie_review$review, rep(1:N_WORKERS, each = nrow(movie_review) / N_WORKERS ))
+splits <- split_into(movie_review$review, N_WORKERS)
 jobs <- lapply(splits, itoken, tolower, word_tokenizer)
-v <- vocabulary(jobs, c(1L, 1L) )
+v <- vocabulary(jobs)
 vectorizer <- vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)
 jobs <- lapply(splits, itoken, tolower, word_tokenizer)
 doParallel::registerDoParallel(N_WORKERS)

@@ -21,7 +21,7 @@ corpus_insert <- function(corpus, iterator) {
 #' We can add documents into this corpus by reference - no copy at all.
 #' See source code for details.
 #' For full process example see \link{get_dtm}.
-#' @seealso \link{vectorizers}
+#' @seealso \link{vectorizers} \link{create_dtm} \link{create_tcm}
 #' @export
 create_corpus <- function(iterator,
                           vectorizer) {
@@ -41,7 +41,7 @@ create_corpus <- function(iterator,
 #' @param skip_grams_window \code{integer} window for Term-Cooccurence matrix
 #' construction. 0L points to do not construct such matrix.
 #' @return vectorizer \code{function}
-#' @seealso \link{create_corpus}
+#' @seealso \link{create_corpus} \link{create_dtm} \link{create_tcm} \link{vocabulary}
 #' @examples
 #' data("movie_review")
 #' N <- 100

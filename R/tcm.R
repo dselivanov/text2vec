@@ -10,11 +10,12 @@
 #' it <- itoken(txt, tolower, word_tokenizer)
 #' vocab <- vocabulary(it)
 #' #remove very common and uncommon words
-#' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
-#'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 5000)
+#' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10, doc_proportion_max = 0.8,
+#'                                 doc_proportion_min = 0.001, max_number_of_terms = 5000)
 #'
+#' vectorizer <- vocab_vectorizer(pruned_vocab, grow_dtm = FALSE, skip_grams_window = 5L)
 #' it <- itoken(txt, tolower, word_tokenizer)
-#' corpus <- create_vocab_corpus(it, pruned_vocab, grow_dtm = FALSE, skip_grams_window = 5)
+#' corpus <- create_corpus(it, vectorizer)
 #' tcm <- get_tcm(corpus)
 #' dim(tcm)
 #' }
@@ -48,11 +49,22 @@ get_tcm <- function(corpus) {
 #' @examples
 #' \dontrun{
 #' data("movie_review")
+#'
+#' # single threadx
+#'
+#' tokens <- movie_review$review %>% tolower %>% word_tokenizer
+#' it <- itoken(tokens)
+#' v <- vocabulary(jobs)
+#' vectorizer <- vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)
+#' tcm <- create_tcm(itoken(tokens), vectorizer)
+#'
+#' # parallel version
+#'
 #' # set to number of cores on your machine
 #' N_WORKERS <- 1
-#' splits <- split(movie_review$review, rep(1:N_WORKERS, each = nrow(movie_review) / N_WORKERS ))
+#' splits <- split_into(movie_review$review, N_WORKERS)
 #' jobs <- lapply(splits, itoken, tolower, word_tokenizer)
-#' v <- vocabulary(jobs, c(1L, 1L) )
+#' v <- vocabulary(jobs)
 #' vectorizer <- vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)
 #' jobs <- lapply(splits, itoken, tolower, word_tokenizer)
 #' doParallel::registerDoParallel(N_WORKERS)

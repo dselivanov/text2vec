@@ -58,6 +58,6 @@ corpus <- create_corpus(it, vectorizer)
 voacb_dtm <- get_dtm(corpus)
 }
 \seealso{
-\link{create_corpus}
+\link{create_corpus} \link{create_dtm} \link{create_tcm} \link{vocabulary}
 }
 

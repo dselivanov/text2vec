@@ -32,11 +32,11 @@ See GloVe paper for details: \url{http://nlp.stanford.edu/pubs/glove.pdf}}
 
 \item{num_iters}{number of AdaGrad epochs}
 
-\item{shuffle_seed}{\code{logical} whether to perform shuffling before each SGD iteration.
-Generally this is good idea, but from my experience, in this particular case,
-it doesn't improve convergence. So, there is  no shuffling by default:
-\code{shuffle_seed = NA_integer_}. Please report, if you find that
-shuffling improves your score.}
+\item{shuffle_seed}{\code{integer} seed. \code{NA_integer_} for turn shuffling off.
+Defines shuffling before each SGD iteration. Generelly good idea for stochastic
+gradient descent, but from my experience, in this particular case, it doesn't
+improve convergence. So, there is  no shuffling by default: \code{shuffle_seed = NA_integer_}.
+Please report, if you find that shuffling improves your score.}
 
 \item{learning_rate}{learning rate for SGD, I don't recommend to modify this parameter,
 AdaGrad will quickly adjust it to optimal.}
@@ -45,6 +45,7 @@ AdaGrad will quickly adjust it to optimal.}
 
 \item{convergence_threshold}{defines early stopping stratergy. We stop fitting when
 one of two following conditions will be satisfied:
+
 a)  spent all iterations
 
 or
@@ -62,8 +63,7 @@ problems with numerical stability.}
 \item{alpha}{alpha in weighting function formula :
 \eqn{f(x) = 1 if x > x_max; else (x/x_max)^alpha }}
 
-\item{...}{arguments passed to other methods (not used at the moment).
-Generelly good idea for stochastic gradient descent}
+\item{...}{arguments passed to other methods (not used at the moment).}
 }
 \description{
 Train GloVe word embeddings model via fully asynchronous parallel AdaGrad.
@@ -76,26 +76,27 @@ Train GloVe word embeddings model via fully asynchronous parallel AdaGrad.
 }}
 \examples{
 \dontrun{
-text8 <- read_lines('./text8')
+library(readr)
+temp <- tempfile()
+download.file('http://mattmahoney.net/dc/text8.zip', temp)
+text8 <- read_lines(unz(temp, "text8"))
 it <- itoken(text8, preprocess_function = identity,
-             tokenizer = function(x) str_split(x, fixed(" ")))
+             tokenizer = function(x) strsplit(x, " ", TRUE))
 vocab <- vocabulary(it) \%>\%
  prune_vocabulary(term_count_min = 5)
 
 it <- itoken(text8, preprocess_function = identity,
-             tokenizer = function(x) str_split(x, fixed(" ")))
+             tokenizer = function(x) strsplit(x, " ", TRUE))
 
-corpus <- create_vocab_corpus(iterator = it,
-                              vocabulary = vocab,
-                              grow_dtm = FALSE,
-                              skip_grams_window = 5)
-tcm <- get_tcm(corpus)
+tcm <- create_tcm(it, vocab_vectorizer(vocab, grow_dtm = FALSE, skip_grams_window = 5L))
 
-RcppParallel::setThreadOptions(numThreads = 8)
+# use the following command to manually set number of threads (if you want)
+# by default glove will use all available CPU cores
+# RcppParallel::setThreadOptions(numThreads = 8)
 fit <- glove(tcm = tcm, shuffle_seed = 1L, word_vectors_size = 50,
               x_max = 10, learning_rate = 0.2,
               num_iters = 50, grain_size = 1e5,
-              max_cost = 100, convergence_threshold = 0.01)
+              max_cost = 100, convergence_threshold = 0.005)
 word_vectors <- fit$word_vectors[[1]] + fit$word_vectors[[2]]
 rownames(word_vectors) <- rownames(tcm)
 qlst <- prepare_analogue_questions('./questions-words.txt', rownames(word_vectors))

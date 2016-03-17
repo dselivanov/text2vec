@@ -64,9 +64,10 @@ S3 methods for creating itoken iterator from list of tokens
 \examples{
 data("movie_review")
 txt <- movie_review[['review']][1:100]
-it <- itoken(txt, tolower, word_tokenizer, chunks_number = 7)
+it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
 }
 \seealso{
-\link{vocabulary}, \link{create_corpus}, \link{vectorizers}
+\link{vocabulary}, \link{create_corpus}, \link{create_dtm},
+\link{vectorizers}, \link{create_tcm}
 }
 

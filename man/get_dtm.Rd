@@ -2,7 +2,7 @@
 % Please edit documentation in R/dtm.R
 \name{get_dtm}
 \alias{get_dtm}
-\title{Creates Document-Term matrix}
+\title{Extracts Document-Term matrix}
 \usage{
 get_dtm(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c"))
 }
@@ -11,16 +11,16 @@ get_dtm(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c"))
 See \link{create_corpus} for details.}
 
 \item{type}{character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
-"lda_c" - Blei's lda-c format (list of 2*doc_terms_size),
+"lda_c" - Blei's lda-c format (list of 2 * doc_terms_size),
 see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}}
 }
 \description{
-Creates Document-Term matrix from Corpus object.
+Extracts Document-Term matrix from Corpus object.
 }
 \examples{
 N <- 1000
-it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
-             tokenizer = word_tokenizer)
+tokens <- movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
+it <- itoken(tokens)
 v <- vocabulary(it)
 
 #remove very common and uncommon words
@@ -29,10 +29,8 @@ pruned_vocab = prune_vocabulary(v, term_count_min = 10,
  max_number_of_terms = 10000)
 
 vectorizer <- vocab_vectorizer(v)
-it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
-             tokenizer = word_tokenizer, chunks_number = 10)
-dtm <- create_dtm(it, vectorizer)
-
-dtm_tfidf <- transformer_tfidf(dtm)
+it <- itoken(tokens)
+corpus <- create_corpus(it, vectorizer)
+dtm <- get_dtm(corpus)
 }
 

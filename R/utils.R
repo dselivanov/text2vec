@@ -46,7 +46,8 @@ to_lda_c <- function(dtm) {
   # preserve names
   # dtm now TDM (because of transpose above)
   # so use colnames!
-  names(m_lda_c) <- colnames(dtm)
+  if ( length(colnames(dtm)) > 0 )
+    names(m_lda_c) <- colnames(dtm)
   m_lda_c
 }
 

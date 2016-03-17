@@ -19,24 +19,28 @@ transformer_binary(dtm)
 \item{sublinear_tf}{\code{logical}, \code{FALSE} by default.
 Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).}
 
-\item{norm}{\code{character} - Norm used to normalize term vectors. 'l1' by default, i.e.
+\item{norm}{\code{character} - Norm type to normalize term vectors. 'l1' by default, i.e.
 scale by bumber of words in document.}
 
-\item{idf}{- \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling. See \link{get_idf}.
+\item{idf}{- \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling.
+See \link{get_idf}.
 If not provided ( \code{NULL} ) - idf will be calculated form current data.}
 }
 \description{
-\code{transformer_tf} scales each document vector by # of terms in corresponding document.
+\code{transformer_tf}:
 
-\code{tf = (Number word appears in document) / (Number words in document) } or in case 'l2' norm
-\code{tf = (Number word appears in document) ^ 2 / (Number words in document) ^ 2 }
+"l1" norm:
+\code{dtm_tf = (count of word appears in document) / (total number words in document) }
 
-\code{transformer_binary} store 1 if document contains term and 0 otherwise.
+"l2" norm:
+\code{tf = (count of word appears in document) ^ 2 / (total number words in document) ^ 2 }
 
+\code{transformer_binary}:
+1 if word appears in document, 0 otherwise.
 
-\code{transformer_tfidf}
-
-\code{idf  = log (Number documents in the corpus) / (Number documents where the term appears + 1)}
+\code{transformer_tfidf}:
+\code{idf  = log (count of word appears in document) /
+(number of documents where the term appears + 1)}
 }
 \section{Functions}{
 \itemize{
@@ -52,14 +56,17 @@ txt <- movie_review[['review']][1:1000]
 it <- itoken(txt, tolower, word_tokenizer)
 vocab <- vocabulary(it)
 #remove very common and uncommon words
-pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
- doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
+pruned_vocab = prune_vocabulary(vocab,
+ term_count_min = 10,
+ doc_proportion_max = 0.8, doc_proportion_min = 0.001,
+ max_number_of_terms = 20000)
 
 it <- itoken(txt, tolower, word_tokenizer)
-corpus <- create_vocab_corpus(it, pruned_vocab)
-dtm <- get_dtm(corpus, type = 'dgCMatrix' )
+dtm <- create_dtm(it, pruned_vocab)
 
 dtm_filtered <- dtm \%>\%
+ # functionality overlaps with prune_vocabulary(),
+ # but still can be useful in some cases
  # filter out very common and very uncommon terms
  transformer_filter_commons( c(0.001, 0.975) )
 
@@ -69,9 +76,9 @@ transformed_tf <- dtm \%>\%
 
 # tf-idf transormation
 idf <- get_idf(dtm)
-transformed_tfidf <- dtm \%>\%
- transformer_tfidf( idf)
- }
+transformed_tfidf <- transformer_tfidf(dtm,  idf)
+
+}
 }
 \seealso{
 \link{get_idf}

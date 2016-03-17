@@ -22,7 +22,7 @@ Each element is a list of tokens = tokenized and normalized strings.}
 \item{vectorizer}{\code{function} vectorizer function.}
 
 \item{type}{character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
-"lda_c" - Blei's lda-c format (list of 2*doc_terms_size),
+"lda_c" - Blei's lda-c format (list of 2 * doc_terms_size),
 see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}}
 
 \item{verbose}{\code{logical} print status messages}
@@ -45,6 +45,21 @@ will be handled in separate thread and at the end they will be combined.
 \examples{
 \dontrun{
 data("movie_review")
+N <- 1000
+it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+             tokenizer = word_tokenizer)
+v <- vocabulary(it)
+#remove very common and uncommon words
+pruned_vocab = prune_vocabulary(v, term_count_min = 10,
+ doc_proportion_max = 0.5, doc_proportion_min = 0.001)
+vectorizer <- vocab_vectorizer(v)
+it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+             tokenizer = word_tokenizer)
+dtm <- create_dtm(it, vectorizer)
+# get tf-idf matrix from bag-of-words matrix
+dtm_tfidf <- transformer_tfidf(dtm)
+
+## Example of parallel mode
 # set to number of cores on your machine
 N_WORKERS <- 1
 doParallel::registerDoParallel(N_WORKERS)
@@ -55,6 +70,6 @@ dtm <- create_dtm(jobs, vectorizer, type = 'dgTMatrix')
 }
 }
 \seealso{
-\link{itoken}
+\link{itoken} \link{vectorizers} \link{create_corpus} \link{get_dtm}
 }
 
