@@ -4,12 +4,12 @@
 #' @param corpus HashCorpus or VocabCorpus object.
 #' See \link{create_corpus} for details.
 #' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
-#' "lda_c" - Blei's lda-c format (list of 2*doc_terms_size),
+#' "lda_c" - Blei's lda-c format (list of 2 * doc_terms_size),
 #' see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
 #' @examples
 #' N <- 1000
-#' it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
-#'              tokenizer = word_tokenizer)
+#' tokens <- movie_review$review[1:N] %>% tolower %>% word_tokenizer
+#' it <- itoken(tokens)
 #' v <- vocabulary(it)
 #'
 #' #remove very common and uncommon words
@@ -18,17 +18,15 @@
 #'  max_number_of_terms = 10000)
 #'
 #' vectorizer <- vocab_vectorizer(v)
-#' it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
-#'              tokenizer = word_tokenizer, chunks_number = 10)
-#' dtm <- create_dtm(it, vectorizer)
-#'
-#' dtm_tfidf <- transformer_tfidf(dtm)
+#' it <- itoken(tokens)
+#' corpus <- create_corpus(it, vectorizer)
+#' dtm <- get_dtm(corpus)
 #' @export
 get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
   if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
     type <- match.arg(type)
     dtm <- corpus$get_dtm()
-    dtm@Dimnames[[1]] <- attr(corpus, 'ids')
+    rownames(dtm) <- attr(corpus, 'ids')
     coerce_dgTMatrix(dtm, type)
   }
   else
@@ -46,16 +44,31 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' Each element is a list of tokens = tokenized and normalized strings.
 #' @param vectorizer \code{function} vectorizer function.
 #' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
-#' "lda_c" - Blei's lda-c format (list of 2*doc_terms_size),
+#' "lda_c" - Blei's lda-c format (list of 2 * doc_terms_size),
 #' see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
 #' @param verbose \code{logical} print status messages
 #' @param ... - arguments to \link{foreach} function which is used to iterate
 #' over \code{itoken_src} under the hood.
 #' @return Document-Term Matrix
-#' @seealso \link{itoken}
+#' @seealso \link{itoken} \link{vectorizers} \link{create_corpus} \link{get_dtm}
 #' @examples
 #' \dontrun{
 #' data("movie_review")
+#' N <- 1000
+#' it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+#'              tokenizer = word_tokenizer)
+#' v <- vocabulary(it)
+#' #remove very common and uncommon words
+#' pruned_vocab = prune_vocabulary(v, term_count_min = 10,
+#'  doc_proportion_max = 0.5, doc_proportion_min = 0.001)
+#' vectorizer <- vocab_vectorizer(v)
+#' it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+#'              tokenizer = word_tokenizer)
+#' dtm <- create_dtm(it, vectorizer)
+#' # get tf-idf matrix from bag-of-words matrix
+#' dtm_tfidf <- transformer_tfidf(dtm)
+#'
+#' ## Example of parallel mode
 #' # set to number of cores on your machine
 #' N_WORKERS <- 1
 #' doParallel::registerDoParallel(N_WORKERS)

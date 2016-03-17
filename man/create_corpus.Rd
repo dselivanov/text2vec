@@ -27,6 +27,6 @@ ram-friendly and efficient way using iterators abstraction. So you can build cor
 objects/files which are orders of magnitude larger that available RAM.
 }
 \seealso{
-\link{vectorizers}
+\link{vectorizers} \link{create_dtm} \link{create_tcm}
 }
 

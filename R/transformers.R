@@ -25,28 +25,32 @@ transformer_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, comm
 #' @name transformer_tf
 #' @title Scales Document-Term matrix
 #' @description
-#' \code{transformer_tf} scales each document vector by # of terms in corresponding document.
 #'
-#' \code{tf = (Number word appears in document) / (Number words in document) } or in case 'l2' norm
-
-#' \code{tf = (Number word appears in document) ^ 2 / (Number words in document) ^ 2 }
+#' \code{transformer_tf}:
 #'
-#' \code{transformer_binary} store 1 if document contains term and 0 otherwise.
+#' "l1" norm:
+#' \code{dtm_tf = (count of word appears in document) / (total number words in document) }
 #'
+#' "l2" norm:
+#' \code{tf = (count of word appears in document) ^ 2 / (total number words in document) ^ 2 }
 #'
-#' \code{transformer_tfidf}
+#' \code{transformer_binary}:
+#' 1 if word appears in document, 0 otherwise.
 #'
-#' \code{idf  = log (Number documents in the corpus) / (Number documents where the term appears + 1)}
+#' \code{transformer_tfidf}:
+#' \code{idf  = log (count of word appears in document) /
+#' (number of documents where the term appears + 1)}
 #'
 #' @param dtm \code{dgCMatrix} - Document-Term matrix
 #'
 #' @param sublinear_tf \code{logical}, \code{FALSE} by default.
 #' Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).
 #'
-#' @param norm \code{character} - Norm used to normalize term vectors. 'l1' by default, i.e.
+#' @param norm \code{character} - Norm type to normalize term vectors. 'l1' by default, i.e.
 #' scale by bumber of words in document.
 #'
-#' @param idf - \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling. See \link{get_idf}.
+#' @param idf - \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling.
+#' See \link{get_idf}.
 #' If not provided ( \code{NULL} ) - idf will be calculated form current data.
 #' @seealso \link{get_idf}
 #' @examples
@@ -57,14 +61,17 @@ transformer_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, comm
 #' it <- itoken(txt, tolower, word_tokenizer)
 #' vocab <- vocabulary(it)
 #' #remove very common and uncommon words
-#' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
-#'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
+#' pruned_vocab = prune_vocabulary(vocab,
+#'  term_count_min = 10,
+#'  doc_proportion_max = 0.8, doc_proportion_min = 0.001,
+#'  max_number_of_terms = 20000)
 #'
 #' it <- itoken(txt, tolower, word_tokenizer)
-#' corpus <- create_vocab_corpus(it, pruned_vocab)
-#' dtm <- get_dtm(corpus, type = 'dgCMatrix' )
+#' dtm <- create_dtm(it, pruned_vocab)
 #'
 #' dtm_filtered <- dtm %>%
+#'  # functionality overlaps with prune_vocabulary(),
+#'  # but still can be useful in some cases
 #'  # filter out very common and very uncommon terms
 #'  transformer_filter_commons( c(0.001, 0.975) )
 #'
@@ -74,9 +81,9 @@ transformer_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, comm
 #'
 #' # tf-idf transormation
 #' idf <- get_idf(dtm)
-#' transformed_tfidf <- dtm %>%
-#'  transformer_tfidf( idf)
-#'  }
+#' transformed_tfidf <- transformer_tfidf(dtm,  idf)
+#'
+#' }
 #' @export
 transformer_tf <- function(dtm, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
 
