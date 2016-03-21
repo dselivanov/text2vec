@@ -150,7 +150,6 @@ private:
       i++;
     }
     // same for stopwords
-    this->stopwords.reserve(stopwords_R.size());
     for (auto val:stopwords_R) {
       //grow vocabulary
       this->stopwords.insert(as< string >(val));
