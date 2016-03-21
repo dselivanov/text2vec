@@ -17,10 +17,10 @@ txt_splits <- text2vec:::split_into(txt, N_WORKER)
 
 test_that("Vocabulary with foreach", {
   iterator <- get_test_iterator(txt)
-  vocab_1 <- vocabulary(iterator)
+  vocab_1 <- create_vocabulary(iterator)
 
   iterator_list <- lapply(txt_splits, get_test_iterator)
-  vocab_2 <- vocabulary(iterator_list)
+  vocab_2 <- create_vocabulary(iterator_list)
 
   expect_equal(sort(vocab_1$vocab$terms),  sort(vocab_2$vocab$terms))
   expect_equal(vocab_1$document_count,  vocab_2$document_count)

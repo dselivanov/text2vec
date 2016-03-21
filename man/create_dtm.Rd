@@ -48,7 +48,7 @@ data("movie_review")
 N <- 1000
 it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer)
-v <- vocabulary(it)
+v <- create_vocabulary(it)
 #remove very common and uncommon words
 pruned_vocab = prune_vocabulary(v, term_count_min = 10,
  doc_proportion_max = 0.5, doc_proportion_min = 0.001)

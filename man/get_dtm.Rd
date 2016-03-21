@@ -21,7 +21,7 @@ Extracts Document-Term matrix from Corpus object.
 N <- 1000
 tokens <- movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
 it <- itoken(tokens)
-v <- vocabulary(it)
+v <- create_vocabulary(it)
 
 #remove very common and uncommon words
 pruned_vocab = prune_vocabulary(v, term_count_min = 10,

@@ -50,12 +50,12 @@ wiki <- read_lines(unz(temp, "text8"))
 unlink(temp)
 ```
 
-In the next step we will create vocabulary - set of words for which we want to learn word vectors. Note, that all text2vec's functions that operates on raw text data (`vocabulary`, `create_hash_corpus`, `create_vocab_corpus`) have streaming API and you should iterator over tokens as first argument for these functions.
+In the next step we will create vocabulary - set of words for which we want to learn word vectors. Note, that all text2vec's functions that operates on raw text data (`create_vocabulary`, `create_corpus`, `create_dtm`, `create_tcm`) have streaming API and you should iterator (or list of iterators) over tokens as first argument for these functions.
 ```{r, eval=FALSE}
 # create iterator over tokens
 tokens <- strsplit(wiki, split = " ", fixed = T)
 # create vocabulary. Terms will be unigrams (simple words).
-vocab <- vocabulary( itoken(tokens) )
+vocab <- create_vocabulary( itoken(tokens) )
 ```
 These words should not be too rare. Fot example we will can't obtain any meaningful word vector for word which we saw only once in entire corpus. Here we will take only words which appear at least 5 times. *text2vec* provides more options to filter vocabulary - see `?prune_vocabulary` function.
 ```{r, eval=FALSE}
@@ -67,7 +67,7 @@ Now we have `71290` terms in vocalulary and ready to construct Term-Coocurence m
 it <- itoken(tokens)
 # use our filtered vocabulary
 vectorizer <- vocab_vectorizer(vocab, 
-                               # don't vectorizer input
+                               # don't vectorize input
                                grow_dtm = FALSE, 
                                # use window of 5 for context words
                                skip_grams_window = 5L)

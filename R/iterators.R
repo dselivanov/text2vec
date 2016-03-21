@@ -1,7 +1,7 @@
 #' @name itoken
 #' @title Creates iterator over input object.
 #' @description Creates iterator over input object. This iterator usually used in
-#' following functions : \link{vocabulary}, \link{create_corpus}, \link{create_dtm},
+#' following functions : \link{create_vocabulary}, \link{create_corpus}, \link{create_dtm},
 #' \link{vectorizers}, \link{create_tcm}. See them for details.
 #' @param iterable an object from which to generate an iterator.
 #' @param ... arguments passed to other methods (not used at the moment).
@@ -15,7 +15,7 @@
 #'  \item{\code{idir}}{ - from dir, same as ifiles}
 #' }
 #'
-#' @seealso \link{vocabulary}, \link{create_corpus}, \link{create_dtm},
+#' @seealso \link{create_vocabulary}, \link{create_corpus}, \link{create_dtm},
 #' \link{vectorizers}, \link{create_tcm}
 #' @examples
 #' data("movie_review")

@@ -47,7 +47,7 @@ Also you can perform tokenization in \code{preprocess_function}
 }
 \description{
 Creates iterator over input object. This iterator usually used in
-following functions : \link{vocabulary}, \link{create_corpus}, \link{create_dtm},
+following functions : \link{create_vocabulary}, \link{create_corpus}, \link{create_dtm},
 \link{vectorizers}, \link{create_tcm}. See them for details.
 }
 \details{
@@ -67,7 +67,7 @@ txt <- movie_review[['review']][1:100]
 it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
 }
 \seealso{
-\link{vocabulary}, \link{create_corpus}, \link{create_dtm},
+\link{create_vocabulary}, \link{create_corpus}, \link{create_dtm},
 \link{vectorizers}, \link{create_tcm}
 }
 

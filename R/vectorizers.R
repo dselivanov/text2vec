@@ -41,7 +41,7 @@ create_corpus <- function(iterator,
 #' @param skip_grams_window \code{integer} window for Term-Cooccurence matrix
 #' construction. 0L points to do not construct such matrix.
 #' @return vectorizer \code{function}
-#' @seealso \link{create_corpus} \link{create_dtm} \link{create_tcm} \link{vocabulary}
+#' @seealso \link{create_corpus} \link{create_dtm} \link{create_tcm} \link{create_vocabulary}
 #' @examples
 #' data("movie_review")
 #' N <- 100
@@ -53,7 +53,7 @@ create_corpus <- function(iterator,
 #'
 #' it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
 #'              tokenizer = word_tokenizer, chunks_number = 10)
-#' v <- vocabulary(it, c(1L, 1L) )
+#' v <- create_vocabulary(it, c(1L, 1L) )
 #'
 #' vectorizer <- vocab_vectorizer(v)
 #'
@@ -65,7 +65,7 @@ create_corpus <- function(iterator,
 
 
 #' @rdname vectorizers
-#' @param vocabulary \code{text2vec_vocabulary} object, see \link{vocabulary}.
+#' @param vocabulary \code{text2vec_vocabulary} object, see \link{create_vocabulary}.
 #' @export
 vocab_vectorizer <- function(vocabulary,
                              grow_dtm = TRUE,
