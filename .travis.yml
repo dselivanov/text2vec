@@ -1,7 +1,18 @@
-language: R
 sudo: false
+language: R
 cache: packages
-
 warnings_are_errors: false
 env:
-- _R_CHECK_FORCE_SUGGESTS_=true
+  - _R_CHECK_FORCE_SUGGESTS_=true
+compiler:
+  - gcc-4.9
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.9
+    - g++-4.9
+before_install:
+  - mkdir ~/.R
+  - echo "CXX1X=g++-4.9" > ~/.R/Makevars
