@@ -57,14 +57,14 @@ set.seed(42L)
 To represent documents in vector space, first of all we have to create `term -> term_id` mappings. We use termin *term* instead of *word*, because actually it can be arbitrary *ngram*, not just single word. Having set of documents we want represent them as *sparse matrix*, where each row should corresponds to *document* and each column should corresponds to *term*. This can be done in 2 ways: using **vocabulary**, or by **feature hashing** (hashing trick).
 
 ### Vocabulary based vectorization
-Lets examine the first choice. He we collect unique terms from all documents and mark them with *unique_id*. `vocabulary()` function designed specially for this purpose.
+Lets examine the first choice. He we collect unique terms from all documents and mark them with *unique_id*. `create_vocabulary()` function designed specially for this purpose.
 ```{r, vocab-iterator, eval=TRUE}
 it <- itoken(movie_review[['review']], 
              preprocess_function = tolower, 
              tokenizer = word_tokenizer)
 # stopwords
 sw <- c("i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours")
-vocab <- vocabulary(it, stopwords = sw)
+vocab <- create_vocabulary(it, stopwords = sw)
 ```
 
 Alternatively, if your data fits in RAM, you can once create list of tokens and the reuse it in further steps:
@@ -77,7 +77,7 @@ tokens <- movie_review[['review']] %>%
 # add ids
 names(tokens) <- movie_review$id
 it <- itoken(tokens)
-vocab <- vocabulary(it, stopwords = sw)
+vocab <- create_vocabulary(it, stopwords = sw)
 ```
 Now we can costruct Document-Term Matrix (DTM). Again, since all functions related to *corpus* construction have streaming API, we have to create *iterator* and provide it to `create_vocab_corpus` function:
 ```{r, vocab_dtm_1, eval=TRUE}
@@ -135,7 +135,7 @@ dtm <- create_dtm(it, vectorizer)
 Also we can (and usually should!) apply **[TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) transofrmation**, which will increase weight for document-specific terms and decrease weight for widely used terms:
 
 ```{r, tfidf_dtm_1}
-dtm <- dtm %>% transformer_tfidf
+dtm <- dtm %>% transform_tfidf
 ```
 
 Now, lets fit out model again:
@@ -167,7 +167,7 @@ We will use up to 3-ngrams:
 ```{r, ngram_dtm_1}
 it <- itoken(tokens)
 
-vocab <- vocabulary(it, ngram = c(1L, 3L)) %>% 
+vocab <- create_vocabulary(it, ngram = c(1L, 3L)) %>% 
   prune_vocabulary(term_count_min = 10, 
                    doc_proportion_max = 0.5, 
                    doc_proportion_min = 0.001)
@@ -177,7 +177,7 @@ vectorizer <- vocab_vectorizer(vocab)
 dtm <- tokens %>% 
   itoken %>% 
   create_dtm(vectorizer) %>% 
-  transformer_tfidf
+  transform_tfidf
 
 dim(dtm)
 
@@ -211,7 +211,7 @@ it <- itoken(tokens)
 
 vectorizer <- hash_vectorizer(hash_size = 2 ^ 16, ngram = c(1L, 3L))
 dtm <- create_dtm(it, vectorizer) %>% 
-  transformer_tfidf
+  transform_tfidf
 
 dim(dtm)
 

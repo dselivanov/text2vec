@@ -13,7 +13,7 @@ test_that("tcm with foreach", {
   TERMS_LIMIT = 3000L
   jobs <- lapply(txt_splits, itoken, tolower, word_tokenizer, chunks_number = 1)
 
-  v <- vocabulary(jobs, c(1L, 1L) ) %>%
+  v <- create_vocabulary(jobs, c(1L, 1L) ) %>%
     prune_vocabulary(term_count_min = 5, doc_proportion_max = 0.5, max_number_of_terms = TERMS_LIMIT)
 
   vectorizer <- vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)

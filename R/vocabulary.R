@@ -1,4 +1,4 @@
-#' @name vocabulary
+#' @name create_vocabulary
 #' @title Creates vocabulary (unique terms)
 #' @description collects unique terms and corresponding statistics from object.
 #' See \code{value} section.
@@ -27,20 +27,27 @@
 #' data("movie_review")
 #' txt <- movie_review[['review']][1:100]
 #' it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
-#' vocab <- vocabulary(it)
+#' vocab <- create_vocabulary(it)
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
 #' @export
-vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                        stopwords = character(0)) {
-  UseMethod("vocabulary")
+  UseMethod("create_vocabulary")
 }
 
-#' @describeIn vocabulary creates \code{text2vec_vocabulary} from predefined
+#' @rdname create_vocabulary
+vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                       stopwords = character(0)) {
+  warning("vocabulary() is depreciated, use create_vocabulary() instead")
+  create_vocabulary(itoken_src, ngram, stopwords)
+}
+
+#' @describeIn create_vocabulary creates \code{text2vec_vocabulary} from predefined
 #' character vector. Terms will be inserted \bold{as is}, without any checks
 #' (ngrams numner, ngram delimiters, etc.).
 #' @export
-vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                                  stopwords = character(0)) {
 
   ngram_min <- as.integer( ngram[[1]] )
@@ -48,7 +55,7 @@ vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_
   vocab_length = length(itoken_src)
 
   res <- list(
-    # keep structure similar to `vocabulary.itoken` object. not used at the moment,
+    # keep structure similar to `create_vocabulary.itoken` object. not used at the moment,
     # but we should keep same structure (keep in mind prune_vocabulary)
     vocab = data.table('terms' = setdiff(itoken_src, stopwords),
                        'terms_counts' = rep(NA_integer_, vocab_length),
@@ -65,9 +72,9 @@ vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_
   res
 }
 
-#' @describeIn vocabulary collects unique terms and corresponding statistics from object.
+#' @describeIn create_vocabulary collects unique terms and corresponding statistics from object.
 #' @export
-vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                               stopwords = character(0)) {
 
   ngram_min <- as.integer( ngram[[1]] )
@@ -89,12 +96,12 @@ vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max
   res
 }
 
-#' @describeIn vocabulary collects unique terms and corresponding statistics from
+#' @describeIn create_vocabulary collects unique terms and corresponding statistics from
 #' list of itoken iterators. If parallel backend is registered, it will build vocabulary
 #' in parallel using \link{foreach}.
 #' @param ... additional arguments to \link{foreach} function.
 #' @export
-vocabulary.list <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary.list <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                             stopwords = character(0), ...) {
   stopifnot( all( vapply(X = itoken_src, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
   res =
@@ -104,7 +111,7 @@ vocabulary.list <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' 
           .multicombine = TRUE,
           ...) %dopar%
           {
-            vocabulary(it, ngram, stopwords)
+            create_vocabulary(it, ngram, stopwords)
           }
   res[['stopwords']] <- stopwords
   res

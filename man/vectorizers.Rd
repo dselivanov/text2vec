@@ -12,7 +12,7 @@ hash_vectorizer(hash_size = 2^18, ngram = c(1L, 1L), signed_hash = FALSE,
   grow_dtm = TRUE, skip_grams_window = 0L)
 }
 \arguments{
-\item{vocabulary}{\code{text2vec_vocabulary} object, see \link{vocabulary}.}
+\item{vocabulary}{\code{text2vec_vocabulary} object, see \link{create_vocabulary}.}
 
 \item{grow_dtm}{\code{logical} should we grow Document-Term matrix
 during corpus construction or not.}
@@ -47,7 +47,7 @@ hash_dtm <- get_dtm(corpus)
 
 it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer, chunks_number = 10)
-v <- vocabulary(it, c(1L, 1L) )
+v <- create_vocabulary(it, c(1L, 1L) )
 
 vectorizer <- vocab_vectorizer(v)
 
@@ -58,6 +58,6 @@ corpus <- create_corpus(it, vectorizer)
 voacb_dtm <- get_dtm(corpus)
 }
 \seealso{
-\link{create_corpus} \link{create_dtm} \link{create_tcm} \link{vocabulary}
+\link{create_corpus} \link{create_dtm} \link{create_tcm} \link{create_vocabulary}
 }
 

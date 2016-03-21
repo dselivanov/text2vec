@@ -14,7 +14,7 @@ get_test_iterator <- function()
 
 test_that("Vocabulary pruning", {
   iterator <- get_test_iterator()
-  vocab <- vocabulary(iterator)
+  vocab <- create_vocabulary(iterator)
   # Vocabulary stats
   expect_equal(length(vocab$vocab$terms), 19297)
   expect_equal( vocab$vocab$terms[ which.max(vocab$vocab$doc_counts) ], 'the')
@@ -66,7 +66,7 @@ test_that("Vocabulary pruning", {
 test_that("Vocabulary stopwords", {
   iterator <- get_test_iterator()
   STOP_WORDS <- c('is', 'in', 'it')
-  vocab <- vocabulary(iterator)
+  vocab <- create_vocabulary(iterator)
   # check removed stop words
   expect_false(any(STOP_WORDS %in% vocab$terms))
 })
@@ -74,7 +74,7 @@ test_that("Vocabulary stopwords", {
 test_that("Unigran Vocabulary Corpus construction", {
   # Vocabulary construction
   iterator <- get_test_iterator()
-  vocab <- vocabulary(iterator)
+  vocab <- create_vocabulary(iterator)
   # VocabCorpus construction
   vectorizer <- vocab_vectorizer(vocab)
   vcorpus <- create_corpus(get_test_iterator(), vectorizer)
@@ -98,7 +98,7 @@ test_that("bi-gram Vocabulary Corpus construction", {
   # unigram + bigram VocabCorpus construction
   iterator <- get_test_iterator()
 
-  vocab <- vocabulary(iterator,
+  vocab <- create_vocabulary(iterator,
                       ngram = c('ngram_min' = 2L,
                                 'ngram_max' = 2L))
 
@@ -118,7 +118,7 @@ test_that("bi-gram Vocabulary Corpus construction", {
 test_that("Unigram + Bigram Vocabulary Corpus construction", {
   # unigram + bigram VocabCorpus construction
   iterator <- get_test_iterator()
-  vocab <- vocabulary(iterator,
+  vocab <- create_vocabulary(iterator,
                       ngram = c('ngram_min' = 1L,
                                 'ngram_max' = 2L))
   expect_equal(length(vocab$vocab$terms), 140630L)

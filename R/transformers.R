@@ -1,4 +1,4 @@
-#' @name transformer_filter_commons
+#' @name transform_filter_commons
 #' @title remove (un)common terms from Document-Term matrix
 #' @description Creates reduced Document-Term matrix - throws out
 #' very common and very uncommon words.
@@ -8,10 +8,10 @@
 #' second element corresponds to frequency of common words.
 #' Terms, which are observed less than first value or frequency
 #' or more than second will be filtered out
-#' @seealso \link{prune_vocabulary}, \link{transformer_tf},
-#' \link{transformer_tfidf}, \link{transformer_binary}
+#' @seealso \link{prune_vocabulary}, \link{transform_tf},
+#' \link{transform_tfidf}, \link{transform_binary}
 #' @export
-transformer_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, common = 0.975) )
+transform_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, common = 0.975) )
 {
   uncommon = term_freq[[1]]
   common = term_freq[[2]]
@@ -22,11 +22,11 @@ transformer_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, comm
   t(tdm[t1 & t2, ])
 }
 
-#' @name transformer_tf
+#' @name transform_tf
 #' @title Scales Document-Term matrix
 #' @description
 #'
-#' \code{transformer_tf}:
+#' \code{transform_tf}:
 #'
 #' "l1" norm:
 #' \code{dtm_tf = (count of word appears in document) / (total number words in document) }
@@ -34,10 +34,10 @@ transformer_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, comm
 #' "l2" norm:
 #' \code{tf = (count of word appears in document) ^ 2 / (total number words in document) ^ 2 }
 #'
-#' \code{transformer_binary}:
+#' \code{transform_binary}:
 #' 1 if word appears in document, 0 otherwise.
 #'
-#' \code{transformer_tfidf}:
+#' \code{transform_tfidf}:
 #' \code{idf  = log (count of word appears in document) /
 #' (number of documents where the term appears + 1)}
 #'
@@ -73,19 +73,19 @@ transformer_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, comm
 #'  # functionality overlaps with prune_vocabulary(),
 #'  # but still can be useful in some cases
 #'  # filter out very common and very uncommon terms
-#'  transformer_filter_commons( c(0.001, 0.975) )
+#'  transform_filter_commons( c(0.001, 0.975) )
 #'
 #' # simple term-frequency transormation
 #' transformed_tf <- dtm %>%
-#'  transformer_tf
+#'  transform_tf
 #'
 #' # tf-idf transormation
 #' idf <- get_idf(dtm)
-#' transformed_tfidf <- transformer_tfidf(dtm,  idf)
+#' transformed_tfidf <- transform_tfidf(dtm,  idf)
 #'
 #' }
 #' @export
-transformer_tf <- function(dtm, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
+transform_tf <- function(dtm, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
 
   norm <- match.arg(norm)
 
@@ -100,14 +100,14 @@ transformer_tf <- function(dtm, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
   tf_scale_matrix %*% dtm
 }
 
-#' @describeIn transformer_tf Transform Document-Term via TF-IDF scaling
+#' @describeIn transform_tf Transform Document-Term via TF-IDF scaling
 #' @export
-transformer_tfidf <- function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
+transform_tfidf <- function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
 
   if (!inherits(dtm, 'dgCMatrix'))
     dtm <- as(dtm, "dgCMatrix")
 
-  tf <- transformer_tf(dtm, sublinear_tf, norm)
+  tf <- transform_tf(dtm, sublinear_tf, norm)
 
   if (!inherits(idf, 'ddiMatrix')) {
     message("idf scaling matrix not provided, calculating it form input matrix")
@@ -117,8 +117,8 @@ transformer_tfidf <- function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c('l
   tf %*% idf
 }
 
-#' @describeIn transformer_tf Transform Document-Term into binary format
+#' @describeIn transform_tf Transform Document-Term into binary format
 #' @export
-transformer_binary <- function(dtm) {
+transform_binary <- function(dtm) {
   sign(abs(dtm))
 }

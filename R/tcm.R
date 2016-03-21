@@ -8,7 +8,7 @@
 #' \dontrun{
 #' txt <- movie_review[['review']][1:1000]
 #' it <- itoken(txt, tolower, word_tokenizer)
-#' vocab <- vocabulary(it)
+#' vocab <- create_vocabulary(it)
 #' #remove very common and uncommon words
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10, doc_proportion_max = 0.8,
 #'                                 doc_proportion_min = 0.001, max_number_of_terms = 5000)
@@ -54,7 +54,7 @@ get_tcm <- function(corpus) {
 #'
 #' tokens <- movie_review$review %>% tolower %>% word_tokenizer
 #' it <- itoken(tokens)
-#' v <- vocabulary(jobs)
+#' v <- create_vocabulary(jobs)
 #' vectorizer <- vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)
 #' tcm <- create_tcm(itoken(tokens), vectorizer)
 #'
@@ -64,7 +64,7 @@ get_tcm <- function(corpus) {
 #' N_WORKERS <- 1
 #' splits <- split_into(movie_review$review, N_WORKERS)
 #' jobs <- lapply(splits, itoken, tolower, word_tokenizer)
-#' v <- vocabulary(jobs)
+#' v <- create_vocabulary(jobs)
 #' vectorizer <- vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)
 #' jobs <- lapply(splits, itoken, tolower, word_tokenizer)
 #' doParallel::registerDoParallel(N_WORKERS)
