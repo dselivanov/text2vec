@@ -7,11 +7,12 @@
 #' @import Rcpp
 #' @import digest
 #' @import iterators
+#' @import data.table
+#' @importFrom foreach foreach %do% %dopar%
 #' @importFrom RcppParallel RcppParallelLibs
 #' @importFrom stringr str_split fixed coll regex boundary
 #' @importFrom magrittr %>%
-#' @importFrom readr read_lines read_rds write_rds
-#' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom utils txtProgressBar setTxtProgressBar
 #' @useDynLib text2vec
 NULL
 

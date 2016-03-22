@@ -5,25 +5,33 @@
 \alias{itoken.character}
 \alias{itoken.ifiles}
 \alias{itoken.ilines}
-\alias{itoken.iserfiles}
+\alias{itoken.list}
 \title{Creates iterator over input object.}
 \usage{
 itoken(iterable, ...)
 
-\method{itoken}{character}(iterable, preprocess_function, tokenizer,
-  chunks_number = 10, progessbar = interactive(), ...)
-
-\method{itoken}{ifiles}(iterable, preprocess_function, tokenizer,
+\method{itoken}{list}(iterable, chunks_number = 10,
   progessbar = interactive(), ...)
 
-\method{itoken}{iserfiles}(iterable, progessbar = interactive(), ...)
+\method{itoken}{character}(iterable, preprocess_function = identity,
+  tokenizer = function(x) strsplit(x, " ", TRUE), chunks_number = 10,
+  progessbar = interactive(), ...)
 
-\method{itoken}{ilines}(iterable, preprocess_function, tokenizer, ...)
+\method{itoken}{ifiles}(iterable, preprocess_function = identity,
+  tokenizer = function(x) strsplit(x, " ", TRUE),
+  progessbar = interactive(), ...)
+
+\method{itoken}{ilines}(iterable, preprocess_function = identity,
+  tokenizer = function(x) strsplit(x, " ", TRUE), ...)
 }
 \arguments{
 \item{iterable}{an object from which to generate an iterator.}
 
 \item{...}{arguments passed to other methods (not used at the moment).}
+
+\item{chunks_number}{\code{integer}, the number of pieces that object should be divided into.}
+
+\item{progessbar}{\code{logical} indicates whether to show progress bar.}
 
 \item{preprocess_function}{\code{function} which takes chunk of objects -
 \code{character vector} and \bold{do all preprocessing} (including stemming if needed).
@@ -36,22 +44,30 @@ from preprocess_function, split it into tokens and returns
 Also you can perform tokenization in \code{preprocess_function}
 (actually you should do it when apply any stemming) and then set
 \code{tokenizer} = \code{\link{identity}}.}
-
-\item{chunks_number}{\code{integer}, the number of pieces that object should be divided into.}
-
-\item{progessbar}{\code{logical} indicates whether to show progress bar.}
 }
 \description{
 Creates iterator over input object. This iterator usually used in
-following functions : \link{vocabulary}, \link{create_vocab_corpus},
-\link{create_hash_corpus}. See them for details.
+following functions : \link{create_vocabulary}, \link{create_corpus}, \link{create_dtm},
+\link{vectorizers}, \link{create_tcm}. See them for details.
+}
+\details{
+S3 methods for creating itoken iterator from list of tokens
+\itemize{
+ \item{\code{list}}{ - all elemets of input list shouild be character tokens}
+ \item{\code{character}}{ - raw text source,
+ user have to provide tokenizer function}
+ \item{\code{ifiles}}{ - from files,
+ user have to provide reader function, tokenizer}
+ \item{\code{idir}}{ - from dir, same as ifiles}
+}
 }
 \examples{
 data("movie_review")
 txt <- movie_review[['review']][1:100]
-it <- itoken(txt, tolower, word_tokenizer, chunks_number = 7)
+it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
 }
 \seealso{
-\link{vocabulary}, \link{create_vocab_corpus}, \link{create_hash_corpus}
+\link{create_vocabulary}, \link{create_corpus}, \link{create_dtm},
+\link{vectorizers}, \link{create_tcm}
 }
 

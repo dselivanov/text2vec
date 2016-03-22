@@ -25,4 +25,5 @@ void fill_vec_val(vector<double>  &vec, double val);
 vector<string> get_ngrams(const CharacterVector terms,
                           uint32_t ngram_min,
                           uint32_t ngram_max,
-                          const string &ngram_delim);
+                          const string &ngram_delim,
+                          const RCPP_UNORDERED_SET< string > &stopwords);

@@ -1,13 +1,14 @@
 Package: text2vec
 Type: Package
-Version: 0.2.1
-Date: 2016-01-10
-Title: Fast and Modern Text Mining Framework - Vectorization and Word Embeddings
+Version: 0.3.0
+Date: 2016-01-31
+Title: Fast Text Mining Framework - Vectorization and Word Embeddings
 License: MIT + file LICENSE
 Description: Very fast and memory-friendly tools for text vectorization and
-    learning word embeddings (GloVe). Also package provides source-agnostic
+    state-of-the-art word embeddings (GloVe). Package provides source-agnostic
     streaming API, which allows to perform analysis of collections
-    of documents, which are much larger the available RAM.
+    of documents, which are much larger than available RAM.
+    All core functions can benefit from multicore machines.
 Authors@R: person("Dmitriy", "Selivanov", role = c("aut", "cre"),
     email = "selivanov.dmitriy@gmail.com")
 Maintainer: Dmitriy Selivanov <selivanov.dmitriy@gmail.com>
@@ -21,18 +22,21 @@ Imports:
     Rcpp (>= 0.11),
     RcppParallel (>= 4.3.14),
     digest (>= 0.6.8),
-    magrittr (>= 1.5),
-    stringr (>= 1.0.0),
     iterators (>= 1.0.8),
-    readr(>= 0.2.2)
-LinkingTo: Rcpp,
+    foreach(>= 1.4.3),
+    data.table(>= 1.9.6),
+    stringr (>= 1.0.0),
+    magrittr (>= 1.5)
+LinkingTo:
+    Rcpp,
     RcppParallel,
     digest
 Suggests:
     testthat,
     knitr,
     rmarkdown,
-    glmnet
+    glmnet,
+    parallel
 URL: https://github.com/dselivanov/text2vec
 BugReports: https://github.com/dselivanov/text2vec/issues
 VignetteBuilder: knitr

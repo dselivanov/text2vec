@@ -35,7 +35,8 @@ protected:
   string ngram_delim;
 
   uint32_t window_size;
-
+  // stopwords
+  RCPP_UNORDERED_SET<string> stopwords;
   // documents
   SparseTripletMatrix<uint32_t> dtm;
 

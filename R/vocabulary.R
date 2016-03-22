@@ -1,14 +1,14 @@
-#' @name vocabulary
+#' @name create_vocabulary
 #' @title Creates vocabulary (unique terms)
 #' @description collects unique terms and corresponding statistics from object.
 #' See \code{value} section.
-#' @param src iterator over \code{list} of \code{character} vectors - documents from which
+#' @param itoken_src iterator over \code{list} of \code{character} vectors - documents from which
 #' user want construct vocabulary. Or, alternatively,
 #' \code{character} vector = user-defined vocabulary terms (which will be used "as is").
 #' @param ngram \code{integer} vector. The lower and upper boundary of the range of
 #' n-values for different n-grams to be extracted. All values of n such that
 #' ngram_min <= n <= ngram_max will be used.
-#' @param  ... arguments passed to other methods (inculding \link{write_rds} function).
+#' @param stopwords \code{character} vector of stopwords to filter them out
 #' @return \code{text2vec_vocabulary} object,
 #' which is actually a \code{list} with following fields:
 #'
@@ -27,90 +27,118 @@
 #' data("movie_review")
 #' txt <- movie_review[['review']][1:100]
 #' it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
-#' vocab <- vocabulary(it)
+#' vocab <- create_vocabulary(it)
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
 #' @export
-vocabulary <- function(src,
-                       ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
-                       ...) {
-  UseMethod("vocabulary")
+create_vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                       stopwords = character(0)) {
+  UseMethod("create_vocabulary")
 }
 
-#' @describeIn vocabulary creates \code{text2vec_vocabulary} from predefined
+#' @rdname create_vocabulary
+vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                       stopwords = character(0)) {
+  warning("vocabulary() is depreciated, use create_vocabulary() instead")
+  create_vocabulary(itoken_src, ngram, stopwords)
+}
+
+#' @describeIn create_vocabulary creates \code{text2vec_vocabulary} from predefined
 #' character vector. Terms will be inserted \bold{as is}, without any checks
 #' (ngrams numner, ngram delimiters, etc.).
 #' @export
-vocabulary.character <- function(src,
-                                 ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
-                                 ...) {
+create_vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                                 stopwords = character(0)) {
 
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
-  vocab_length = length(src)
+  vocab_length = length(itoken_src)
 
   res <- list(
-    # keep structure similar to `vocabulary.itoken` object. not used at the moment,
+    # keep structure similar to `create_vocabulary.itoken` object. not used at the moment,
     # but we should keep same structure (keep in mind prune_vocabulary)
-    vocab = data.frame('terms' = src,
+    vocab = data.table('terms' = setdiff(itoken_src, stopwords),
                        'terms_counts' = rep(NA_integer_, vocab_length),
                        'doc_counts' = rep(NA_integer_, vocab_length),
                        # 'doc_proportions' = rep(NA_real_, vocab_length),
                        stringsAsFactors = FALSE
                        ),
     ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
-    document_count = NA_integer_
+    document_count = NA_integer_,
+    stopwords = stopwords
   )
 
   class(res) <- c('text2vec_vocabulary')
   res
 }
 
-#' @describeIn vocabulary collects unique terms and corresponding statistics from object.
-#' @param serialize_dir As a \bold{side effect}, we can save tokenized texts in serialized form to disk.
-#' So, \code{serialize_dir} is a \code{character} - path where to save tokenized input files.
+#' @describeIn create_vocabulary collects unique terms and corresponding statistics from object.
 #' @export
-vocabulary.itoken <- function(src,
-                              ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
-                              serialize_dir = NULL, ...) {
+create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                              stopwords = character(0)) {
+
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
-  vocab <- new(VocabularyBuilder, ngram_min, ngram_max)
-  i <- 1
+  vocab <- new(VocabularyBuilder, ngram_min, ngram_max, stopwords)
 
-  write_tokens <- FALSE
-  if ( !is.null(serialize_dir) )
-    if ( !dir.exists(serialize_dir) )
-      stop("serialize_dir does not exist")
-  else {
-    base_path <- paste0(serialize_dir, '/part-')
-    write_tokens <- TRUE
-  }
-
-  while (TRUE) {
-    # iterate
-    tokens = try(nextElem(src), silent = TRUE)
-    # check end of iterator
-    if (class(tokens) == "try-error") {
-      if (attributes(tokens)$condition$message == "StopIteration")
-        break
-      # handle other errors
-      else
-        stop(attributes(tokens)$condition$message)
-    }
-    # insert into vocabulary
+  foreach(tokens = itoken_src) %do% {
     vocab$insert_document_batch(tokens)
-    # write tokens to disk
-    if (write_tokens)
-      write_rds(tokens, paste0(base_path, i), ...)
-    i <- i + 1
   }
 
   res <- list(
-    vocab = vocab$get_vocab_statistics(),
+    vocab = setDT(vocab$get_vocab_statistics()),
     ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
-    document_count = vocab$get_document_count())
+    document_count = vocab$get_document_count(),
+    stopwords = stopwords
+  )
 
+  class(res) <- c('text2vec_vocabulary')
+  res
+}
+
+#' @describeIn create_vocabulary collects unique terms and corresponding statistics from
+#' list of itoken iterators. If parallel backend is registered, it will build vocabulary
+#' in parallel using \link{foreach}.
+#' @param ... additional arguments to \link{foreach} function.
+#' @export
+create_vocabulary.list <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                            stopwords = character(0), ...) {
+  stopifnot( all( vapply(X = itoken_src, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
+  res =
+    foreach(it = itoken_src,
+          .combine = combine_vocabulary,
+          .inorder = FALSE,
+          .multicombine = TRUE,
+          ...) %dopar%
+          {
+            create_vocabulary(it, ngram, stopwords)
+          }
+  res[['stopwords']] <- stopwords
+  res
+}
+
+combine_vocabulary <- function(...) {
+  vocab_list <- list(...)
+  ngram <- vocab_list[[1]][['ngram']]
+  # extract vocabulary stats data.frame and rbind them
+  combined_vocab <- vocab_list %>%
+    lapply(function(x) x[['vocab']]) %>%
+    rbindlist
+
+  # reduce by terms
+  combined_vocab <- combined_vocab[, .('terms_counts' = sum(terms_counts),
+                                       'doc_counts' = sum(doc_counts)),
+                                   by = terms]
+  setcolorder(combined_vocab, c('terms', 'terms_counts', 'doc_counts'))
+
+  combined_document_count <- sum(vapply(vocab_list, function(x) x[['document_count']], FUN.VALUE = NA_integer_))
+
+  res <- list(
+    vocab = combined_vocab,
+    ngram = ngram,
+    document_count = combined_document_count,
+    stopwords = character(0)
+  )
   class(res) <- c('text2vec_vocabulary')
   res
 }
@@ -125,7 +153,6 @@ vocabulary.itoken <- function(src,
 #' @param term_count_max maximum number of occurences over all documents.
 #' @param doc_proportion_min minimum proportion of documents which should contain term.
 #' @param doc_proportion_max maximum proportion of documents which should contain term.
-#' @param stop_words - \code{character} vector. Word to remove from vocabulary.
 #' @param max_number_of_terms maximum number of terms in vocabulary.
 #' @seealso \link{vocabulary}
 #' @export
@@ -134,7 +161,6 @@ prune_vocabulary <- function(vocabulary,
                   term_count_max = Inf,
                   doc_proportion_min = 0.0,
                   doc_proportion_max = 1.0,
-                  stop_words = character(0),
                   max_number_of_terms = Inf) {
 
   if (!inherits(vocabulary, 'text2vec_vocabulary'))
@@ -169,12 +195,6 @@ prune_vocabulary <- function(vocabulary,
 
   pruned_vocabulary <- vocab_df[ind, ]
 
-  # remove stop words if asked
-  if (is.character(stop_words) && length(stop_words) > 0) {
-    non_stop_words_ind <- !(pruned_vocabulary$terms %in% stop_words)
-    pruned_vocabulary <- pruned_vocabulary[non_stop_words_ind, ]
-  }
-
   # restrict to max number if asked
   if (is.finite(max_number_of_terms)) {
     pruned_vocabulary <- pruned_vocabulary[order(pruned_vocabulary$terms_counts, decreasing = T),]
@@ -184,7 +204,8 @@ prune_vocabulary <- function(vocabulary,
 
   pruned_vocabulary <- list('vocab' = pruned_vocabulary,
                             'ngram' = vocabulary[['ngram']],
-                            'document_count' = vocabulary[['document_count']])
+                            'document_count' = vocabulary[['document_count']],
+                            'stopwords' = vocabulary[['stopwords']])
 
   class(pruned_vocabulary) <- 'text2vec_vocabulary'
 
