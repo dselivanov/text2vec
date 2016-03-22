@@ -56,8 +56,6 @@ sw <- c("i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "you
 vocab <- create_vocabulary(it, stopwords = sw)
 ```
 
-Now that we have a vocabulary, we can construct a document-term matrix. Since all functions that are related to corpus construction have a streaming API, we have to create another iterator and pass it to the `create_vocab_corpus()` function:
-
 Alternatively, if your data fits in RAM, you can once create list of tokens and the reuse it in further steps:
 
 ```{r}
@@ -70,6 +68,8 @@ names(tokens) <- movie_review$id
 it <- itoken(tokens)
 vocab <- create_vocabulary(it, stopwords = sw)
 ```
+
+Now that we have a vocabulary, we can construct a document-term matrix. (We could instead use `create_corpus()` and `get_dtm()`).
 
 
 ```{r, vocab_dtm_1, eval=TRUE}

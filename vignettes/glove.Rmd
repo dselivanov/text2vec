@@ -55,7 +55,7 @@ wiki <- read_lines(unz(temp, "text8"))
 unlink(temp)
 ```
 
-In the next step we will create a vocabulary, a set of words for which we want to learn word vectors. Note, that all of text2vec's functions which operate on raw text data (`vocabulary`, `create_hash_corpus`, `create_vocab_corpus`) have a streaming API and you should iterate over tokens as the first argument for these functions.
+In the next step we will create a vocabulary, a set of words for which we want to learn word vectors. Note, that all of text2vec's functions which operate on raw text data (`create_vocabulary`, `create_corpus`, `create_dtm`, `create_tcm`) have a streaming API and you should iterate over tokens as the first argument for these functions.
 
 ```{r, eval=FALSE}
 # Create iterator over tokens
