@@ -51,34 +51,33 @@ Let's first create a vocabulary-based DTM. Here we collect unique terms from all
 it <- itoken(movie_review[['review']], 
              preprocess_function = tolower, 
              tokenizer = word_tokenizer)
-# stopwords
+
 sw <- c("i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours")
-vocab <- create_vocabulary(it, stopwords = sw)
-```
-
-Alternatively, if your data fits in RAM, you can create a list of tokens once and then reuse it in later steps:
-
-```{r}
-tokens <- movie_review[['review']] %>% 
-  tolower %>% 
-  word_tokenizer
-
-# add document IDs
-names(tokens) <- movie_review$id
-it <- itoken(tokens)
 vocab <- create_vocabulary(it, stopwords = sw)
 ```
 
 Now that we have a vocabulary, we can construct a document-term matrix. Since all functions that are related to corpus construction have a streaming API, we have to create another iterator and pass it to the `create_vocab_corpus()` function:
 
+Alternatively, if your data fits in RAM, you can once create list of tokens and the reuse it in further steps:
+
+```{r}
+# Each element of list represents document
+tokens <- movie_review[['review']] %>% 
+  tolower() %>% 
+  word_tokenizer()
+# add ids
+names(tokens) <- movie_review$id
+it <- itoken(tokens)
+vocab <- create_vocabulary(it, stopwords = sw)
+```
+
+
 ```{r, vocab_dtm_1, eval=TRUE}
 it <- itoken(tokens)
-# or 
+# Or
 # it <- itoken(movie_review[['review']], tolower, word_tokenizer)
-
 vectorizer <- vocab_vectorizer(vocab)
-corpus <- create_corpus(it, vectorizer)
-dtm <- get_dtm(corpus)
+dtm <- create_dtm(it, vectorizer)
 ```
 
 Now we have a DTM and can check its dimensions.
@@ -107,7 +106,7 @@ fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']],
                  # again lower number of iterations for faster training
                  maxit = 1e3)
 plot(fit)
-print(paste("max AUC = ", round(max(fit$cvm), 4)))
+print(paste("max AUC =", round(max(fit$cvm), 4)))
 ```
 
 We have successfully fit a model to our DTM.
@@ -150,7 +149,7 @@ fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']],
                  maxit = 1e3)
 print(difftime(Sys.time(), t1, units = 'sec'))
 plot(fit)
-print(paste("max AUC = ", round(max(fit$cvm), 4)))
+print(paste("max AUC =", round(max(fit$cvm), 4)))
 ```
 
 We trained this model faster with a larger AUC.
@@ -183,8 +182,9 @@ fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']],
                  nfolds = 5,
                  thresh = 1e-3,
                  maxit = 1e3)
+
 plot(fit)
-print(paste("max AUC = ", round(max(fit$cvm), 4)))
+print(paste("max AUC =", round(max(fit$cvm), 4)))
 ```
 
 Using n-grams improved our model a little bit more. Further tuning is left up to the reader.
@@ -209,8 +209,9 @@ fit <- cv.glmnet(x = dtm, y = movie_review[['sentiment']],
                  nfolds = 5,
                  thresh = 1e-3,
                  maxit = 1e3)
+
 plot(fit)
-print(paste("max AUC = ", round(max(fit$cvm), 4)))
+print(paste("max AUC =", round(max(fit$cvm), 4)))
 ```
 
 As you can see, we our AUC is a bit worse, but DTM construction time was considerably lower. On large collections of documents this can be a significant advantage.

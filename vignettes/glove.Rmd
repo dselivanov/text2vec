@@ -122,7 +122,7 @@ rownames(word_vectors) <- rownames(tcm)
 We can find the closest word vectors for our *paris - france + italy* example:
 
 ```{r, eval = FALSE}
-word_vectors_norm <-  sqrt(rowSums(word_vectors ^ 2))
+word_vectors_norm <- sqrt(rowSums(word_vectors ^ 2))
 
 rome <- word_vectors['paris', , drop = FALSE] - 
   word_vectors['france', , drop = FALSE] + 
