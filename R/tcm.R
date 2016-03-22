@@ -78,7 +78,7 @@ create_tcm <- function(itoken_src, vectorizer, verbose = FALSE, ...) {
 #' @rdname create_tcm
 #' @export
 create_tcm.itoken <- function(itoken_src, vectorizer, verbose = FALSE, ...) {
-  create_tcm( list(itoken_src), vectorizer, verbose, ...)
+  suppressWarnings(create_tcm( list(itoken_src), vectorizer, verbose, ...))
 }
 
 #' @rdname create_tcm
