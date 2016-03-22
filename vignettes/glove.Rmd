@@ -1,10 +1,10 @@
 ---
-title: "GloVe word embeddings."
+title: "GloVe Word Embeddings"
 author: "Dmitriy Selivanov"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{GloVe word embeddings.}
+  %\VignetteIndexEntry{GloVe Word Embeddings}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
