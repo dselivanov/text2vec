@@ -46,7 +46,6 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
 #' "lda_c" - Blei's lda-c format (list of 2 * doc_terms_size),
 #' see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
-#' @param verbose \code{logical} print status messages
 #' @param ... - arguments to \link{foreach} function which is used to iterate
 #' over \code{itoken_src} under the hood.
 #' @return Document-Term Matrix
@@ -80,7 +79,6 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' @export
 create_dtm <- function(itoken_src, vectorizer,
                        type = c("dgCMatrix", "dgTMatrix", "lda_c"),
-                       verbose = FALSE,
                        ...) {
   UseMethod("create_dtm")
 }
@@ -89,12 +87,24 @@ create_dtm <- function(itoken_src, vectorizer,
 #' @export
 create_dtm.itoken <- function(itoken_src, vectorizer,
                             type = c("dgCMatrix", "dgTMatrix", "lda_c"),
-                            verbose = FALSE,
                             ...) {
-  suppressWarnings(create_dtm( list(itoken_src), vectorizer, type, verbose, ...))
+  corp <- vectorizer(itoken_src)
+  type <- match.arg(type)
+  # get it in triplet form - fastest and most
+  # memory efficient way because internally it
+  # kept in triplet form
+  dtm <- get_dtm(corp, 'dgTMatrix')
+  # remove corpus and trigger gc()!
+  # this will release a lot of memory
+  rm(corp); gc();
+  if (type != 'dgTMatrix')
+    coerce_dgTMatrix(dtm, type)
+  else
+    dtm
 }
 
 #' @rdname create_dtm
+#' @param verbose \code{logical} print status messages
 #' @export
 create_dtm.list <- function(itoken_src, vectorizer,
                        type = c("dgCMatrix", "dgTMatrix", "lda_c"),
@@ -102,9 +112,7 @@ create_dtm.list <- function(itoken_src, vectorizer,
                        ...) {
   check_itoken <- sapply(itoken_src, inherits, 'itoken', USE.NAMES = F)
   stopifnot(all( check_itoken ))
-
   type <- match.arg(type)
-
   combine_fun <- function(...) {
     f <- switch(type,
                 dgCMatrix = rbind,
@@ -124,17 +132,6 @@ create_dtm.list <- function(itoken_src, vectorizer,
         .options.multicore = list(preschedule = FALSE),
         ...) %dopar%
         {
-          corp <- vectorizer(it)
-          # get it in triplet form - fastest and most
-          # memory efficient way because internally it
-          # kept in triplet form
-          dtm_chunk <- get_dtm(corp, 'dgTMatrix')
-          # remove corpus and trigger gc()!
-          # this will release a lot of memory
-          rm(corp); gc();
-          if (type != 'dgTMatrix')
-            coerce_dgTMatrix(dtm_chunk, type)
-          else
-            dtm_chunk
+          create_dtm(it, vectorizer, type)
         }
 }

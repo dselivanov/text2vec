@@ -41,7 +41,6 @@ get_tcm <- function(corpus) {
 #' @param itoken_src \code{list} of iterators over tokens - \code{itoken}.
 #' Each element is a list of tokens = tokenized and normalized strings.
 #' @param vectorizer \code{function} vectorizer function.
-#' @param verbose \code{logical} print status messages
 #' @param ... - arguments to \link{foreach} function which is used to iterate
 #' over \code{itoken_src} under the hood.
 #' @return \code{dgCMatrix} Term-Cooccurence Matrix
@@ -71,17 +70,26 @@ get_tcm <- function(corpus) {
 #' tcm <- create_tcm(jobs, vectorizer)
 #' }
 #' @export
-create_tcm <- function(itoken_src, vectorizer, verbose = FALSE, ...) {
+create_tcm <- function(itoken_src, vectorizer, ...) {
   UseMethod("create_tcm")
 }
 
 #' @rdname create_tcm
 #' @export
-create_tcm.itoken <- function(itoken_src, vectorizer, verbose = FALSE, ...) {
-  suppressWarnings(create_tcm( list(itoken_src), vectorizer, verbose, ...))
+create_tcm.itoken <- function(itoken_src, vectorizer, ...) {
+  corp <- vectorizer(itoken_src)
+  # get it in triplet form - fastest and most
+  # memory efficient way because internally it
+  # kept in triplet form
+  tcm <- get_tcm(corp)
+  # remove corpus and trigger gc()!
+  # this will release a lot of memory
+  rm(corp); gc();
+  tcm
 }
 
 #' @rdname create_tcm
+#' @param verbose \code{logical} print status messages
 #' @export
 create_tcm.list <- function(itoken_src, vectorizer, verbose = FALSE, ...) {
 
@@ -94,15 +102,7 @@ create_tcm.list <- function(itoken_src, vectorizer, verbose = FALSE, ...) {
           .options.multicore = list(preschedule = FALSE),
           ...) %dopar%
           {
-            corp <- vectorizer(it)
-            # get it in triplet form - fastest and most
-            # memory efficient way because internally it
-            # kept in triplet form
-            dtm_chunk <- get_tcm(corp)
-            # remove corpus and trigger gc()!
-            # this will release a lot of memory
-            rm(corp); gc();
-            dtm_chunk
+            create_tcm(it, vectorizer, ...)
           }
 }
 

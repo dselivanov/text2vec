@@ -6,9 +6,9 @@
 \alias{create_tcm.list}
 \title{Term-Cooccurence Matrix construction.}
 \usage{
-create_tcm(itoken_src, vectorizer, verbose = FALSE, ...)
+create_tcm(itoken_src, vectorizer, ...)
 
-\method{create_tcm}{itoken}(itoken_src, vectorizer, verbose = FALSE, ...)
+\method{create_tcm}{itoken}(itoken_src, vectorizer, ...)
 
 \method{create_tcm}{list}(itoken_src, vectorizer, verbose = FALSE, ...)
 }
@@ -18,10 +18,10 @@ Each element is a list of tokens = tokenized and normalized strings.}
 
 \item{vectorizer}{\code{function} vectorizer function.}
 
-\item{verbose}{\code{logical} print status messages}
-
 \item{...}{- arguments to \link{foreach} function which is used to iterate
 over \code{itoken_src} under the hood.}
+
+\item{verbose}{\code{logical} print status messages}
 }
 \value{
 \code{dgCMatrix} Term-Cooccurence Matrix
