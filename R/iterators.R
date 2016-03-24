@@ -19,40 +19,28 @@
 #' \link{vectorizers}, \link{create_tcm}
 #' @examples
 #' data("movie_review")
-#' txt <- movie_review[['review']][1:100]
+#' txt <- movie_review$review[1:100]
+#' ids <- movie_review$id[1:100]
 #' it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
+#' it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
 #' @export
 itoken <- function(iterable, ...) {
   UseMethod("itoken")
 }
 
 #' @rdname itoken
+#' @param ids \code{vector} of document ids.
+#' If not provided, \code{names(iterable)} will be used.
+#' If \code{names(iterable) == NULL}, incremental ids will be assigned.
 #' @export
 itoken.list <- function(iterable,
                         chunks_number = 10,
-                        progessbar = interactive(), ...) {
+                        progessbar = interactive(),
+                        ids = NULL, ...) {
 
   stopifnot( all( vapply(X = iterable, FUN = inherits, FUN.VALUE = FALSE, "character") ) )
 
-  i <- 1
-  it <- idiv(n = length(iterable), chunks = chunks_number)
-  max_len = length(iterable)
-  if (progessbar)
-    pb <- txtProgressBar(initial = -1L, min = 0, max = max_len, style = 3, width = 100)
-  env <- environment()
-  nextEl <- function() {
-    n <- nextElem(it)
-    ix <- seq(i, length = n)
-
-    if (progessbar)
-      eval(setTxtProgressBar(pb, min(i, max_len)), enclos = env)
-
-    i <<- i + n
-    iterable[ix]
-  }
-  obj <- list(nextElem = nextEl)
-  class(obj) <- c('itoken', 'abstractiter', 'iter')
-  obj
+  itoken_finite(iterable, chunks_number, progessbar, ids, ...)
 }
 
 #' @rdname itoken
@@ -73,26 +61,9 @@ itoken.character <- function(iterable,
                              preprocess_function = identity,
                              tokenizer = function(x) strsplit(x, ' ', TRUE),
                              chunks_number = 10,
-                             progessbar = interactive(), ...) {
-  i <- 1
-  it <- idiv(n = length(iterable), chunks = chunks_number)
-  max_len = length(iterable)
-  if (progessbar)
-    pb <- txtProgressBar(initial = -1L, min = 0, max = max_len, style = 3, width = 100)
-  env <- environment()
-  nextEl <- function() {
-    n <- nextElem(it)
-    ix <- seq(i, length = n)
-
-    if (progessbar)
-      eval(setTxtProgressBar(pb, min(i, max_len)), enclos = env)
-
-    i <<- i + n
-    get_iter_next_value(iterable[ix], preprocess_function, tokenizer)
-  }
-  obj <- list(nextElem = nextEl)
-  class(obj) <- c('itoken', 'abstractiter', 'iter')
-  obj
+                             progessbar = interactive(),
+                             ids = NULL, ...) {
+  itoken_finite(iterable, chunks_number, progessbar, ids, preprocess_function, tokenizer, ...)
 }
 
 #' @rdname itoken
@@ -101,34 +72,25 @@ itoken.ifiles <- function(iterable,
                           preprocess_function = identity,
                           tokenizer = function(x) strsplit(x, ' ', TRUE),
                           progessbar = interactive(), ...) {
+
+  iterable_length = attr(iterable, 'length', exact = FALSE)
+  if (progessbar) {
+    pb <- txtProgressBar(initial = -1L, min = 0, max = iterable_length, style = 3, width = 100)
+  }
+
   i <- 1
-  max_len = attr(iterable, 'length', exact = FALSE)
-  if (progessbar)
-    pb <- txtProgressBar(initial = -1L, min = 0L, max = max_len, style = 3, width = 100)
-  env <- environment()
-
   nextEl <- function() {
-    res <- get_iter_next_value(nextElem(iterable), preprocess_function, tokenizer)
-
-    if (progessbar)
-      eval(setTxtProgressBar(pb, min(i, max_len)), enclos = env)
+    res <- try(get_iter_next_value(nextElem(iterable), preprocess_function, tokenizer), silent = TRUE)
+    if (progessbar) setTxtProgressBar(pb, min(i - 1, iterable_length))
+    if (class(res) == 'try-error' && attributes(res)$condition$message == 'StopIteration')
+      stop('StopIteration', call. = FALSE)
     i <<- i + 1
-
-    res
+    list(tokens = res, ids = names(res))
   }
   obj <- list(nextElem = nextEl)
   class(obj) <- c('itoken', 'abstractiter', 'iter')
   obj
 }
-
-# #' @rdname itoken
-# #' @export
-# itoken.iserfiles <- function(iterable, progessbar = interactive(), ...) {
-#   itoken.ifiles(iterable,
-#                 preprocess_function = identity,
-#                 tokenizer = identity,
-#                 progessbar = progessbar, ...)
-# }
 
 #' @rdname itoken
 #' @export
@@ -136,11 +98,10 @@ itoken.ilines <- function(iterable,
                           preprocess_function = identity,
                           tokenizer = function(x) strsplit(x, ' ', TRUE),
                           ...) {
-
   nextEl <- function() {
-    get_iter_next_value(nextElem(iterable), preprocess_function, tokenizer)
+    res <- get_iter_next_value(nextElem(iterable), preprocess_function, tokenizer)
+    list(tokens = res, ids = names(res))
   }
-
   obj <- list(nextElem = nextEl)
   class(obj) <- c('itoken', 'abstractiter', 'iter')
   obj
@@ -176,9 +137,9 @@ ilines <- function(con, n, ...) {
 #' @export
 ifiles <- function(file_paths, reader_function = readLines, ...) {
   i <- 1
-  N <- length(file_paths)
+  n_files <- length(file_paths)
   nextEl <- function() {
-    if (i <= N)
+    if (i <= n_files)
         res <- reader_function(file_paths[[i]], ...)
     else
       stop('StopIteration', call. = FALSE)
@@ -188,9 +149,7 @@ ifiles <- function(file_paths, reader_function = readLines, ...) {
 
   obj <- list(nextElem = nextEl)
   class(obj) <- c('ifiles', 'abstractiter', 'iter')
-
-  attr(obj, 'length') <- length(file_paths)
-
+  attr(obj, 'length') <- n_files
   obj
 }
 
@@ -205,10 +164,50 @@ idir <- function(path, reader_function = readLines, ...) {
   return( ifiles(fls, reader_function = reader_function, ...) )
 }
 
+itoken_finite <- function(iterable,
+                          chunks_number = 10,
+                          progessbar = interactive(),
+                          ids = NULL,
+                          preprocessor = identity,
+                          tokenizer = identity,
+                          ...) {
+  iterable_length = length(iterable)
+  # set up progress bar if needed
+  if (progessbar) {
+    pb <- txtProgressBar(initial = -1L, min = 0, max = iterable_length, style = 3, width = 100)
+  }
+
+  if ( is.null(ids) ) {
+    ids <- names( iterable )
+    # iterable doesn't have names
+    # assign incremnted ids
+    if ( is.null( ids )) {
+      warning("iterable doesn't have names, ids not provided - setting incremental documents ids")
+      ids <- seq_along(iterable)
+    }
+  }
+  stopifnot(length(ids) == iterable_length)
+
+  it <- idiv(n = iterable_length, chunks = chunks_number)
+  i <- 1
+  nextEl <- function() {
+    n <- try(nextElem(it), silent = TRUE)
+    if (progessbar) setTxtProgressBar(pb, min(i - 1, iterable_length))
+    if (class(n) == 'try-error' && attributes(n)$condition$message == 'StopIteration')
+      stop('StopIteration', call. = FALSE)
+    ix <- seq(i, length = n)
+    i <<- i + n
+    list(tokens = iterable[ix] %>% preprocessor %>% tokenizer,
+         ids = ids[ix])
+  }
+  obj <- list(nextElem = nextEl)
+  class(obj) <- c('itoken', 'abstractiter', 'iter')
+  obj
+}
+
 get_iter_next_value <- function(iter_val, preprocess_function, tokenizer) {
-  res <- iter_val %>%
+  iter_val %>%
     preprocess_function %>%
-    tokenizer
-  names(res) <- names(iter_val)
-  res
+    tokenizer %>%
+    setNames(names(iter_val))
 }

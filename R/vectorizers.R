@@ -1,7 +1,7 @@
 corpus_insert <- function(corpus, iterator) {
   foreach(val = iterator ) %do% {
-    corpus$insert_document_batch(val)
-    attr(corpus, 'ids') <- c(attr(corpus, 'ids'), names(val))
+    corpus$insert_document_batch(val$tokens)
+    attr(corpus, 'ids') <- c(attr(corpus, 'ids'), val$ids)
   }
   corpus
 }

@@ -37,6 +37,7 @@ create_vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max
 }
 
 #' @rdname create_vocabulary
+#' @export
 vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                        stopwords = character(0)) {
   warning("vocabulary() is depreciated, use create_vocabulary() instead")
@@ -82,7 +83,7 @@ create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ng
   vocab <- new(VocabularyBuilder, ngram_min, ngram_max, stopwords)
 
   foreach(tokens = itoken_src) %do% {
-    vocab$insert_document_batch(tokens)
+    vocab$insert_document_batch(tokens$tokens)
   }
 
   res <- list(

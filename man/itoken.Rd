@@ -11,11 +11,11 @@
 itoken(iterable, ...)
 
 \method{itoken}{list}(iterable, chunks_number = 10,
-  progessbar = interactive(), ...)
+  progessbar = interactive(), ids = NULL, ...)
 
 \method{itoken}{character}(iterable, preprocess_function = identity,
   tokenizer = function(x) strsplit(x, " ", TRUE), chunks_number = 10,
-  progessbar = interactive(), ...)
+  progessbar = interactive(), ids = NULL, ...)
 
 \method{itoken}{ifiles}(iterable, preprocess_function = identity,
   tokenizer = function(x) strsplit(x, " ", TRUE),
@@ -32,6 +32,10 @@ itoken(iterable, ...)
 \item{chunks_number}{\code{integer}, the number of pieces that object should be divided into.}
 
 \item{progessbar}{\code{logical} indicates whether to show progress bar.}
+
+\item{ids}{\code{vector} of document ids.
+If not provided, \code{names(iterable)} will be used.
+If \code{names(iterable) == NULL}, incremental ids will be assigned.}
 
 \item{preprocess_function}{\code{function} which takes chunk of objects -
 \code{character vector} and \bold{do all preprocessing} (including stemming if needed).
@@ -63,8 +67,10 @@ S3 methods for creating itoken iterator from list of tokens
 }
 \examples{
 data("movie_review")
-txt <- movie_review[['review']][1:100]
+txt <- movie_review$review[1:100]
+ids <- movie_review$id[1:100]
 it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
+it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
 }
 \seealso{
 \link{create_vocabulary}, \link{create_corpus}, \link{create_dtm},
