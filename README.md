@@ -30,8 +30,8 @@ The API is built around the [iterator](https://en.wikipedia.org/wiki/Iterator) a
 
 The package has [issue tracker on GitHub](https://github.com/dselivanov/text2vec/issues) where I'm filing feature requests and notes for future work. Any ideas are appreciated.
 
-Contributors are welcome. If you like it, you can help by
+Contributors are welcome. You can help by
 
-- testing and leaving feedback on the [GitHub issuer tracker](https://github.com/dselivanov/text2vec/issues) (preferably) or directly by email.
+- testing and leaving feedback on the [GitHub issuer tracker](https://github.com/dselivanov/text2vec/issues) (preferably) or directly by e-mail.
 - forking and contributing. Vignettes, docs, tests, and use cases are very welcome.
-- or just by giving me a star on [project page](https://github.com/dselivanov/text2vec) :-)
+- by giving me a star on [project page](https://github.com/dselivanov/text2vec) :-)
