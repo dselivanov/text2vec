@@ -75,7 +75,7 @@ itoken.ifiles <- function(iterable,
 
   iterable_length = attr(iterable, 'length', exact = FALSE)
   if (progessbar) {
-    pb <- txtProgressBar(initial = -1L, min = 0, max = iterable_length, style = 3, width = 100)
+    pb <- txtProgressBar(initial = -1L, min = 0, max = iterable_length, style = 3)
   }
 
   i <- 1
@@ -174,7 +174,7 @@ itoken_finite <- function(iterable,
   iterable_length = length(iterable)
   # set up progress bar if needed
   if (progessbar) {
-    pb <- txtProgressBar(initial = -1L, min = 0, max = iterable_length, style = 3, width = 100)
+    pb <- txtProgressBar(initial = -1L, min = 0, max = iterable_length, style = 3)
   }
 
   if ( is.null(ids) ) {
@@ -182,7 +182,6 @@ itoken_finite <- function(iterable,
     # iterable doesn't have names
     # assign incremnted ids
     if ( is.null( ids )) {
-      warning("iterable doesn't have names, ids not provided - setting incremental documents ids")
       ids <- seq_along(iterable)
     }
   }
