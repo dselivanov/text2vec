@@ -1,4 +1,5 @@
-#' The text2vec package.
+#' text2vec is a package that provides an efficient framework with a concise API
+#' for text analysis and natural language processing in R.
 #'
 #' @docType package
 #' @name text2vec
