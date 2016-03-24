@@ -7,10 +7,10 @@
 \title{Document-Term Matrix construction.}
 \usage{
 create_dtm(itoken_src, vectorizer, type = c("dgCMatrix", "dgTMatrix",
-  "lda_c"), verbose = FALSE, ...)
+  "lda_c"), ...)
 
 \method{create_dtm}{itoken}(itoken_src, vectorizer, type = c("dgCMatrix",
-  "dgTMatrix", "lda_c"), verbose = FALSE, ...)
+  "dgTMatrix", "lda_c"), ...)
 
 \method{create_dtm}{list}(itoken_src, vectorizer, type = c("dgCMatrix",
   "dgTMatrix", "lda_c"), verbose = FALSE, ...)
@@ -25,10 +25,10 @@ Each element is a list of tokens = tokenized and normalized strings.}
 "lda_c" - Blei's lda-c format (list of 2 * doc_terms_size),
 see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}}
 
-\item{verbose}{\code{logical} print status messages}
-
 \item{...}{- arguments to \link{foreach} function which is used to iterate
 over \code{itoken_src} under the hood.}
+
+\item{verbose}{\code{logical} print status messages}
 }
 \value{
 Document-Term Matrix
