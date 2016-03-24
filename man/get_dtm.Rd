@@ -2,20 +2,21 @@
 % Please edit documentation in R/dtm.R
 \name{get_dtm}
 \alias{get_dtm}
-\title{Extracts Document-Term matrix}
+\title{Extract document-term matrix}
 \usage{
 get_dtm(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c"))
 }
 \arguments{
-\item{corpus}{HashCorpus or VocabCorpus object.
-See \link{create_corpus} for details.}
+\item{corpus}{\code{HashCorpus} or \code{VocabCorpus} object. See
+\link{create_corpus} for details.}
 
 \item{type}{character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
-"lda_c" - Blei's lda-c format (list of 2 * doc_terms_size),
-see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}}
+\code{"lda_c"} is Blei's lda-c format (a list of 2 * doc_terms_size); see
+\url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}}
 }
 \description{
-Extracts Document-Term matrix from Corpus object.
+This function extracts a document-term matrix from a
+  \code{Corpus} object.
 }
 \examples{
 N <- 1000
