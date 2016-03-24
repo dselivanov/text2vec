@@ -6,8 +6,12 @@
 
 # Tutorials
 
-1. [Vectorization](http://dsnotes.com/blog/text2vec/2015/11/09/text2vec/).
-2. [GloVe on English Wikipedia](http://dsnotes.com/blog/text2vec/2015/12/01/glove-enwiki/).
+To learn how to use this package, see the package vignettes.
+
+1. [Text vectorization](https://cran.r-project.org/web/packages/text2vec/vignettes/text-vectorization.html): `vignette("text-vectorization", package = "text2vec")`
+2. [GloVe word embeddings](https://cran.r-project.org/web/packages/text2vec/vignettes/glove.html): `vignette("glove", package = "text2vec")`
+
+See also the [text2vec articles](http://dsnotes.com/tags/text2vec/) on my blog.
 
 # Features
 
