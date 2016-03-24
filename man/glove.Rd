@@ -4,7 +4,7 @@
 \alias{glove}
 \alias{glove.Matrix}
 \alias{glove.dgTMatrix}
-\title{Perform fit of the GloVe model.}
+\title{Fit a GloVe word-embedded model}
 \usage{
 glove(tcm, vocabulary_size, word_vectors_size, x_max, num_iters,
   shuffle_seed = NA_integer_, learning_rate = 0.05, verbose = TRUE,
@@ -19,60 +19,61 @@ glove(tcm, vocabulary_size, word_vectors_size, x_max, num_iters,
 \method{glove}{Matrix}(tcm, ...)
 }
 \arguments{
-\item{tcm}{object which represents Term-Coocurence matrix, which used in training.
-At the moment only \code{dgTMatrix} or (coercible to \code{dgTMatrix}) is supported.
-In future releases we will add support for out-of-core learning and streaming TCM from disk.}
+\item{tcm}{an object which represents a term-co-occurrence matrix, which is
+used in training. At the moment only \code{dgTMatrix} or objects coercible
+to a \code{dgTMatrix}) are supported. In future releases we will add
+support for out-of-core learning and streaming a TCM from disk.}
 
-\item{vocabulary_size}{number of words in underlying Term-Coocurence matrix}
+\item{vocabulary_size}{number of words in in the term-co-occurrence matrix}
 
 \item{word_vectors_size}{desired dimenson for word vectors}
 
-\item{x_max}{maximum number of cooccurences to use in weighting function.
-See GloVe paper for details: \url{http://nlp.stanford.edu/pubs/glove.pdf}}
+\item{x_max}{maximum number of co-occurrences to use in the weighting
+function. See the GloVe paper for details:
+\url{http://nlp.stanford.edu/pubs/glove.pdf}.}
 
 \item{num_iters}{number of AdaGrad epochs}
 
-\item{shuffle_seed}{\code{integer} seed. \code{NA_integer_} for turn shuffling off.
-Defines shuffling before each SGD iteration. Generelly good idea for stochastic
-gradient descent, but from my experience, in this particular case, it doesn't
-improve convergence. So, there is  no shuffling by default: \code{shuffle_seed = NA_integer_}.
-Please report, if you find that shuffling improves your score.}
+\item{shuffle_seed}{\code{integer} seed. Use \code{NA_integer_} to turn
+shuffling off. A seed defines shuffling before each SGD iteration.
+Generelly shuffling is a good idea for stochastic-gradient descent, but
+from my experience in this particular case it does not improve convergence.
+By default there is no shuffling. Please report if you find that shuffling
+improves your score.}
 
-\item{learning_rate}{learning rate for SGD, I don't recommend to modify this parameter,
-AdaGrad will quickly adjust it to optimal.}
+\item{learning_rate}{learning rate for SGD. I do not recommend that you
+modify this parameter, since AdaGrad will quickly adjust it to optimal.}
 
-\item{verbose}{whether to display training inforamtion}
+\item{verbose}{\code{logical} whether to display training inforamtion}
 
-\item{convergence_threshold}{defines early stopping stratergy. We stop fitting when
-one of two following conditions will be satisfied:
+\item{convergence_threshold}{defines early stopping strategy. We stop fitting
+when one of two following conditions will be satisfied: (a) we have used
+all iterations, or (b) \code{cost_previous_iter / cost_current_iter - 1 <
+convergence_threshold}.}
 
-a)  spent all iterations
+\item{grain_size}{I do not recommend adjusting this paramenter. This is the
+grain_size for \code{RcppParallel::parallelReduce}. For details, see
+\url{http://rcppcore.github.io/RcppParallel/#grain-size}.}
 
-or
-
-b) \code{cost_previous_iter} / \code{cost_current_iter} - 1 < convergence_threshold}
-
-\item{grain_size}{I don't recommend to adjust this paramenter. This is the grain_size
-for \code{RcppParallel::parallelReduce}.
-See \url{http://rcppcore.github.io/RcppParallel/#grain-size} for details.}
-
-\item{max_cost}{the maximum absolute value of calculated
-gradient for any single co-occurrence pair. Try to set to smaller vaue if you have
+\item{max_cost}{the maximum absolute value of calculated gradient for any
+single co-occurrence pair. Try to set this to a smaller value if you have
 problems with numerical stability.}
 
-\item{alpha}{alpha in weighting function formula :
-\eqn{f(x) = 1 if x > x_max; else (x/x_max)^alpha }}
+\item{alpha}{the alpha in weighting function formula : \eqn{f(x) = 1 if x >
+x_max; else (x/x_max)^alpha}}
 
 \item{...}{arguments passed to other methods (not used at the moment).}
 }
 \description{
-Train GloVe word embeddings model via fully asynchronous parallel AdaGrad.
+This function trains a GloVe word-embeddings model via fully
+  asynchronous and parallel AdaGrad.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{dgTMatrix}: fits GloVe model on dgTMatrix - sparse Matrix in triplet form
+\item \code{dgTMatrix}: fits GloVe model on a \code{dgTMatrix}, a sparse matrix in
+triplet form
 
-\item \code{Matrix}: fits GloVe model on Matrix input
+\item \code{Matrix}: Fits a GloVe model on a \code{Matrix} input
 }}
 \examples{
 \dontrun{
