@@ -1,8 +1,9 @@
 #' @name get_tcm
-#' @title Creates Term-Coocurnce matrix construction
-#' @description Creates Term-Coocurnce matrix from Corpus object.
-#' @param corpus HashCorpus or VocabCorpus object.
-#' See \link{create_corpus}, \link{vectorizers} for details.
+#' @title Extract term-co-occurence matrix
+#' @description This function creates a term-co-occurence matrix from a
+#'   \code{Corpus} object.
+#' @param corpus \code{HashCorpus} or \code{VocabCorpus} object. See
+#'   \link{create_corpus}, \link{vectorizers} for details.
 #' @seealso \link{create_corpus}
 #' @examples
 #' \dontrun{
@@ -32,18 +33,22 @@ get_tcm <- function(corpus) {
 }
 
 #' @name create_tcm
-#' @title Term-Cooccurence Matrix construction.
-#' @description High-level function for Term-Cooccurence Matrix construction.
-#' If parallel backend is registered, it will construct TCM in multiple threads.
-#' @details User should keep in mind, that he/she should split data itself and
-#' provide list of \link{itoken} iterators. Each element of \code{itoken_src}
-#' will be handled in separate thread and at the end they will be combined.
-#' @param itoken_src \code{list} of iterators over tokens - \code{itoken}.
-#' Each element is a list of tokens = tokenized and normalized strings.
-#' @param vectorizer \code{function} vectorizer function.
-#' @param ... - arguments to \link{foreach} function which is used to iterate
-#' over \code{itoken_src} under the hood.
-#' @return \code{dgCMatrix} Term-Cooccurence Matrix
+#' @title Term-co-occurence matrix construction
+#' @description This is a high-level function for constructing a
+#'   term-co-occurrence matrix. If a parallel backend is registered, it will
+#'   construct the TCM in multiple threads.
+#' @details The user should keep in mind that he or she should split data and
+#'   and provide a list of \link{itoken} iterators. Each element of
+#'   \code{itoken_src} will be handled in a separate thread combined at the end
+#'   of processing.
+#' @param itoken_src \code{list} of iterators over tokens from \link{itoken}.
+#'   Each element is a list of tokens, that is, tokenized and normalized
+#'   strings.
+#' @param vectorizer \code{function} vectorizer function. See
+#'   \link{vectorizers}.
+#' @param ... arguments to \link{foreach} function which is used to iterate over
+#'   \code{itoken_src}.
+#' @return \code{dgCMatrix} TCM matrix
 #' @seealso \link{itoken}
 #' @examples
 #' \dontrun{
