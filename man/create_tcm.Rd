@@ -4,7 +4,7 @@
 \alias{create_tcm}
 \alias{create_tcm.itoken}
 \alias{create_tcm.list}
-\title{Term-Cooccurence Matrix construction.}
+\title{Term-co-occurence matrix construction}
 \usage{
 create_tcm(itoken_src, vectorizer, ...)
 
@@ -13,27 +13,31 @@ create_tcm(itoken_src, vectorizer, ...)
 \method{create_tcm}{list}(itoken_src, vectorizer, verbose = FALSE, ...)
 }
 \arguments{
-\item{itoken_src}{\code{list} of iterators over tokens - \code{itoken}.
-Each element is a list of tokens = tokenized and normalized strings.}
+\item{itoken_src}{\code{list} of iterators over tokens from \link{itoken}.
+Each element is a list of tokens, that is, tokenized and normalized
+strings.}
 
-\item{vectorizer}{\code{function} vectorizer function.}
+\item{vectorizer}{\code{function} vectorizer function. See
+\link{vectorizers}.}
 
-\item{...}{- arguments to \link{foreach} function which is used to iterate
-over \code{itoken_src} under the hood.}
+\item{...}{arguments to \link{foreach} function which is used to iterate over
+\code{itoken_src}.}
 
 \item{verbose}{\code{logical} print status messages}
 }
 \value{
-\code{dgCMatrix} Term-Cooccurence Matrix
+\code{dgCMatrix} TCM matrix
 }
 \description{
-High-level function for Term-Cooccurence Matrix construction.
-If parallel backend is registered, it will construct TCM in multiple threads.
+This is a high-level function for constructing a
+  term-co-occurrence matrix. If a parallel backend is registered, it will
+  construct the TCM in multiple threads.
 }
 \details{
-User should keep in mind, that he/she should split data itself and
-provide list of \link{itoken} iterators. Each element of \code{itoken_src}
-will be handled in separate thread and at the end they will be combined.
+The user should keep in mind that he or she should split data and
+  and provide a list of \link{itoken} iterators. Each element of
+  \code{itoken_src} will be handled in a separate thread combined at the end
+  of processing.
 }
 \examples{
 \dontrun{

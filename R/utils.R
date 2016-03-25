@@ -1,17 +1,17 @@
-#' @name split_vector
-#' @title Generating indexes for splitting vector into chunks
-#' @description Generating indexes for splitting vector into chunks for parallel processing.
-#' @details Parameters granularity and splits controls the numer of chunks in returned list.
-#' Number of chunks in resulted list in general is equal granularity * splits
-#' @param vec \link{list} or \link{vector} to split
-#' @param granularity \link{integer} -  granularity is useful for management of granularity
-#' of splits. If you expect that computational time on each chunk of your data will
-#' be distributed nerarly uniformly, granularity = 1 is good choice because of little overheads
-#' in syncronizing parallel processes.
-#' @param splits \link{integer} - controls number of parallel jobs you have planned.
-#' Usually should be equal to number of cores in the machine.
-#' @return \link{list} each element is a \link{integer} \link{vector} pair.
-#' First element in pair is lower index, second element is upper index.
+# @name split_vector
+# @title Generating indexes for splitting vector into chunks
+# @description Generating indexes for splitting vector into chunks for parallel processing.
+# @details Parameters granularity and splits controls the numer of chunks in returned list.
+# Number of chunks in resulted list in general is equal granularity * splits
+# @param vec \link{list} or \link{vector} to split
+# @param granularity \link{integer} -  granularity is useful for management of granularity
+# of splits. If you expect that computational time on each chunk of your data will
+# be distributed nerarly uniformly, granularity = 1 is good choice because of little overheads
+# in syncronizing parallel processes.
+# @param splits \link{integer} - controls number of parallel jobs you have planned.
+# Usually should be equal to number of cores in the machine.
+# @return \link{list} each element is a \link{integer} \link{vector} pair.
+# First element in pair is lower index, second element is upper index.
 split_vector <- function(vec, splits, granularity = 1) {
   if ( !is.vector(vec)) stop("vec must be vector or list")
   if (length(vec) < splits * granularity) {
@@ -24,10 +24,10 @@ split_vector <- function(vec, splits, granularity = 1) {
   mapply(FUN = function(lower, upper) list(c(lower, upper)), knots[-length(knots)], knots[-1] - 1)
 }
 
-#' @name to_lda_c
-#' @title Converts 'dgCMatrix' to 'lda_c' format
-#' @description Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lda_c' format
-#' @param dtm Document-Term matrix
+# @name to_lda_c
+# @title Converts 'dgCMatrix' to 'lda_c' format
+# @description Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lda_c' format
+# @param dtm Document-Term matrix
 to_lda_c <- function(dtm) {
   # probably receive dtm in dgTMatrix
   if (!inherits(dtm, "dgCMatrix"))
@@ -84,13 +84,16 @@ rbind_dgTMatrix <- function(...) {
 }
 
 #' @name split_into
-#' @title split vector into N roughly equal parts
-#' @description splits vector into N roughly equal parts
-#' @param vec unput \code{vector}
-#' @param N \code{integer} desired number of chunks
-#' @return \link{list} with \code{N} roughly equal length elements
+#' @title Split a vector for parallel processing
+#' @description This function splits a vector into \code{n} parts of roughly
+#'   equal size. These splits can be used for parallel processing. In general,
+#'   \code{n} should be equal to the number of jobs you want to run, which
+#'   should be the number of cores you want to use.
+#' @param vec input vector
+#' @param n \code{integer} desired number of chunks
+#' @return \code{list} with \code{n} elements, each of roughly equal length
 #' @export
-split_into <- function(vec, N) {
-  max_part_len <- ceiling(length(vec) / N)
-  suppressWarnings( split(vec, rep(1:N, each = max_part_len)) )
+split_into <- function(vec, n) {
+  max_part_len <- ceiling(length(vec) / n)
+  suppressWarnings( split(vec, rep(1:n, each = max_part_len)) )
 }

@@ -2,23 +2,24 @@
 % Please edit documentation in R/iterators.R
 \name{ilines}
 \alias{ilines}
-\title{Creates iterator over lines of connection/file}
+\title{Creates iterator over the lines of a connection or file}
 \usage{
 ilines(con, n, ...)
 }
 \arguments{
-\item{con}{\code{connection} object or a character string.}
+\item{con}{\code{connection} object or a \code{character} string.}
 
 \item{n}{\code{integer}, the maximum number of lines to read per iteration.
-Negative values indicate that one should read up to the end of the connection.
-The default value is 1.}
+Negative values indicate that one should read up to the end of the
+connection. The default value is 1.}
 
-\item{...}{arguments passed to \code{readLines} function.}
+\item{...}{arguments passed to \link{readLines} function.}
 }
 \description{
-Result of this function usually used in \link{itoken} function.
+The result of this function is usually used in an \link{itoken}
+  function.
 }
 \seealso{
-\link{itoken}
+\link{itoken}, \link{readLines}
 }
 
