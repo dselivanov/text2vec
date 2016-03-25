@@ -84,13 +84,16 @@ rbind_dgTMatrix <- function(...) {
 }
 
 #' @name split_into
-#' @title split vector into N roughly equal parts
-#' @description splits vector into N roughly equal parts
-#' @param vec unput \code{vector}
-#' @param N \code{integer} desired number of chunks
-#' @return \link{list} with \code{N} roughly equal length elements
+#' @title Split a vector for parallel processing
+#' @description This function splits a vector into \code{n} parts of roughly
+#'   equal size. These splits can be used for parallel processing. In general,
+#'   \code{n} should be equal to the number of jobs you want to run, which
+#'   should be the number of cores you want to use.
+#' @param vec input vector
+#' @param n \code{integer} desired number of chunks
+#' @return \code{list} with \code{n} elements, each of roughly equal length
 #' @export
-split_into <- function(vec, N) {
-  max_part_len <- ceiling(length(vec) / N)
-  suppressWarnings( split(vec, rep(1:N, each = max_part_len)) )
+split_into <- function(vec, n) {
+  max_part_len <- ceiling(length(vec) / n)
+  suppressWarnings( split(vec, rep(1:n, each = max_part_len)) )
 }

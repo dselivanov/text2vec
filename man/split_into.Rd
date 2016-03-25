@@ -2,19 +2,22 @@
 % Please edit documentation in R/utils.R
 \name{split_into}
 \alias{split_into}
-\title{split vector into N roughly equal parts}
+\title{Split a vector for parallel processing}
 \usage{
-split_into(vec, N)
+split_into(vec, n)
 }
 \arguments{
-\item{vec}{unput \code{vector}}
+\item{vec}{input vector}
 
-\item{N}{\code{integer} desired number of chunks}
+\item{n}{\code{integer} desired number of chunks}
 }
 \value{
-\link{list} with \code{N} roughly equal length elements
+\code{list} with \code{n} elements, each of roughly equal length
 }
 \description{
-splits vector into N roughly equal parts
+This function splits a vector into \code{n} parts of roughly
+  equal size. These splits can be used for parallel processing. In general,
+  \code{n} should be equal to the number of jobs you want to run, which
+  should be the number of cores you want to use.
 }
 
