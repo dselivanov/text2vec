@@ -12,15 +12,17 @@ idir(path, reader_function = readLines, ...)
 \arguments{
 \item{file_paths}{\code{character} paths of input files}
 
-\item{reader_function}{\code{function} which will perform reading of text files from disk.
-Only one assumption - it should take path as first argument.}
+\item{reader_function}{\code{function} which will perform reading of text
+files from disk, which should take a path as its first argument.}
 
-\item{...}{arguments passed to other methods (inculding \code{reader_function}).}
+\item{...}{arguments passed to other methods (including
+\code{reader_function}).}
 
-\item{path}{\code{character} path of directory, from where read ALL the files.}
+\item{path}{\code{character} path of directory. All files in the directory will be read.}
 }
 \description{
-Result of this function usually used in \link{itoken} function.
+The result of this function usually used in an \link{itoken}
+  function.
 }
 \examples{
 current_dir_files <- list.files(path = ".", full.names = TRUE)
