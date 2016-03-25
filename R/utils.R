@@ -24,10 +24,10 @@ split_vector <- function(vec, splits, granularity = 1) {
   mapply(FUN = function(lower, upper) list(c(lower, upper)), knots[-length(knots)], knots[-1] - 1)
 }
 
-#' @name to_lda_c
-#' @title Converts 'dgCMatrix' to 'lda_c' format
-#' @description Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lda_c' format
-#' @param dtm Document-Term matrix
+# @name to_lda_c
+# @title Converts 'dgCMatrix' to 'lda_c' format
+# @description Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lda_c' format
+# @param dtm Document-Term matrix
 to_lda_c <- function(dtm) {
   # probably receive dtm in dgTMatrix
   if (!inherits(dtm, "dgCMatrix"))
