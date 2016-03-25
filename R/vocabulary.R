@@ -1,27 +1,29 @@
-#' @name create_vocabulary
-#' @title Creates vocabulary (unique terms)
-#' @description collects unique terms and corresponding statistics from object.
-#' See \code{value} section.
-#' @param itoken_src iterator over \code{list} of \code{character} vectors - documents from which
-#' user want construct vocabulary. Or, alternatively,
-#' \code{character} vector = user-defined vocabulary terms (which will be used "as is").
-#' @param ngram \code{integer} vector. The lower and upper boundary of the range of
-#' n-values for different n-grams to be extracted. All values of n such that
-#' ngram_min <= n <= ngram_max will be used.
-#' @param stopwords \code{character} vector of stopwords to filter them out
-#' @return \code{text2vec_vocabulary} object,
-#' which is actually a \code{list} with following fields:
+#'@name create_vocabulary
+#'@title Creates a vocabulary of unique terms
+#'@description This function collects unique terms and corresponding statistics.
+#'  See the below for details.
+#'@param itoken_src iterator over a \code{list} of \code{character} vectors,
+#'  which are the documents from which the user wants to construct a vocabulary.
+#'  Alternatively, a \code{character} vector of user-defined vocabulary terms
+#'  (which will be used "as is").
+#'@param ngram \code{integer} vector. The lower and upper boundary of the range
+#'  of n-values for different n-grams to be extracted. All values of \code{n}
+#'  such that ngram_min <= n <= ngram_max will be used.
+#'@param stopwords \code{character} vector of stopwords to filter out
+#'@return \code{text2vec_vocabulary} object, which is actually a \code{list}
+#'  with following fields:
 #'
-#' 1. \bold{vocab} - \code{data.frame} which contains columns
-#'\itemize{
+#'  1. \code{vocab}: a \code{data.frame} which contains columns \itemize{
 #'  \item{\code{terms}       }{ \code{character} vector of unique terms}
-#'  \item{\code{terms_counts} }{ \code{integer} vector of term counts across all documents}
-#'  \item{\code{doc_counts}  }{ \code{integer} vector of document counts
-#'                            that contain corresponding term}
-#'}
+#'  \item{\code{terms_counts} }{ \code{integer} vector of term counts across all
+#'  documents} \item{\code{doc_counts}  }{ \code{integer} vector of document
+#'  counts that contain corresponding term} }
 #'
-#' 2. \bold{ngram} - \code{integer} vector, the lower and upper boundary of the range of n-gram-values.
-#' 3. \bold{document_count} - \code{integer} number of documents vocabulary was built.
+#'  2. \code{ngram}: \code{integer} vector, the lower and upper boundary of the
+#'  range of n-gram-values.
+#'
+#'  3. \code{document_count}: \code{integer} number of documents vocabulary was
+#'  built.
 #'
 #' @examples
 #' data("movie_review")
@@ -30,7 +32,7 @@
 #' vocab <- create_vocabulary(it)
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
-#' @export
+#'@export
 create_vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                        stopwords = character(0)) {
   UseMethod("create_vocabulary")
@@ -97,9 +99,9 @@ create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ng
   res
 }
 
-#' @describeIn create_vocabulary collects unique terms and corresponding statistics from
-#' list of itoken iterators. If parallel backend is registered, it will build vocabulary
-#' in parallel using \link{foreach}.
+#' @describeIn create_vocabulary collects unique terms and corresponding
+#'   statistics from list of itoken iterators. If parallel backend is
+#'   registered, it will build vocabulary in parallel using \link{foreach}.
 #' @param ... additional arguments to \link{foreach} function.
 #' @export
 create_vocabulary.list <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
@@ -145,15 +147,19 @@ combine_vocabulary <- function(...) {
 }
 
 #' @name prune_vocabulary
-#' @title Prunes vocabulary.
-#' @description Perform filtering of the input vocabulary and trhrowing out very frequet and
-#' very infrequet terms. Also leaves top `max_number_of_terms` (by count) terms. See examples
-#' in \link{vocabulary} function.
-#' @param vocabulary vocabulary from \link{vocabulary} function output.
+#' @title Prune vocabulary
+#' @description This function filters the input vocabulary and throws out very
+#'   frequent and very infrequent terms. See examples in for the
+#'   \link{vocabulary} function. The parameter \code{max_number_of_terms} can
+#'   also be used to limit the absolute size of the vocabulary to only the most
+#'   frequently used terms.
+#' @param vocabulary a vocabulary from the \link{vocabulary} function.
 #' @param term_count_min minimum number of occurences over all documents.
 #' @param term_count_max maximum number of occurences over all documents.
-#' @param doc_proportion_min minimum proportion of documents which should contain term.
-#' @param doc_proportion_max maximum proportion of documents which should contain term.
+#' @param doc_proportion_min minimum proportion of documents which should
+#'   contain term.
+#' @param doc_proportion_max maximum proportion of documents which should
+#'   contain term.
 #' @param max_number_of_terms maximum number of terms in vocabulary.
 #' @seealso \link{vocabulary}
 #' @export
