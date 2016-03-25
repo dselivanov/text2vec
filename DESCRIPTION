@@ -9,8 +9,10 @@ Description: Very fast and memory-friendly tools for text vectorization and
     streaming API, which allows to perform analysis of collections
     of documents, which are much larger than available RAM.
     All core functions can benefit from multicore machines.
-Authors@R: person("Dmitriy", "Selivanov", role = c("aut", "cre"),
-    email = "selivanov.dmitriy@gmail.com")
+Authors@R: c(person("Dmitriy", "Selivanov", role = c("aut", "cre"),
+    email = "selivanov.dmitriy@gmail.com"),
+    person("Lincoln", "Mullen", role = c("ctb"),
+    email = "lincoln@lincolnmullen.com"))
 Maintainer: Dmitriy Selivanov <selivanov.dmitriy@gmail.com>
 Encoding: UTF-8
 SystemRequirements: GNU make, C++11
