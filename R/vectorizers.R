@@ -7,21 +7,22 @@ corpus_insert <- function(corpus, iterator) {
 }
 
 #' @name create_corpus
-#' @title RAM-friendly streaming corpus construction.
-#' @description This functions allow to create corpus objects (vocabulary or hash based),
-#' which are stored outside of R's heap and wrapped via Reference Classes using Rcpp-Modules.
-#' From that objects you can easily extract Document-Term (dtm) and Term-Cooccurnce(tcm)
-#' matrices. Also text2vec grows corpus for \code{tcm} and \code{dtm} simultaneously in a very
-#' ram-friendly and efficient way using iterators abstraction. So you can build corpuses from
-#' objects/files which are orders of magnitude larger that available RAM.
-#' @param iterator iterator over \code{list} of \code{character} vectors.
-#' Each element is a list of tokens = tokenized and normalized strings.
-#' @param vectorizer \code{function} vectorizer function.
-#' @return corpus object,
-#' We can add documents into this corpus by reference - no copy at all.
-#' See source code for details.
-#' For full process example see \link{get_dtm}.
-#' @seealso \link{vectorizers} \link{create_dtm} \link{create_tcm}
+#' @title Create a corpus
+#' @description This functions creates corpus objects (based on vocabulary or
+#'   hashes), which are stored outside of R's heap and wrapped via reference
+#'   classes using Rcpp-Modules. From those objects you can easily extract
+#'   document-term (DTM) and term-co-occurrence (TCM) matrices. Also, text2vec
+#'   grows the corpus for DTM and TCM matrices simultaneously in a RAM-friendly
+#'   and efficient way using the iterators abstraction. You can build corpora
+#'   from objects or files which are orders of magnitude larger that available
+#'   RAM.
+#' @param iterator iterator over a \code{list} of \code{character} vectors. Each
+#'   element is a list of tokens, that is, tokenized and normalized strings.
+#' @param vectorizer \code{function} vectorizer function. See
+#'   \link{vectorizers}.
+#' @return \code{Corpus} object.
+#' @seealso \link{vectorizers}, \link{create_dtm}, \link{get_dtm},
+#'   \link{get_tcm}, \link{create_tcm}
 #' @export
 create_corpus <- function(iterator,
                           vectorizer) {
@@ -33,14 +34,14 @@ create_corpus <- function(iterator,
 }
 
 #' @name vectorizers
-#' @title creates vocabulary or hash based vectorizer.
-#' @description This function creates text vectorizer function
-#' which used in corpus construction.
-#' @param grow_dtm \code{logical} should we grow Document-Term matrix
+#' @title Vocabulary and hash vectorizers
+#' @description This function creates a text vectorizer function
+#' which is used in constructing a corpus.
+#' @param grow_dtm \code{logical} Should we grow the document-term matrix
 #' during corpus construction or not.
-#' @param skip_grams_window \code{integer} window for Term-Cooccurence matrix
-#' construction. 0L points to do not construct such matrix.
-#' @return vectorizer \code{function}
+#' @param skip_grams_window \code{integer} window for term-co-occurence matrix
+#' construction. A value of \code{0L} does not construct the TCM.
+#' @return A vectorizer \code{function}
 #' @seealso \link{create_corpus} \link{create_dtm} \link{create_tcm} \link{create_vocabulary}
 #' @examples
 #' data("movie_review")
@@ -91,12 +92,14 @@ vocab_vectorizer <- function(vocabulary,
 }
 
 #' @rdname vectorizers
-#' @param hash_size \code{integer} > 0 - number of hash-buckets
-#' for hashing trick (feature hashing). Preferably power of 2 number.
-#' @param ngram \code{integer} vector. The lower and upper boundary of the range of
-#' n-values for different n-grams to be extracted. All values of n such that
-#' @param signed_hash \code{logical},  indicating whether to use second hash-function
-#' to reduce impact of collisions.
+#' @param hash_size \code{integer} The number of of hash-buckets for the feature
+#'   hashing trick. The number must be greater than 0, and preferably it will be
+#'   a power of 2.
+#'@param ngram \code{integer} vector. The lower and upper boundary of the range
+#'  of n-values for different n-grams to be extracted. All values of \code{n}
+#'  such that ngram_min <= n <= ngram_max will be used.
+#' @param signed_hash \code{logical},  indicating whether to use a signed
+#'   hash-function to reduce collisions when hashing.
 #' @export
 hash_vectorizer <- function(hash_size = 2 ^ 18,
                             ngram = c(1L, 1L),
