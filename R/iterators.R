@@ -1,22 +1,25 @@
 #' @name itoken
-#' @title Creates iterator over input object.
-#' @description Creates iterator over input object. This iterator usually used in
-#' following functions : \link{create_vocabulary}, \link{create_corpus}, \link{create_dtm},
-#' \link{vectorizers}, \link{create_tcm}. See them for details.
-#' @param iterable an object from which to generate an iterator.
-#' @param ... arguments passed to other methods (not used at the moment).
-#' @details S3 methods for creating itoken iterator from list of tokens
-#' \itemize{
-#'  \item{\code{list}}{ - all elemets of input list shouild be character tokens}
-#'  \item{\code{character}}{ - raw text source,
-#'  user have to provide tokenizer function}
-#'  \item{\code{ifiles}}{ - from files,
-#'  user have to provide reader function, tokenizer}
-#'  \item{\code{idir}}{ - from dir, same as ifiles}
-#' }
-#'
-#' @seealso \link{create_vocabulary}, \link{create_corpus}, \link{create_dtm},
-#' \link{vectorizers}, \link{create_tcm}
+#' @title Iterators over input objects
+#' @description This function creates iterators over input objects to
+#'   vocabularies, corpora, or DTM and TCM matrices. This iterator is usually
+#'   used in following functions : \link{create_vocabulary},
+#'   \link{create_corpus}, \link{create_dtm}, \link{vectorizers},
+#'   \link{create_tcm}. See them for details.
+#' @param iterable an object from which to generate an iterator
+#' @param ... arguments passed to other methods (not used at the moment)
+#' @details S3 methods for creating an itoken iterator from list of tokens
+#'   \itemize{ \item{\code{list}: all elements of the input list should be
+#'   character vectors containing tokens} \item{\code{character}: raw text
+#'   source: the user must provide a tokenizer function} \item{\code{ifiles}:
+#'   from files, a user must provide a function to read in the file (to
+#'   \link{ifiles}) and a function to tokenize it (to \link{itoken})}
+#'   \item{\code{idir}: from a directory, the user must provide a function to
+#'   read in the files (to \link{idir}) and a function to tokenize it (to
+#'   \link{itoken})} \item{\code{ilines}: from lines, the user must provide
+#'   functions to tokenize}}
+#' @seealso \link{ifiles}, \link{idir}, \link{ilines}, \link{create_vocabulary},
+#'   \link{create_corpus}, \link{create_dtm}, \link{vectorizers},
+#'   \link{create_tcm}
 #' @examples
 #' data("movie_review")
 #' txt <- movie_review$review[1:100]
@@ -29,9 +32,9 @@ itoken <- function(iterable, ...) {
 }
 
 #' @rdname itoken
-#' @param ids \code{vector} of document ids.
-#' If not provided, \code{names(iterable)} will be used.
-#' If \code{names(iterable) == NULL}, incremental ids will be assigned.
+#' @param ids \code{vector} of document ids. If \code{ids} is not provided,
+#'   \code{names(iterable)} will be used. If \code{names(iterable) == NULL},
+#'   incremental ids will be assigned.
 #' @export
 itoken.list <- function(iterable,
                         chunks_number = 10,
@@ -44,17 +47,18 @@ itoken.list <- function(iterable,
 }
 
 #' @rdname itoken
-#' @param preprocess_function \code{function} which takes chunk of objects -
-#' \code{character vector} and \bold{do all preprocessing} (including stemming if needed).
-#' Usually \code{preprocess_function} should return \code{character vector} - vector of
-#' preprocessed/cleaned documents. See "Details" section.
-#' @param tokenizer \code{function} which takes \code{character vector}
-#' from preprocess_function, split it into tokens and returns
-#' \code{list} of \code{character vector}s.
-#' Also you can perform tokenization in \code{preprocess_function}
-#' (actually you should do it when apply any stemming) and then set
-#' \code{tokenizer} = \code{\link{identity}}.
-#' @param chunks_number \code{integer}, the number of pieces that object should be divided into.
+#' @param preprocess_function \code{function} which takes chunk of
+#'   \code{character} vectors and does all pre-processing (including stemming if
+#'   necessary). Usually \code{preprocess_function} should return a
+#'   \code{character} vector of preprocessed/cleaned documents. See "Details"
+#'   section.
+#' @param tokenizer \code{function} which takes a \code{character} vector from
+#'   \code{preprocess_function}, split it into tokens and returns a \code{list}
+#'   of \code{character} vectors. Also you can perform tokenization in
+#'   \code{preprocess_function} (actually you should do so when applying a
+#'   stemming function) and then set \code{tokenizer = \link{identity}}.
+#' @param chunks_number \code{integer}, the number of pieces that object should
+#'   be divided into.
 #' @param progessbar \code{logical} indicates whether to show progress bar.
 #' @export
 itoken.character <- function(iterable,
@@ -108,14 +112,15 @@ itoken.ilines <- function(iterable,
 }
 
 #' @name ilines
-#' @title Creates iterator over lines of connection/file
-#' @description Result of this function usually used in \link{itoken} function.
-#' @param con \code{connection} object or a character string.
+#' @title Creates iterator over the lines of a connection or file
+#' @description The result of this function is usually used in an \link{itoken}
+#'   function.
+#' @param con \code{connection} object or a \code{character} string.
 #' @param n \code{integer}, the maximum number of lines to read per iteration.
-#' Negative values indicate that one should read up to the end of the connection.
-#' The default value is 1.
-#' @param ... arguments passed to \code{readLines} function.
-#' @seealso \link{itoken}
+#'   Negative values indicate that one should read up to the end of the
+#'   connection. The default value is 1.
+#' @param ... arguments passed to \link{readLines} function.
+#' @seealso \link{itoken}, \link{readLines}
 #' @export
 ilines <- function(con, n, ...) {
   obj <- ireadLines(con = con, n = n, ...)
@@ -125,11 +130,13 @@ ilines <- function(con, n, ...) {
 
 #' @name ifiles
 #' @title Creates iterator over text files from the disk
-#' @description Result of this function usually used in \link{itoken} function.
+#' @description The result of this function usually used in an \link{itoken}
+#'   function.
 #' @param file_paths \code{character} paths of input files
-#' @param reader_function \code{function} which will perform reading of text files from disk.
-#' Only one assumption - it should take path as first argument.
-#' @param ... arguments passed to other methods (inculding \code{reader_function}).
+#' @param reader_function \code{function} which will perform reading of text
+#'   files from disk, which should take a path as its first argument.
+#' @param ... arguments passed to other methods (including
+#'   \code{reader_function}).
 #' @seealso \link{itoken}
 #' @examples
 #' current_dir_files <- list.files(path = ".", full.names = TRUE)
@@ -154,7 +161,7 @@ ifiles <- function(file_paths, reader_function = readLines, ...) {
 }
 
 #' @rdname ifiles
-#' @param path \code{character} path of directory, from where read ALL the files.
+#' @param path \code{character} path of directory. All files in the directory will be read.
 #' @examples
 #' dir_files_iterator <- idir(path = ".")
 #' @export

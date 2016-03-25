@@ -2,21 +2,25 @@
 % Please edit documentation in R/matrix.R
 \name{get_tf}
 \alias{get_tf}
-\title{TermFrequency scaling matrix construction from Document-Term-Matrix}
+\title{Term-frequency scaling matrix}
 \usage{
 get_tf(dtm, norm = c("l1", "l2"))
 }
 \arguments{
-\item{dtm}{\code{sparseMatrix} - Document-Term-Matrix}
+\item{dtm}{a document-term matrix of class \code{dgCMatrix} or
+\code{dgTMatrix}.}
 
-\item{norm}{\code{character} - Norm used to normalize term vectors. 'l1' by default, i.e.
-scale by bumber of words in document.}
+\item{norm}{\code{character} the method used to normalize term vectors.
+\code{"l1"} by default, i.e., scale by the number of words in the document.}
+}
+\value{
+\code{ddiMatrix} TF scaling diagonal sparse matrix.
 }
 \description{
-Creates TermFrequency (tf) scaling matrix from Document-Term-Matrix. For examples
-see \link{get_dtm}.
+This function creates a term-frequency (TF) scaling matrix from
+  a document-term matrix.
 }
 \seealso{
-\link{get_idf}, \link{get_dtm}
+\link{get_idf}, \link{get_dtm}, \link{create_dtm}
 }
 

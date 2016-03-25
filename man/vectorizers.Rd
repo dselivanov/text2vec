@@ -4,7 +4,7 @@
 \alias{hash_vectorizer}
 \alias{vectorizers}
 \alias{vocab_vectorizer}
-\title{creates vocabulary or hash based vectorizer.}
+\title{Vocabulary and hash vectorizers}
 \usage{
 vocab_vectorizer(vocabulary, grow_dtm = TRUE, skip_grams_window = 0L)
 
@@ -14,27 +14,29 @@ hash_vectorizer(hash_size = 2^18, ngram = c(1L, 1L), signed_hash = FALSE,
 \arguments{
 \item{vocabulary}{\code{text2vec_vocabulary} object, see \link{create_vocabulary}.}
 
-\item{grow_dtm}{\code{logical} should we grow Document-Term matrix
+\item{grow_dtm}{\code{logical} Should we grow the document-term matrix
 during corpus construction or not.}
 
-\item{skip_grams_window}{\code{integer} window for Term-Cooccurence matrix
-construction. 0L points to do not construct such matrix.}
+\item{skip_grams_window}{\code{integer} window for term-co-occurence matrix
+construction. A value of \code{0L} does not construct the TCM.}
 
-\item{hash_size}{\code{integer} > 0 - number of hash-buckets
-for hashing trick (feature hashing). Preferably power of 2 number.}
+\item{hash_size}{\code{integer} The number of of hash-buckets for the feature
+hashing trick. The number must be greater than 0, and preferably it will be
+a power of 2.}
 
-\item{ngram}{\code{integer} vector. The lower and upper boundary of the range of
-n-values for different n-grams to be extracted. All values of n such that}
+\item{ngram}{\code{integer} vector. The lower and upper boundary of the range
+of n-values for different n-grams to be extracted. All values of \code{n}
+such that ngram_min <= n <= ngram_max will be used.}
 
-\item{signed_hash}{\code{logical},  indicating whether to use second hash-function
-to reduce impact of collisions.}
+\item{signed_hash}{\code{logical},  indicating whether to use a signed
+hash-function to reduce collisions when hashing.}
 }
 \value{
-vectorizer \code{function}
+A vectorizer \code{function}
 }
 \description{
-This function creates text vectorizer function
-which used in corpus construction.
+This function creates a text vectorizer function
+which is used in constructing a corpus.
 }
 \examples{
 data("movie_review")

@@ -1,11 +1,12 @@
 #' @name get_dtm
-#' @title Extracts Document-Term matrix
-#' @description Extracts Document-Term matrix from Corpus object.
-#' @param corpus HashCorpus or VocabCorpus object.
-#' See \link{create_corpus} for details.
+#' @title Extract document-term matrix
+#' @description This function extracts a document-term matrix from a
+#'   \code{Corpus} object.
+#' @param corpus \code{HashCorpus} or \code{VocabCorpus} object. See
+#'   \link{create_corpus} for details.
 #' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
-#' "lda_c" - Blei's lda-c format (list of 2 * doc_terms_size),
-#' see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
+#'   \code{"lda_c"} is Blei's lda-c format (a list of 2 * doc_terms_size); see
+#'   \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
 #' @examples
 #' N <- 1000
 #' tokens <- movie_review$review[1:N] %>% tolower %>% word_tokenizer
@@ -34,21 +35,26 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 }
 
 #' @name create_dtm
-#' @title Document-Term Matrix construction.
-#' @description High-level function for Document-Term Matrix construction.
-#' If parallel backend is registered, it will construct DTM in multiple threads.
-#' @details User should keep in mind, that he/she should split data itself and
-#' provide list of \link{itoken} iterators. Each element of \code{itoken_src}
-#' will be handled in separate thread and at the end they will be combined.
-#' @param itoken_src \code{list} of iterators over tokens - \code{itoken}.
-#' Each element is a list of tokens = tokenized and normalized strings.
-#' @param vectorizer \code{function} vectorizer function.
-#' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
-#' "lda_c" - Blei's lda-c format (list of 2 * doc_terms_size),
-#' see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
-#' @param ... - arguments to \link{foreach} function which is used to iterate
-#' over \code{itoken_src} under the hood.
-#' @return Document-Term Matrix
+#' @title Document-term matrix construction
+#' @description This is a high-level function for creating a document-term
+#'   matrix. If a parallel backend is registered, it will construct the DTM in
+#'   multiple threads.
+#' @details The user should keep in mind that he or she should split the data
+#'   itself and provide a list of \link{itoken} iterators. Each element of
+#'   \code{itoken_src} will be handled in separate thread and combined at the
+#'   end of processing.
+#' @param itoken_src \code{list} of iterators over tokens provided by
+#'   \code{itoken}. Each element is a list of tokens, that is, tokenized and
+#'   normalized strings.
+#' @param vectorizer \code{function} vectorizer function; see
+#'   \link{vectorizers}.
+#' @param type \code{character}, one of \code{c("dgCMatrix", "dgTMatrix",
+#'   "lda_c")}. \code{"lda_c"} is Blei's lda-c format (a list of 2 *
+#'   doc_terms_size); see
+#'   \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
+#' @param ... arguments to the \link{foreach} function which is used to iterate
+#'   over \code{itoken_src}.
+#' @return A document-term matrix
 #' @seealso \link{itoken} \link{vectorizers} \link{create_corpus} \link{get_dtm}
 #' @examples
 #' \dontrun{
