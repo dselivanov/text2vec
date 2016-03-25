@@ -2,30 +2,31 @@
 % Please edit documentation in R/matrix.R
 \name{get_idf}
 \alias{get_idf}
-\title{Inverse Document-Frequency scaling matrix construction}
+\title{Inverse document-frequency scaling matrix}
 \usage{
-get_idf(dtm, log_scale = log, smooth_idf = T)
+get_idf(dtm, log_scale = log, smooth_idf = TRUE)
 }
 \arguments{
-\item{dtm}{\code{dgCMatrix} - Document-Term matrix.}
+\item{dtm}{a document-term matrix of class \code{dgCMatrix} or
+\code{dgTMatrix}.}
 
-\item{log_scale}{function to use in idf calculation. Usually \link{log} used.
-Also worth to try \link{log2}.}
+\item{log_scale}{\code{function} to use in calculating the IDF matrix.
+Usually \link{log} is used, but it might be worth trying \link{log2}.}
 
-\item{smooth_idf}{\code{logical} smooth idf weights by adding one to document frequencies,
-as if an extra document was seen containing every term in the collection exactly once.
-Prevents zero divisions.}
+\item{smooth_idf}{\code{logical} smooth IDF weights by adding one to document
+frequencies, as if an extra document was seen containing every term in the
+collection exactly once. This prevents division by zero.}
 }
 \value{
-\code{ddiMatrix} idf scaling diagonal sparse matrix.
+\code{ddiMatrix} IDF scaling diagonal sparse matrix.
 }
 \description{
-Creates Inverse Document-Frequency (idf) scaling matrix from Document-Term matrix.
- For examples see \link{get_dtm}.
-idf = log (# documents in the corpus) / (# documents where the term appears + 1)
-For examples see  \link{get_dtm}
+This function creates an inverse-document-frequency (IDF)
+  scaling matrix from a document-term matrix. The IDF is defined as follows:
+  \code{idf = log(# documents in the corpus) / (# documents where the term
+  appears + 1)}
 }
 \seealso{
-\link{get_tf}, \link{get_dtm}
+\link{get_tf}, \link{get_dtm}, \link{create_dtm}
 }
 

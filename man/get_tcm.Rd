@@ -2,16 +2,17 @@
 % Please edit documentation in R/tcm.R
 \name{get_tcm}
 \alias{get_tcm}
-\title{Creates Term-Coocurnce matrix construction}
+\title{Extract term-co-occurence matrix}
 \usage{
 get_tcm(corpus)
 }
 \arguments{
-\item{corpus}{HashCorpus or VocabCorpus object.
-See \link{create_corpus}, \link{vectorizers} for details.}
+\item{corpus}{\code{HashCorpus} or \code{VocabCorpus} object. See
+\link{create_corpus}, \link{vectorizers} for details.}
 }
 \description{
-Creates Term-Coocurnce matrix from Corpus object.
+This function creates a term-co-occurence matrix from a
+  \code{Corpus} object.
 }
 \examples{
 \dontrun{

@@ -4,7 +4,7 @@
 \alias{create_dtm}
 \alias{create_dtm.itoken}
 \alias{create_dtm.list}
-\title{Document-Term Matrix construction.}
+\title{Document-term matrix construction}
 \usage{
 create_dtm(itoken_src, vectorizer, type = c("dgCMatrix", "dgTMatrix",
   "lda_c"), ...)
@@ -16,31 +16,36 @@ create_dtm(itoken_src, vectorizer, type = c("dgCMatrix", "dgTMatrix",
   "dgTMatrix", "lda_c"), verbose = FALSE, ...)
 }
 \arguments{
-\item{itoken_src}{\code{list} of iterators over tokens - \code{itoken}.
-Each element is a list of tokens = tokenized and normalized strings.}
+\item{itoken_src}{\code{list} of iterators over tokens provided by
+\code{itoken}. Each element is a list of tokens, that is, tokenized and
+normalized strings.}
 
-\item{vectorizer}{\code{function} vectorizer function.}
+\item{vectorizer}{\code{function} vectorizer function; see
+\link{vectorizers}.}
 
-\item{type}{character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
-"lda_c" - Blei's lda-c format (list of 2 * doc_terms_size),
-see \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}}
+\item{type}{\code{character}, one of \code{c("dgCMatrix", "dgTMatrix",
+"lda_c")}. \code{"lda_c"} is Blei's lda-c format (a list of 2 *
+doc_terms_size); see
+\url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}}
 
-\item{...}{- arguments to \link{foreach} function which is used to iterate
-over \code{itoken_src} under the hood.}
+\item{...}{arguments to the \link{foreach} function which is used to iterate
+over \code{itoken_src}.}
 
 \item{verbose}{\code{logical} print status messages}
 }
 \value{
-Document-Term Matrix
+A document-term matrix
 }
 \description{
-High-level function for Document-Term Matrix construction.
-If parallel backend is registered, it will construct DTM in multiple threads.
+This is a high-level function for creating a document-term
+  matrix. If a parallel backend is registered, it will construct the DTM in
+  multiple threads.
 }
 \details{
-User should keep in mind, that he/she should split data itself and
-provide list of \link{itoken} iterators. Each element of \code{itoken_src}
-will be handled in separate thread and at the end they will be combined.
+The user should keep in mind that he or she should split the data
+  itself and provide a list of \link{itoken} iterators. Each element of
+  \code{itoken_src} will be handled in separate thread and combined at the
+  end of processing.
 }
 \examples{
 \dontrun{
