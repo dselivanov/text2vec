@@ -1,17 +1,17 @@
-#' @name split_vector
-#' @title Generating indexes for splitting vector into chunks
-#' @description Generating indexes for splitting vector into chunks for parallel processing.
-#' @details Parameters granularity and splits controls the numer of chunks in returned list.
-#' Number of chunks in resulted list in general is equal granularity * splits
-#' @param vec \link{list} or \link{vector} to split
-#' @param granularity \link{integer} -  granularity is useful for management of granularity
-#' of splits. If you expect that computational time on each chunk of your data will
-#' be distributed nerarly uniformly, granularity = 1 is good choice because of little overheads
-#' in syncronizing parallel processes.
-#' @param splits \link{integer} - controls number of parallel jobs you have planned.
-#' Usually should be equal to number of cores in the machine.
-#' @return \link{list} each element is a \link{integer} \link{vector} pair.
-#' First element in pair is lower index, second element is upper index.
+# @name split_vector
+# @title Generating indexes for splitting vector into chunks
+# @description Generating indexes for splitting vector into chunks for parallel processing.
+# @details Parameters granularity and splits controls the numer of chunks in returned list.
+# Number of chunks in resulted list in general is equal granularity * splits
+# @param vec \link{list} or \link{vector} to split
+# @param granularity \link{integer} -  granularity is useful for management of granularity
+# of splits. If you expect that computational time on each chunk of your data will
+# be distributed nerarly uniformly, granularity = 1 is good choice because of little overheads
+# in syncronizing parallel processes.
+# @param splits \link{integer} - controls number of parallel jobs you have planned.
+# Usually should be equal to number of cores in the machine.
+# @return \link{list} each element is a \link{integer} \link{vector} pair.
+# First element in pair is lower index, second element is upper index.
 split_vector <- function(vec, splits, granularity = 1) {
   if ( !is.vector(vec)) stop("vec must be vector or list")
   if (length(vec) < splits * granularity) {
