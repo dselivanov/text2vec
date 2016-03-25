@@ -1,15 +1,16 @@
 #' @name transform_filter_commons
-#' @title remove (un)common terms from Document-Term matrix
-#' @description Creates reduced Document-Term matrix - throws out
-#' very common and very uncommon words.
-#' @param dtm \code{dgCMatrix} - Document-Term Matrix
-#' @param term_freq - \code{numeric} vector of 2 values in c(0, 1) range
-#' First element corresponds to frequency of uncommon words,
-#' second element corresponds to frequency of common words.
-#' Terms, which are observed less than first value or frequency
-#' or more than second will be filtered out
+#' @title Remove terms from a document-term matrix
+#' @description This function removes very common and very uncommon words from a
+#'   document-term matrix.
+#' @param dtm a document-term matrix of class \code{dgCMatrix} or
+#'   \code{dgTMatrix}.
+#' @param term_freq \code{numeric} vector of 2 values in between \code{0} and
+#'   \code{1}. The first element corresponds to frequency of uncommon words; the
+#'   second element corresponds to the frequency of common words. Terms which
+#'   are observed less than first value or frequency or more than second will be
+#'   filtered out.
 #' @seealso \link{prune_vocabulary}, \link{transform_tf},
-#' \link{transform_tfidf}, \link{transform_binary}
+#'   \link{transform_tfidf}, \link{transform_binary}
 #' @export
 transform_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, common = 0.975) )
 {
@@ -23,36 +24,35 @@ transform_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, common
 }
 
 #' @name transform_tf
-#' @title Scales Document-Term matrix
+#' @title Scale a document-term matrix
 #' @description
 #'
-#' \code{transform_tf}:
+#' This set of functions scales a document-term matrix.
 #'
-#' "l1" norm:
-#' \code{dtm_tf = (count of word appears in document) / (total number words in document) }
+#' \code{transform_tf}: scale a DTM by one of two methods. If \code{norm =
+#' "l1"}, then then \code{dtm_tf = (count of a particular word in the document)
+#' / (total number of words in the document)}. If \code{norm = "l2"}, then
+#' \code{dtm_tf = (count of a particular word in the document) ^ 2 / (total
+#' number words in the document) ^ 2}.
 #'
-#' "l2" norm:
-#' \code{tf = (count of word appears in document) ^ 2 / (total number words in document) ^ 2 }
+#' \code{transform_binary}: scale a DTM so that if a cell is 1 if a word appears
+#' in the document; otherwise it is 0.
 #'
-#' \code{transform_binary}:
-#' 1 if word appears in document, 0 otherwise.
+#' \code{transform_tfidf}: scale a DTM so that \code{dtm_idf = log(count of a
+#' particular word in a document) / (number of documents where the term appears
+#' + 1)}
 #'
-#' \code{transform_tfidf}:
-#' \code{idf  = log (count of word appears in document) /
-#' (number of documents where the term appears + 1)}
-#'
-#' @param dtm \code{dgCMatrix} - Document-Term matrix
-#'
-#' @param sublinear_tf \code{logical}, \code{FALSE} by default.
-#' Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).
-#'
-#' @param norm \code{character} - Norm type to normalize term vectors. 'l1' by default, i.e.
-#' scale by bumber of words in document.
-#'
-#' @param idf - \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling.
-#' See \link{get_idf}.
-#' If not provided ( \code{NULL} ) - idf will be calculated form current data.
-#' @seealso \link{get_idf}
+#' @param dtm a document-term matrix of class \code{dgCMatrix} or
+#'   \code{dgTMatrix}.
+#' @param sublinear_tf \code{logical}, \code{FALSE} by default. Apply sublinear
+#'   term-frequency scaling, i.e., replace the term frequency with \code{1 +
+#'   log(TF)}.
+#' @param norm \code{character} Type of normalization to apply to term vectors.
+#'   \code{"l1"} by default, i.e., scale by the number of words in the document.
+#' @param idf \code{ddiMatrix} a diagonal matrix for IDF scaling. See
+#'   \link{get_idf}. If not provided the IDF scaling matrix will be calculated
+#'   from the matrix passed to \code{dtm}.
+#' @seealso \link{get_idf}, \link{get_tf}
 #' @examples
 #' \dontrun{
 #' data(moview_review)
@@ -82,7 +82,6 @@ transform_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, common
 #' # tf-idf transormation
 #' idf <- get_idf(dtm)
 #' transformed_tfidf <- transform_tfidf(dtm,  idf)
-#'
 #' }
 #' @export
 transform_tf <- function(dtm, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
@@ -100,7 +99,7 @@ transform_tf <- function(dtm, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
   tf_scale_matrix %*% dtm
 }
 
-#' @describeIn transform_tf Transform Document-Term via TF-IDF scaling
+#' @describeIn transform_tf Scale a document-term matrix via TF-IDF
 #' @export
 transform_tfidf <- function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
 
@@ -117,7 +116,8 @@ transform_tfidf <- function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c('l1'
   tf %*% idf
 }
 
-#' @describeIn transform_tf Transform Document-Term into binary format
+#' @describeIn transform_tf Transform a document-term matrix into binary
+#'   representation
 #' @export
 transform_binary <- function(dtm) {
   sign(abs(dtm))

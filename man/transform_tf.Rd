@@ -4,7 +4,7 @@
 \alias{transform_binary}
 \alias{transform_tf}
 \alias{transform_tfidf}
-\title{Scales Document-Term matrix}
+\title{Scale a document-term matrix}
 \usage{
 transform_tf(dtm, sublinear_tf = FALSE, norm = c("l1", "l2"))
 
@@ -14,39 +14,42 @@ transform_tfidf(dtm, idf = NULL, sublinear_tf = FALSE, norm = c("l1",
 transform_binary(dtm)
 }
 \arguments{
-\item{dtm}{\code{dgCMatrix} - Document-Term matrix}
+\item{dtm}{a document-term matrix of class \code{dgCMatrix} or
+\code{dgTMatrix}.}
 
-\item{sublinear_tf}{\code{logical}, \code{FALSE} by default.
-Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).}
+\item{sublinear_tf}{\code{logical}, \code{FALSE} by default. Apply sublinear
+term-frequency scaling, i.e., replace the term frequency with \code{1 +
+log(TF)}.}
 
-\item{norm}{\code{character} - Norm type to normalize term vectors. 'l1' by default, i.e.
-scale by bumber of words in document.}
+\item{norm}{\code{character} Type of normalization to apply to term vectors.
+\code{"l1"} by default, i.e., scale by the number of words in the document.}
 
-\item{idf}{- \code{ddiMatrix} \code{Diagonal} matrix for idf-scaling.
-See \link{get_idf}.
-If not provided ( \code{NULL} ) - idf will be calculated form current data.}
+\item{idf}{\code{ddiMatrix} a diagonal matrix for IDF scaling. See
+\link{get_idf}. If not provided the IDF scaling matrix will be calculated
+from the matrix passed to \code{dtm}.}
 }
 \description{
-\code{transform_tf}:
+This set of functions scales a document-term matrix.
 
-"l1" norm:
-\code{dtm_tf = (count of word appears in document) / (total number words in document) }
+\code{transform_tf}: scale a DTM by one of two methods. If \code{norm =
+"l1"}, then then \code{dtm_tf = (count of a particular word in the document)
+/ (total number of words in the document)}. If \code{norm = "l2"}, then
+\code{dtm_tf = (count of a particular word in the document) ^ 2 / (total
+number words in the document) ^ 2}.
 
-"l2" norm:
-\code{tf = (count of word appears in document) ^ 2 / (total number words in document) ^ 2 }
+\code{transform_binary}: scale a DTM so that if a cell is 1 if a word appears
+in the document; otherwise it is 0.
 
-\code{transform_binary}:
-1 if word appears in document, 0 otherwise.
-
-\code{transform_tfidf}:
-\code{idf  = log (count of word appears in document) /
-(number of documents where the term appears + 1)}
+\code{transform_tfidf}: scale a DTM so that \code{dtm_idf = log(count of a
+particular word in a document) / (number of documents where the term appears
++ 1)}
 }
 \section{Functions}{
 \itemize{
-\item \code{transform_tfidf}: Transform Document-Term via TF-IDF scaling
+\item \code{transform_tfidf}: Scale a document-term matrix via TF-IDF
 
-\item \code{transform_binary}: Transform Document-Term into binary format
+\item \code{transform_binary}: Transform a document-term matrix into binary
+representation
 }}
 \examples{
 \dontrun{
@@ -77,10 +80,9 @@ transformed_tf <- dtm \%>\%
 # tf-idf transormation
 idf <- get_idf(dtm)
 transformed_tfidf <- transform_tfidf(dtm,  idf)
-
 }
 }
 \seealso{
-\link{get_idf}
+\link{get_idf}, \link{get_tf}
 }
 
