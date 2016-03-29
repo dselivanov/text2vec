@@ -8,7 +8,9 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
+```{r, echo=FALSE}
+op <- options(width = 80, str = strOptions(strict.width = "cut"))
+```
 # Features
 
 **text2vec** provides an efficient framework with a concise API for text analysis and natural language processing (NLP) in R. 
@@ -48,9 +50,10 @@ To represent documents in vector space, we first have to create `term -> term_id
 Let's first create a vocabulary-based DTM. Here we collect unique terms from all documents and mark each of them with a unique_id. Using the `vocabulary()` function. We use an iterator to create the vocabulary.
 
 ```{r, vocab-iterator, eval=TRUE}
-it <- itoken(movie_review[['review']], 
+it <- itoken(movie_review$review, 
              preprocess_function = tolower, 
-             tokenizer = word_tokenizer)
+             tokenizer = word_tokenizer, 
+             ids = movie_review$id)
 
 sw <- c("i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours")
 vocab <- create_vocabulary(it, stopwords = sw)
@@ -60,22 +63,19 @@ Alternatively, if your data fits in RAM, you can once create list of tokens and 
 
 ```{r}
 # Each element of list represents document
-tokens <- movie_review[['review']] %>% 
+tokens <- movie_review$review %>% 
   tolower() %>% 
   word_tokenizer()
-# add ids
-names(tokens) <- movie_review$id
-it <- itoken(tokens)
+it <- itoken(tokens, ids = movie_review$id)
 vocab <- create_vocabulary(it, stopwords = sw)
 ```
 
 Now that we have a vocabulary, we can construct a document-term matrix. (We could instead use `create_corpus()` and `get_dtm()`).
 
-
 ```{r, vocab_dtm_1, eval=TRUE}
-it <- itoken(tokens)
+it <- itoken(tokens, ids = movie_review$id)
 # Or
-# it <- itoken(movie_review[['review']], tolower, word_tokenizer)
+# it <- itoken(movie_review$review, tolower, word_tokenizer, ids = movie_review$id)
 vectorizer <- vocab_vectorizer(vocab)
 dtm <- create_dtm(it, vectorizer)
 ```
@@ -83,7 +83,7 @@ dtm <- create_dtm(it, vectorizer)
 Now we have a DTM and can check its dimensions.
 
 ```{r, vocab_dtm_1_dim, eval=TRUE}
-dim(dtm)
+str(dtm)
 identical(rownames(dtm), movie_review$id)
 ```
 
@@ -120,7 +120,7 @@ For example we can find words "a," "the," and "in" in almost all documents, but 
 ```{r, prune_vocab_dtm_1}
 pruned_vocab <- prune_vocabulary(vocab, term_count_min = 10,
  doc_proportion_max = 0.5, doc_proportion_min = 0.001)
-it <- itoken(tokens)
+it <- itoken(tokens, ids = movie_review$id)
 vectorizer <- vocab_vectorizer(pruned_vocab)
 dtm <- create_dtm(it, vectorizer)
 dim(dtm)
@@ -159,7 +159,7 @@ We trained this model faster with a larger AUC.
 We can try to improve our model by using n-grams instead of words. We will use up to 3-grams:
 
 ```{r, ngram_dtm_1}
-it <- itoken(tokens)
+it <- itoken(tokens, ids = movie_review$id)
 
 vocab <- create_vocabulary(it, ngram = c(1L, 3L)) %>% 
   prune_vocabulary(term_count_min = 10, 
@@ -196,7 +196,7 @@ If you are not familiar with feature hashing (the so-called "hashing trick") I r
 Here is how to use feature hashing in text2vec.
 
 ```{r, hash_dtm}
-it <- itoken(tokens)
+it <- itoken(tokens, ids = movie_review$id)
 
 vectorizer <- hash_vectorizer(hash_size = 2 ^ 16, ngram = c(1L, 3L))
 dtm <- create_dtm(it, vectorizer) %>% 
