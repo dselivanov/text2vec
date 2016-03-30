@@ -94,6 +94,14 @@ rbind_dgTMatrix <- function(...) {
 #' @return \code{list} with \code{n} elements, each of roughly equal length
 #' @export
 split_into <- function(vec, n) {
-  max_part_len <- ceiling(length(vec) / n)
-  suppressWarnings( split(vec, rep(1:n, each = max_part_len)) )
+  vec_len <- length(vec)
+  chunk_len <- vec_len %/% n
+  # number of vectrors of size (chunk_len + 1)
+  n2 <- (vec_len - chunk_len * n)
+  if (n2 == 0) {
+    split_factors <- rep( 1:n, each = chunk_len)
+  } else
+    split_factors <- c( rep( 1:n2, each = chunk_len + 1),
+                        rep( (n2 + 1):n,  each = chunk_len))
+  split(vec, split_factors)
 }
