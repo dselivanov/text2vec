@@ -131,8 +131,7 @@ create_dtm.list <- function(itoken_src, vectorizer,
 
   foreach(it = itoken_src,
         .combine = combine_fun,
-        .inorder = T,
-        .multicombine = T,
+        .multicombine = TRUE,
         # user already made split for jobs
         # preschedule = FALSE is much more memory efficient
         .options.multicore = list(preschedule = FALSE),

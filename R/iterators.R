@@ -26,6 +26,10 @@
 #' ids <- movie_review$id[1:100]
 #' it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
 #' it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
+#' # Example of stemming tokenizer
+#' # stem_tokenizer <- function(x) {
+#' #  word_tokenizer(x) %>% lapply(SnowballC::wordStem('en'))
+#' # }
 #' @export
 itoken <- function(iterable, ...) {
   UseMethod("itoken")
@@ -48,15 +52,14 @@ itoken.list <- function(iterable,
 
 #' @rdname itoken
 #' @param preprocess_function \code{function} which takes chunk of
-#'   \code{character} vectors and does all pre-processing (including stemming if
-#'   necessary). Usually \code{preprocess_function} should return a
+#'   \code{character} vectors and does all pre-processing.
+#'   Usually \code{preprocess_function} should return a
 #'   \code{character} vector of preprocessed/cleaned documents. See "Details"
 #'   section.
 #' @param tokenizer \code{function} which takes a \code{character} vector from
 #'   \code{preprocess_function}, split it into tokens and returns a \code{list}
-#'   of \code{character} vectors. Also you can perform tokenization in
-#'   \code{preprocess_function} (actually you should do so when applying a
-#'   stemming function) and then set \code{tokenizer = \link{identity}}.
+#'   of \code{character} vectors. If you need to perform stemming -
+#'   call stemmer inside tokenizer. See examples section.
 #' @param chunks_number \code{integer}, the number of pieces that object should
 #'   be divided into.
 #' @param progessbar \code{logical} indicates whether to show progress bar.
