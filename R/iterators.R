@@ -86,8 +86,8 @@ itoken.ifiles <- function(iterable,
   nextEl <- function() {
     res <- try(get_iter_next_value(nextElem(iterable), preprocess_function, tokenizer), silent = TRUE)
     if (progessbar) setTxtProgressBar(pb, min(i - 1, iterable_length))
-    if (class(res) == 'try-error' && attributes(res)$condition$message == 'StopIteration')
-      stop('StopIteration', call. = FALSE)
+    if (class(res) == 'try-error')
+      stop(attributes(res)$condition$message, call. = FALSE)
     i <<- i + 1
     list(tokens = res, ids = names(res))
   }
@@ -197,12 +197,12 @@ itoken_finite <- function(iterable,
   it <- idiv(n = iterable_length, chunks = chunks_number)
   i <- 1
   nextEl <- function() {
-    n <- try(nextElem(it), silent = TRUE)
+    res <- try(nextElem(it), silent = TRUE)
     if (progessbar) setTxtProgressBar(pb, min(i - 1, iterable_length))
-    if (class(n) == 'try-error' && attributes(n)$condition$message == 'StopIteration')
-      stop('StopIteration', call. = FALSE)
-    ix <- seq(i, length = n)
-    i <<- i + n
+    if (class(res) == 'try-error')
+      stop(attributes(res)$condition$message, call. = FALSE)
+    ix <- seq(i, length = res)
+    i <<- i + res
     list(tokens = iterable[ix] %>% preprocessor %>% tokenizer,
          ids = ids[ix])
   }
