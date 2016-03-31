@@ -5,53 +5,83 @@
 \alias{itoken.character}
 \alias{itoken.ifiles}
 \alias{itoken.ilines}
-\alias{itoken.iserfiles}
-\title{Creates iterator over input object.}
+\alias{itoken.list}
+\title{Iterators over input objects}
 \usage{
 itoken(iterable, ...)
 
-\method{itoken}{character}(iterable, preprocess_function, tokenizer,
-  chunks_number = 10, progessbar = interactive(), ...)
+\method{itoken}{list}(iterable, chunks_number = 10,
+  progessbar = interactive(), ids = NULL, ...)
 
-\method{itoken}{ifiles}(iterable, preprocess_function, tokenizer,
+\method{itoken}{character}(iterable, preprocess_function = identity,
+  tokenizer = function(x) strsplit(x, " ", TRUE), chunks_number = 10,
+  progessbar = interactive(), ids = NULL, ...)
+
+\method{itoken}{ifiles}(iterable, preprocess_function = identity,
+  tokenizer = function(x) strsplit(x, " ", TRUE),
   progessbar = interactive(), ...)
 
-\method{itoken}{iserfiles}(iterable, progessbar = interactive(), ...)
-
-\method{itoken}{ilines}(iterable, preprocess_function, tokenizer, ...)
+\method{itoken}{ilines}(iterable, preprocess_function = identity,
+  tokenizer = function(x) strsplit(x, " ", TRUE), ...)
 }
 \arguments{
-\item{iterable}{an object from which to generate an iterator.}
+\item{iterable}{an object from which to generate an iterator}
 
-\item{...}{arguments passed to other methods (not used at the moment).}
+\item{...}{arguments passed to other methods (not used at the moment)}
 
-\item{preprocess_function}{\code{function} which takes chunk of objects -
-\code{character vector} and \bold{do all preprocessing} (including stemming if needed).
-Usually \code{preprocess_function} should return \code{character vector} - vector of
-preprocessed/cleaned documents. See "Details" section.}
-
-\item{tokenizer}{\code{function} which takes \code{character vector}
-from preprocess_function, split it into tokens and returns
-\code{list} of \code{character vector}s.
-Also you can perform tokenization in \code{preprocess_function}
-(actually you should do it when apply any stemming) and then set
-\code{tokenizer} = \code{\link{identity}}.}
-
-\item{chunks_number}{\code{integer}, the number of pieces that object should be divided into.}
+\item{chunks_number}{\code{integer}, the number of pieces that object should
+be divided into.}
 
 \item{progessbar}{\code{logical} indicates whether to show progress bar.}
+
+\item{ids}{\code{vector} of document ids. If \code{ids} is not provided,
+\code{names(iterable)} will be used. If \code{names(iterable) == NULL},
+incremental ids will be assigned.}
+
+\item{preprocess_function}{\code{function} which takes chunk of
+\code{character} vectors and does all pre-processing.
+Usually \code{preprocess_function} should return a
+\code{character} vector of preprocessed/cleaned documents. See "Details"
+section.}
+
+\item{tokenizer}{\code{function} which takes a \code{character} vector from
+\code{preprocess_function}, split it into tokens and returns a \code{list}
+of \code{character} vectors. If you need to perform stemming -
+call stemmer inside tokenizer. See examples section.}
 }
 \description{
-Creates iterator over input object. This iterator usually used in
-following functions : \link{vocabulary}, \link{create_vocab_corpus},
-\link{create_hash_corpus}. See them for details.
+This function creates iterators over input objects to
+  vocabularies, corpora, or DTM and TCM matrices. This iterator is usually
+  used in following functions : \link{create_vocabulary},
+  \link{create_corpus}, \link{create_dtm}, \link{vectorizers},
+  \link{create_tcm}. See them for details.
+}
+\details{
+S3 methods for creating an itoken iterator from list of tokens
+  \itemize{ \item{\code{list}: all elements of the input list should be
+  character vectors containing tokens} \item{\code{character}: raw text
+  source: the user must provide a tokenizer function} \item{\code{ifiles}:
+  from files, a user must provide a function to read in the file (to
+  \link{ifiles}) and a function to tokenize it (to \link{itoken})}
+  \item{\code{idir}: from a directory, the user must provide a function to
+  read in the files (to \link{idir}) and a function to tokenize it (to
+  \link{itoken})} \item{\code{ilines}: from lines, the user must provide
+  functions to tokenize}}
 }
 \examples{
 data("movie_review")
-txt <- movie_review[['review']][1:100]
-it <- itoken(txt, tolower, word_tokenizer, chunks_number = 7)
+txt <- movie_review$review[1:100]
+ids <- movie_review$id[1:100]
+it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
+it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
+# Example of stemming tokenizer
+# stem_tokenizer <- function(x) {
+#  word_tokenizer(x) \%>\% lapply(SnowballC::wordStem('en'))
+# }
 }
 \seealso{
-\link{vocabulary}, \link{create_vocab_corpus}, \link{create_hash_corpus}
+\link{ifiles}, \link{idir}, \link{ilines}, \link{create_vocabulary},
+  \link{create_corpus}, \link{create_dtm}, \link{vectorizers},
+  \link{create_tcm}
 }
 

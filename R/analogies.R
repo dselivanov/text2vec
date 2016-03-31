@@ -1,14 +1,15 @@
-#' @name prepare_analogue_questions
-#' @title Prepares questions list from \code{questions-words.txt} format.
-#' @param questions_file_path \code{character} path of questions file.
-#' @param vocab_terms \code{character vector}, words which we have in vocabulary
-#' and word embeddings matrix.
+#' @name prepare_analogy_questions
+#' @title Prepares list of analogy questions
+#' @param questions_file_path \code{character} path to questions file.
+#' @param vocab_terms \code{character} words which we have in the
+#'   vocabulary and word embeddings matrix.
 #' @param verbose \code{logical} whether to print messages during evaluation.
-#' @description for full examples see \link{glove}
-#' @seealso \link{check_analogue_accuracy}, \link{glove}
+#' @description  This function prepares a list of questions from a
+#'   \code{questions-words.txt} format. For full examples see \link{glove}.
+#' @seealso \link{check_analogy_accuracy}, \link{glove}
 #' @export
-prepare_analogue_questions <- function(questions_file_path, vocab_terms, verbose = TRUE) {
-  lines <- read_lines(questions_file_path) %>%
+prepare_analogy_questions <- function(questions_file_path, vocab_terms, verbose = TRUE) {
+  lines <- readLines(questions_file_path) %>%
     tolower %>%
     str_split(fixed(" "))
 
@@ -53,29 +54,32 @@ prepare_analogue_questions <- function(questions_file_path, vocab_terms, verbose
   stats::setNames(q, sapply(lines[section_name_ind], .subset2, 2))
 }
 
-#' @name check_analogue_accuracy
-#' @title Checks accuracy of word embeddings on analogue task.
-#' @param questions_lst \code{list} of questions. Each element of \code{questions_lst} is
-#' a \code{integer matrix} with \code{ncol = 4} and represents set of questions
-#' related to particular category. Each element of matrix is a index of row in
-#' \code{m_word_vectors}. See output of \link{prepare_analogue_questions} for details
-#' @param m_word_vectors word vectors \code{numeric matrix}. Each row should represent word.
+#' @name check_analogy_accuracy
+#' @title Checks accuracy of word embeddings on the analogy task
+#' @param questions_list \code{list} of questions. Each element of
+#'   \code{questions_list} is a \code{integer matrix} with four columns. It
+#'   represents a set of questions related to a particular category. Each
+#'   element of matrix is an index of a row in \code{m_word_vectors}. See output
+#'   of \link{prepare_analogy_questions} for details
+#' @param m_word_vectors word vectors \code{numeric matrix}. Each row should
+#'   represent a word.
 #' @param verbose \code{logical} whether to print messages during evaluation.
-#' @description for full examples see \link{glove}
-#' @seealso \link{prepare_analogue_questions}, \link{glove}
+#' @description This function checks how well the GloVe word embeddings do on
+#'   the analogy task. For full examples see \link{glove}.
+#' @seealso \link{prepare_analogy_questions}, \link{glove}
 #' @export
-check_analogue_accuracy <- function(questions_lst, m_word_vectors, verbose = TRUE) {
+check_analogy_accuracy <- function(questions_list, m_word_vectors, verbose = TRUE) {
 
   m_word_vectors_norm <-  sqrt(rowSums(m_word_vectors ^ 2))
 
-  categories_number <- length(questions_lst)
+  categories_number <- length(questions_list)
 
   res <- vector(mode = 'list', length = categories_number)
 
   for (i in 1:categories_number) {
-    q_mat <- questions_lst[[i]]
+    q_mat <- questions_list[[i]]
     q_number <- nrow(q_mat)
-    category <- names(questions_lst)[[i]]
+    category <- names(questions_list)[[i]]
 
     m_query <-
       (m_word_vectors[q_mat[, 2], ] +

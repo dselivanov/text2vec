@@ -1,4 +1,5 @@
-#' The text2vec package.
+#' text2vec is a package that provides an efficient framework with a concise API
+#' for text analysis and natural language processing in R.
 #'
 #' @docType package
 #' @name text2vec
@@ -7,11 +8,12 @@
 #' @import Rcpp
 #' @import digest
 #' @import iterators
+#' @import data.table
+#' @importFrom foreach foreach %do% %dopar%
 #' @importFrom RcppParallel RcppParallelLibs
 #' @importFrom stringr str_split fixed coll regex boundary
 #' @importFrom magrittr %>%
-#' @importFrom readr read_lines read_rds write_rds
-#' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom utils txtProgressBar setTxtProgressBar
 #' @useDynLib text2vec
 NULL
 
@@ -41,3 +43,10 @@ NULL
 
 #' @export
 magrittr::`%>%`
+
+if (getRversion() >= "2.15.1") {
+  trick_pass_r_cmd_check <-
+    c(".", "doc_counts", "it", "pair", "terms", "terms_counts", "tokens", "val")
+  utils::globalVariables(trick_pass_r_cmd_check)
+}
+

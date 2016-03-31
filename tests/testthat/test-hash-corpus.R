@@ -12,8 +12,10 @@ get_test_iterator <- function()
 
 test_that("Unigram Hash Corpus construction", {
   h_size = 2 ^ 14;
-  hcorpus <- create_hash_corpus(get_test_iterator(),
-                                feature_hasher = feature_hasher(h_size, c(1L, 1L)))
+
+  vectorizer <- hash_vectorizer(hash_size = h_size)
+  hcorpus <- create_corpus(get_test_iterator(), vectorizer)
+
   m <- hcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], h_size)
@@ -28,8 +30,10 @@ test_that("Unigram Hash Corpus construction", {
 
 test_that("trigram hash-corpus construction", {
   h_size = 2 ^ 18;
-  hcorpus <- create_hash_corpus(get_test_iterator(),
-                                feature_hasher = feature_hasher(h_size, c(1L, 3L)))
+
+  vectorizer <- hash_vectorizer(hash_size = h_size, ngram = c(1L, 3L))
+  hcorpus <- create_corpus(get_test_iterator(), vectorizer)
+
   m <- hcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], h_size)

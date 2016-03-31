@@ -3,31 +3,26 @@
 \name{ifiles}
 \alias{idir}
 \alias{ifiles}
-\title{Creates iterator over text/serialized files from the disk}
+\title{Creates iterator over text files from the disk}
 \usage{
-ifiles(file_paths, serialized = FALSE, reader_function = read_lines,
-  check = TRUE, ...)
+ifiles(file_paths, reader_function = readLines, ...)
 
-idir(path, serialized = FALSE, reader_function = read_lines, check = TRUE,
-  ...)
+idir(path, reader_function = readLines, ...)
 }
 \arguments{
 \item{file_paths}{\code{character} paths of input files}
 
-\item{serialized}{\code{logical} indicates, whether to read raw text files or
-pre-tokenized list of character vectors, saved to disk in serialized form (.RData, .rds files).}
+\item{reader_function}{\code{function} which will perform reading of text
+files from disk, which should take a path as its first argument.}
 
-\item{reader_function}{\code{function} which will perform reading of text files from disk.
-Only one assumption - it should take path as first argument.}
+\item{...}{arguments passed to other methods (including
+\code{reader_function}).}
 
-\item{check}{\code{logical} check whether files exists before reading}
-
-\item{...}{arguments passed to other methods (inculding \code{reader_function}).}
-
-\item{path}{\code{character} path of directory, from where read ALL the files.}
+\item{path}{\code{character} path of directory. All files in the directory will be read.}
 }
 \description{
-Result of this function usually used in \link{itoken} function.
+The result of this function usually used in an \link{itoken}
+  function.
 }
 \examples{
 current_dir_files <- list.files(path = ".", full.names = TRUE)
