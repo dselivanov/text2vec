@@ -13,7 +13,7 @@ vignette: >
 
 It this paragraph I will show how to use `text2vec` for vectorization of large collections of text stored in files.
 
-Imagine we want to build a topic model with [lda](https://cran.r-project.org/web/packages/lda/) package. We have a collection of movie reviews stored in multiple text files on disk. 
+Imagine we want to build a topic model with [lda](http://cran.r-project.org/package=lda) package. We have a collection of movie reviews stored in multiple text files on disk. 
 
 For this vignette we will create files from embedded `movie_review` dataset:
 ```{r}
@@ -51,7 +51,8 @@ reader <- function(x, ...) {
   # select column with review
   res <- chunk$review
   # assign ids to reviews
-  setNames(res, chunk$id)
+  names(res) <- chunk$id
+  res
 }
 # create iterator over files
 it_files  <- ifiles(files, reader_function = reader)

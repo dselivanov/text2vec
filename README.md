@@ -1,7 +1,7 @@
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/text2vec)](http://cran.r-project.org/package=text2vec)
 [![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=master)](https://travis-ci.org/dselivanov/text2vec)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://badges.mit-license.org)
-[![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/text2vec)](http://cran.rstudio.com/package=text2vec)
+[![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/text2vec)](http://cran.r-project.org/package=text2vec)
 [![Follow](https://img.shields.io/twitter/follow/dselvan0v.svg?style=social)](https://twitter.com/intent/follow?screen_name=dselvan0v)
 
 # Tutorials
@@ -10,7 +10,6 @@ To learn how to use this package, see the package vignettes.
 
 1. [Text vectorization](https://cran.r-project.org/web/packages/text2vec/vignettes/text-vectorization.html): `vignette("text-vectorization", package = "text2vec")`
 2. [GloVe word embeddings](https://cran.r-project.org/web/packages/text2vec/vignettes/glove.html): `vignette("glove", package = "text2vec")`
-3. [Advanced topics of text2vec](https://cran.r-project.org/web/packages/text2vec/vignettes/advanced.html): `vignette("advanced", package = "text2vec")`
 
 See also the [text2vec articles](http://dsnotes.com/tags/text2vec/) on my blog.
 
