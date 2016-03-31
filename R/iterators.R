@@ -218,5 +218,5 @@ get_iter_next_value <- function(iter_val, preprocess_function, tokenizer) {
   iter_val %>%
     preprocess_function %>%
     tokenizer %>%
-    setNames(names(iter_val))
+    stats::setNames(names(iter_val))
 }
