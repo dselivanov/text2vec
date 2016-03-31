@@ -10,6 +10,7 @@ To learn how to use this package, see the package vignettes.
 
 1. [Text vectorization](https://cran.r-project.org/web/packages/text2vec/vignettes/text-vectorization.html): `vignette("text-vectorization", package = "text2vec")`
 2. [GloVe word embeddings](https://cran.r-project.org/web/packages/text2vec/vignettes/glove.html): `vignette("glove", package = "text2vec")`
+3. [Advanced topics of text2vec](https://cran.r-project.org/web/packages/text2vec/vignettes/advanced.html): `vignette("advanced", package = "text2vec")`
 
 See also the [text2vec articles](http://dsnotes.com/tags/text2vec/) on my blog.
 
