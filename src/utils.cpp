@@ -40,89 +40,58 @@ void fill_vec_val(vector<double>  &vec, double val) {
     vec[i] = val;
 }
 
-vector<string> get_ngrams(const CharacterVector terms,
-                          uint32_t ngram_min,
-                          uint32_t ngram_max,
-                          const string &ngram_delim,
-                          const RCPP_UNORDERED_SET< string > &stopwords) {
-  uint32_t original_len = terms.size();
+void generate_ngrams(CharacterVector terms_raw,
+                               const uint32_t ngram_min,
+                               const uint32_t ngram_max,
+                               RCPP_UNORDERED_SET<string> &stopwords,
+                               // pass buffer by reference to avoid memory allocation
+                               // on each iteration
+                               vector<string> &terms_filtered_buffer,
+                               vector<string> &ngrams,
+                               const string ngram_delim) {
+  // clear buffers from previous iteration
+  terms_filtered_buffer.clear();
+  ngrams.clear();
 
+  string term;
   // filter out stopwords
-  vector<string> terms_filtered;
-  terms_filtered.reserve(original_len);
-  string s;
-  for(auto it:terms) {
-    s = as<string>(it);
-    if( stopwords.find(s) == stopwords.end())
-      terms_filtered.push_back(s);
+  for (auto it: terms_raw) {
+    term = as<string>(it);
+    if(stopwords.find(term) == stopwords.end())
+      terms_filtered_buffer.push_back(term);
   }
 
-  //special case for unigram to speed up a little bit
-  if(ngram_min == 1 && ngram_max == 1) {
-    return(terms_filtered);
+  // special case for unigrams
+  if( ngram_min == ngram_max &&  ngram_max == 1 ) {
+    ngrams = terms_filtered_buffer;
+    return;
   }
 
-  uint32_t len = terms_filtered.size();
-  // calculate res size
-  size_t out_len = 0;
+  uint32_t len = terms_filtered_buffer.size();
 
-  uint32_t i1 = min(len, ngram_min);
-  uint32_t i2 = min(len, ngram_max);
-
-  for(size_t i = i1; i <= i2; i++)
-    out_len += (len - i) + 1;
-
-  vector< string> res;
-  res.reserve(out_len);
-
-  string k_gram, current_term;
-  size_t n, k;
+  string k_gram;
+  size_t k, j_max_observed;
   // iterates through input vector by window of size = n_max and build n-grams
   // for terms ["a", "b", "c", "d"] and n_min = 1, n_max = 2
   // will build 1:3-grams in following order
   //"a"     "a_b"   "a_b_c" "b"     "b_c"   "b_c_d" "c"     "c_d"   "d"
   for(size_t j = 0; j < len; j ++ ) {
-    n = 0;
-    k = 0;
-    while (n < ngram_max && (j + k) < len) {
-      current_term = terms_filtered[j + k];
+    k = 1;
+    j_max_observed = j;
+    while (k <= ngram_max && j_max_observed < len) {
 
-      if(stopwords.find(current_term) == stopwords.end()) {
-        if( n == 0) {
-          k_gram = current_term;
-        }
-        else
-          k_gram = k_gram + ngram_delim + current_term;
-        if(n >= ngram_min - 1) {
-          res.push_back(k_gram);
-        }
-        n++;
+      if( k == 1) {
+        k_gram = terms_filtered_buffer[j_max_observed];
+      } else
+        k_gram = k_gram + ngram_delim + terms_filtered_buffer[j_max_observed];
+
+      if(k >= ngram_min) {
+        ngrams.push_back(k_gram);
       }
-      k++;
+      j_max_observed = j + k;
+      k = k + 1;
     }
   }
-  return res;
-}
-
-//' @export
-//' @name ngrams
-//' @title Generates ngrams
-//' @description Generates ngrams character vector from tokens
-//' @param terms input tokens
-//' @param ngram_min min number of tokens in ngram
-//' @param ngram_max max number of tokens in ngram
-//' @param stopwords character vector of stopwords to filter them out
-//' @param sep string separator between tokems
-// [[Rcpp::export]]
-CharacterVector ngrams(const CharacterVector terms,
-                       uint32_t ngram_min,
-                       uint32_t ngram_max,
-                       const CharacterVector stopwords = CharacterVector(),
-                       const String sep = "_") {
-  RCPP_UNORDERED_SET<string> stopwords_set;
-  for(auto it:stopwords)
-    stopwords_set.insert(as<string>(it));
-  return wrap(get_ngrams(terms, ngram_min, ngram_max, sep, stopwords_set));
 }
 
 // // for unordered_map < <uint32_t, uint32_t>, T >
