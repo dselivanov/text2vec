@@ -22,7 +22,12 @@ void fill_vec_rand(vector<double>  &vec, double runif_min, double runif_max);
 
 void fill_vec_val(vector<double>  &vec, double val);
 
-vector<string> get_ngrams(const CharacterVector terms,
-                          uint32_t ngram_min,
-                          uint32_t ngram_max,
-                          const string &ngram_delim);
+void generate_ngrams(CharacterVector terms_raw,
+                     const uint32_t ngram_min,
+                     const uint32_t ngram_max,
+                     RCPP_UNORDERED_SET<string> &stopwords,
+                     // pass buffer by reference to avoid memory allocation
+                     // on each iteration
+                     vector<string> &terms_filtered_buffer,
+                     vector<string> &ngrams,
+                     const string ngram_delim);

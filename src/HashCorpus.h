@@ -92,8 +92,12 @@ public:
   }
 
   void insert_document(const CharacterVector doc) {
-    vector< string> ngrams = get_ngrams(doc, this->ngram_min, this->ngram_max, this->ngram_delim);
-    insert_terms(ngrams);
+    generate_ngrams(doc, this->ngram_min, this->ngram_max,
+                    this->stopwords,
+                    this->terms_filtered_buffer,
+                    this->ngrams_buffer,
+                    this->ngram_delim);
+    insert_terms(this->ngrams_buffer);
     this->dtm.increment_nrows();
     this->doc_count++;
   }

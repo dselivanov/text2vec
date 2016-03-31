@@ -4,8 +4,10 @@
 \name{text2vec}
 \alias{text2vec}
 \alias{text2vec-package}
-\title{The text2vec package.}
+\title{text2vec is a package that provides an efficient framework with a concise API
+for text analysis and natural language processing in R.}
 \description{
-The text2vec package.
+text2vec is a package that provides an efficient framework with a concise API
+for text analysis and natural language processing in R.
 }
 

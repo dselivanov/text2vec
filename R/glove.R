@@ -1,70 +1,69 @@
 #' @name glove
-#' @title Perform fit of the GloVe model.
-#' @description Train GloVe word embeddings model via fully asynchronous parallel AdaGrad.
-#' @param tcm object which represents Term-Coocurence matrix, which used in training.
-#' At the moment only \code{dgTMatrix} or (coercible to \code{dgTMatrix}) is supported.
-#' In future releases we will add support for out-of-core learning and streaming TCM from disk.
-#' @param vocabulary_size number of words in underlying Term-Coocurence matrix
+#' @title Fit a GloVe word-embedded model
+#' @description This function trains a GloVe word-embeddings model via fully
+#'   asynchronous and parallel AdaGrad.
+#' @param tcm an object which represents a term-co-occurrence matrix, which is
+#'   used in training. At the moment only \code{dgTMatrix} or objects coercible
+#'   to a \code{dgTMatrix}) are supported. In future releases we will add
+#'   support for out-of-core learning and streaming a TCM from disk.
+#' @param vocabulary_size number of words in in the term-co-occurrence matrix
 #' @param word_vectors_size desired dimenson for word vectors
-#' @param x_max maximum number of cooccurences to use in weighting function.
-#' See GloVe paper for details: \url{http://nlp.stanford.edu/pubs/glove.pdf}
+#' @param x_max maximum number of co-occurrences to use in the weighting
+#'   function. See the GloVe paper for details:
+#'   \url{http://nlp.stanford.edu/pubs/glove.pdf}.
 #' @param num_iters number of AdaGrad epochs
-#' @param shuffle_seed \code{logical} whether to perform shuffling before each SGD iteration.
-#' Generally this is good idea, but from my experience, in this particular case,
-#' it doesn't improve convergence. So, there is  no shuffling by default:
-#' \code{shuffle_seed = NA_integer_}. Please report, if you find that
-#' shuffling improves your score.
-#' @param learning_rate learning rate for SGD, I don't recommend to modify this parameter,
-#' AdaGrad will quickly adjust it to optimal.
-#' @param verbose whether to display training inforamtion
-#' @param convergence_threshold defines early stopping stratergy. We stop fitting when
-#' one of two following conditions will be satisfied:
-#' a)  spent all iterations
-#'
-#' or
-#'
-#' b) \code{cost_previous_iter} / \code{cost_current_iter} - 1 < convergence_threshold
-#' @param grain_size I don't recommend to adjust this paramenter. This is the grain_size
-#' for \code{RcppParallel::parallelReduce}.
-#' See \url{http://rcppcore.github.io/RcppParallel/#grain-size} for details.
-#' @param max_cost the maximum absolute value of calculated
-#' gradient for any single co-occurrence pair. Try to set to smaller vaue if you have
-#' problems with numerical stability.
-#' @param alpha alpha in weighting function formula :
-#' \eqn{f(x) = 1 if x > x_max; else (x/x_max)^alpha }
+#' @param shuffle_seed \code{integer} seed. Use \code{NA_integer_} to turn
+#'   shuffling off. A seed defines shuffling before each SGD iteration.
+#'   Generelly shuffling is a good idea for stochastic-gradient descent, but
+#'   from my experience in this particular case it does not improve convergence.
+#'   By default there is no shuffling. Please report if you find that shuffling
+#'   improves your score.
+#' @param learning_rate learning rate for SGD. I do not recommend that you
+#'   modify this parameter, since AdaGrad will quickly adjust it to optimal.
+#' @param verbose \code{logical} whether to display training inforamtion
+#' @param convergence_threshold defines early stopping strategy. We stop fitting
+#'   when one of two following conditions will be satisfied: (a) we have used
+#'   all iterations, or (b) \code{cost_previous_iter / cost_current_iter - 1 <
+#'   convergence_threshold}.
+#' @param grain_size I do not recommend adjusting this paramenter. This is the
+#'   grain_size for \code{RcppParallel::parallelReduce}. For details, see
+#'   \url{http://rcppcore.github.io/RcppParallel/#grain-size}.
+#' @param max_cost the maximum absolute value of calculated gradient for any
+#'   single co-occurrence pair. Try to set this to a smaller value if you have
+#'   problems with numerical stability.
+#' @param alpha the alpha in weighting function formula : \eqn{f(x) = 1 if x >
+#'   x_max; else (x/x_max)^alpha}
 #' @param ... arguments passed to other methods (not used at the moment).
-#' Generelly good idea for stochastic gradient descent
 #' @seealso \url{http://nlp.stanford.edu/projects/glove/}
 #' @export
 #' @examples
 #' \dontrun{
-#' text8 <- read_lines('./text8')
+#' library(readr)
+#' temp <- tempfile()
+#' download.file('http://mattmahoney.net/dc/text8.zip', temp)
+#' text8 <- read_lines(unz(temp, "text8"))
 #' it <- itoken(text8, preprocess_function = identity,
-#'              tokenizer = function(x) str_split(x, fixed(" ")))
+#'              tokenizer = function(x) strsplit(x, " ", TRUE))
 #' vocab <- vocabulary(it) %>%
 #'  prune_vocabulary(term_count_min = 5)
 #'
 #' it <- itoken(text8, preprocess_function = identity,
-#'              tokenizer = function(x) str_split(x, fixed(" ")))
+#'              tokenizer = function(x) strsplit(x, " ", TRUE))
 #'
-#' corpus <- create_vocab_corpus(iterator = it,
-#'                               vocabulary = vocab,
-#'                               grow_dtm = FALSE,
-#'                               skip_grams_window = 5)
-#' tcm <- get_tcm(corpus)
+#' tcm <- create_tcm(it, vocab_vectorizer(vocab, grow_dtm = FALSE, skip_grams_window = 5L))
 #'
-#' RcppParallel::setThreadOptions(numThreads = 8)
+#' # use the following command to manually set number of threads (if you want)
+#' # by default glove will use all available CPU cores
+#' # RcppParallel::setThreadOptions(numThreads = 8)
 #' fit <- glove(tcm = tcm, shuffle_seed = 1L, word_vectors_size = 50,
 #'               x_max = 10, learning_rate = 0.2,
 #'               num_iters = 50, grain_size = 1e5,
-#'               max_cost = 100, convergence_threshold = 0.01)
+#'               max_cost = 100, convergence_threshold = 0.005)
 #' word_vectors <- fit$word_vectors[[1]] + fit$word_vectors[[2]]
 #' rownames(word_vectors) <- rownames(tcm)
-#' qlst <- prepare_analogue_questions('./questions-words.txt', rownames(word_vectors))
-#' res <- check_analogue_accuracy(questions_lst = qlst, m_word_vectors = word_vectors)
+#' qlst <- prepare_analogy_questions('./questions-words.txt', rownames(word_vectors))
+#' res <- check_analogy_accuracy(questions_lst = qlst, m_word_vectors = word_vectors)
 #' }
-
-
 glove <- function(tcm,
                   vocabulary_size,
                   word_vectors_size,
@@ -81,7 +80,8 @@ glove <- function(tcm,
   UseMethod("glove")
 }
 
-#' @describeIn glove fits GloVe model on dgTMatrix - sparse Matrix in triplet form
+#' @describeIn glove fits GloVe model on a \code{dgTMatrix}, a sparse matrix in
+#'   triplet form
 #' @export
 glove.dgTMatrix <- function(tcm,
                             vocabulary_size = nrow(tcm),
@@ -155,7 +155,7 @@ glove.dgTMatrix <- function(tcm,
   glove
 }
 
-#' @describeIn glove fits GloVe model on Matrix input
+#' @describeIn glove Fits a GloVe model on a \code{Matrix} input
 #' @export
 glove.Matrix <- function(tcm,
                          ...) {
