@@ -150,7 +150,7 @@ ifiles <- function(file_paths, reader_function = readLines, ...) {
   n_files <- length(file_paths)
   nextEl <- function() {
     if (i <= n_files)
-        res <- reader_function(file_paths[[i]], ...)
+      res <- reader_function(file_paths[[i]], ...)
     else
       stop('StopIteration', call. = FALSE)
     i <<- i + 1
