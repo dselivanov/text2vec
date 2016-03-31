@@ -34,12 +34,12 @@ for (i in 1:N_FILES ) {
 str(movie_review, strict.width = 'cut')
 ```
 
-`text2vec` provides functions to **easily** work with files input.
+`text2vec` provides functions to **easily** work with files.
 
-You need to do only a few things: 
+User need to perform only a few things: 
 
 1. Construct iterator over the files with `ifiles` function.
-1. Provide reader function to `ifiles`. `text2vec` don't know anything about underlying files. They can be in plain text or some binary format.
+1. Provide reader function to `ifiles`. `text2vec` doesn't know anything about underlying files. They can be in plain text or some binary format.
 1. Construct tokens iterator from files iterator via `itoken` function.
 
 Lets see how it works:
@@ -62,7 +62,7 @@ it_tokens <- itoken(it_files, preprocess_function = tolower,
 vocab <- create_vocabulary(it_tokens)
 ```
 
-Now we will construct DTM in `lda_c` format (as required by `lda` package):
+Now are able to construct DTM in `lda_c` format (as required by `lda` package):
 ```{r}
 # need to reinitialise iterators!
 # they are mutable and already empty!
@@ -75,9 +75,9 @@ dtm <- create_dtm(it_tokens, vectorizer = vocab_vectorizer(vocab), type = 'lda_c
 str(dtm, list.len = 5)
 ```
 
-Note, that DTM has document ids. They are inhereted from document names we assigned in `reader` function. This is a convenient way to assign document ids when working with files.
+Note that DTM has document ids. They are inhereted from document names we assigned in `reader` function. This is a convenient way to assign document ids when working with files.
 
-Now we can easily fit `LDA` model using `lda::lda.collapsed.gibbs.sampler()` function:
+Now we can fit `LDA` model using `lda::lda.collapsed.gibbs.sampler()` function:
 ```{r, eval=FALSE}
 library(lda)
 # prior for topics
@@ -95,7 +95,7 @@ lda_fit <- lda.collapsed.gibbs.sampler(documents = dtm, K = 30,
 
 ## Parallel mode - using multiple cores
 
-`create_dtm`, `create_tcm`, `create_vocabulary` are albe to take advantage of multicore machines and do it in transparent manner. In contrast to GloVe fitting which uses low-level thread parallelism via `RcppParallel`, other functions use standart R high-level parallelism on top of `foreach` package. They are flexible and can use diffrent parallel backends - `doParallel`, `doRedis`, etc. But user should remember that such high-level parallelism **can** involve significant overhead.
+`create_dtm`, `create_tcm`, `create_vocabulary` are albe to take advantage of multicore machines and do it in transparent manner. In contrast to GloVe fitting which uses low-level thread parallelism via `RcppParallel`, these functions use standart R high-level parallelism on top of `foreach` package. They are flexible and can use diffrent parallel backends - `doParallel`, `doRedis`, etc. But user should remember that such high-level parallelism **can** involve significant overhead.
 
 Only two things user should perform manually to take advantage of multicore machine: 
 
