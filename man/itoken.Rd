@@ -39,16 +39,15 @@ be divided into.}
 incremental ids will be assigned.}
 
 \item{preprocess_function}{\code{function} which takes chunk of
-\code{character} vectors and does all pre-processing (including stemming if
-necessary). Usually \code{preprocess_function} should return a
+\code{character} vectors and does all pre-processing.
+Usually \code{preprocess_function} should return a
 \code{character} vector of preprocessed/cleaned documents. See "Details"
 section.}
 
 \item{tokenizer}{\code{function} which takes a \code{character} vector from
 \code{preprocess_function}, split it into tokens and returns a \code{list}
-of \code{character} vectors. Also you can perform tokenization in
-\code{preprocess_function} (actually you should do so when applying a
-stemming function) and then set \code{tokenizer = \link{identity}}.}
+of \code{character} vectors. If you need to perform stemming -
+call stemmer inside tokenizer. See examples section.}
 }
 \description{
 This function creates iterators over input objects to
@@ -75,6 +74,10 @@ txt <- movie_review$review[1:100]
 ids <- movie_review$id[1:100]
 it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
 it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
+# Example of stemming tokenizer
+# stem_tokenizer <- function(x) {
+#  word_tokenizer(x) \%>\% lapply(SnowballC::wordStem('en'))
+# }
 }
 \seealso{
 \link{ifiles}, \link{idir}, \link{ilines}, \link{create_vocabulary},
