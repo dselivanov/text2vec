@@ -28,7 +28,8 @@ Imports:
     foreach(>= 1.4.3),
     data.table(>= 1.9.6),
     stringr (>= 1.0.0),
-    magrittr (>= 1.5)
+    magrittr (>= 1.5),
+    RSpectra (>= 0.11)
 LinkingTo:
     Rcpp,
     RcppParallel,
