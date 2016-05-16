@@ -62,9 +62,7 @@ create_vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 
     # but we should keep same structure (keep in mind prune_vocabulary)
     vocab = data.table('terms' = setdiff(itoken_src, stopwords),
                        'terms_counts' = rep(NA_integer_, vocab_length),
-                       'doc_counts' = rep(NA_integer_, vocab_length),
-                       # 'doc_proportions' = rep(NA_real_, vocab_length),
-                       stringsAsFactors = FALSE
+                       'doc_counts' = rep(NA_integer_, vocab_length)
                        ),
     ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
     document_count = NA_integer_,
