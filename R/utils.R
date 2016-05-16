@@ -105,3 +105,15 @@ split_into <- function(vec, n) {
                         rep( (n2 + 1):n,  each = chunk_len))
   split(vec, split_factors)
 }
+
+coerce_matrix <- function(X, target_class = 'dgCMatrix', verbose = FALSE) {
+  dtm_class = class(X)
+  if (!inherits(X, target_class )) {
+    if (verbose)
+      message(paste0('coercing X from ', dtm_class, ' to ', target_class, '...'))
+    X <- try(as(X, target_class))
+    if (class(X) == 'try-error')
+      stop(paste("cannot coerce input to", target_class))
+  }
+  X
+}
