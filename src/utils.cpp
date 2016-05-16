@@ -72,7 +72,7 @@ void generate_ngrams(CharacterVector terms_raw,
   string k_gram;
   size_t k, j_max_observed;
   // iterates through input vector by window of size = n_max and build n-grams
-  // for terms ["a", "b", "c", "d"] and n_min = 1, n_max = 2
+  // for terms ["a", "b", "c", "d"] and n_min = 1, n_max = 3
   // will build 1:3-grams in following order
   //"a"     "a_b"   "a_b_c" "b"     "b_c"   "b_c_d" "c"     "c_d"   "d"
   for(size_t j = 0; j < len; j ++ ) {
