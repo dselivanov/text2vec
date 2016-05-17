@@ -1,6 +1,6 @@
 Package: text2vec
 Type: Package
-Version: 0.3.0
+Version: 0.4.0
 Date: 2016-03-31
 Title: Fast Text Mining Framework for Vectorization and Word Embeddings
 License: MIT + file LICENSE
