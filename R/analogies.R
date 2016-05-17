@@ -71,35 +71,33 @@ prepare_analogy_questions <- function(questions_file_path, vocab_terms, verbose 
 check_analogy_accuracy <- function(questions_list, m_word_vectors, verbose = TRUE) {
 
   m_word_vectors_norm <-  sqrt(rowSums(m_word_vectors ^ 2))
+  m_word_vectors_normalized = m_word_vectors / m_word_vectors_norm
 
   categories_number <- length(questions_list)
 
   res <- vector(mode = 'list', length = categories_number)
 
   for (i in 1:categories_number) {
-    q_mat <- questions_list[[i]]
-    q_number <- nrow(q_mat)
-    category <- names(questions_list)[[i]]
+    q_mat = questions_list[[i]]
+    q_number = nrow(q_mat)
+    category = names(questions_list)[[i]]
 
-    m_query <-
-      (m_word_vectors[q_mat[, 2], ] +
-         m_word_vectors[q_mat[, 3], ] -
-         m_word_vectors[q_mat[, 1], ])
-    query_norm <- m_query %>%
-      (function(x) x ^ 2) %>%
-      rowSums %>%
-      sqrt
+    m_query =
+      m_word_vectors[q_mat[, 2], ] +
+      m_word_vectors[q_mat[, 3], ] -
+      m_word_vectors[q_mat[, 1], ]
 
-    m_query / query_norm
+    m_query_norm = sqrt(rowSums(m_query ^ 2))
+    m_query_normalized = m_query / m_query_norm
 
-    cos_mat <- cosine(m_query , m_word_vectors, m_word_vectors_norm)
+    cos_mat = tcrossprod(m_query_normalized, m_word_vectors_normalized)
 
     for (j in 1:q_number)
       cos_mat[j, q_mat[j, c(1, 2, 3)]] <- -Inf
 
-    preds <- max.col(cos_mat)
-    act <- q_mat[, 4]
-    correct_number <- sum(preds == act)
+    preds = max.col(cos_mat, ties.method = 'first')
+    act = q_mat[, 4]
+    correct_number = sum(preds == act)
 
     if (verbose) {
       msg <- sprintf("%s - %s: correct %d out of %d, accuracy = %.4f",
@@ -111,14 +109,14 @@ check_analogy_accuracy <- function(questions_list, m_word_vectors, verbose = TRU
       message(msg)
     }
     res[[i]] <-
-      data.frame(
+      data.table(
         'predicted' = preds,
         'actual' = act,
-        'category' = category,
-        stringsAsFactors = FALSE
+        'category' = category
       )
   }
-  res <- do.call(rbind, res)
+  res <- rbindlist(res)
+  # res <- do.call(rbind, res)
 
   if (verbose) {
     msg <- sprintf("%s - OVERALL ACCURACY = %.4f", as.character(Sys.time()),
