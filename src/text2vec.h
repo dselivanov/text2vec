@@ -12,15 +12,15 @@ using namespace Rcpp;
 uint32_t fast_int_hash(uint32_t a);
 
 
-NumericMatrix convert2Rmat(vector<vector<double> > &mat, size_t ncol);
+NumericMatrix convert2Rmat(vector<vector<float> > &mat, size_t ncol);
 
-void fill_mat_val(vector<vector<double> > &mat, size_t ncol, double val);
+void fill_mat_val(vector<vector<float> > &mat, size_t ncol, float val);
 
-void fill_mat_rand(vector<vector<double> > &mat, size_t ncol, double runif_min, double runif_max);
+void fill_mat_rand(vector<vector<float> > &mat, size_t ncol, float runif_min, float runif_max);
 
-void fill_vec_rand(vector<double>  &vec, double runif_min, double runif_max);
+void fill_vec_rand(vector<float>  &vec, float runif_min, float runif_max);
 
-void fill_vec_val(vector<double>  &vec, double val);
+void fill_vec_val(vector<float>  &vec, float val);
 
 void generate_ngrams(CharacterVector terms_raw,
                      const uint32_t ngram_min,
