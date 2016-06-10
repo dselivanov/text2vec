@@ -24,40 +24,41 @@ split_vector <- function(vec, splits, granularity = 1) {
   mapply(FUN = function(lower, upper) list(c(lower, upper)), knots[-length(knots)], knots[-1] - 1)
 }
 
-# @name to_lda_c
-# @title Converts 'dgCMatrix' to 'lda_c' format
-# @description Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lda_c' format
-# @param dtm Document-Term matrix
-to_lda_c <- function(dtm) {
-  # probably receive dtm in dgTMatrix
-  if (!inherits(dtm, "dgCMatrix"))
-    dtm <- as( dtm, "dgCMatrix")
+#' @name as.lda_c
+#' @title Converts document-term matrix sparse matrix to 'lda_c' format
+#' @description Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lda_c' format
+#' @param X Document-Term matrix
+#' @export
+as.lda_c <- function(X) {
+  # recieved matrix in lda_c format, but without class attribute
+  if (class(X) == 'list' && all(vapply(X, function(x) is.matrix(x) && is.integer(x), FALSE)) ) {
+    return(X)
+  }
+
+  # receive dtm in dgTMatrix format
+  if (!inherits(X, "dgCMatrix"))
+    X <- as( X, "dgCMatrix")
 
   # convert to TDM dgCMatrix format
   # for simpler lda_c conversion below
-  dtm <- t(dtm)
+  X <- t(X)
 
   m_lda_c <-
     Map(f = function(i1, i2, ind, val) rbind(ind[i1:i2], as.integer(val[i1:i2])),
-        dtm@p[-length(dtm@p)] + 1L,
-        dtm@p[-1L],
-        MoreArgs = list(ind = dtm@i, val = dtm@x),
+        X@p[-length(X@p)] + 1L,
+        X@p[-1L],
+        MoreArgs = list(ind = X@i, val = X@x),
         USE.NAMES = F)
   # preserve names
-  # dtm now TDM (because of transpose above)
+  # X now TDM (because of transpose above)
   # so use colnames!
-  if ( length(colnames(dtm)) > 0 )
-    names(m_lda_c) <- colnames(dtm)
+  if ( length(colnames(X)) > 0 )
+    names(m_lda_c) <- colnames(X)
+  class(m_lda_c) <- 'lda_c'
   m_lda_c
 }
 
-coerce_dgTMatrix <- function(dtm, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
-  switch(type,
-         dgTMatrix = dtm,
-         dgCMatrix = as(dtm, "dgCMatrix"),
-         lda_c = to_lda_c(dtm),
-         NULL)
-}
+to_lda_c <- as.lda_c
 
 rbind_dgTMatrix <- function(...) {
   res <- new('dgTMatrix')
@@ -106,14 +107,22 @@ split_into <- function(vec, n) {
   split(vec, split_factors)
 }
 
-coerce_matrix <- function(X, target_class = 'dgCMatrix', verbose = FALSE) {
-  dtm_class = class(X)
-  if (!inherits(X, target_class )) {
+coerce_matrix <- function(X, target_class = c("dgCMatrix", "dgTMatrix", "lda_c"), verbose = FALSE) {
+  target_class = match.arg(target_class)
+  X_class = class(X)
+  if (X_class != target_class ) {
     if (verbose)
-      message(paste0('coercing X from ', dtm_class, ' to ', target_class, '...'))
-    X <- try(as(X, target_class))
+      message(paste0('coercing X from ', X_class, ' to ', target_class, '...'))
+    if (target_class != 'lda_c')
+      X <- try(as(X, target_class))
+    else
+      X <- try(as.lda_c(X))
     if (class(X) == 'try-error')
       stop(paste("cannot coerce input to", target_class))
   }
   X
+}
+
+coerce_dgTMatrix <- function(X, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
+  coerce_matrix(X, type)
 }
