@@ -1,4 +1,6 @@
 #include <Rcpp.h>
+#include <stdio.h>
+#include <time.h>
 #include <string>
 #include <vector>
 #include <functional>
@@ -31,3 +33,4 @@ void generate_ngrams(CharacterVector terms_raw,
                      vector<string> &terms_filtered_buffer,
                      vector<string> &ngrams,
                      const string ngram_delim);
+const std::string currentDateTime();
