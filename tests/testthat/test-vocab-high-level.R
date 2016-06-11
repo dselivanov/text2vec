@@ -1,4 +1,4 @@
-context("vocabulary-corpus construction")
+context("vocabulary-corpus parallel")
 
 get_test_iterator <- function(txt)
   itoken(txt,
