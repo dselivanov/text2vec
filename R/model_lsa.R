@@ -1,9 +1,9 @@
-#' @name lsa
+#' @name LSA
 #' @title Creates LSA model
 #' @description This function creates LSA(Latent semantic analysis) model.
 #' See \url{https://en.wikipedia.org/wiki/Latent_semantic_analysis} for details.
 #' Model can be fitted with \link{fit}, \link{fit_transform} methods.
-#' @param n_factors number of latent factors
+#' @param n_topics number of latent factors
 #' (number of singular values in underlying SVD decomposition).
 #' @param verbose \code{logical} print status messages
 #' @examples
@@ -11,15 +11,15 @@
 #' N = 100
 #' tokens <- movie_review$review[1:N] %>% tolower %>% word_tokenizer
 #' dtm <- create_dtm(itoken(tokens), hash_vectorizer())
-#' n_factors = 10
-#' fitted_model_1 = lsa(n_factors) %>% fit(dtm)
-#' lsa_model_2 = lsa(n_factors)
+#' n_topics = 10
+#' fitted_model_1 = LSA(n_topics) %>% fit(dtm)
+#' lsa_model_2 = LSA(n_topics)
 #'
 #' all.equal(fit_transform(lsa_model_2, dtm), transform(fitted_model_1, dtm))
 #' @export
-lsa <- function(n_factors, verbose = FALSE) {
+LSA <- function(n_topics, verbose = FALSE) {
   # check input
-  stopifnot( n_factors > 0 || length(n_factors) != 1)
+  stopifnot( n_topics > 0 || length(n_topics) != 1)
 
   # internal parameters and helpers
   .internal_matrix_format = 'dgCMatrix'
@@ -37,7 +37,7 @@ lsa <- function(n_factors, verbose = FALSE) {
   # main methods
   fit <- function(dtm) {
     dtm = coerce_matrix(dtm, .internal_matrix_format, verbose = verbose)
-    svd_fit = RSpectra::svds(dtm, k = n_factors, nv = n_factors, nu = 0)
+    svd_fit = RSpectra::svds(dtm, k = n_topics, nv = n_topics, nu = 0)
     internal_lsa_factors <- svd_fit$v
     .singular_values <<- svd_fit$d
     rm(svd_fit)
@@ -51,7 +51,7 @@ lsa <- function(n_factors, verbose = FALSE) {
 
   fit_transform <- function(dtm) {
     dtm = coerce_matrix(dtm, .internal_matrix_format, verbose = verbose)
-    svd_fit = RSpectra::svds(dtm, k = n_factors, nv = n_factors, nu = n_factors)
+    svd_fit = RSpectra::svds(dtm, k = n_topics, nv = n_topics, nu = n_topics)
     # save parameters
     .singular_values <<- svd_fit$d
     internal_lsa_factors <- svd_fit$v

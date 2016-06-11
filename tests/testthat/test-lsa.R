@@ -1,6 +1,6 @@
 context("lsa model")
 N = 100
-n_factors = 100
+n_topics = 100
 train_ind <- 1:N
 
 txt = movie_review[['review']][train_ind] %>% tolower %>% word_tokenizer
@@ -13,7 +13,7 @@ dtm <- create_dtm(itoken(txt, ids = ids), vocab_vectorizer(vocab))
 
 test_that("LSA", {
 
-  model = lsa(n_factors)
+  model = LSA(n_topics)
   # suppressWarnings because we perform full rank SVD and Rspectra produce warning
   suppressWarnings(fitted_model <- fit(model, dtm))
   documents = transform(fitted_model, X = dtm)
@@ -21,7 +21,7 @@ test_that("LSA", {
 
   # check fit_transform & (fit(); transform()) give similar results
   # suppressWarnings because we perform full rank SVD and Rspectra produce warning
-  suppressWarnings(documents_2 <- fit_transform(lsa(n_factors), X = dtm))
+  suppressWarnings(documents_2 <- fit_transform(LSA(n_topics), X = dtm))
   expect_equal(documents, documents_2)
 
 
