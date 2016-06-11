@@ -77,20 +77,25 @@ struct AdaGradIter : public Worker {
 
 class GloveFitter {
 public:
-  GloveFitter(size_t vocab_size,
-            size_t word_vec_size,
-            uint32_t x_max,
-            float learning_rate,
-            uint32_t grain_size,
-            float max_cost,
-            float alpha):
-  GRAIN_SIZE(grain_size),
-  gloveFit(vocab_size,  word_vec_size, learning_rate, x_max, max_cost, alpha),
-  adaGradIter(gloveFit) {}
-
-  void set_cost_zero() {adaGradIter.set_cost_zero();};
-
-  double fit_chunk(const IntegerVector x_irow,
+  //------------------------------------------------
+  GloveFitter(List params):
+    GRAIN_SIZE(as<uint32_t>(params["grain_size"])),
+    gloveFit(as<size_t>(params["vocab_size"]),
+             as<size_t>(params["word_vec_size"]),
+             as<float>(params["learning_rate"]),
+             as<uint32_t>(params["x_max"]),
+             as<float>(params["max_cost"]),
+             as<float>(params["alpha"]),
+             as<float>(params["lambda"])),
+    adaGradIter(gloveFit) {}
+  //------------------------------------------------
+  void set_cost_zero() {
+    adaGradIter.set_cost_zero();
+  }
+  float get_word_vectors_sparsity_ratio() {
+    return adaGradIter.fit.get_word_vectors_sparsity_ratio();
+  }
+  double partial_fit(const IntegerVector x_irow,
                    const IntegerVector  x_icol,
                    const NumericVector x_val,
                    const IntegerVector iter_order) {
@@ -99,8 +104,9 @@ public:
     return (this->adaGradIter.global_cost);
   }
 
-  List get_word_vectors() {
-    return List::create(_["word_vectors"] = adaGradIter.fit.get_word_vectors());
+  NumericMatrix get_word_vectors() {
+  // List get_word_vectors() {
+    return adaGradIter.fit.get_word_vectors();
   }
 
 private:
@@ -111,10 +117,10 @@ private:
 
 RCPP_MODULE(GloveFitter) {
   class_< GloveFitter >( "GloveFitter" )
-  //<vocab_size, word_vec_size, x_max, learning_rate, grain_size, max_cost, alpha>
-  .constructor<size_t, size_t, uint32_t, float, uint32_t, float, float>()
+  .constructor<List>()
   .method( "get_word_vectors", &GloveFitter::get_word_vectors, "returns word vectors")
   .method( "set_cost_zero", &GloveFitter::set_cost_zero, "sets cost to zero")
-  .method( "fit_chunk", &GloveFitter::fit_chunk, "process TCM data chunk")
+  .method( "partial_fit", &GloveFitter::partial_fit, "process TCM data chunk")
+  .method( "get_sparsity_level", &GloveFitter::get_word_vectors_sparsity_ratio, "return current sparsity level")
   ;
 }
