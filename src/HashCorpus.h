@@ -108,12 +108,12 @@ public:
   }
   // get term cooccurence matrix
   SEXP get_tcm() {
-    vector< string> dummy_dimnames(0);
+    CharacterVector dummy_dimnames(0);
     return tcm.get_sparse_triplet_matrix(dummy_dimnames, dummy_dimnames);
   }
 
   SEXP get_dtm_triplet() {
-    vector< string> dummy_names(0);
+    CharacterVector dummy_names(0);
     return dtm.get_sparse_triplet_matrix(dummy_names, dummy_names);
   };
 
