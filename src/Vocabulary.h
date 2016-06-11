@@ -104,7 +104,9 @@ public:
     IntegerVector doc_counts(N);
     NumericVector doc_prop(N);
     for(auto it:vocab) {
-      terms[i] = it.first;
+      // use this intead of simple terms[i] = it.first to preserve encoding
+      // see #101 for details
+      terms[i] = Rf_mkCharLenCE( it.first.c_str(), it.first.size(), CE_UTF8);
       term_counts[i] = vocab_statistics[it.second].term_global_count;
       doc_counts[i] = vocab_statistics[it.second].document_term_count;
       i++;
