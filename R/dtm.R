@@ -123,7 +123,7 @@ create_dtm.list <- function(itoken_src, vectorizer,
     f <- switch(type,
                 dgCMatrix = rbind,
                 dgTMatrix = rbind_dgTMatrix,
-                lda_c = c)
+                lda_c = function(...) {x <- c(...); class(x) <- 'lda_c'; x})
     if (verbose)
       print(paste(Sys.time(), "got results from workers, call combine ..."))
     f(...)
