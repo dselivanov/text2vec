@@ -2,7 +2,7 @@
 #' @title Creates LSA model
 #' @description This function creates LSA(Latent semantic analysis) model.
 #' See \url{https://en.wikipedia.org/wiki/Latent_semantic_analysis} for details.
-#' Model can be fitted with \link{fit}, \link{fit_transform} methods.
+#' Model can be fitted with \link{fit}, \link{fit_predict} methods.
 #' @param n_topics number of latent factors
 #' (number of singular values in underlying SVD decomposition).
 #' @param verbose \code{logical} print status messages
@@ -15,7 +15,7 @@
 #' fitted_model_1 = LSA(n_topics) %>% fit(dtm)
 #' lsa_model_2 = LSA(n_topics)
 #'
-#' all.equal(fit_transform(lsa_model_2, dtm), transform(fitted_model_1, dtm))
+#' all.equal(fit_predict(lsa_model_2, dtm), predict(fitted_model_1, dtm))
 #' @export
 LSA <- function(n_topics, verbose = FALSE) {
   # check input
@@ -49,7 +49,7 @@ LSA <- function(n_topics, verbose = FALSE) {
     invisible(self())
   }
 
-  fit_transform <- function(dtm) {
+  fit_predict <- function(dtm) {
     dtm = coerce_matrix(dtm, .internal_matrix_format, verbose = verbose)
     svd_fit = RSpectra::svds(dtm, k = n_topics, nv = n_topics, nu = n_topics)
     # save parameters
@@ -64,7 +64,7 @@ LSA <- function(n_topics, verbose = FALSE) {
     documents
   }
 
-  transform <- function(dtm) {
+  predict <- function(dtm) {
     if (.fitted)
       as.matrix(dtm %*% .lsa_factors)
     else
@@ -73,8 +73,8 @@ LSA <- function(n_topics, verbose = FALSE) {
 
   self <- function() {
     model = list(fit = fit,
-                 fit_transform = fit_transform,
-                 transform = transform,
+                 fit_predict = fit_predict,
+                 predict = predict,
                  get_params = get_params)
     class(model) <- c('text2vec_model', 'LSA')
     model

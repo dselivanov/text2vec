@@ -56,6 +56,8 @@ grain_size for \code{RcppParallel::parallelReduce}. For details, see
 \item{tcm}{an object which represents a term-co-occurrence matrix, which is
 used in training. Preferably \code{dgTMatrix}.}
 
+\item{num_iters}{number of iterations}
+
 \item{verbose}{\code{logical} whether to display training inforamtion}
 
 \item{convergence_tol}{defines early stopping strategy. We stop fitting
@@ -69,7 +71,7 @@ to \code{word_vec_history} attribute.}
 \description{
 \bold{Iterative algorithm}. This function creates a GloVe word-embeddings model.
 It can be trained via fully can asynchronous and parallel
-AdaGrad with \code{fit_transform} function.
+AdaGrad with \code{fit_predict} function.
 }
 \examples{
 \dontrun{
@@ -91,9 +93,9 @@ glove_model <- GloVe(word_vectors_size = 50,
 # fit model
 fitted_model = fit(glove_model, tcm, n_iter = 10, convergence_tol = 0.01, verbose = TRUE)
 # get word vectors
-wv = transform(fitted_model)
+wv = predict(fitted_model)
 # or fit model and get word vectors with single call
-wv = fit_transform(glove_model, tcm, n_iter = 10)
+wv = fit_predict(glove_model, tcm, n_iter = 10)
 }
 }
 \seealso{

@@ -15,7 +15,7 @@ LSA(n_topics, verbose = FALSE)
 \description{
 This function creates LSA(Latent semantic analysis) model.
 See \url{https://en.wikipedia.org/wiki/Latent_semantic_analysis} for details.
-Model can be fitted with \link{fit}, \link{fit_transform} methods.
+Model can be fitted with \link{fit}, \link{fit_predict} methods.
 }
 \examples{
 data("movie_review")
@@ -26,6 +26,6 @@ n_topics = 10
 fitted_model_1 = LSA(n_topics) \%>\% fit(dtm)
 lsa_model_2 = LSA(n_topics)
 
-all.equal(fit_transform(lsa_model_2, dtm), transform(fitted_model_1, dtm))
+all.equal(fit_predict(lsa_model_2, dtm), predict(fitted_model_1, dtm))
 }
 

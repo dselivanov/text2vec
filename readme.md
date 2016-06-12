@@ -20,7 +20,10 @@ See also the [text2vec articles](http://dsnotes.com/tags/text2vec/) on my blog.
 The core functionality at the moment includes
 
 1. Fast text vectorization on arbitrary n-grams, using vocabulary or feature hashing.
-2. State-of-the-art [GloVe](http://www-nlp.stanford.edu/projects/glove/) word embeddings.
+2. [GloVe](http://www-nlp.stanford.edu/projects/glove/) word embeddings.
+3. Topic modeling with:
+  - Latent Dirichlet Allocation
+  - Latent Sematic Analysis
 
 The core of this package is carefully written in C++, which means text2vec is fast and memory friendly. Some parts (GloVe training) are fully parallelized using the excellent [RcppParallel](http://rcppcore.github.io/RcppParallel/) package. This means that parallel processing works on OS X, Linux, Windows and Solaris (x86) without any additional hacking or tricks. In addition, there is a higher-level parallelization for text vectorization and vocabulary construction on top of the [foreach](https://cran.r-project.org/package=foreach) package, and text2vec has a streaming API so that users don't have to load all of the data into RAM.
 

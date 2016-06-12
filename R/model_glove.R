@@ -2,7 +2,7 @@
 #' @title Creates GloVe word-embeddings model.
 #' @description \bold{Iterative algorithm}. This function creates a GloVe word-embeddings model.
 #' It can be trained via fully can asynchronous and parallel
-#' AdaGrad with \code{fit_transform} function.
+#' AdaGrad with \code{fit_predict} function.
 #' @param word_vectors_size desired dimenson for word vectors
 #' @param vocabulary \code{character} vector or instanceof
 #' \code{text2vec_vocabulary} class. Each word should correspond to dimension
@@ -57,9 +57,9 @@
 #' # fit model
 #' fitted_model = fit(glove_model, tcm, n_iter = 10, convergence_tol = 0.01, verbose = TRUE)
 #' # get word vectors
-#' wv = transform(fitted_model)
+#' wv = predict(fitted_model)
 #' # or fit model and get word vectors with single call
-#' wv = fit_transform(glove_model, tcm, n_iter = 10)
+#' wv = fit_predict(glove_model, tcm, n_iter = 10)
 #' }
 #' @export
 GloVe <- function(word_vectors_size,
@@ -100,15 +100,10 @@ GloVe <- function(word_vectors_size,
   if ( .flag_do_shuffle  )
     set.seed(shuffle_seed)
   #--------------------------------------------------------
-  # internal debug methods
-#   get_params <- function() {
-#     list(param_1 = .param_1, param_2 = .param_2, fitted = .fitted)
-#   }
-  #--------------------------------------------------------
   # main methods
 
-  # fit_transform method will work only with sparse matrices coercible to "dgTMatrix"
-  fit_transform <- function(X, n_iter, convergence_tol = -1,
+  # fit_predict method will work only with sparse matrices coercible to "dgTMatrix"
+  fit_predict <- function(X, n_iter, convergence_tol = -1,
                             verbose = interactive(), dump_every_n = 0L, ...) {
     # convert to internal native format
     stopifnot(inherits(X, 'Matrix'))
@@ -173,7 +168,7 @@ GloVe <- function(word_vectors_size,
       i <- i + 1
     }
     .fitted <<- TRUE
-    transform()
+    predict()
   }
 
   partial_fit <- function(X, ...) {
@@ -190,7 +185,7 @@ GloVe <- function(word_vectors_size,
     cost
   }
 
-  transform <- function(...) {
+  predict <- function(...) {
     if (.fitted) {
       res <- .glove_fitter$get_word_vectors()
       if ( inherits(res, 'matrix') )
@@ -204,10 +199,9 @@ GloVe <- function(word_vectors_size,
   }
 
   self <- function() {
-    model = list(fit_transform = fit_transform,
+    model = list(fit_predict = fit_predict,
                  partial_fit = partial_fit,
-                 transform = transform,
-                 get_params = get_params)
+                 predict = predict)
     class(model) <- c('text2vec_model', 'GloVe')
     model
   }
@@ -217,6 +211,7 @@ GloVe <- function(word_vectors_size,
 #' @rdname GloVe
 #' @param tcm an object which represents a term-co-occurrence matrix, which is
 #'   used in training. Preferably \code{dgTMatrix}.
+#' @param num_iters number of iterations
 #' @param dump_every_n \code{integer} - dump word vectors each \code{dump_every_n} epoch
 #' to \code{word_vec_history} attribute.
 #' @export
@@ -251,7 +246,7 @@ glove <- function(tcm,
                        grain_size =  1e5L,
                        ...)
 
-  fit_transform(glove_model, tcm, n_iter = num_iters,
+  fit_predict(glove_model, tcm, n_iter = num_iters,
                 convergence_tol = convergence_tol,
                 verbose = verbose, dump_every_n = dump_every_n)
 }
