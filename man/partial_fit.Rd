@@ -5,12 +5,12 @@
 \alias{partial_fit.text2vec_model}
 \title{Fit model to chunk of data}
 \usage{
-partial_fit(model, X, ...)
+partial_fit(object, X, ...)
 
-\method{partial_fit}{text2vec_model}(model, X, ...)
+\method{partial_fit}{text2vec_model}(object, X, ...)
 }
 \arguments{
-\item{model}{instance of class \code{text2vec_model}.}
+\item{object}{instance of class \code{text2vec_model}.}
 
 \item{X}{matrix like object. At the moment usually one of
 \code{c("matrix", "dgCMatrix", "dgTMatrix", "lda_c")}}

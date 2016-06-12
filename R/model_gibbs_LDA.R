@@ -10,12 +10,12 @@
 #                             check_convergence_every_n = 5, verbose = T)
 #
 #
-# res = fit_transform(lda_model, dtm, n_iter = 40)
-# preds = transform(lda_model, dtm, verbose = T)
+# res = fit_predict(lda_model, dtm, n_iter = 40)
+# preds = predict(lda_model, dtm, verbose = T)
 #' @name LDA
 #' @title Creates Latent Dirichlet Allocation model.
 #' @description \bold{Iterative algorithm}. Model can be fitted
-#' via Collapsed Gibbs Sampling algorithm using \code{fit} or \code{fit_transform} methods.
+#' via Collapsed Gibbs Sampling algorithm using \code{fit} or \code{fit_predict} methods.
 #' @param n_topics desired number of topics. Also knows as \bold{K}.
 #' @param vocabulary vocabulary in a form of \code{character} vector or class of
 #' \code{text2vec_vocab}
@@ -24,13 +24,6 @@
 #' @param topic_word_prior prior for topic-word multinomial distribution.
 #' Also knows as \bold{eta}.
 #' @param ... arguments passed to other methods (not used at the moment).
-#' @details model implements methods with signatures:
-#' \describe{
-#'  \item{fit}{\code{fit(X, n_iter, convergence_tol = -1, check_convergence_every_n = 0, initial = list(), verbose = interactive(), ...)}}
-#'  \item{fit_transform}{\code{fit_transform(X, n_iter, convergence_tol = -1, verbose = interactive(), dump_every_n = 0L, ...)}}
-#'  \item{partial_fit}{\code{partial_fit(X, ...)}}
-#'  \item{transform}{\code{transform(...)}}
-#' }
 #' @export
 LDA <- function(n_topics,
                 vocabulary,
@@ -85,7 +78,7 @@ LDA <- function(n_topics,
     invisible(self())
   }
 
-  fit_transform <- function(X, n_iter, convergence_tol = -1, verbose = interactive(),
+  fit_predict <- function(X, n_iter, convergence_tol = -1, verbose = interactive(),
                             initial = list(), check_convergence_every_n = 0, ...) {
     X = coerce_matrix(X, .internal_matrix_format, verbose = verbose)
     fit(X, n_iter, convergence_tol, verbose, initial, check_convergence_every_n, ...)
@@ -97,7 +90,7 @@ LDA <- function(n_topics,
     res
   }
 
-  transform <- function(X, n_iter = 100,
+  predict <- function(X, n_iter = 100,
                         convergence_tol = 0.005,
                         check_convergence_every_n = 1,
                         verbose = FALSE) {
@@ -109,7 +102,7 @@ LDA <- function(n_topics,
                                              n_iter = n_iter,
                                              alpha = .doc_topic_prior,
                                              eta = .topic_word_prior,
-                                             initial_ = .lda_fitted,
+                                             initial = .lda_fitted,
                                              convergence_tol = convergence_tol,
                                              check_convergence_every_n = check_convergence_every_n,
                                              trace = verbose,
@@ -125,8 +118,8 @@ LDA <- function(n_topics,
 
   self <- function() {
     model = list(fit = fit,
-                 fit_transform = fit_transform,
-                 transform = transform,
+                 fit_predict = fit_predict,
+                 predict = predict,
                  get_params = get_params)
     class(model) <- c('text2vec_model', 'LDA_gibbs')
     model

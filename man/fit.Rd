@@ -3,14 +3,14 @@
 \name{fit}
 \alias{fit}
 \alias{fit.text2vec_model}
-\title{fit model}
+\title{fit modelpredict}
 \usage{
-fit(model, X, ...)
+fit(object, X, ...)
 
-\method{fit}{text2vec_model}(model, X, ...)
+\method{fit}{text2vec_model}(object, X, ...)
 }
 \arguments{
-\item{model}{instance of class \code{text2vec_model}. See \link{lsa}.}
+\item{object}{instance of class \code{text2vec_model}. See \link{LSA}.}
 
 \item{X}{matrix like object. At the moment usually one of
 \code{c("matrix", "dgCMatrix", "dgTMatrix", "lda_c")}}
@@ -18,8 +18,8 @@ fit(model, X, ...)
 \item{...}{arguments to underlying functions. Currently not used.}
 }
 \value{
-fitted model of class \code{text2vec_model}, which can be used for predictions
-via \link{transform.text2vec_model} S3 method.
+fitted object of class \code{text2vec_model}, which can be used for predictions
+via \link{predict.text2vec_model} S3 method.
 }
 \description{
 This is generic function to fit text2vec models (class = "text2vec_model")
@@ -30,7 +30,7 @@ N = 100
 tokens <- movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
 dtm <- create_dtm(itoken(tokens), hash_vectorizer())
 n_factors = 10
-fitted_model = lsa(n_factors) \%>\% fit(dtm)
-document_vectors = transform(fitted_model, dtm)
+fitted_model = LSA(n_factors) \%>\% fit(dtm)
+document_vectors = predict(fitted_model, dtm)
 }
 

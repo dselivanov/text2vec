@@ -16,12 +16,12 @@ test_that("LSA", {
   model = LSA(n_topics)
   # suppressWarnings because we perform full rank SVD and Rspectra produce warning
   suppressWarnings(fitted_model <- fit(model, dtm))
-  documents = transform(fitted_model, X = dtm)
+  documents = predict(fitted_model, X = dtm)
   expect_equal(rownames(documents), ids)
 
   # check fit_transform & (fit(); transform()) give similar results
   # suppressWarnings because we perform full rank SVD and Rspectra produce warning
-  suppressWarnings(documents_2 <- fit_transform(LSA(n_topics), X = dtm))
+  suppressWarnings(documents_2 <- fit_predict(LSA(n_topics), X = dtm))
   expect_equal(documents, documents_2)
 
 

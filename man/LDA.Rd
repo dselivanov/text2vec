@@ -23,15 +23,6 @@ Also knows as \bold{eta}.}
 }
 \description{
 \bold{Iterative algorithm}. Model can be fitted
-via Collapsed Gibbs Sampling algorithm using \code{fit} or \code{fit_transform} methods.
-}
-\details{
-model implements methods with signatures:
-\describe{
- \item{fit}{\code{fit(X, n_iter, convergence_tol = -1, check_convergence_every_n = 0, initial = list(), verbose = interactive(), ...)}}
- \item{fit_transform}{\code{fit_transform(X, n_iter, convergence_tol = -1, verbose = interactive(), dump_every_n = 0L, ...)}}
- \item{partial_fit}{\code{partial_fit(X, ...)}}
- \item{transform}{\code{transform(...)}}
-}
+via Collapsed Gibbs Sampling algorithm using \code{fit} or \code{fit_predict} methods.
 }
 
