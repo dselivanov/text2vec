@@ -8,7 +8,7 @@
 \method{predict}{text2vec_model}(object, X, ...)
 }
 \arguments{
-\item{object}{instance of class \code{text2vec_model}. See \link{LSA}.}
+\item{object}{instance of class \code{text2vec_model}.}
 
 \item{X}{matrix like object. At the moment usually one of
 \code{c("matrix", "dgCMatrix", "dgTMatrix", "lda_c")}}
