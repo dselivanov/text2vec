@@ -10,7 +10,8 @@ create_tcm(itoken_src, vectorizer, ...)
 
 \method{create_tcm}{itoken}(itoken_src, vectorizer, ...)
 
-\method{create_tcm}{list}(itoken_src, vectorizer, verbose = FALSE, ...)
+\method{create_tcm}{list}(itoken_src, vectorizer, verbose = FALSE,
+  work_dir = tempdir(), ...)
 }
 \arguments{
 \item{itoken_src}{\code{list} of iterators over tokens from \link{itoken}.
@@ -24,6 +25,8 @@ strings.}
 \code{itoken_src}.}
 
 \item{verbose}{\code{logical} print status messages}
+
+\item{work_dir}{working directory for intermediate results}
 }
 \value{
 \code{dgCMatrix} TCM matrix

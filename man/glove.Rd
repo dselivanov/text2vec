@@ -85,17 +85,13 @@ vocab <- create_vocabulary(it) \%>\%
 it <- itoken(text8)
 tcm <- create_tcm(it, vocab_vectorizer(vocab, grow_dtm = FALSE, skip_grams_window = 5L))
 
-glove_model <- GloVe(word_vectors_size = 50,
- vocabulary = vocab,
- x_max = 10,
- learning_rate = 0.25)
-
-# fit model
-fitted_model = fit(glove_model, tcm, n_iter = 10, convergence_tol = 0.01, verbose = TRUE)
-# get word vectors
-wv = predict(fitted_model)
-# or fit model and get word vectors with single call
+glove_model <- GloVe(word_vectors_size = 50, vocabulary = vocab,
+ x_max = 10, learning_rate = 0.25)
+# fit model and get word vectors
 wv = fit_predict(glove_model, tcm, n_iter = 10)
+# glove_model is mutable object! (actually it is a closure)
+wv2 = predict(glove_model)
+identical(wv, wv2)
 }
 }
 \seealso{

@@ -95,38 +95,49 @@ create_tcm.itoken <- function(itoken_src, vectorizer, ...) {
 
 #' @rdname create_tcm
 #' @param verbose \code{logical} print status messages
+#' @param work_dir working directory for intermediate results
 #' @export
-create_tcm.list <- function(itoken_src, vectorizer, verbose = FALSE, ...) {
-
-  foreach(it = itoken_src,
-          .combine = function(...) triplet_sum(..., verbose = verbose),
-          .inorder = F,
-          .multicombine = T,
-          # user already made split for jobs
-          # preschedule = FALSE is much more memory efficient
-          .options.multicore = list(preschedule = FALSE),
-          ...) %dopar%
-          {
-            create_tcm(it, vectorizer, ...)
-          }
-}
-
-triplet_sum <- function(..., verbose = FALSE) {
+create_tcm.list <- function(itoken_src, vectorizer, verbose = FALSE, work_dir = tempdir(), ...) {
+  jobs = Map(function(job_id, it) list(job_id = job_id, it = it), seq_along(itoken_src), itoken_src)
+  tcm_files =
+    foreach(it = jobs,
+            .combine = c,
+            #.combine = function(...) triplet_sum(..., verbose = verbose),
+            .inorder = F,
+            .multicombine = T,
+            # user already made split for jobs
+            # preschedule = FALSE is much more memory efficient
+            .options.multicore = list(preschedule = FALSE),
+            ...) %dopar%
+            {
+              tcm = create_tcm(it$it, vectorizer, ...)
+              file_to_save = tempfile(pattern = paste0("tcm_map_part_", it$job_id, "_"), tmpdir = work_dir, fileext = '.rds')
+              saveRDS(tcm, file_to_save, compress = F)
+              file_to_save
+            }
   if (verbose)
-    print(paste(Sys.time(), "got results from workers, call combine ..."))
-
-  lst <- list(...)
-
-  if (any(vapply(lst, is.null, FALSE)))
-    stop('Got NULL from one of the jobs.
-          Probably result size >= 2gb and package "parallel" can\'t collect results.
-          Try to split input into more chunks (so result on each chunk must be < 2gb)')
-
-  res <- uniqTsparse(Reduce(`+`, lst))
-  # assume all matrices have same dimnames
-  res@Dimnames <- lst[[1]]@Dimnames
-  res
+    message(paste(Sys.time(), "map phase finished, starting reduce"))
+  res_file = mc_triplet_rds_sum(tcm_files, work_dir, verbose = verbose)
+  res = readRDS(res_file); unlink(res_file)
+  as(res, 'dgTMatrix')
 }
+
+# triplet_sum <- function(..., verbose = FALSE) {
+#   if (verbose)
+#     print(paste(Sys.time(), "got results from workers, call combine ..."))
+#
+#   lst <- list(...)
+#
+#   if (any(vapply(lst, is.null, FALSE)))
+#     stop('Got NULL from one of the jobs.
+#           Probably result size >= 2gb and package "parallel" can\'t collect results.
+#           Try to split input into more chunks (so result on each chunk must be < 2gb)')
+#
+#   res <- uniqTsparse(Reduce(`+`, lst))
+#   # assume all matrices have same dimnames
+#   res@Dimnames <- lst[[1]]@Dimnames
+#   res
+# }
 
 # multicore combine
 mc_reduce <- function(X, FUN,  ...) {
@@ -150,10 +161,36 @@ mc_reduce <- function(X, FUN,  ...) {
   else
     X[[1]]
 }
-# multicore version of triplet_sum
-mc_triplet_sum <- function(...) {
-  mc_reduce(list(...),
-            FUN = function(a, b) uniqTsparse(a + b),
+
+mc_triplet_rds_sum <- function(fls, work_dir, verbose) {
+  sum_m = function(a, b) {
+    m1 = readRDS(a); unlink(a)
+    if (!inherits(m1, 'dgCMatrix')) {
+      m1 = as(m1, 'dgCMatrix')
+      gc()
+    }
+    m2 = readRDS(b); unlink(b);
+    if (!inherits(m2, 'dgCMatrix')) {
+      m2 = as(m2, 'dgCMatrix')
+      gc()
+    }
+    res = m1 + m2
+    rm(m1, m2);gc();
+    file_to_save = tempfile(pattern = "reduce_", tmpdir = work_dir, fileext = '.rds')
+    saveRDS(res, file_to_save, compress = F)
+    file_to_save
+  }
+  mc_reduce(fls,
+            FUN = sum_m,
             .inorder = FALSE,
             .multicombine = TRUE)
 }
+
+# multicore version of triplet_sum
+# mc_triplet_sum <- function(...) {
+#   mc_reduce(list(...),
+#             FUN = function(a, b) uniqTsparse(a + b),
+#             .inorder = FALSE,
+#             .multicombine = TRUE)
+# }
+
