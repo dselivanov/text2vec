@@ -104,21 +104,21 @@ public:
   CharacterVector get_vocab() {
     CharacterVector vocab_R(vocab.size());
     for(auto i:vocab)
-      vocab_R[ i.second ] = i.first;
+      vocab_R[ i.second ] = Rf_mkCharLenCE( i.first.c_str(), i.first.size(), CE_UTF8);
     return vocab_R;
   }
   // get term cooccurence matrix
   SEXP get_tcm() {
-    vector< string> dimnames(vocab.size());
+    CharacterVector dimnames(vocab.size());
     for(auto it:vocab)
-      dimnames[it.second] = it.first;
+      dimnames[it.second] = Rf_mkCharLenCE( it.first.c_str(), it.first.size(), CE_UTF8);
     return tcm.get_sparse_triplet_matrix(dimnames, dimnames);
   }
   SEXP get_dtm_triplet() {
-    vector<string> dummy_doc_names(0);
-    vector<string> terms(this->vocab.size());
+    CharacterVector dummy_doc_names(0);
+    CharacterVector terms(this->vocab.size());
     for(auto it:vocab)
-      terms[it.second] = it.first;
+      terms[it.second] = Rf_mkCharLenCE( it.first.c_str(), it.first.size(), CE_UTF8);
     return dtm.get_sparse_triplet_matrix(dummy_doc_names, terms);
   }
 
