@@ -58,7 +58,7 @@ public:
     this->sparse_container[make_pair(i, j)] += increment;
   };
 
-  SEXP get_sparse_triplet_matrix(vector< string>  &rownames, vector< string>  &colnames) {
+  SEXP get_sparse_triplet_matrix(CharacterVector  &rownames, CharacterVector  &colnames) {
     // non-zero values count
     size_t NNZ = this->size();
 
