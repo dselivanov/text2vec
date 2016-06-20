@@ -42,10 +42,9 @@ create_vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max
 #' @export
 vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                        stopwords = character(0)) {
-  warning("vocabulary() is depreciated, use create_vocabulary() instead")
+  .Deprecated("create_vocabulary")
   create_vocabulary(itoken_src, ngram, stopwords)
 }
-
 #' @describeIn create_vocabulary creates \code{text2vec_vocabulary} from predefined
 #' character vector. Terms will be inserted \bold{as is}, without any checks
 #' (ngrams numner, ngram delimiters, etc.).
@@ -92,6 +91,8 @@ create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ng
     document_count = vocab$get_document_count(),
     stopwords = stopwords
   )
+  if (nrow(res$vocab) == 0)
+    stop("vocabulary has no elements. Did you miss to reinitialise iterator over tokens?")
 
   class(res) <- c('text2vec_vocabulary')
   res
