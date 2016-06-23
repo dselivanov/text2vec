@@ -11,7 +11,7 @@
 prepare_analogy_questions <- function(questions_file_path, vocab_terms, verbose = TRUE) {
   lines <- readLines(questions_file_path) %>%
     tolower %>%
-    str_split(fixed(" "))
+    strsplit(split = " ", fixed = TRUE)
 
   # identify categories of questions
   section_name_ind <- which( sapply(lines, length) != 4 )

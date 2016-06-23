@@ -1,11 +1,14 @@
 #' @name tokenizers
-#' @title Tokenization functions, which performs string splitting
-#' @description simple wrappers around \code{stringi} and \code{stringr} packages functionality.
-#' @details Uses \link{str_split} under the hood(which build on top of \code{stringi::stri_split}).
-#' Actually just a wrapper for \code{str_split} which is very consistent, flexible and robust.
-#' See \link{str_split} and \link{modifiers} for details.
+#' @title Simple tokenization functions, which performs string splitting
+#' @description simple wrappers around \code{base} regular expressions.
+#' For much more faster and functional tokenizers see \code{tokenizers} package:
+#' \url{https://cran.r-project.org/web/packages/tokenizers/index.html}.
+#' Also see \code{str_split_*} functions in \code{stringi} and \code{stringr} packages.
+#' The reason for not including this packages to \code{text2vec} dependencies is our
+#' desare to keep number of dependencies as small as possible.
 #' @param string \code{character} vector
-#' @param pattern \code{character} pattern symbol. Also can be one of \link{modifiers}.
+#' @param pattern \code{character} pattern symbol.
+#' @param ... other parameters to \link{strsplit} function, which is used under the hood.
 #' @return \code{list} of \code{character} vectors.
 #' Each element of list containts vector of tokens.
 #' @examples
@@ -13,27 +16,18 @@
 #' # split by words
 #' word_tokenizer(doc)
 #' #faster, but far less general - perform split by a fixed single whitespace symbol.
-#' regexp_tokenizer(doc, pattern = stringr::fixed(" "))
+#' regexp_tokenizer(doc, " ", TRUE)
 
 #' @rdname tokenizers
 #' @export
-word_tokenizer <- function(string)
+word_tokenizer <- function(string, ...)
 {
-  str_split(string = string, pattern = boundary("word"))
+  strsplit(string, "\\W", ...) %>% lapply(function(x) x[nchar(x) > 0])
 }
 
 #' @rdname tokenizers
 #' @export
-regexp_tokenizer <- function(string, pattern)
+regexp_tokenizer <- function(string, pattern, ...)
 {
-  str_split(string = string, pattern = pattern)
+  strsplit(string, pattern)
 }
-
-#' @export
-stringr::fixed
-#' @export
-stringr::coll
-#' @export
-stringr::regex
-#' @export
-stringr::boundary

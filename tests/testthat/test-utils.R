@@ -8,7 +8,7 @@ txt_first_10 <- c("with", "all", "this", "stuff",
 
 test_that("word_tokenizer ", {
   tokens <- word_tokenizer(txt)[[1]]
-  expect_equal(length(tokens), 438)
+  expect_equal(length(tokens), 446)
   expect_equal(tokens[1:10], txt_first_10)
   # non ASCII symbols
   tokens <- word_tokenizer("one, two. Three! four")[[1]]

@@ -21,7 +21,7 @@ test_that("tcm with foreach", {
   jobs <- lapply(txt_splits, itoken, tolower, word_tokenizer)
 
   tcm <- create_tcm(jobs, vectorizer)
-  expect_true(tcm['his', 'he'] - 42 < 1e-5)
+  expect_true(tcm["who", "from"] - 9 < 1e-5)
   expect_equal(dim(tcm),  c(TERMS_LIMIT, TERMS_LIMIT))
   expect_true(isTriangular(tcm, upper = TRUE))
 })

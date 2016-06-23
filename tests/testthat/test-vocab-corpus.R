@@ -16,10 +16,10 @@ test_that("Vocabulary pruning", {
   iterator <- get_test_iterator()
   vocab <- create_vocabulary(iterator)
   # Vocabulary stats
-  expect_equal(length(vocab$vocab$terms), 19297)
+  expect_equal(length(vocab$vocab$terms), 18402)
   expect_equal( vocab$vocab$terms[ which.max(vocab$vocab$doc_counts) ], 'the')
   expect_equal( max(vocab$vocab$doc_counts), 992)
-  expect_equal( max(vocab$vocab$terms_counts), 13224)
+  expect_equal( max(vocab$vocab$terms_counts), 13252)
 
   COUNT_MAX <- 5000L
   COUNT_MIN <- 20L
@@ -38,7 +38,7 @@ test_that("Vocabulary pruning", {
   # same ngrams
   expect_identical(p_vocab$ngram, p_vocab$ngram)
   # number of terms in prunned vocab
-  expect_equal(nrow(p_vocab$vocab), 428L)
+  expect_equal(nrow(p_vocab$vocab), 429L)
 
   PROP_MAX <- 0.05
   LIMIT <- 20L
@@ -83,7 +83,7 @@ test_that("Unigran Vocabulary Corpus construction", {
   m <- vcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
-  expect_equal( length(m@x), 141714L)
+  expect_equal( length(m@x), 141876L)
 
   # check classification accuracy
   fit <- glmnet::cv.glmnet(x = m, y = movie_review[['sentiment']][train_ind],
@@ -102,8 +102,8 @@ test_that("bi-gram Vocabulary Corpus construction", {
                       ngram = c('ngram_min' = 2L,
                                 'ngram_max' = 2L))
 
-  expect_equal(sum(grepl("_", vocab$vocab$terms, fixed = T)), 121333L)
-  expect_equal(length(vocab$vocab$terms), 121333L)
+  expect_equal(sum(grepl("_", vocab$vocab$terms, fixed = T)), 120070L)
+  expect_equal(length(vocab$vocab$terms), 120070L)
   # VocabCorpus construction
   vectorizer <- vocab_vectorizer(vocab)
   vcorpus <- create_corpus(get_test_iterator(), vectorizer)
@@ -112,7 +112,7 @@ test_that("bi-gram Vocabulary Corpus construction", {
   m <- vcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
-  expect_equal( length(m@x), 220104L)
+  expect_equal( length(m@x), 223579L)
 })
 
 test_that("Unigram + Bigram Vocabulary Corpus construction", {
@@ -121,7 +121,7 @@ test_that("Unigram + Bigram Vocabulary Corpus construction", {
   vocab <- create_vocabulary(iterator,
                       ngram = c('ngram_min' = 1L,
                                 'ngram_max' = 2L))
-  expect_equal(length(vocab$vocab$terms), 140630L)
+  expect_equal(length(vocab$vocab$terms), 138472L)
   # VocabCorpus construction
   vectorizer <- vocab_vectorizer(vocab)
   vcorpus <- create_corpus(get_test_iterator(), vectorizer)
@@ -129,6 +129,5 @@ test_that("Unigram + Bigram Vocabulary Corpus construction", {
   m <- vcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
-  expect_equal( length(m@x), 361818L)
-
+  expect_equal( length(m@x), 365455L)
 })

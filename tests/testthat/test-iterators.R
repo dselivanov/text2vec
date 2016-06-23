@@ -21,27 +21,27 @@ test_that("ifiles", {
   it <- ifiles(c(temp_file_1, temp_file_2))
   it2 <- itoken(it, preprocess_function = tolower, tokenizer = word_tokenizer)
   v <- create_vocabulary(it2)
-  expect_equal(nrow(v$vocab), 7448)
+  expect_equal(nrow(v$vocab), 7261)
 })
 
 test_that("idir", {
   it <- idir(path = tmp_dir)
   it2 <- itoken(it, preprocess_function = tolower, tokenizer = word_tokenizer)
   v <- create_vocabulary(it2)
-  expect_equal(nrow(v$vocab), 7448)
+  expect_equal(nrow(v$vocab), 7261)
 })
 
 test_that("ilines", {
   it <- ilines(con = temp_file_1, n = 10)
   it2 <- itoken(it, preprocess_function = tolower, tokenizer = word_tokenizer)
   v <- create_vocabulary(it2)
-  expect_equal(nrow(v$vocab), 4562)
+  expect_equal(nrow(v$vocab), 4464)
 })
 
 test_that("itoken character", {
   it2 <- itoken(txt_1, preprocess_function = tolower, tokenizer = word_tokenizer)
   v <- create_vocabulary(it2)
-  expect_equal(nrow(v$vocab), 4562)
+  expect_equal(nrow(v$vocab), 4464)
 })
 
 ########################################
