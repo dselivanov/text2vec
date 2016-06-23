@@ -11,7 +11,6 @@
 #' @import data.table
 #' @importFrom foreach foreach %do% %dopar%
 #' @importFrom RcppParallel RcppParallelLibs
-#' @importFrom stringr str_split fixed coll regex boundary
 #' @importFrom magrittr %>%
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' @useDynLib text2vec
