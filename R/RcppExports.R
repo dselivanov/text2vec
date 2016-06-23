@@ -9,3 +9,19 @@ collapsedGibbsSampler <- function(documents, n_topics, vocab_size, n_iter, alpha
     .Call('text2vec_collapsedGibbsSampler', PACKAGE = 'text2vec', documents, n_topics, vocab_size, n_iter, alpha, eta, initial, convergence_tol, check_convergence_every_n, trace, freeze_topics)
 }
 
+colMins <- function(x) {
+    .Call('text2vec_colMins', PACKAGE = 'text2vec', x)
+}
+
+colMaxs <- function(x) {
+    .Call('text2vec_colMaxs', PACKAGE = 'text2vec', x)
+}
+
+rowMins <- function(x) {
+    .Call('text2vec_rowMins', PACKAGE = 'text2vec', x)
+}
+
+rowMaxs <- function(x) {
+    .Call('text2vec_rowMaxs', PACKAGE = 'text2vec', x)
+}
+

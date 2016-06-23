@@ -1,6 +1,6 @@
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/text2vec)](http://cran.r-project.org/package=text2vec)
 [![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=master)](https://travis-ci.org/dselivanov/text2vec)
-[![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://badges.mit-license.org)
+[![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
 [![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/text2vec)](http://cran.r-project.org/package=text2vec)
 [![Follow](https://img.shields.io/twitter/follow/dselvan0v.svg?style=social)](https://twitter.com/intent/follow?screen_name=dselvan0v)
 
@@ -38,3 +38,7 @@ Contributors are welcome. You can help by
 - testing and leaving feedback on the [GitHub issuer tracker](https://github.com/dselivanov/text2vec/issues) (preferably) or directly by e-mail.
 - forking and contributing. Vignettes, docs, tests, and use cases are very welcome.
 - by giving me a star on [project page](https://github.com/dselivanov/text2vec) :-)
+
+# License
+
+GPL (>= 2)

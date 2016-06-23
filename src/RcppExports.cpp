@@ -40,3 +40,47 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// colMins
+NumericVector colMins(const NumericMatrix x);
+RcppExport SEXP text2vec_colMins(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    __result = Rcpp::wrap(colMins(x));
+    return __result;
+END_RCPP
+}
+// colMaxs
+NumericVector colMaxs(const NumericMatrix x);
+RcppExport SEXP text2vec_colMaxs(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    __result = Rcpp::wrap(colMaxs(x));
+    return __result;
+END_RCPP
+}
+// rowMins
+NumericVector rowMins(const NumericMatrix x);
+RcppExport SEXP text2vec_rowMins(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    __result = Rcpp::wrap(rowMins(x));
+    return __result;
+END_RCPP
+}
+// rowMaxs
+NumericVector rowMaxs(const NumericMatrix x);
+RcppExport SEXP text2vec_rowMaxs(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    __result = Rcpp::wrap(rowMaxs(x));
+    return __result;
+END_RCPP
+}
