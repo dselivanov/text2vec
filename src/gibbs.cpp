@@ -1,13 +1,29 @@
+// Copyright (C) 2015 - 2016  Dmitriy Selivanov
+// This file is part of text2vec
+//
+// text2vec is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
+//
+// text2vec is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
+
 // Code below is based on code from R lda package: https://github.com/slycoder/R-lda-deprecated
 // All credits to Jonathan Chang - https://github.com/slycoder
-// Original code lda is under LGPL license
+// Original code is under LGPL license
 
 #include "text2vec.h"
 using namespace Rcpp;
 
 IntegerMatrix subtract_matrices(IntegerMatrix m1, IntegerMatrix m2) {
   IntegerMatrix res(m1.nrow(), m1.ncol());
-  for(size_t i = 0; i < m1.length(); i++ )
+  for(uint32_t i = 0; i < m1.length(); i++ )
     res[i] = m1[i] - m2[i];
   return(res);
 }
@@ -15,7 +31,7 @@ IntegerMatrix subtract_matrices(IntegerMatrix m1, IntegerMatrix m2) {
 double docs_likelihood(IntegerMatrix M, double prior) {
   double ll = 0;
   int n = M.nrow();
-  for (size_t i_doc = 0; i_doc < M.ncol(); ++i_doc) {
+  for (uint32_t i_doc = 0; i_doc < M.ncol(); ++i_doc) {
     double sum = prior * n;
     for (int kk = 0; kk < n; ++kk) {
       ll += R::lgammafn(M[n * i_doc + kk] + prior);
@@ -70,14 +86,18 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
                            int freeze_topics = 0) {
   // int burnin = -1,
   GetRNGstate();
-  size_t i_doc;
+  uint32_t i_doc;
   int kk;
 
-  int n_documents = documents.size();
+  uint32_t n_documents = documents.size();
+  uint32_t total_words = 0;
+  for(uint32_t i = 0; i < n_documents; i++ )
+    total_words += sum(documents[i].row(1));
 
   IntegerMatrix document_topic_distr;
   List assignements;
   std::vector<double> log_likelihood;
+  std::vector<double> perpl;
 
   IntegerMatrix topics_word_distr;
   IntegerVector topic_sums;
@@ -87,7 +107,7 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
   int have_initial_word_topic_distr = (initial.size() > 0);
   int have_initial_document_topic_distr = 0;
   int have_initial_assignements = 0;
-  if(initial.containsElementNamed("document_topic_distr")) have_initial_document_topic_distr = 1;
+  //if(initial.containsElementNamed("document_topic_distr")) have_initial_document_topic_distr = 1;
   if(initial.containsElementNamed("assignements")) have_initial_assignements = 1;
 
   // List initial_assignements(n_documents);
@@ -103,13 +123,12 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
     topics_word_distr = clone(initial_topics_word_distr);
     topic_sums = clone(initial_topic_sums);
 
-    if(have_initial_document_topic_distr) {
-      initial_document_topic_distr = as<IntegerMatrix>(initial["document_topic_distr"]);
-      // make deep copies, since we will modify by reference below
-      document_topic_distr = clone(initial_document_topic_distr);
-    } else {
+//     if(have_initial_document_topic_distr) {
+//       initial_document_topic_distr = as<IntegerMatrix>(initial["document_topic_distr"]);
+//       // make deep copies, since we will modify by reference below
+//       document_topic_distr = clone(initial_document_topic_distr);
+//     } else
       document_topic_distr = IntegerMatrix(n_topics, n_documents);
-    }
     if(have_initial_assignements)
       assignements = initial["assignements"];
     else {
@@ -144,7 +163,7 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
     for (i_doc = 0; i_doc < n_documents; ++i_doc) {
       IntegerVector zs = assignements[i_doc];
       IntegerMatrix document = documents[i_doc];
-      int nw = document.ncol();
+      uint32_t nw = document.ncol();
       IntegerVector initial_d;
       if (have_initial_assignements) {
         initial_d = assignements[i_doc];
@@ -238,10 +257,12 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
         topic_ll = topics_likelihood(topics_word_distr, eta);
 
       log_likelihood.push_back(doc_ll - const_prior + topic_ll - const_ll);
+      perpl.push_back( exp ( -log_likelihood[j] / total_words) );
       if (trace >= 1) {
-        Rprintf("\r%s iteration %d, likelihood: %0.2f\n",
+        Rprintf("\r%s iteration %d, perplexity: %0.2f likelihood %0.2f\n",
                 currentDateTime().c_str(),
                 iteration,
+                perpl[j],
                 log_likelihood[j]
         );
         R_FlushConsole();
@@ -249,10 +270,10 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
 
       // check convergence
       if(j > 0) {
-        double ll_improvement =  log_likelihood[j - 1] / log_likelihood[j] - 1;
-        if(ll_improvement < convergence_tol) {
-          Rprintf("Early stopping on %d iteradion. Likelihood improve for last iteration was %0.2f%%\n",
-                  iteration, ll_improvement * 100);
+        double perpl_improvement =  perpl[j - 1] / perpl[j] - 1;
+        if(perpl_improvement < convergence_tol) {
+          Rprintf("Early stopping on %d iteradion. Perplexity improvement for last iteration was %0.2f%%\n",
+                  iteration, perpl_improvement * 100);
           break;
         }
       }
