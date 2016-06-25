@@ -9,19 +9,19 @@
 \title{Creates a vocabulary of unique terms}
 \usage{
 create_vocabulary(itoken_src, ngram = c(ngram_min = 1L, ngram_max = 1L),
-  stopwords = character(0))
+  stopwords = character(0), sep_ngram = "_")
 
 vocabulary(itoken_src, ngram = c(ngram_min = 1L, ngram_max = 1L),
-  stopwords = character(0))
+  stopwords = character(0), sep_ngram = "_")
 
 \method{create_vocabulary}{character}(itoken_src, ngram = c(ngram_min = 1L,
-  ngram_max = 1L), stopwords = character(0))
+  ngram_max = 1L), stopwords = character(0), sep_ngram = "_")
 
 \method{create_vocabulary}{itoken}(itoken_src, ngram = c(ngram_min = 1L,
-  ngram_max = 1L), stopwords = character(0))
+  ngram_max = 1L), stopwords = character(0), sep_ngram = "_")
 
 \method{create_vocabulary}{list}(itoken_src, ngram = c(ngram_min = 1L,
-  ngram_max = 1L), stopwords = character(0), ...)
+  ngram_max = 1L), stopwords = character(0), sep_ngram = "_", ...)
 }
 \arguments{
 \item{itoken_src}{iterator over a \code{list} of \code{character} vectors,
@@ -34,6 +34,8 @@ of n-values for different n-grams to be extracted. All values of \code{n}
 such that ngram_min <= n <= ngram_max will be used.}
 
 \item{stopwords}{\code{character} vector of stopwords to filter out}
+
+\item{sep_ngram}{\code{character} a character string to concatenate words in ngrams}
 
 \item{...}{additional arguments to \link{foreach} function.}
 }

@@ -29,10 +29,10 @@ public:
 //     init(vocab_R, n_min, n_max);
 //   };
   // contructor with window_size for term cooccurence matrix
-  VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, uint32_t window_size, const CharacterVector stopwords_R) {
+  VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, uint32_t window_size, const CharacterVector stopwords_R, const String delim) {
     tcm = SparseTripletMatrix<float>(vocab_R.size(), vocab_R.size());
     this->window_size = window_size;
-    init(vocab_R, n_min, n_max, stopwords_R);
+    init(vocab_R, n_min, n_max, stopwords_R, delim);
   };
 
   void insert_terms (vector< string> &terms) {
@@ -147,7 +147,7 @@ private:
   unordered_map<string, uint32_t> vocab;
 
 
-  void init(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, const CharacterVector stopwords_R) {
+  void init(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, const CharacterVector stopwords_R, const String delim) {
     //vocab2 = Vocabulary(n_min, n_max, delim);
     this->verbose = 0;
     this->nnz = 0;
@@ -157,7 +157,7 @@ private:
     this->ngram_min = n_min;
     this->ngram_max = n_max;
     // ngram concatenation delimiter
-    this->ngram_delim = "_";
+    this->ngram_delim = delim;
 
     size_t i = 0;
     // we know vocab size, so lets reserve buckets this number

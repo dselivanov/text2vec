@@ -10,6 +10,7 @@
 #'  of n-values for different n-grams to be extracted. All values of \code{n}
 #'  such that ngram_min <= n <= ngram_max will be used.
 #'@param stopwords \code{character} vector of stopwords to filter out
+#'@param sep_ngram \code{character} a character string to concatenate words in ngrams
 #'@return \code{text2vec_vocabulary} object, which is actually a \code{list}
 #'  with following fields:
 #'
@@ -34,14 +35,14 @@
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
 #'@export
 create_vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
-                       stopwords = character(0)) {
+                       stopwords = character(0), sep_ngram = "_") {
   UseMethod("create_vocabulary")
 }
 
 #' @rdname create_vocabulary
 #' @export
 vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
-                       stopwords = character(0)) {
+                       stopwords = character(0), sep_ngram = "_") {
   .Deprecated("create_vocabulary")
   create_vocabulary(itoken_src, ngram, stopwords)
 }
@@ -50,7 +51,7 @@ vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L)
 #' (ngrams numner, ngram delimiters, etc.).
 #' @export
 create_vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
-                                 stopwords = character(0)) {
+                                 stopwords = character(0), sep_ngram = "_") {
 
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
@@ -65,7 +66,8 @@ create_vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 
                        ),
     ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
     document_count = NA_integer_,
-    stopwords = stopwords
+    stopwords = stopwords,
+    sep_ngram = sep_ngram
   )
 
   class(res) <- c('text2vec_vocabulary')
@@ -75,11 +77,11 @@ create_vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 
 #' @describeIn create_vocabulary collects unique terms and corresponding statistics from object.
 #' @export
 create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
-                              stopwords = character(0)) {
+                              stopwords = character(0), sep_ngram = "_") {
 
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
-  vocab <- new(VocabularyBuilder, ngram_min, ngram_max, stopwords)
+  vocab <- new(VocabularyBuilder, ngram_min, ngram_max, stopwords, sep_ngram)
 
   foreach(tokens = itoken_src) %do% {
     vocab$insert_document_batch(tokens$tokens)
@@ -89,7 +91,8 @@ create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ng
     vocab = setDT(vocab$get_vocab_statistics()),
     ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
     document_count = vocab$get_document_count(),
-    stopwords = stopwords
+    stopwords = stopwords,
+    sep_ngram = sep_ngram
   )
   if (nrow(res$vocab) == 0)
     stop("vocabulary has no elements. Did you miss to reinitialise iterator over tokens?")
@@ -104,7 +107,7 @@ create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ng
 #' @param ... additional arguments to \link{foreach} function.
 #' @export
 create_vocabulary.list <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
-                            stopwords = character(0), ...) {
+                            stopwords = character(0), sep_ngram = "_", ...) {
   stopifnot( all( vapply(X = itoken_src, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
   res =
     foreach(it = itoken_src,
@@ -116,6 +119,7 @@ create_vocabulary.list <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngra
             create_vocabulary(it, ngram, stopwords)
           }
   res[['stopwords']] <- stopwords
+  res[['sep_ngram']] <- sep_ngram
   res
 }
 
@@ -139,7 +143,8 @@ combine_vocabulary <- function(...) {
     vocab = combined_vocab,
     ngram = ngram,
     document_count = combined_document_count,
-    stopwords = character(0)
+    stopwords = character(0),
+    sep_ngram = character(0)
   )
   class(res) <- c('text2vec_vocabulary')
   res
@@ -211,7 +216,9 @@ prune_vocabulary <- function(vocabulary,
   pruned_vocabulary <- list('vocab' = pruned_vocabulary,
                             'ngram' = vocabulary[['ngram']],
                             'document_count' = vocabulary[['document_count']],
-                            'stopwords' = vocabulary[['stopwords']])
+                            'stopwords' = vocabulary[['stopwords']],
+                            'sep_ngram' = vocabulary[['sep_ngram']]
+                            )
 
   class(pruned_vocabulary) <- 'text2vec_vocabulary'
 
