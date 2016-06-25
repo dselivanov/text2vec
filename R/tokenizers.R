@@ -6,7 +6,7 @@
 #' Also see \code{str_split_*} functions in \code{stringi} and \code{stringr} packages.
 #' The reason for not including this packages to \code{text2vec} dependencies is our
 #' desare to keep number of dependencies as small as possible.
-#' @param string \code{character} vector
+#' @param strings \code{character} vector
 #' @param pattern \code{character} pattern symbol.
 #' @param ... other parameters to \link{strsplit} function, which is used under the hood.
 #' @return \code{list} of \code{character} vectors.
@@ -20,14 +20,21 @@
 
 #' @rdname tokenizers
 #' @export
-word_tokenizer <- function(string, ...)
+word_tokenizer <- function(strings, ...)
 {
-  strsplit(string, "\\W", ...) %>% lapply(function(x) x[nchar(x) > 0])
+  strsplit(strings, "\\W", ...) %>% lapply(function(x) x[nchar(x) > 0])
 }
 
 #' @rdname tokenizers
 #' @export
-regexp_tokenizer <- function(string, pattern, ...)
+regexp_tokenizer <- function(strings, pattern, ...)
 {
-  strsplit(string, pattern)
+  strsplit(strings, pattern, ...)
+}
+
+#' @rdname tokenizers
+#' @export
+char_tokenizer <- function(strings, ...)
+{
+  strsplit(strings, "", TRUE, ...)
 }
