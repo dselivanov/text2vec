@@ -27,10 +27,8 @@
 #' @export
 LDA <- function(n_topics,
                 vocabulary,
-                # alpha
-                doc_topic_prior = 1 / n_topics,
-                # eta
-                topic_word_prior = 1 / n_topics,
+                doc_topic_prior = 1 / n_topics, # alpha
+                topic_word_prior = 1 / n_topics, # eta
                 ...) {
   #---------------------------------------------------
   # check input

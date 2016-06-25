@@ -114,7 +114,7 @@ partial_fit.text2vec_model <- function(object, X, ...) {
 #' @title Transform new data with fitted model
 #' @description This is generic function to apply fitted text2vec models
 #' (class = "text2vec_model") to new data.
-#' @param object instance of class \code{text2vec_model}. See \link{LSA}.
+#' @param object instance of class \code{text2vec_model}.
 #' @param X matrix like object. At the moment usually one of
 #' \code{c("matrix", "dgCMatrix", "dgTMatrix", "lda_c")}
 #' @param ... arguments to underlying functions. Currently not used.
