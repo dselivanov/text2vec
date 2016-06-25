@@ -6,7 +6,7 @@
 \alias{transform_tfidf}
 \title{Scale a document-term matrix}
 \usage{
-transform_tf(dtm, sublinear_tf = FALSE, norm = c("l1", "l2"))
+transform_tf(dtm, sublinear_tf = FALSE, norm = c("l1", "l2", "none"))
 
 transform_tfidf(dtm, idf = NULL, sublinear_tf = FALSE, norm = c("l1",
   "l2"))
@@ -48,8 +48,7 @@ particular word in a document) / (number of documents where the term appears
 \itemize{
 \item \code{transform_tfidf}: Scale a document-term matrix via TF-IDF
 
-\item \code{transform_binary}: Transform a document-term matrix into binary
-representation
+\item \code{transform_binary}: Transform a document-term matrix into binary representation
 }}
 \examples{
 \dontrun{

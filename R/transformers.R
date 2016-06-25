@@ -1,3 +1,78 @@
+#' @name get_idf
+#' @title Inverse document-frequency scaling matrix
+#' @description This function creates an inverse-document-frequency (IDF)
+#'   scaling matrix from a document-term matrix. The IDF is defined as follows:
+#'   \code{idf = log(# documents in the corpus) / (# documents where the term
+#'   appears + 1)}
+#' @param dtm a document-term matrix of class \code{dgCMatrix} or
+#'   \code{dgTMatrix}.
+#' @param log_scale \code{function} to use in calculating the IDF matrix.
+#'   Usually \link{log} is used, but it might be worth trying \link{log2}.
+#' @param smooth_idf \code{logical} smooth IDF weights by adding one to document
+#'   frequencies, as if an extra document was seen containing every term in the
+#'   collection exactly once. This prevents division by zero.
+#' @return \code{ddiMatrix} IDF scaling diagonal sparse matrix.
+#' @seealso \link{get_tf}, \link{get_dtm}, \link{create_dtm}
+#' @export
+get_idf <- function(dtm, log_scale = log, smooth_idf = TRUE)
+{
+  # abs is needed for case when dtm is matrix from HashCorpus and signed_hash is used!
+  cs = colSums( abs(sign(dtm) ) )
+  if (smooth_idf)
+    idf = log_scale(nrow(dtm) / (cs + 1 ))
+  else
+    idf = log_scale(nrow(dtm) / (cs))
+  #, idfProb = pmax(0.01, log_scale((nrow(dtm) - cs + 0.5) / (cs + 0.5)))
+  Diagonal(x = idf)
+}
+
+#' @name get_tf
+#' @title Term-frequency scaling matrix
+#' @description This function creates a term-frequency (TF) scaling matrix from
+#'   a document-term matrix.
+#' @param dtm a document-term matrix of class \code{dgCMatrix} or
+#'   \code{dgTMatrix}.
+#' @param norm \code{character} the method used to normalize term vectors.
+#'   \code{"l1"} by default, i.e., scale by the number of words in the document.
+#' @seealso \link{get_idf}, \link{get_dtm}, \link{create_dtm}
+#' @return \code{ddiMatrix} TF scaling diagonal sparse matrix.
+#' @export
+get_tf <- function(dtm, norm = c('l1', 'l2'))
+{
+  .Deprecated('normalize')
+  norm <- match.arg(norm)
+  norm_vec <- switch(norm,
+                     # abs is needed for case when dtm is
+                     # matrix from HashCorpus and signed_hash is used!
+                     l1 = 1 / rowSums(abs(dtm)),
+                     l2 = 1 / sqrt(rowSums(dtm ^ 2)))
+  norm_vec[is.infinite(norm_vec)] = 0
+  Diagonal(x = norm_vec)
+}
+
+#' @name normalize
+#' @title Matrix normalization
+#' @description normalize matrix rows using given norm
+#' @param m \code{matrix} (sparse or dense).
+#' @param norm \code{character} the method used to normalize term vectors
+#' @seealso \link{get_idf}, \link{get_dtm}, \link{create_dtm}
+#' @return normalized matrix
+#' @export
+normalize <- function(m, norm = c('l1', 'l2', 'none')) {
+  norm = match.arg(norm)
+
+  if (norm == 'none')
+    return(m)
+
+  norm_vec = switch(norm,
+                l1 = 1 / rowSums(m),
+                l2 = 1 / sqrt(rowSums(m ^ 2))
+  )
+  # case when sum row elements == 0
+  norm_vec[is.infinite(norm_vec)] = 0
+  Diagonal(x = norm_vec) %*% m
+}
+
 #' @name transform_filter_commons
 #' @title Remove terms from a document-term matrix
 #' @description This function removes very common and very uncommon words from a
@@ -84,19 +159,14 @@ transform_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, common
 #' transformed_tfidf <- transform_tfidf(dtm,  idf)
 #' }
 #' @export
-transform_tf <- function(dtm, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
+transform_tf <- function(dtm, sublinear_tf = FALSE, norm = c('l1', 'l2', 'none')) {
 
   norm <- match.arg(norm)
 
   if (sublinear_tf)
     dtm@x <- 1 + log(dtm@x)
 
-  tf_scale_matrix <- get_tf(dtm, norm)
-
-  if (norm == 'l2')
-    dtm@x <- dtm@x ^ 2
-
-  tf_scale_matrix %*% dtm
+  normalize(dtm, norm)
 }
 
 #' @describeIn transform_tf Scale a document-term matrix via TF-IDF
@@ -116,8 +186,7 @@ transform_tfidf <- function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c('l1'
   tf %*% idf
 }
 
-#' @describeIn transform_tf Transform a document-term matrix into binary
-#'   representation
+#' @describeIn transform_tf Transform a document-term matrix into binary representation
 #' @export
 transform_binary <- function(dtm) {
   sign(abs(dtm))
