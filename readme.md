@@ -4,6 +4,10 @@
 [![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/text2vec)](http://cran.r-project.org/package=text2vec)
 [![Follow](https://img.shields.io/twitter/follow/dselvan0v.svg?style=social)](https://twitter.com/intent/follow?screen_name=dselvan0v)
 
+# Development
+
+We keep **stable (last CRAN release) version in master**. Current **active development is in [0.4 branch](https://github.com/dselivanov/text2vec/tree/0.4).**
+
 # Tutorials
 
 To learn how to use this package, see the package vignettes.
