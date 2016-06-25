@@ -84,3 +84,15 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// euclidean_dist
+NumericMatrix euclidean_dist(const NumericMatrix x, const NumericMatrix y);
+RcppExport SEXP text2vec_euclidean_dist(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix >::type y(ySEXP);
+    __result = Rcpp::wrap(euclidean_dist(x, y));
+    return __result;
+END_RCPP
+}
