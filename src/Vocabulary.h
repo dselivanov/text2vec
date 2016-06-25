@@ -38,10 +38,11 @@ public:
 
   Vocabulary(uint32_t ngram_min,
              uint32_t ngram_max,
-             const CharacterVector stopwords_R):
+             const CharacterVector stopwords_R,
+             const String delim):
   ngram_min(ngram_min), ngram_max(ngram_max),
   document_count(0), token_count(0) {
-    ngram_delim = "_";
+    ngram_delim = delim;
     for(auto it:stopwords_R)
       stopwords.insert(as<string>(it));
   };
