@@ -58,7 +58,10 @@ as.lda_c <- function(X) {
   m_lda_c
 }
 
-to_lda_c <- as.lda_c
+to_lda_c <- function(X) {
+  .Deprecated("as.lda_c")
+  as.lda_c(X)
+}
 
 rbind_dgTMatrix <- function(...) {
   res <- new('dgTMatrix')
@@ -107,7 +110,7 @@ split_into <- function(vec, n) {
   split(vec, split_factors)
 }
 
-coerce_matrix <- function(X, target_class = c("dgCMatrix", "dgTMatrix", "lda_c"), verbose = FALSE) {
+coerce_matrix <- function(X, target_class = c("dgCMatrix", "dgTMatrix", "RsparseMatrix", "lda_c"), verbose = FALSE) {
   target_class = match.arg(target_class)
   X_class = class(X)
   if (X_class != target_class ) {
