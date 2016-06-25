@@ -25,3 +25,7 @@ rowMaxs <- function(x) {
     .Call('text2vec_rowMaxs', PACKAGE = 'text2vec', x)
 }
 
+euclidean_dist <- function(x, y) {
+    .Call('text2vec_euclidean_dist', PACKAGE = 'text2vec', x, y)
+}
+
