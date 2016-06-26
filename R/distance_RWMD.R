@@ -29,7 +29,6 @@ dist_internal <- function(wv, i, j, method) {
 #' @param normalize should function perform L2 normalization of word vectors?
 #' Word vectors should be normalized before calculation of distances between them!
 #' If user has pre-normalized input, he/she can set \code{normalize = FALSE}.
-#' @param verbose \code{logical} whether to display additional information during calculations
 #' @examples
 #' \dontrun{
 #' data("movie_review")
@@ -47,7 +46,7 @@ dist_internal <- function(wv, i, j, method) {
 #' rwmd_dist <- dist2(dtm[1:10, ], dtm[1:100, ], metrics = rwmd_model, norm = 'none')
 #'}
 #' @export
-RWMD <- function(word_vectors, method = c('cosine', 'euclidean'), normalize = TRUE, verbose = interactive()) {
+RWMD <- function(word_vectors, method = c('cosine', 'euclidean'), normalize = TRUE) {
 
   .internal_matrix_format = 'RsparseMatrix'
   method <- match.arg(method)

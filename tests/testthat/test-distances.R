@@ -5,10 +5,9 @@ m2 <- matrix(1:12, nrow = 4)
 
 tokens <- movie_review$review[ind] %>% tolower %>% word_tokenizer
 v = create_vocabulary(itoken(tokens, progessbar = F)) %>% prune_vocabulary(term_count_min = 3)
-corpus = create_corpus(itoken(tokens, ids = movie_review$id[ind], progessbar = F),
-                       vectorizer = vocab_vectorizer(v, skip_grams_window = 5))
-dtm = get_dtm(corpus)
-tcm = get_dtm(corpus)
+dtm = create_dtm(itoken(tokens, ids = movie_review$id[ind], progessbar = F), vectorizer = vocab_vectorizer(v))
+tcm = create_tcm(itoken(tokens, ids = movie_review$id[ind], progessbar = F),
+                 vectorizer = vocab_vectorizer(v, grow_dtm = F, skip_grams_window = 5))
 i1 = 1:10
 i2 = 1:20
 
@@ -52,9 +51,9 @@ test_that("euclidean", {
 
 test_that("relaxed word mover distance", {
   glove_model <- GloVe(word_vectors_size = 50, vocabulary = v, x_max = 10)
-  wv = fit_predict(glove_model, tcm, n_iter = 10, verbose = F)
+  wv = fit_predict(glove_model, tcm, n_iter = 10, verbose = FALSE)
   rwmd_model = RWMD(word_vectors = wv)
-  rwmd_dist <- dist2(dtm[i1, ], dtm[i2, ], method = rwmd_model, norm = 'none')
+  rwmd_dist <- dist2(dtm[i1, ], dtm[i2, ], method = rwmd_model, norm = 'none', verbose = F)
   expect_equal(nrow(rwmd_dist), length(i1))
   expect_equal(ncol(rwmd_dist), length(i2))
   expect_lte(rwmd_dist[1,1], 1e-10)
