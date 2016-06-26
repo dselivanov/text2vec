@@ -3,7 +3,7 @@ Type: Package
 Version: 0.4.0
 Date: 2016-03-31
 Title: Fast Text Mining Framework for Vectorization and Word Embeddings
-License: GPL (>= 2)
+License: GPL (>= 2) | file LICENSE
 Description: Very fast and memory-friendly tools for text vectorization and
     state-of-the-art word embeddings (GloVe). This package provides a
     source-agnostic streaming API, which allows researchers to perform analysis
