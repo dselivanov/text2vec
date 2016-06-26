@@ -4,8 +4,7 @@
 \alias{RWMD}
 \title{Creates model which can be used for calculation of "relaxed word movers distance".}
 \usage{
-RWMD(word_vectors, method = c("cosine", "euclidean"), normalize = TRUE,
-  verbose = interactive())
+RWMD(word_vectors, method = c("cosine", "euclidean"), normalize = TRUE)
 }
 \arguments{
 \item{word_vectors}{numeric matrix which contains word embeddings. Rows - words,
@@ -17,8 +16,6 @@ columns - corresponding vectors. Rows should have names (words).}
 \item{normalize}{should function perform L2 normalization of word vectors?
 Word vectors should be normalized before calculation of distances between them!
 If user has pre-normalized input, he/she can set \code{normalize = FALSE}.}
-
-\item{verbose}{\code{logical} whether to display additional information during calculations}
 }
 \description{
 Relaxed word movers distance tries to measure distance between documents by
