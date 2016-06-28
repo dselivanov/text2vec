@@ -52,9 +52,9 @@ RWMD <- function(word_vectors, method = c('cosine', 'euclidean'), normalize = TR
   method <- match.arg(method)
 
   if (normalize)
-    .wv = t(word_vectors / sqrt(rowSums(word_vectors ^ 2)))
+    wv = t(word_vectors / sqrt(rowSums(word_vectors ^ 2)))
   else
-    .wv = word_vectors
+    wv = t(word_vectors)
 
   # RWMD - workhorse
   # wv - word vectors matrix (WORDS = COLUMNS, because faster subsetting!)
@@ -70,11 +70,13 @@ RWMD <- function(word_vectors, method = c('cosine', 'euclidean'), normalize = TR
     max(d1, d2)
   }
   # main methods
-  distance <- function(x, y, verbose = verbose) {
+  dist2 <- function(x, y, verbose = verbose) {
     stopifnot( colnames(x) == colnames(y) )
     # take only words that appear both in word vectors
-    terms = intersect(colnames(x), colnames(.wv))
-    wv = .wv[, terms,drop = FALSE]
+    terms = intersect(colnames(x), colnames(wv))
+    # make sure we don't have empty string - matrices doesn't allow subsetting by empty string
+    terms = setdiff(terms, "")
+    wv = wv[, terms, drop = FALSE]
     x_csr = x[, terms, drop = FALSE] %>% transform_tf %>% as(.internal_matrix_format)
     y_csr = y[, terms, drop = FALSE] %>% transform_tf %>% as(.internal_matrix_format)
     if (verbose)
@@ -100,8 +102,35 @@ RWMD <- function(word_vectors, method = c('cosine', 'euclidean'), normalize = TR
     res
   }
 
+  pdist2 <- function(x, y, verbose = T) {
+    stopifnot( ncol(x) == ncol(y) )
+    stopifnot( colnames(x) == colnames(y) )
+    stopifnot( nrow(x) == nrow(y) )
+    # take only words that appear both in word vectors
+    terms = intersect(colnames(x), colnames(wv))
+    # make sure we don't have empty string - matrices doesn't allow subsetting by empty string
+    terms = setdiff(terms, "")
+    wv = wv[, terms, drop = FALSE]
+    x_csr = x[, terms, drop = FALSE] %>% transform_tf %>% as(.internal_matrix_format)
+    y_csr = y[, terms, drop = FALSE] %>% transform_tf %>% as(.internal_matrix_format)
+    if (verbose)
+      pb <- txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)
+    res = rep(Inf,  nrow(x_csr))
+    for (j in 2L:(length(x_csr@p))) {
+      if (verbose) setTxtProgressBar(pb, j)
+      i1 = (x_csr@p[[j - 1]] + 1L):x_csr@p[[j]]
+      j1 = x_csr@j[i1] + 1L
+      x1 = x_csr@x[i1]
+      i2 = (y_csr@p[[j - 1L]] + 1L):y_csr@p[[j]]
+      j2 = y_csr@j[i2] + 1L
+      x2 = y_csr@x[i2]
+      res[j - 1L] = rwmd(wv, j1, j2, x1, x2)
+    }
+    res
+  }
+
   self <- function() {
-    model = list(distance = distance)
+    model = list(dist2 = dist2, pdist2 = pdist2)
     class(model) <- c('text2vec_distance', 'RWMD')
     model
   }

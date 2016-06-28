@@ -3,10 +3,13 @@
 \name{distances}
 \alias{dist2}
 \alias{distances}
+\alias{pdist2}
 \title{Pairwise Distance Matrix Computation}
 \usage{
 dist2(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
   norm = c("none", "l1", "l2"), verbose = TRUE)
+
+pdist2(x, y = x, method = "cosine", norm = c("none", "l1", "l2"))
 }
 \arguments{
 \item{x}{first matrix.}
@@ -25,14 +28,22 @@ Also user should keep in mind, that distance = 1 - similarity.}
 \value{
 \code{dist2} returns \code{matrix} of distances between each row of
 matrix \code{x} and each row of matrix \code{y}.
+
+\code{pdist2} returns \code{vector} of "parallel" distances between rows
+of \code{x} and \code{y}.
 }
 \description{
 \code{dist2} calculates pairwise distances between the
 rows of two data matrices. \bold{Note} that some methods work only on sparse matrices and
 others work only on dense matrices.
+
+\code{pdist2} calculates "parallel" distances between the rows of two data matrices.
 }
 \details{
 Computes the distance matrix computed by using the specified method.
 Similar to \link{dist} function, but works with two matrices.
+
+\code{pdist2} takes two matrices and return a single vector.
+giving the ‘parallel’ distances of the vectors.
 }
 

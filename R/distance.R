@@ -98,7 +98,7 @@ dist2 <- function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
       if (norm != 'none')
         warning("RWMD can be computed only on bag-of-words matrices - raw word-counts.
                 Usually no normalization is needed - l1 normalization will be done aumatically!")
-      RESULT = method$distance(x, y,  verbose)
+      RESULT = method$dist2(x, y,  verbose)
     }
   }
   if (is.null(RESULT))
@@ -106,16 +106,20 @@ dist2 <- function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
   RESULT
 }
 #
-# #' @rdname distances
-# #' @title "Parallel" Distance Matrix Computation
-# #' @description \code{pdist2} calculates "parallel" distances between the rows of two data matrices.
-# #' @details \code{pdist2} takes two matrices and return a single vector.
-# #' giving the ‘parallel’ distances of the vectors.
-# #' @return \code{pdist2} returns \code{vector} of "parallel" distances between rows
-# #' of \code{x} and \code{y}.
-# #' @export
-# pdist2 <- function(x, y = x, method = 'cosine', norm = c('none' ,'l1', 'l2')) {
-#   stop("not implemented yet")
-#   NULL
-# }
-#
+#' @rdname distances
+#' @title "Parallel" Distance Matrix Computation
+#' @description \code{pdist2} calculates "parallel" distances between the rows of two data matrices.
+#' @details \code{pdist2} takes two matrices and return a single vector.
+#' giving the ‘parallel’ distances of the vectors.
+#' @return \code{pdist2} returns \code{vector} of "parallel" distances between rows
+#' of \code{x} and \code{y}.
+#' @export
+pdist2 <- function(x, y = x, method = 'cosine', norm = c('none' ,'l1', 'l2')) {
+  if (inherits(method, 'RWMD')) {
+    method$pdist2(x, y)
+  } else {
+    stop("not implemented yet")
+    NULL
+  }
+}
+
