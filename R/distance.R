@@ -59,6 +59,7 @@ dist2 <- function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
   norm = match.arg(norm)
   RESULT = NULL
   if (inherits(method, "character")) {
+    method = match.arg(method)
     if (method == 'cosine') {
       if (norm == 'l1') stop("l2 norm should be used with 'cosine' method")
       if (FLAG_TWO_MATRICES_INPUT) y = normalize(y, norm)
@@ -105,7 +106,8 @@ dist2 <- function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
     stop(paste("not implemented for class", class(method)))
   RESULT
 }
-#
+
+
 #' @rdname distances
 #' @title "Parallel" Distance Matrix Computation
 #' @description \code{pdist2} calculates "parallel" distances between the rows of two data matrices.
@@ -114,12 +116,54 @@ dist2 <- function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
 #' @return \code{pdist2} returns \code{vector} of "parallel" distances between rows
 #' of \code{x} and \code{y}.
 #' @export
-pdist2 <- function(x, y = x, method = 'cosine', norm = c('none' ,'l1', 'l2')) {
-  if (inherits(method, 'RWMD')) {
-    method$pdist2(x, y)
-  } else {
-    stop("not implemented yet")
-    NULL
+pdist2 <- function(x, y, method = c('cosine', 'euclidean', 'jaccard'),
+                  norm = c('none', 'l1', 'l2'), verbose = TRUE) {
+  stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix"))
+  stopifnot(inherits(method, "text2vec_distance") || inherits(method, "character"))
+  stopifnot(ncol(x) == ncol(y))
+  stopifnot(nrow(x) == nrow(y))
+  stopifnot(colnames(x) == colnames(y))
+  norm = match.arg(norm)
+  RESULT = NULL
+  if (inherits(method, "character")) {
+    method = match.arg(method)
+    if (method == 'cosine') {
+      if (norm == 'l1') stop("l2 norm should be used with 'cosine' method")
+      y = normalize(y, norm)
+      x = normalize(x, norm)
+      RESULT = 1 - rowSums(x * y)
+    }
+    if (method == 'euclidean') {
+      if (!inherits(x, 'matrix') || !inherits(y, 'matrix'))
+        stop("At the moment eucludian distance can be calculated only for
+              dense matrices of class 'matrix'")
+        RESULT = sqrt(rowSums((x - y) * 2))
+    }
+    if (method == 'jaccard') {
+      if (!inherits(x, 'sparseMatrix'))
+        stop("at the moment jaccard distance defined only for sparse matrices")
+
+      if (norm != 'none')
+        warning("No normalization is needed - values will be convertet to 0, 1 aumatically! \\
+                'jaccard' can be computed only on sets which should be encoded as sparse matrices of 0, 1.")
+
+      x@x = sign(x@x)
+      y@x = sign(y@x)
+      intrs = rowSums(x * y)
+
+      RESULT = 1 - intrs / (rowSums(x) + rowSums(y) - intrs)
+    }
   }
+  if (inherits(method, "text2vec_distance")) {
+    if (inherits(method, "RWMD")) {
+      if (norm != 'none')
+        warning("RWMD can be computed only on bag-of-words matrices - raw word-counts.
+                Usually no normalization is needed - l1 normalization will be done aumatically!")
+      RESULT = method$pdist2(x, y,  verbose)
+    }
+  }
+  if (is.null(RESULT))
+    stop(paste("not implemented for class", class(method)))
+  RESULT
 }
 

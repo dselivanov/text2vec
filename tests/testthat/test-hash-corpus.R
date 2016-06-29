@@ -14,9 +14,8 @@ test_that("Unigram Hash Corpus construction", {
   h_size = 2 ^ 14;
 
   vectorizer <- hash_vectorizer(hash_size = h_size)
-  hcorpus <- create_corpus(get_test_iterator(), vectorizer)
+  m <- create_dtm(get_test_iterator(), vectorizer)
 
-  m <- hcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], h_size)
   expect_equal( length(m@x), 140790L)
@@ -32,9 +31,8 @@ test_that("trigram hash-corpus construction", {
   h_size = 2 ^ 18;
 
   vectorizer <- hash_vectorizer(hash_size = h_size, ngram = c(1L, 3L))
-  hcorpus <- create_corpus(get_test_iterator(), vectorizer)
+  m <- create_dtm(get_test_iterator(), vectorizer)
 
-  m <- hcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], h_size)
   expect_equal( length(m@x), 599667L)
