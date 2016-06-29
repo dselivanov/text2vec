@@ -9,7 +9,8 @@
 dist2(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
   norm = c("none", "l1", "l2"), verbose = TRUE)
 
-pdist2(x, y = x, method = "cosine", norm = c("none", "l1", "l2"))
+pdist2(x, y, method = c("cosine", "euclidean", "jaccard"), norm = c("none",
+  "l1", "l2"), verbose = TRUE)
 }
 \arguments{
 \item{x}{first matrix.}
