@@ -17,8 +17,9 @@ jaccard_dist <- function(x, y = NULL, format = 'dgCMatrix') {
     rs_y = rowSums(y)
   }
   RESULT = as(RESULT, 'dgTMatrix')
-  # add 1 because of zero-based indices in sparse matrices
-  RESULT@x <- RESULT@x / (rs_x[RESULT@i + 1L] + rs_y[RESULT@j + 1L] - RESULT@x)
+  # add 1 to indices because of zero-based indices in sparse matrices
+  # 1 - (...) because we calculate distance, not similarity
+  RESULT@x <- 1 - RESULT@x / (rs_x[RESULT@i + 1L] + rs_y[RESULT@j + 1L] - RESULT@x)
   if (!inherits(RESULT, format))
     RESULT = as(RESULT, format)
   RESULT
@@ -47,6 +48,7 @@ dist2 <- function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
   stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix"))
   stopifnot(inherits(method, "text2vec_distance") || inherits(method, "character"))
 
+  FLAG_TWO_MATRICES_INPUT = FALSE
   if (!is.null(y)) {
     FLAG_TWO_MATRICES_INPUT = TRUE
   }
@@ -91,7 +93,7 @@ dist2 <- function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
       if (FLAG_TWO_MATRICES_INPUT) {
         y@x = sign(y@x)
       }
-      RESULT = 1 - jaccard_dist(x, y)
+      RESULT = jaccard_dist(x, y)
     }
   }
   if (inherits(method, "text2vec_distance")) {
