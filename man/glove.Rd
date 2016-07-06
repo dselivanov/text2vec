@@ -7,7 +7,7 @@
 \usage{
 GloVe(word_vectors_size, vocabulary, x_max, learning_rate = 0.15,
   max_cost = 10, alpha = 0.75, lambda = 0, shuffle_seed = NA_integer_,
-  grain_size = 100000L, ...)
+  initial = NULL, grain_size = 100000L, ...)
 
 glove(tcm, word_vectors_size, x_max, num_iters, shuffle_seed = NA_integer_,
   learning_rate = 0.15, verbose = TRUE, convergence_tol = -1,
@@ -46,6 +46,12 @@ Generelly shuffling is a good idea for stochastic-gradient descent, but
 from my experience in this particular case it does not improve convergence.
 By default there is no shuffling. Please report if you find that shuffling
 improves your score.}
+
+\item{initial}{\code{NULL} - word vectors and word biases will be initialized
+randomly. Or named \code{list} which contains \code{w_i, w_j, b_i, b_j} values -
+initial word vectors and biases. This is useful for fine-tuning. For example one can
+pretrain model on large corpus (such as wikipedia dump) and then fine tune
+on smaller task-specific dataset.}
 
 \item{grain_size}{I do not recommend adjusting this paramenter. This is the
 grain_size for \code{RcppParallel::parallelReduce}. For details, see

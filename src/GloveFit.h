@@ -31,14 +31,21 @@ class GloveFit {
            uint32_t x_max,
            float max_cost,
            float alpha,
-           float lambda):
+           float lambda,
+           NumericMatrix w_i_init,
+           NumericMatrix w_j_init,
+           NumericVector b_i_init,
+           NumericVector b_j_init):
     vocab_size(vocab_size), word_vec_size(word_vec_size),
     x_max(x_max), learning_rate(learning_rate), max_cost(max_cost),
     alpha(alpha), lambda(lambda) {
 
     b_i.resize(vocab_size);
     b_j.resize(vocab_size);
-
+    for(size_t i = 0; i < vocab_size; i++) {
+      b_i[i] = b_i_init[i];
+      b_j[i] = b_j_init[i];
+    }
     grad_sq_b_i.resize(vocab_size);
     grad_sq_b_j.resize(vocab_size);
 
@@ -51,18 +58,16 @@ class GloveFit {
     for(size_t i = 0; i < vocab_size; i++) {
       w_i[i].resize(word_vec_size);
       w_j[i].resize(word_vec_size);
-
+      for(size_t j = 0; j < word_vec_size; j++) {
+        w_i[i][j] = w_i_init(i, j);
+        w_j[i][j] = w_j_init(i, j);
+      }
       grad_sq_w_i[i].resize(word_vec_size);
       grad_sq_w_j[i].resize(word_vec_size);
     }
-    fill_mat_rand(w_i, word_vec_size, -0.5, 0.5);
-    fill_mat_rand(w_j, word_vec_size, -0.5, 0.5);
 
     fill_mat_val(grad_sq_w_i, word_vec_size, 1.0);
     fill_mat_val(grad_sq_w_j, word_vec_size, 1.0);
-
-    fill_vec_rand(b_i, -0.5, 0.5);
-    fill_vec_rand(b_j, -0.5, 0.5);
 
     fill_vec_val(grad_sq_b_i, 1.0);
     fill_vec_val(grad_sq_b_j, 1.0);
@@ -135,7 +140,7 @@ class GloveFit {
       // partial_fit will be called 2 times - on this upper-triangular matrix and on transposed one.
       // So if we want to iterate with random order we will swap indices to
       // emulate upper-diagonal and lower-diagonal elements
-      if ( is_odd( i ) ) {
+      if ( is_odd( i_iter_order ) ) {
         x_irow_i = x_irow[ i_iter_order ];
         x_icol_i = x_icol[ i_iter_order ];
       } else {
@@ -233,7 +238,7 @@ class GloveFit {
           // main
           w_i[ x_irow_i ][ k ] -= (learning_rate * grad_w_i / sqrt( grad_sq_w_i[ x_irow_i ][ k ] ) );
           // context
-          w_j[ x_icol_i ][ k ] -= (learning_rate * grad_w_j / sqrt( grad_sq_w_i[ x_icol_i ][ k ] ) );
+          w_j[ x_icol_i ][ k ] -= (learning_rate * grad_w_j / sqrt( grad_sq_w_j[ x_icol_i ][ k ] ) );
 
           // Update squared gradient sums for word vectors
           // main
@@ -243,7 +248,7 @@ class GloveFit {
         }
         // Perform adaptive updates for bias terms
         b_i[ x_irow_i ] -= (learning_rate * grad_b_i / sqrt( grad_sq_b_i[ x_irow_i ] ));
-        b_j[ x_icol_i ] -= (learning_rate * grad_b_j / sqrt( grad_sq_b_i[ x_icol_i ] ));
+        b_j[ x_icol_i ] -= (learning_rate * grad_b_j / sqrt( grad_sq_b_j[ x_icol_i ] ));
 
         // Update squared gradient sums for biases
         grad_sq_b_i[ x_irow_i ] += grad_b_i * grad_b_i;
@@ -260,17 +265,17 @@ class GloveFit {
         if(this->FLAG_DO_L1_REGURARIZATION)
           wv(i, j) = this->w_i[i][j];
         else
-        // sum of context and main word vectors
-        wv(i, j) = this->w_i[i][j] + this->w_j[i][j];
+          // sum of context and main word vectors
+          wv(i, j) = this->w_i[i][j] + this->w_j[i][j];
     return wv;
   }
 
-//   List get_fit() {
-//     return List::create(_["w_i"] = convert2Rmat(this->w_i, this->word_vec_size),
-//                         _["grad_sq_w_i"] = convert2Rmat(this->grad_sq_w_i, this->word_vec_size),
-//                         _["b_i"] = this->b_i,
-//                         _["grad_sq_b_i"] = this->grad_sq_b_i);
-//   }
+  List dump_model() {
+    return List::create(_["w_i"] = convert2Rmat(this->w_i, this->word_vec_size),
+                        _["w_j"] = convert2Rmat(this->w_j, this->word_vec_size),
+                        _["b_i"] = this->b_i,
+                        _["b_j"] = this->b_j);
+  }
   private:
     size_t vocab_size, word_vec_size;
     uint32_t x_max;
