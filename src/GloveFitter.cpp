@@ -102,7 +102,11 @@ public:
              as<uint32_t>(params["x_max"]),
              as<float>(params["max_cost"]),
              as<float>(params["alpha"]),
-             as<float>(params["lambda"])),
+             as<float>(params["lambda"]),
+             as<List>(params["initial"])["w_i"],
+             as<List>(params["initial"])["w_j"],
+             as<List>(params["initial"])["b_i"],
+             as<List>(params["initial"])["b_j"]),
     adaGradIter(gloveFit) {}
   //------------------------------------------------
   void set_cost_zero() {
@@ -124,6 +128,9 @@ public:
   // List get_word_vectors() {
     return adaGradIter.fit.get_word_vectors();
   }
+  List dump_model() {
+    return adaGradIter.fit.dump_model();
+  }
 
 private:
   uint32_t GRAIN_SIZE;
@@ -138,5 +145,6 @@ RCPP_MODULE(GloveFitter) {
   .method( "set_cost_zero", &GloveFitter::set_cost_zero, "sets cost to zero")
   .method( "partial_fit", &GloveFitter::partial_fit, "process TCM data chunk")
   .method( "get_sparsity_level", &GloveFitter::get_word_vectors_sparsity_ratio, "return current sparsity level")
+  .method( "dump_model", &GloveFitter::dump_model, "return model parameters")
   ;
 }

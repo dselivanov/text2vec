@@ -31,6 +31,11 @@
 #'   from my experience in this particular case it does not improve convergence.
 #'   By default there is no shuffling. Please report if you find that shuffling
 #'   improves your score.
+#' @param initial \code{NULL} - word vectors and word biases will be initialized
+#' randomly. Or named \code{list} which contains \code{w_i, w_j, b_i, b_j} values -
+#' initial word vectors and biases. This is useful for fine-tuning. For example one can
+#' pretrain model on large corpus (such as wikipedia dump) and then fine tune
+#' on smaller task-specific dataset.
 #' @param grain_size I do not recommend adjusting this paramenter. This is the
 #'   grain_size for \code{RcppParallel::parallelReduce}. For details, see
 #'   \url{http://rcppcore.github.io/RcppParallel/#grain-size}.
@@ -66,6 +71,7 @@ GloVe <- function(word_vectors_size,
                   alpha = 0.75,
                   lambda = 0.0,
                   shuffle_seed = NA_integer_,
+                  initial = NULL,
                   grain_size =  1e5L, ...) {
   #--------------------------------------------------------
   # check input
@@ -81,9 +87,33 @@ GloVe <- function(word_vectors_size,
   # model parameters
   vocab_size = length(.vocab_terms)
 
+  # user didn't provide , so initialize word vectors and corresponding biases
+  # randomly as it done in GloVe paper
+  if (is.null(initial)) {
+    w_i = matrix(runif(length(.vocab_terms) * word_vectors_size, -0.5, 0.5),
+                 nrow = length(.vocab_terms),
+                 ncol = word_vectors_size)
+    b_i = runif(length(.vocab_terms), -0.5, 0.5)
+
+    w_j = matrix(runif(length(.vocab_terms) * word_vectors_size, -0.5, 0.5),
+                 nrow = length(.vocab_terms),
+                 ncol = word_vectors_size)
+    b_j = runif(length(.vocab_terms), -0.5, 0.5)
+
+    initial = list(w_i = w_i, w_j = w_j, b_i = b_i, b_j = b_j)
+  } else {
+    stopifnot(is.list(initial))
+    stopifnot(all(c('w_i', 'w_j', 'b_i', 'b_j') %in% names(initial) ))
+    stopifnot(all(dim(initial$w_i) == c(length(.vocab_terms), word_vectors_size)))
+    stopifnot(all(dim(initial$w_j) == c(length(.vocab_terms), word_vectors_size)))
+    stopifnot(length(initial$b_i) == length(.vocab_terms) &&
+                length(initial$b_j) == length(.vocab_terms))
+  }
   .params = list(vocab_size = vocab_size, word_vec_size = word_vectors_size,
                  learning_rate = learning_rate, x_max = x_max, max_cost = max_cost,
-                 alpha = alpha, lambda = lambda, grain_size = grain_size)
+                 alpha = alpha, lambda = lambda, grain_size = grain_size,
+                 initial = initial)
+  rm(initial);gc();
   # track cost between iterations
   .cost_history <- numeric(0)
   .word_vectors_history <- NULL
@@ -97,7 +127,9 @@ GloVe <- function(word_vectors_size,
     set.seed(shuffle_seed)
   #--------------------------------------------------------
   # main methods
-
+  dump_parameters = function() {
+    .glove_fitter$dump_model()
+  }
   # fit_predict method will work only with sparse matrices coercible to "dgTMatrix"
   fit_predict <- function(X, n_iter, convergence_tol = -1,
                             verbose = interactive(), dump_every_n = 0L, ...) {
@@ -134,6 +166,8 @@ GloVe <- function(word_vectors_size,
       # check whether SGD is numerically correct - no NaN at C++ level
       if (is.nan(cost))
         stop("Cost becomes NaN, try to use smaller learning_rate or smaller max_cost.")
+      if (cost / n_nnz / 2 > 0.5 && i == 1)
+        warning("Cost is too big, probably something goes wrong... try smaller learning rate", immediate. = T)
 
       # save cost history
       .cost_history <<- c(.cost_history, cost / n_nnz / 2)
@@ -197,7 +231,8 @@ GloVe <- function(word_vectors_size,
   self <- function() {
     model = list(fit_predict = fit_predict,
                  partial_fit = partial_fit,
-                 predict = predict)
+                 predict = predict,
+                 dump_parameters = dump_parameters)
     class(model) <- c('text2vec_model', 'GloVe')
     model
   }
