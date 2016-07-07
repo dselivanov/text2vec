@@ -133,6 +133,7 @@ GloVe <- function(word_vectors_size,
   # fit_predict method will work only with sparse matrices coercible to "dgTMatrix"
   fit_predict <- function(X, n_iter, convergence_tol = -1,
                             verbose = interactive(), dump_every_n = 0L, ...) {
+    .cost_history <<- numeric(0)
     # convert to internal native format
     stopifnot(inherits(X, 'Matrix'))
     if (!inherits(X, .internal_matrix_format))
@@ -141,7 +142,7 @@ GloVe <- function(word_vectors_size,
     n_nnz = length(X@i)
     # create list for saving word vectors
     if (dump_every_n > 0) {
-      temp = vector('list', n_iter %/% dump_every_n)
+      temp = vector('list', max(1, n_iter %/% dump_every_n))
       names(temp) <- paste0("iter_", dump_every_n * seq_len(n_iter %/% dump_every_n))
       .word_vectors_history <<- temp
     }
