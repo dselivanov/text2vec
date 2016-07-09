@@ -71,6 +71,7 @@ create_vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 
   )
 
   class(res) <- c('text2vec_vocabulary')
+  res$vocab$ngram_n = detect_ngrams(res)
   res
 }
 
@@ -81,16 +82,17 @@ create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ng
 
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
-  vocab <- new(VocabularyBuilder, ngram_min, ngram_max, stopwords, sep_ngram)
+  vocab_module <- new(VocabularyBuilder, ngram_min, ngram_max, stopwords, sep_ngram)
 
   foreach(tokens = itoken_src) %do% {
-    vocab$insert_document_batch(tokens$tokens)
+    vocab_module$insert_document_batch(tokens$tokens)
   }
+  vocab = setDT(vocab_module$get_vocab_statistics())
 
   res <- list(
-    vocab = setDT(vocab$get_vocab_statistics()),
+    vocab = vocab,
     ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
-    document_count = vocab$get_document_count(),
+    document_count = vocab_module$get_document_count(),
     stopwords = stopwords,
     sep_ngram = sep_ngram
   )
@@ -98,6 +100,7 @@ create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ng
     stop("vocabulary has no elements. Did you miss to reinitialise iterator over tokens?")
 
   class(res) <- c('text2vec_vocabulary')
+  res$vocab$ngram_n = detect_ngrams(res)
   res
 }
 
@@ -120,6 +123,7 @@ create_vocabulary.list <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngra
           }
   res[['stopwords']] <- stopwords
   res[['sep_ngram']] <- sep_ngram
+  res$vocab$ngram_n = detect_ngrams(res)
   res
 }
 
@@ -128,7 +132,7 @@ combine_vocabulary <- function(...) {
   ngram <- vocab_list[[1]][['ngram']]
   # extract vocabulary stats data.frame and rbind them
   combined_vocab <- vocab_list %>%
-    lapply(function(x) x[['vocab']]) %>%
+    lapply(function(x) x$vocab[, .(terms_counts, doc_counts, terms)]) %>%
     rbindlist
 
   # reduce by terms
@@ -143,6 +147,7 @@ combine_vocabulary <- function(...) {
     vocab = combined_vocab,
     ngram = ngram,
     document_count = combined_document_count,
+    # init with empty values
     stopwords = character(0),
     sep_ngram = character(0)
   )
@@ -223,4 +228,20 @@ prune_vocabulary <- function(vocabulary,
   class(pruned_vocabulary) <- 'text2vec_vocabulary'
 
   pruned_vocabulary
+}
+
+detect_ngrams = function(vocab, ...) {
+  stopifnot(class(vocab) == 'text2vec_vocabulary')
+  strsplit(vocab$vocab$terms, vocab$sep_ngram, fixed = T, ...) %>%
+    vapply(length, 0L)
+}
+
+print.text2vec_vocabulary <- function(x, ...) {
+  m1 = paste("Number of docs:", v$document_count)
+  m2 = paste(length(v$stopwords), "stopwords:", paste(head(v$stopwords), collapse = ', '), '...', collapse = ', ')
+  m3 = paste(names(v$ngram), v$ngram, sep = '=', collapse = '; ')
+  print(m1, quote = F)
+  print(m2, quote = F)
+  print(m3, quote = F)
+  print(x$vocab)
 }
