@@ -27,7 +27,7 @@ get_tcm <- function(corpus) {
     if (length(tcm@x) == 0)
       stop("tcm has 0 rows. Did you miss to reinitialise iterator over tokens?")
     dim_names <- colnames(tcm)
-    dimnames(tcm) <- list(dim_names, dim_names)
+    tcm@Dimnames = list(dim_names, dim_names)
     tcm
   }
   else

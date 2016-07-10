@@ -36,6 +36,7 @@
 #'@export
 create_vocabulary <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                        stopwords = character(0), sep_ngram = "_") {
+  stopifnot(is.numeric(ngram) && length(ngram) == 2 && ngram[[2]] >= ngram[[1]])
   UseMethod("create_vocabulary")
 }
 
@@ -71,7 +72,7 @@ create_vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 
   )
 
   class(res) <- c('text2vec_vocabulary')
-  res$vocab$ngram_n = detect_ngrams(res)
+  # res$vocab$ngram_n = detect_ngrams(res)
   res
 }
 
@@ -100,7 +101,7 @@ create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ng
     stop("vocabulary has no elements. Did you miss to reinitialise iterator over tokens?")
 
   class(res) <- c('text2vec_vocabulary')
-  res$vocab$ngram_n = detect_ngrams(res)
+  # res$vocab$ngram_n = detect_ngrams(res)
   res
 }
 
@@ -123,7 +124,7 @@ create_vocabulary.list <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngra
           }
   res[['stopwords']] <- stopwords
   res[['sep_ngram']] <- sep_ngram
-  res$vocab$ngram_n = detect_ngrams(res)
+  # res$vocab$ngram_n = detect_ngrams(res)
   res
 }
 

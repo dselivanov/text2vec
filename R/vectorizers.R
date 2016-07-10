@@ -1,6 +1,6 @@
-corpus_insert <- function(corpus, iterator) {
+corpus_insert <- function(corpus, iterator, grow_dtm = TRUE) {
   foreach(val = iterator ) %do% {
-    corpus$insert_document_batch(val$tokens)
+    corpus$insert_document_batch(val$tokens, grow_dtm)
     attr(corpus, 'ids') <- c(attr(corpus, 'ids'), val$ids)
   }
   corpus
@@ -76,6 +76,9 @@ vocab_vectorizer <- function(vocabulary,
     stop("At least one of the arguments 'grow_dtm', 'skip_grams_window' should
          satisfy grow_dtm == TRUE or skip_grams_window > 0")
 
+  if ( skip_grams_window > 0 && vocabulary$ngram[[2]] > 1)
+    stop("skip_grams_window > 0 can be used only with ngram = c(1, 1)")
+
   vectorizer <- function(iterator) {
 
     vocab_corpus <- new(VocabCorpus,
@@ -87,7 +90,7 @@ vocab_vectorizer <- function(vocabulary,
                         delim = vocabulary$sep_ngram)
 
     attr(vocab_corpus, 'ids') <- character(0)
-    corpus_insert(vocab_corpus, iterator)
+    corpus_insert(vocab_corpus, iterator, grow_dtm)
   }
   vectorizer
 }
@@ -107,6 +110,10 @@ hash_vectorizer <- function(hash_size = 2 ^ 18,
                             signed_hash = FALSE,
                             grow_dtm = TRUE,
                             skip_grams_window = 0L) {
+  stopifnot(is.numeric(ngram) && length(ngram) == 2 && ngram[[2]] >= ngram[[1]])
+
+  if ( skip_grams_window > 0 && ngram[[2]] > 1)
+    stop("skip_grams_window > 0 can be used only with ngram = c(1, 1)")
 
   if (!grow_dtm && skip_grams_window == 0L)
     stop("At least one of the arguments 'grow_dtm', 'skip_grams_window' should
@@ -120,7 +127,7 @@ hash_vectorizer <- function(hash_size = 2 ^ 18,
                        window_size = 0,
                        signed_hash)
     attr(hash_corpus, 'ids') <- character(0)
-    corpus_insert(hash_corpus, iterator)
+    corpus_insert(hash_corpus, iterator, grow_dtm)
   }
   vectorizer
 }
