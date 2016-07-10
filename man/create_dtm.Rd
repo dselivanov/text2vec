@@ -16,9 +16,7 @@ create_dtm(itoken_src, vectorizer, type = c("dgCMatrix", "dgTMatrix",
   "dgTMatrix", "lda_c"), verbose = FALSE, ...)
 }
 \arguments{
-\item{itoken_src}{\code{list} of iterators over tokens provided by
-\code{itoken}. Each element is a list of tokens, that is, tokenized and
-normalized strings.}
+\item{itoken_src}{\link{itoken} iterator or \code{list} of \code{itoken} iterators.}
 
 \item{vectorizer}{\code{function} vectorizer function; see
 \link{vectorizers}.}
@@ -38,14 +36,14 @@ A document-term matrix
 }
 \description{
 This is a high-level function for creating a document-term
-  matrix. If a parallel backend is registered, it will construct the DTM in
-  multiple threads.
+  matrix.
 }
 \details{
-The user should keep in mind that he or she should split the data
-  itself and provide a list of \link{itoken} iterators. Each element of
-  \code{itoken_src} will be handled in separate thread and combined at the
-  end of processing.
+If a parallel backend is registered and first argument is a list of \code{itoken},
+itereators, fucntion will construct the DTM in multiple threads.
+User should keep in mind that he or she should split the data itself and provide a list of
+\link{itoken} iterators. Each element of \code{itoken_src} will be handled in separate
+thread and combined at the end of processing.
 }
 \examples{
 \dontrun{

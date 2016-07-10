@@ -64,7 +64,7 @@ public:
   size_t get_tcm_size() {return this->tcm.size();};
 
   // implements hashing trick
-  void insert_terms (vector< string> &terms) {
+  void insert_terms (vector< string> &terms, int grow_dtm) {
     uint32_t term_index, context_term_index;
 
     size_t K = terms.size();
@@ -74,11 +74,13 @@ public:
     for(auto term: terms) {
       this->token_count++;
       term_index = murmurhash3_hash(term) % buckets_size;
-      if(signed_hash && murmurhash3_sign(term) < 0) {
-        dtm.add(doc_count, term_index, -1);
-      }
-      else {
-        dtm.add(doc_count, term_index, 1);
+      if(grow_dtm) {
+        if(signed_hash && murmurhash3_sign(term) < 0) {
+          dtm.add(doc_count, term_index, -1);
+        }
+        else {
+          dtm.add(doc_count, term_index, 1);
+        }
       }
       //###########################################
       // cooccurence related
@@ -107,20 +109,21 @@ public:
     }
   }
 
-  void insert_document(const CharacterVector doc) {
+  void insert_document(const CharacterVector doc, int grow_dtm = 1) {
+    checkUserInterrupt();
     generate_ngrams(doc, this->ngram_min, this->ngram_max,
                     this->stopwords,
                     this->terms_filtered_buffer,
                     this->ngrams_buffer,
                     this->ngram_delim);
-    insert_terms(this->ngrams_buffer);
+    insert_terms(this->ngrams_buffer, grow_dtm);
     this->dtm.increment_nrows();
     this->doc_count++;
   }
 
-  void insert_document_batch(const ListOf<const CharacterVector> docs_batch) {
+  void insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm = 1) {
     for (auto it:docs_batch)
-      insert_document(it);
+      insert_document(it, grow_dtm);
   }
   // get term cooccurence matrix
   SEXP get_tcm() {

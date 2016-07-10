@@ -35,7 +35,7 @@ public:
     init(vocab_R, n_min, n_max, stopwords_R, delim);
   };
 
-  void insert_terms (vector< string> &terms) {
+  void insert_terms (vector< string> &terms, int grow_dtm) {
 
     uint32_t term_index, context_term_index;
     size_t K = terms.size();
@@ -57,8 +57,10 @@ public:
       if(term_iterator != this->vocab.end()) {
         // get main word index from vocab
         term_index = term_iterator->second;
-        // increment count for input term
-        dtm.add(doc_count, term_index, 1);
+        if(grow_dtm) {
+          // increment count for input term
+          dtm.add(doc_count, term_index, 1);
+        }
         //###########################################
         // cooccurence related
         // will check 1 == ngram_min == ngram_max on R side
@@ -92,21 +94,21 @@ public:
     }
   }
 
-  void insert_document(const CharacterVector doc) {
+  void insert_document(const CharacterVector doc, int grow_dtm = 1) {
+    checkUserInterrupt();
     generate_ngrams(doc, this->ngram_min, this->ngram_max,
                     this->stopwords,
                     this->terms_filtered_buffer,
                     this->ngrams_buffer,
                     this->ngram_delim);
-    insert_terms(this->ngrams_buffer);
+    insert_terms(this->ngrams_buffer, grow_dtm);
     this->dtm.increment_nrows();
     this->doc_count++;
   }
 
-  void insert_document_batch(const ListOf<const CharacterVector> docs_batch ) {
+  void insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm = 1) {
     for (auto it:docs_batch) {
-      checkUserInterrupt();
-      insert_document(it);
+      insert_document(it, grow_dtm);
     }
   }
 

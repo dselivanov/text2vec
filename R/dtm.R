@@ -39,15 +39,13 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' @name create_dtm
 #' @title Document-term matrix construction
 #' @description This is a high-level function for creating a document-term
-#'   matrix. If a parallel backend is registered, it will construct the DTM in
-#'   multiple threads.
-#' @details The user should keep in mind that he or she should split the data
-#'   itself and provide a list of \link{itoken} iterators. Each element of
-#'   \code{itoken_src} will be handled in separate thread and combined at the
-#'   end of processing.
-#' @param itoken_src \code{list} of iterators over tokens provided by
-#'   \code{itoken}. Each element is a list of tokens, that is, tokenized and
-#'   normalized strings.
+#'   matrix.
+#' @details If a parallel backend is registered and first argument is a list of \code{itoken},
+#' itereators, fucntion will construct the DTM in multiple threads.
+#' User should keep in mind that he or she should split the data itself and provide a list of
+#' \link{itoken} iterators. Each element of \code{itoken_src} will be handled in separate
+#' thread and combined at the end of processing.
+#' @param itoken_src \link{itoken} iterator or \code{list} of \code{itoken} iterators.
 #' @param vectorizer \code{function} vectorizer function; see
 #'   \link{vectorizers}.
 #' @param type \code{character}, one of \code{c("dgCMatrix", "dgTMatrix",
