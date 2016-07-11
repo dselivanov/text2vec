@@ -44,7 +44,7 @@
 #' text8 <- read_lines(unz(temp, "text8"))
 #' it <- itoken(text8, preprocess_function = identity,
 #'              tokenizer = function(x) strsplit(x, " ", TRUE))
-#' vocab <- vocabulary(it) %>%
+#' vocab <- create_vocabulary(it) %>%
 #'  prune_vocabulary(term_count_min = 5)
 #'
 #' it <- itoken(text8, preprocess_function = identity,
