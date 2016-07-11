@@ -35,6 +35,7 @@ LinkingTo:
     digest
 Suggests:
     testthat,
+    covr,
     knitr,
     rmarkdown,
     glmnet,
