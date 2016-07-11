@@ -60,7 +60,7 @@ get_tcm <- function(corpus) {
 #'
 #' tokens <- movie_review$review %>% tolower %>% word_tokenizer
 #' it <- itoken(tokens)
-#' v <- create_vocabulary(jobs)
+#' v <- create_vocabulary(it)
 #' vectorizer <- vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)
 #' tcm <- create_tcm(itoken(tokens), vectorizer)
 #'

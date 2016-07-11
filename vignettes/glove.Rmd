@@ -11,7 +11,7 @@ vignette: >
 
 # Word embeddings
 
-After Tomas Mikolov et al. released the [word2vec](https://code.google.com/p/word2vec/) tool, there was a boom of articles about word vector representations. One of the best of these articles is Stanford's [GloVe: Global Vectors for Word Representation](http://nlp.stanford.edu/projects/glove/), which did explained why such algorithms work and refolmulating word2vec optimizations as a special kind of factoriazation for word co-occurence matrices. 
+After Tomas Mikolov et al. released the [word2vec](https://code.google.com/p/word2vec/) tool, there was a boom of articles about word vector representations. One of the best of these articles is Stanford's [GloVe: Global Vectors for Word Representation](http://nlp.stanford.edu/projects/glove/), which did explained why such algorithms work and reformulating word2vec optimizations as a special kind of factorization for word co-occurence matrices. 
 
 Here I will briefly introduce the GloVe algorithm and show how to use its text2vec implementation.
 
