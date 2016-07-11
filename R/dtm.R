@@ -27,6 +27,8 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
   if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
     type <- match.arg(type)
     dtm <- corpus$get_dtm()
+    if (length(dtm@x) == 0)
+      stop("dtm is empty. Did you miss to reinitialise iterator over tokens?")
     dtm@Dimnames[[1]] <- attr(corpus, 'ids')
     coerce_dgTMatrix(dtm, type)
   }

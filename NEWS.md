@@ -1,3 +1,7 @@
+# text2vec 0.3.1
+
+1. 2016-07-11 Check input in `create_*()` functions for empty iterators; various typos corrections, thanks to @kbenoit and @dfalbel
+
 # text2vec 0.3.0
 
 1. 2016-01-13 fix for #46, thanks to @[buhrmann](https://github.com/buhrmann) for reporting 

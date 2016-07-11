@@ -94,6 +94,8 @@ create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ng
     document_count = vocab$get_document_count(),
     stopwords = stopwords
   )
+  if (nrow(res$vocab) == 0)
+    stop("vocabulary has no elements. Did you miss to reinitialise iterator over tokens?")
 
   class(res) <- c('text2vec_vocabulary')
   res

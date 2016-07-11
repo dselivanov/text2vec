@@ -24,8 +24,10 @@
 get_tcm <- function(corpus) {
   if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
     tcm <- corpus$get_tcm()
+    if (length(tcm@x) == 0)
+      stop("tcm is empty. Did you miss to reinitialise iterator over tokens?")
     dim_names <- colnames(tcm)
-    dimnames(tcm) <- list(dim_names, dim_names)
+    tcm@Dimnames <- list(dim_names, dim_names)
     tcm
   }
   else
