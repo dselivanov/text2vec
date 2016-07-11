@@ -41,45 +41,20 @@ struct AdaGradIter : public Worker {
             const IntegerVector &x_icolR,
             const NumericVector &x_valR,
             const IntegerVector &iter_orderR,
-            GloveFit &fit) {
-    x_irow = RVector<int>(x_irowR);
-    x_icol = RVector<int>(x_icolR);
-    x_val  = RVector<double> (x_valR);
-    iter_order = RVector<int> (iter_orderR);
-    fit = fit;
-    global_cost = 0;
-  }
+            GloveFit &fit);
 
 
   // dummy constructor
   // used in first initialization of GloveFitter
-  AdaGradIter(GloveFit &fit):
-    x_irow(IntegerVector(0)),
-    x_icol(IntegerVector(0)),
-    x_val(NumericVector(0)),
-    iter_order(IntegerVector(0)),
-    fit(fit) {};
-
+  AdaGradIter(GloveFit &fit);
   // constructors
   AdaGradIter(const IntegerVector &x_irowR,
               const IntegerVector &x_icolR,
               const NumericVector &x_valR,
               const IntegerVector &iter_orderR,
-              GloveFit &fit):
-    x_irow(x_irowR),
-    x_icol(x_icolR),
-    x_val(x_valR),
-    iter_order(iter_orderR),
-    fit(fit),
-    global_cost(0) {}
+              GloveFit &fit);
 
-  AdaGradIter(const AdaGradIter& AdaGradIter, Split):
-    x_irow(AdaGradIter.x_irow),
-    x_icol(AdaGradIter.x_icol),
-    x_val(AdaGradIter.x_val),
-    iter_order(AdaGradIter.iter_order),
-    fit(AdaGradIter.fit),
-    global_cost(0) {}
+  AdaGradIter(const AdaGradIter& AdaGradIter, Split);
 
   // process just the elements of the range
   void operator()(size_t begin, size_t end) {
@@ -90,6 +65,50 @@ struct AdaGradIter : public Worker {
     global_cost += rhs.global_cost;
   }
 };
+//-----------------------------------------------------------------
+// implementation AdaGradIter methods
+//-----------------------------------------------------------------
+void AdaGradIter::init(const IntegerVector &x_irowR,
+                       const IntegerVector &x_icolR,
+                       const NumericVector &x_valR,
+                       const IntegerVector &iter_orderR,
+                       GloveFit &fit) {
+  x_irow = RVector<int>(x_irowR);
+  x_icol = RVector<int>(x_icolR);
+  x_val  = RVector<double> (x_valR);
+  iter_order = RVector<int> (iter_orderR);
+  fit = fit;
+  global_cost = 0;
+}
+
+AdaGradIter::AdaGradIter(GloveFit &fit):
+  x_irow(IntegerVector(0)),
+  x_icol(IntegerVector(0)),
+  x_val(NumericVector(0)),
+  iter_order(IntegerVector(0)),
+  fit(fit) {};
+
+
+AdaGradIter::AdaGradIter(const IntegerVector &x_irowR,
+                         const IntegerVector &x_icolR,
+                         const NumericVector &x_valR,
+                         const IntegerVector &iter_orderR,
+                         GloveFit &fit):
+  x_irow(x_irowR),
+  x_icol(x_icolR),
+  x_val(x_valR),
+  iter_order(iter_orderR),
+  fit(fit),
+  global_cost(0) {}
+
+AdaGradIter::AdaGradIter(const AdaGradIter& AdaGradIter, Split):
+  x_irow(AdaGradIter.x_irow),
+  x_icol(AdaGradIter.x_icol),
+  x_val(AdaGradIter.x_val),
+  iter_order(AdaGradIter.iter_order),
+  fit(AdaGradIter.fit),
+  global_cost(0) {}
+//-----------------------------------------------------------------
 
 class GloveFitter {
 public:
