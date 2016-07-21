@@ -6,15 +6,10 @@ txt <- movie_review[['review']][train_ind]
 ids <- movie_review[['id']][train_ind]
 names(txt) <- ids
 
-get_test_iterator <- function()
-  itoken(txt,
-         preprocess_function = tolower,
-         tokenizer = word_tokenizer,
-         progessbar = F)
+it = itoken(txt, tolower, word_tokenizer, progessbar = F)
 
 test_that("Vocabulary pruning", {
-  iterator <- get_test_iterator()
-  vocab <- create_vocabulary(iterator)
+  vocab <- create_vocabulary(it)
   # Vocabulary stats
   expect_equal(length(vocab$vocab$terms), 18402)
   expect_equal( vocab$vocab$terms[ which.max(vocab$vocab$doc_counts) ], 'the')
@@ -51,7 +46,7 @@ test_that("Vocabulary pruning", {
 
   # test for https://github.com/dselivanov/text2vec/issues/46
   vectorizer <- vocab_vectorizer(p_vocab)
-  vcorpus <- create_corpus(get_test_iterator(), vectorizer)
+  vcorpus <- create_corpus(it, vectorizer)
 
   dtm <- get_dtm(vcorpus)
   # check we keep names for input. see #51
@@ -64,20 +59,18 @@ test_that("Vocabulary pruning", {
 })
 
 test_that("Vocabulary stopwords", {
-  iterator <- get_test_iterator()
   STOP_WORDS <- c('is', 'in', 'it')
-  vocab <- create_vocabulary(iterator)
+  vocab <- create_vocabulary(it)
   # check removed stop words
   expect_false(any(STOP_WORDS %in% vocab$terms))
 })
 
 test_that("Unigran Vocabulary Corpus construction", {
   # Vocabulary construction
-  iterator <- get_test_iterator()
-  vocab <- create_vocabulary(iterator)
+  vocab <- create_vocabulary(it)
   # VocabCorpus construction
   vectorizer <- vocab_vectorizer(vocab)
-  vcorpus <- create_corpus(get_test_iterator(), vectorizer)
+  vcorpus <- create_corpus(it, vectorizer)
 
   # dtm
   m <- vcorpus$get_dtm()
@@ -96,9 +89,8 @@ test_that("Unigran Vocabulary Corpus construction", {
 
 test_that("bi-gram Vocabulary Corpus construction", {
   # unigram + bigram VocabCorpus construction
-  iterator <- get_test_iterator()
 
-  vocab <- create_vocabulary(iterator,
+  vocab <- create_vocabulary(it,
                       ngram = c('ngram_min' = 2L,
                                 'ngram_max' = 2L))
 
@@ -106,7 +98,7 @@ test_that("bi-gram Vocabulary Corpus construction", {
   expect_equal(length(vocab$vocab$terms), 120070L)
   # VocabCorpus construction
   vectorizer <- vocab_vectorizer(vocab)
-  vcorpus <- create_corpus(get_test_iterator(), vectorizer)
+  vcorpus <- create_corpus(it, vectorizer)
 
   # dtm
   m <- vcorpus$get_dtm()
@@ -117,14 +109,13 @@ test_that("bi-gram Vocabulary Corpus construction", {
 
 test_that("Unigram + Bigram Vocabulary Corpus construction", {
   # unigram + bigram VocabCorpus construction
-  iterator <- get_test_iterator()
-  vocab <- create_vocabulary(iterator,
+  vocab <- create_vocabulary(it,
                       ngram = c('ngram_min' = 1L,
                                 'ngram_max' = 2L))
   expect_equal(length(vocab$vocab$terms), 138472L)
   # VocabCorpus construction
   vectorizer <- vocab_vectorizer(vocab)
-  vcorpus <- create_corpus(get_test_iterator(), vectorizer)
+  vcorpus <- create_corpus(it, vectorizer)
   # dtm
   m <- vcorpus$get_dtm()
   expect_equal( dim(m)[[1]], length(train_ind))

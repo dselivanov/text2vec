@@ -7,9 +7,9 @@
 #' @import Matrix
 #' @import Rcpp
 #' @import digest
-#' @import iterators
 #' @import data.table
 #' @importFrom foreach foreach %do% %dopar%
+#' @importFrom R6 R6Class
 #' @importFrom RcppParallel RcppParallelLibs
 #' @importFrom magrittr %>%
 #' @importFrom utils txtProgressBar setTxtProgressBar

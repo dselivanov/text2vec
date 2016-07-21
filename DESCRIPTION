@@ -24,11 +24,11 @@ Imports:
     Rcpp (>= 0.11),
     RcppParallel (>= 4.3.14),
     digest (>= 0.6.8),
-    iterators (>= 1.0.8),
     foreach(>= 1.4.3),
     data.table(>= 1.9.6),
     magrittr (>= 1.5),
-    RSpectra (>= 0.11)
+    RSpectra (>= 0.11),
+    R6 (>= 2.1.2)
 LinkingTo:
     Rcpp,
     RcppParallel,

@@ -38,3 +38,10 @@ char_tokenizer <- function(strings, ...)
 {
   strsplit(strings, "", TRUE, ...)
 }
+
+#' @rdname tokenizers
+#' @export
+space_tokenizer <- function(strings, ...)
+{
+  strsplit(strings, " ", TRUE, ...)
+}

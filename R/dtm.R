@@ -28,7 +28,7 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
     type <- match.arg(type)
     dtm <- corpus$get_dtm()
     if (length(dtm@x) == 0)
-      stop("dtm has 0 rows. Did you miss to reinitialise iterator over tokens?")
+      warning("dtm has 0 rows. Empty iterator?", immediate. = T)
     dtm@Dimnames[[1]] <- attr(corpus, 'ids')
     coerce_dgTMatrix(dtm, type)
   }

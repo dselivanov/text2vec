@@ -1,5 +1,11 @@
 corpus_insert <- function(corpus, iterator, grow_dtm = TRUE) {
-  foreach(val = iterator ) %do% {
+  if (inherits(iterator, 'R6'))
+    it = iterator$clone(deep = TRUE)
+  else {
+    warning("Can't clone input iterator. It will be modified by current function call", immediate. = T)
+    it = iterator
+  }
+  foreach(val = it ) %do% {
     corpus$insert_document_batch(val$tokens, grow_dtm)
     attr(corpus, 'ids') <- c(attr(corpus, 'ids'), val$ids)
   }
