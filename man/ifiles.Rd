@@ -5,18 +5,15 @@
 \alias{ifiles}
 \title{Creates iterator over text files from the disk}
 \usage{
-ifiles(file_paths, reader_function = readLines, ...)
+ifiles(file_paths, reader_function = readLines)
 
-idir(path, reader_function = readLines, ...)
+idir(path, reader_function = readLines)
 }
 \arguments{
 \item{file_paths}{\code{character} paths of input files}
 
 \item{reader_function}{\code{function} which will perform reading of text
 files from disk, which should take a path as its first argument.}
-
-\item{...}{arguments passed to other methods (including
-\code{reader_function}).}
 
 \item{path}{\code{character} path of directory. All files in the directory will be read.}
 }

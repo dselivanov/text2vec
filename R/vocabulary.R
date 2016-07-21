@@ -80,12 +80,18 @@ create_vocabulary.character <- function(itoken_src, ngram = c('ngram_min' = 1L, 
 #' @export
 create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                               stopwords = character(0), sep_ngram = "_") {
+  if (inherits(itoken_src, 'R6'))
+    it = itoken_src$clone(deep = TRUE)
+  else {
+    warning("Can't clone input iterator. It will be modified by current function call", immediate. = T)
+    it = itoken_src
+  }
 
   ngram_min <- as.integer( ngram[[1]] )
   ngram_max <- as.integer( ngram[[2]] )
   vocab_module <- new(VocabularyBuilder, ngram_min, ngram_max, stopwords, sep_ngram)
 
-  foreach(tokens = itoken_src) %do% {
+  foreach(tokens = it) %do% {
     vocab_module$insert_document_batch(tokens$tokens)
   }
   vocab = setDT(vocab_module$get_vocab_statistics())
@@ -98,7 +104,7 @@ create_vocabulary.itoken <- function(itoken_src, ngram = c('ngram_min' = 1L, 'ng
     sep_ngram = sep_ngram
   )
   if (nrow(res$vocab) == 0)
-    stop("vocabulary has no elements. Did you miss to reinitialise iterator over tokens?")
+    warning("vocabulary has no elements. Empty iterator?", immediate. = T)
 
   class(res) <- c('text2vec_vocabulary')
   # res$vocab$ngram_n = detect_ngrams(res)
@@ -237,10 +243,13 @@ detect_ngrams = function(vocab, ...) {
     vapply(length, 0L)
 }
 
+
+#' @export
+#' @method print text2vec_vocabulary
 print.text2vec_vocabulary <- function(x, ...) {
-  m1 = paste("Number of docs:", v$document_count)
-  m2 = paste(length(v$stopwords), "stopwords:", paste(head(v$stopwords), collapse = ', '), '...', collapse = ', ')
-  m3 = paste(names(v$ngram), v$ngram, sep = '=', collapse = '; ')
+  m1 = paste("Number of docs:", x$document_count)
+  m2 = paste(length(x$stopwords), "stopwords:", paste(head(x$stopwords), collapse = ', '), '...', collapse = ', ')
+  m3 = paste(names(x$ngram), x$ngram, sep = '=', collapse = '; ')
   print(m1, quote = F)
   print(m2, quote = F)
   print(m3, quote = F)

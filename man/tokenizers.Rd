@@ -3,6 +3,7 @@
 \name{tokenizers}
 \alias{char_tokenizer}
 \alias{regexp_tokenizer}
+\alias{space_tokenizer}
 \alias{tokenizers}
 \alias{word_tokenizer}
 \title{Simple tokenization functions, which performs string splitting}
@@ -12,6 +13,8 @@ word_tokenizer(strings, ...)
 regexp_tokenizer(strings, pattern, ...)
 
 char_tokenizer(strings, ...)
+
+space_tokenizer(strings, ...)
 }
 \arguments{
 \item{strings}{\code{character} vector}

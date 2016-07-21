@@ -19,9 +19,11 @@ writeLines(txt_2, con = temp_file_2)
 ########################################
 test_that("ifiles", {
   it <- ifiles(c(temp_file_1, temp_file_2))
-  it2 <- itoken(it, preprocess_function = tolower, tokenizer = word_tokenizer)
+  it2 <- itoken(it, preprocess_function = tolower, tokenizer = word_tokenizer, progressbar = FALSE)
   v <- create_vocabulary(it2)
   expect_equal(nrow(v$vocab), 7261)
+  v2 <- create_vocabulary(it2)
+  expect_equal(v, v2)
 })
 
 test_that("idir", {
@@ -31,12 +33,12 @@ test_that("idir", {
   expect_equal(nrow(v$vocab), 7261)
 })
 
-test_that("ilines", {
-  it <- ilines(con = temp_file_1, n = 10)
-  it2 <- itoken(it, preprocess_function = tolower, tokenizer = word_tokenizer)
-  v <- create_vocabulary(it2)
-  expect_equal(nrow(v$vocab), 4464)
-})
+# test_that("ilines", {
+#   it <- ilines(con = temp_file_1, n = 10)
+#   it2 <- itoken(it, preprocess_function = tolower, tokenizer = word_tokenizer)
+#   v <- create_vocabulary(it2)
+#   expect_equal(nrow(v$vocab), 4464)
+# })
 
 test_that("itoken character", {
   it2 <- itoken(txt_1, preprocess_function = tolower, tokenizer = word_tokenizer)
@@ -47,13 +49,29 @@ test_that("itoken character", {
 ########################################
 # test input empty iterators
 ########################################
-test_that("empty input iterators", {
-  tokens <- movie_review[seq_len(N),]$review %>% tolower %>% strsplit(' ', T)
-  it <- itoken(tokens)
+# test_that("empty input iterators", {
+#   tokens <- movie_review[seq_len(N),]$review %>% tolower %>% strsplit(' ', T)
+#   it <- itoken(tokens)
+#   v = create_vocabulary(it)
+#   expect_equal(nrow(v$vocab), 5949L)
+#   expect_error(create_vocabulary(it), "vocabulary has no elements. Did you miss to reinitialise iterator over tokens?")
+#   expect_error(create_dtm(it, vocab_vectorizer(v)), "dtm has 0 rows. Did you miss to reinitialise iterator over tokens?")
+#   expect_error(create_dtm(it, hash_vectorizer()), "dtm has 0 rows. Did you miss to reinitialise iterator over tokens?")
+#   expect_error(create_tcm(it, vocab_vectorizer(v, grow_dtm = F, skip_grams_window = 2)), "tcm has 0 rows. Did you miss to reinitialise iterator over tokens?")
+# })
+
+
+########################################
+# test that iterators are immutable
+########################################
+test_that("immutable input iterators", {
+  tokens <- movie_review[seq_len(N),]$review %>% tolower %>% space_tokenizer
+  it = itoken(tokens)
   v = create_vocabulary(it)
-  expect_equal(nrow(v$vocab), 5949L)
-  expect_error(create_vocabulary(it), "vocabulary has no elements. Did you miss to reinitialise iterator over tokens?")
-  expect_error(create_dtm(it, vocab_vectorizer(v)), "dtm has 0 rows. Did you miss to reinitialise iterator over tokens?")
-  expect_error(create_dtm(it, hash_vectorizer()), "dtm has 0 rows. Did you miss to reinitialise iterator over tokens?")
-  expect_error(create_tcm(it, vocab_vectorizer(v, grow_dtm = F, skip_grams_window = 2)), "tcm has 0 rows. Did you miss to reinitialise iterator over tokens?")
+  dtm1 = create_dtm(it, vocab_vectorizer(v))
+  dtm2 = create_dtm(it, vocab_vectorizer(v))
+  expect_identical(dtm1, dtm2)
+  dtm1 = create_dtm(it, hash_vectorizer(2**8))
+  dtm2 = create_dtm(it, hash_vectorizer(2**8))
+  expect_identical(dtm1, dtm2)
 })
