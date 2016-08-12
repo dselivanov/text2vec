@@ -90,15 +90,15 @@ GloVe <- function(word_vectors_size,
   # user didn't provide , so initialize word vectors and corresponding biases
   # randomly as it done in GloVe paper
   if (is.null(initial)) {
-    w_i = matrix(runif(length(.vocab_terms) * word_vectors_size, -0.5, 0.5),
+    w_i = matrix(stats::runif(length(.vocab_terms) * word_vectors_size, -0.5, 0.5),
                  nrow = length(.vocab_terms),
                  ncol = word_vectors_size)
-    b_i = runif(length(.vocab_terms), -0.5, 0.5)
+    b_i = stats::runif(length(.vocab_terms), -0.5, 0.5)
 
-    w_j = matrix(runif(length(.vocab_terms) * word_vectors_size, -0.5, 0.5),
+    w_j = matrix(stats::runif(length(.vocab_terms) * word_vectors_size, -0.5, 0.5),
                  nrow = length(.vocab_terms),
                  ncol = word_vectors_size)
-    b_j = runif(length(.vocab_terms), -0.5, 0.5)
+    b_j = stats::runif(length(.vocab_terms), -0.5, 0.5)
 
     initial = list(w_i = w_i, w_j = w_j, b_i = b_i, b_j = b_j)
   } else {
