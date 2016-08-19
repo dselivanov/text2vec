@@ -249,9 +249,10 @@ detect_ngrams = function(vocab, ...) {
 print.text2vec_vocabulary <- function(x, ...) {
   m1 = paste("Number of docs:", x$document_count)
   m2 = paste(length(x$stopwords), "stopwords:", paste(head(x$stopwords), collapse = ', '), '...', collapse = ', ')
-  m3 = paste(names(x$ngram), x$ngram, sep = '=', collapse = '; ')
-  print(m1, quote = F)
-  print(m2, quote = F)
-  print(m3, quote = F)
+  m3 = paste(names(x$ngram), x$ngram, sep = ' = ', collapse = '; ')
+  cat(m1, "\n")
+  cat(m2, "\n")
+  cat(m3, "\n")
+  cat("Vocabulary:", "\n")
   print(x$vocab)
 }
