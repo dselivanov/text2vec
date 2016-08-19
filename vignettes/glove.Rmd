@@ -11,22 +11,21 @@ vignette: >
 
 # Word embeddings
 
-After Tomas Mikolov et al. released the [word2vec](https://code.google.com/p/word2vec/) tool, there was a boom of articles about word vector representations. One of the best of these articles is Stanford's [GloVe: Global Vectors for Word Representation](http://nlp.stanford.edu/projects/glove/), which did explained why such algorithms work and refolmulating word2vec optimizations as a special kind of factoriazation for word co-occurence matrices. 
+After Tomas Mikolov et al. released the [word2vec](https://code.google.com/p/word2vec/) tool, there was a boom of articles about word vector representations. One of the best of these articles is Stanford's [GloVe: Global Vectors for Word Representation](http://nlp.stanford.edu/projects/glove/), which explained why such algorithms work and reformulated word2vec optimizations as a special kind of factoriazation for word co-occurence matrices. 
 
 Here I will briefly introduce the GloVe algorithm and show how to use its text2vec implementation.
 
 # Introduction to the GloVe algorithm
 
-GloVe algorithm consists of following steps:
+THe GloVe algorithm consists of following steps:
 
-1. Collect word cooccurence statistics in a form of word coocurence matrix $X$. Each element $X_{ij}$ of such matrix represents measure of how often word *i* appears in context of word *j*. Usually we scan our corpus in the following manner: for each term we look for context terms withing some area, a *window_size* before and a *window_size* after. Also we give less weight for more distant words, usually using the formula $$decay = 1/offset$$.
+1. Collect word cooccurence statistics in a form of word co-ocurrence matrix $X$. Each element $X_{ij}$ of such matrix represents how often word *i* appears in context of word *j*. Usually we scan our corpus in the following manner: for each term we look for context terms within some area defined by a *window_size* before the term and a *window_size* after the term. Also we give less weight for more distant words, usually using this formula: $$decay = 1/offset$$
 
-2. Define soft constraints for each word pair: 
-$$w_i^Tw_j + b_i + b_j = log(X_{ij})$$
-Here $w_i$ - vector for the main word, $w_j$ - vector for the context word, $b_i$, $b_j$ are scalar biases for the main and context words.
+2. Define soft constraints for each word pair:  $$w_i^Tw_j + b_i + b_j = log(X_{ij})$$ Here $w_i$ - vector for the main word, $w_j$ - vector for the context word, $b_i$, $b_j$ are scalar biases for the main and context words.
+
 3. Define a cost function 
 $$J = \sum_{i=1}^V \sum_{j=1}^V \; f(X_{ij}) ( w_i^T w_j + b_i + b_j - \log X_{ij})^2$$
-Here $f$ is a weighting function which help us to prevent learning only from extremely common word pairs. The GloVe authors choose the following fucntion:
+Here $f$ is a weighting function which help us to prevent learning only from extremely common word pairs. The GloVe authors choose the following function:
 
 $$
 f(X_{ij}) = 
@@ -64,7 +63,7 @@ tokens <- strsplit(wiki, split = " ", fixed = T)
 vocab <- create_vocabulary(itoken(tokens))
 ```
 
-These words should not be too rare. Fot example we cannot calculate a meaningful word vector for a word which we saw only once in the entire corpus. Here we will take only words which appear at least 5 times. *text2vec* provides more options to filter vocabulary (see `?prune_vocabulary`).
+These words should not be too uncommon. Fot example we cannot calculate a meaningful word vector for a word which we saw only once in the entire corpus. Here we will take only words which appear at least five times. text2vec provides additional options to filter vocabulary (see `?prune_vocabulary`).
 
 ```{r, eval=FALSE}
 vocab <- prune_vocabulary(vocab, term_count_min = 5L)
@@ -85,15 +84,14 @@ tcm <- create_tcm(it, vectorizer)
 ```
 
 Now we have a TCM matrix and can factorize it via the GloVe algorithm.  
-text2vec uses a parallel stochastic gradient descend algorithm. By default it use all cores on your machine, but you can specify the number of cores if you wish. For example, to use 4 threads, call `RcppParallel::setThreadOptions(numThreads = 4)`. 
+text2vec uses a parallel stochastic gradient descent algorithm. By default it will use all cores on your machine, but you can specify the number of cores if you wish. For example, to use 4 threads call `RcppParallel::setThreadOptions(numThreads = 4)`. 
 
-Let's fit our model. (It can take several of minutes to fit!)
+Let's fit our model. (It can take several minutes to fit!)
 
 ```{r, eval = FALSE}
 fit <- glove(tcm = tcm,
              word_vectors_size = 50,
-             x_max = 10, learning_rate = 0.2,
-             num_iters = 15)
+             x_max = 10, learning_rate = 0.2, num_iters = 15)
 ```
 
 > 2016-01-10 14:12:37 - epoch 1, expected cost 0.0662  
@@ -136,4 +134,4 @@ head(sort(cos_dist[1,], decreasing = T), 10)
 ## 0.7811252 0.7763088 0.7048109 0.6696540 0.6580989
 ```
 
-You can achieve **much** better results by experimenting with `skip_grams_window` and the parameters of the `glove()` function (including word vectors size and the number of iterations). For more details and large-scale experiments on wikipedia data see this [post](http://dsnotes.com/blog/text2vec/2015/12/01/glove-enwiki/) on my blog.
+You can achieve much better results by experimenting with `skip_grams_window` and the parameters of the `glove()` function (including word vectors size and the number of iterations). For more details and large-scale experiments on wikipedia data see this [post](http://dsnotes.com/blog/text2vec/2015/12/01/glove-enwiki/) on my blog.
