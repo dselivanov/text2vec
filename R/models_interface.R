@@ -1,5 +1,22 @@
+# all text2vec models should inherit from this class!
+text2vec_model = R6::R6Class(
+  classname = 'text2vec_model',
+  public = list(
+    fit = function() {stop("Method not implemented")},
+    partial_fit = function() {stop("Method not implemented")},
+    predict = function() {stop("Method not implemented")},
+    transform = function() {stop("Method not implemented")},
+    fit_transform = function() {stop("Method not implemented")}
+  ),
+  private = list(
+    verbose = FALSE,
+    fitted = FALSE,
+    internal_matrix_format = NULL
+  )
+)
+
 #' @name fit
-#' @title fit modelpredict
+#' @title fit text2vec model
 #' @description This is generic function to fit text2vec models (class = "text2vec_model")
 #' @param object instance of class \code{text2vec_model}. See \link{LSA}.
 #' @param X matrix like object. At the moment usually one of
@@ -141,79 +158,3 @@ call_model <- function(object, X, method, ...) {
                "not implemented for model of class(es)",
                paste(class(object), collapse = ', ') ))
 }
-
-#-------------------------------------------------------------------------------
-# TEMPLATE FOR NEW MODELS
-#-------------------------------------------------------------------------------
-
-# model_template <- function(param_1, param_2, verbose = FALSE, ...) {
-#   # check input
-#   stopifnot(TRUE)
-#   # internal parameters and helpers
-#   .internal_matrix_format = 'dgCMatrix'
-#   # Flag wich stores whether model was fitted/partially fitted or not
-#   .fitted = FALSE
-#   # model parameters
-#   .param_1 = NULL
-#   .param_2 = NULL
-#
-#   # internal debug methods
-#   get_params <- function() {
-#     list(param_1 = .param_1, param_2 = .param_2, fitted = .fitted)
-#   }
-#
-#   # main methods
-#   fit <- function(X) {
-#     # fit here
-#
-#     # change internal parameters if needed
-#     # .param_1 <<- SOMEVALUE
-#
-#     # set fitted FLAG
-#     # .fitted <<- TRUE
-#     invisible(self())
-#   }
-#
-#   partial_fit <- function(X) {
-#     # fit here
-#
-#     # change internal parameters if needed
-#     # .param_1 <<- SOMEVALUE
-#
-#     # set fitted FLAG
-#     # .fitted <<- TRUE
-#     invisible(self())
-#   }
-#
-#   fit_predict <- function(X) {
-#     # fit here
-#
-#     # change internal parameters if needed
-#     # .param_1 <<- SOMEVALUE
-#
-#     # set fitted FLAG
-#     # .fitted <<- TRUE
-#
-#     # call tranform at the end
-#     tranform(model, X)
-#   }
-#
-#   predict <- function(dtm) {
-#     if (.fitted)
-#
-#     else
-#       stop("Model was not fitted, please fit it first...")
-#   }
-#
-#   self <- function() {
-#     model = list(fit = fit,
-#                  fit_predict = fit_predict,
-#                  partial_fit = partial_fit,
-#                  predict = predict,
-#                  get_params = get_params)
-#     class(model) <- c('text2vec_model', 'MODEL_CLASS')
-#     model
-#   }
-#
-#   self()
-# }

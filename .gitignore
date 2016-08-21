@@ -6,3 +6,7 @@ src/*.so
 src/*.dll
 inst/doc
 vignettes/*.html
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
