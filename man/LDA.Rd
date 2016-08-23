@@ -23,6 +23,20 @@ Also knows as \bold{eta}.}
 }
 \description{
 \bold{Iterative algorithm}. Model can be fitted
-via Collapsed Gibbs Sampling algorithm using \code{fit} or \code{fit_predict} methods.
+via Collapsed Gibbs Sampling algorithm using \code{fit} or \code{fit_transf} methods.
+}
+\examples{
+library(text2vec)
+data("movie_review")
+N = 100
+tokens = movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
+it = itoken(tokens, ids = movie_review$id[1:N])
+v = create_vocabulary(it) \%>\%
+prune_vocabulary(term_count_min = 5, doc_proportion_max = 0.2)
+dtm = create_dtm(it, vocab_vectorizer(v), 'lda_c')
+     lda_model = LDA(n_topics = 10, vocabulary = v,
+     doc_topic_prior = 0.1, topic_word_prior = 0.1,
+     check_convergence_every_n = 5, verbose = T)
+doc_topic_distr = fit_transf(lda_model, dtm, n_iter = 10)
 }
 

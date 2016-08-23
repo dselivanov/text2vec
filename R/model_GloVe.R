@@ -2,7 +2,7 @@
 #' @title Creates GloVe word-embeddings model.
 #' @description \bold{Iterative algorithm}. This function creates a GloVe word-embeddings model.
 #' It can be trained via fully can asynchronous and parallel
-#' AdaGrad with \code{fit_predict} function.
+#' AdaGrad with \code{fit_transf} function.
 #' @param word_vectors_size desired dimenson for word vectors
 #' @param vocabulary \code{character} vector or instanceof
 #' \code{text2vec_vocabulary} class. Each word should correspond to dimension
@@ -57,9 +57,9 @@
 #' glove_model <- GloVe(word_vectors_size = 50, vocabulary = vocab,
 #'  x_max = 10, learning_rate = 0.25)
 #' # fit model and get word vectors
-#' wv = fit_predict(glove_model, tcm, n_iter = 10)
+#' wv = fit_transf(glove_model, tcm, n_iter = 10)
 #' # glove_model is mutable object! (actually it is a closure)
-#' wv2 = predict(glove_model)
+#' wv2 = transf(glove_model)
 #' identical(wv, wv2)
 #' }
 #' @export
@@ -130,8 +130,8 @@ GloVe <- function(word_vectors_size,
   dump_parameters = function() {
     .glove_fitter$dump_model()
   }
-  # fit_predict method will work only with sparse matrices coercible to "dgTMatrix"
-  fit_predict <- function(X, n_iter, convergence_tol = -1,
+  # fit_transf method will work only with sparse matrices coercible to "dgTMatrix"
+  fit_transf <- function(X, n_iter, convergence_tol = -1,
                             verbose = interactive(), dump_every_n = 0L, ...) {
     .cost_history <<- numeric(0)
     # convert to internal native format
@@ -199,7 +199,7 @@ GloVe <- function(word_vectors_size,
       i <- i + 1
     }
     .fitted <<- TRUE
-    predict()
+    transf()
   }
 
   partial_fit <- function(X, ...) {
@@ -216,7 +216,7 @@ GloVe <- function(word_vectors_size,
     cost
   }
 
-  predict <- function(...) {
+  transf <- function(...) {
     if (.fitted) {
       res <- .glove_fitter$get_word_vectors()
       if ( inherits(res, 'matrix') )
@@ -230,14 +230,30 @@ GloVe <- function(word_vectors_size,
   }
 
   self <- function() {
-    model = list(fit_predict = fit_predict,
+    model = list(fit_transf = fit_transf,
                  partial_fit = partial_fit,
-                 predict = predict,
+                 transf = transf,
                  dump_parameters = dump_parameters)
     class(model) <- c('text2vec_model', 'GloVe')
     model
   }
   self()
+}
+
+#' @rdname fit_transf
+#' @export
+#' @param n_iter number of iterations
+#' @param convergence_tol convergence tolerance
+#' @param verbose verbose
+#' @param dump_every_n dump model every n iterations
+fit_transf.GloVe <- function(object, X, n_iter,
+                             convergence_tol = -1,
+                             verbose = interactive(),
+                             dump_every_n = 0L, ...) {
+  object$fit_transf(X, n_iter = n_iter,
+             convergence_tol = convergence_tol,
+             verbose = verbose,
+             dump_every_n = dump_every_n, ...)
 }
 
 #' @rdname GloVe
@@ -278,7 +294,7 @@ glove <- function(tcm,
                        grain_size =  1e5L,
                        ...)
 
-  fit_predict(glove_model, tcm, n_iter = num_iters,
+  fit_transf(glove_model, tcm, n_iter = num_iters,
                 convergence_tol = convergence_tol,
                 verbose = verbose, dump_every_n = dump_every_n)
 }

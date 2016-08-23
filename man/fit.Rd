@@ -3,7 +3,7 @@
 \name{fit}
 \alias{fit}
 \alias{fit.text2vec_model}
-\title{fit modelpredict}
+\title{fit text2vec model}
 \usage{
 fit(object, X, ...)
 
@@ -18,8 +18,8 @@ fit(object, X, ...)
 \item{...}{arguments to underlying functions. Currently not used.}
 }
 \value{
-fitted object of class \code{text2vec_model}, which can be used for predictions
-via \link{predict.text2vec_model} S3 method.
+fitted object of class \code{text2vec_model}, which can be used for transformations
+via \link{transf.text2vec_model} S3 method.
 }
 \description{
 This is generic function to fit text2vec models (class = "text2vec_model")
@@ -31,6 +31,6 @@ tokens <- movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
 dtm <- create_dtm(itoken(tokens), hash_vectorizer())
 n_factors = 10
 fitted_model = LSA(n_factors) \%>\% fit(dtm)
-document_vectors = predict(fitted_model, dtm)
+document_vectors = transf(fitted_model, dtm)
 }
 

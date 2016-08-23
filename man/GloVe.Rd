@@ -77,7 +77,7 @@ to \code{word_vec_history} attribute.}
 \description{
 \bold{Iterative algorithm}. This function creates a GloVe word-embeddings model.
 It can be trained via fully can asynchronous and parallel
-AdaGrad with \code{fit_predict} function.
+AdaGrad with \code{fit_transf} function.
 }
 \examples{
 \dontrun{
@@ -94,9 +94,9 @@ tcm <- create_tcm(it, vocab_vectorizer(vocab, grow_dtm = FALSE, skip_grams_windo
 glove_model <- GloVe(word_vectors_size = 50, vocabulary = vocab,
  x_max = 10, learning_rate = 0.25)
 # fit model and get word vectors
-wv = fit_predict(glove_model, tcm, n_iter = 10)
+wv = fit_transf(glove_model, tcm, n_iter = 10)
 # glove_model is mutable object! (actually it is a closure)
-wv2 = predict(glove_model)
+wv2 = transf(glove_model)
 identical(wv, wv2)
 }
 }
