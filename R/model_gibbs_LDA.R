@@ -1,21 +1,7 @@
-# library(text2vec)
-# data("movie_review")
-# tokens <- movie_review$review %>% tolower %>% word_tokenizer
-# it <- itoken(tokens, ids = movie_review$id)
-# v <- create_vocabulary(it)
-# v <- prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.2)
-#
-# dtm <- create_dtm(itoken(tokens, ids = movie_review$id), vocab_vectorizer(v, skip_grams_window = 5), 'lda_c')
-# lda_model = LDA(n_topics = 20, vocabulary = v, doc_topic_prior = 0.1, topic_word_prior = 0.1,
-#                             check_convergence_every_n = 5, verbose = T)
-#
-#
-# res = fit_predict(lda_model, dtm, n_iter = 40)
-# preds = predict(lda_model, dtm, verbose = T)
 #' @name LDA
 #' @title Creates Latent Dirichlet Allocation model.
 #' @description \bold{Iterative algorithm}. Model can be fitted
-#' via Collapsed Gibbs Sampling algorithm using \code{fit} or \code{fit_predict} methods.
+#' via Collapsed Gibbs Sampling algorithm using \code{fit} or \code{fit_transf} methods.
 #' @param n_topics desired number of topics. Also knows as \bold{K}.
 #' @param vocabulary vocabulary in a form of \code{character} vector or class of
 #' \code{text2vec_vocab}
@@ -25,6 +11,19 @@
 #' Also knows as \bold{eta}.
 #' @param ... arguments passed to other methods (not used at the moment).
 #' @export
+#' @examples
+#' library(text2vec)
+#' data("movie_review")
+#' N = 100
+#' tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
+#' it = itoken(tokens, ids = movie_review$id[1:N])
+#' v = create_vocabulary(it) %>%
+#' prune_vocabulary(term_count_min = 5, doc_proportion_max = 0.2)
+#' dtm = create_dtm(it, vocab_vectorizer(v), 'lda_c')
+#'      lda_model = LDA(n_topics = 10, vocabulary = v,
+#'      doc_topic_prior = 0.1, topic_word_prior = 0.1,
+#'      check_convergence_every_n = 5, verbose = T)
+#' doc_topic_distr = fit_transf(lda_model, dtm, n_iter = 10)
 LDA <- function(n_topics,
                 vocabulary,
                 doc_topic_prior = 1 / n_topics, # alpha
@@ -76,7 +75,7 @@ LDA <- function(n_topics,
     invisible(self())
   }
 
-  fit_predict <- function(X, n_iter, convergence_tol = -1, verbose = interactive(),
+  fit_transf <- function(X, n_iter, convergence_tol = -1, verbose = interactive(),
                             initial = list(), check_convergence_every_n = 0, ...) {
     X = coerce_matrix(X, .internal_matrix_format, verbose = verbose)
     fit(X, n_iter, convergence_tol, verbose, initial, check_convergence_every_n, ...)
@@ -88,7 +87,7 @@ LDA <- function(n_topics,
     res
   }
 
-  predict <- function(X, n_iter = 100,
+  transf <- function(X, n_iter = 100,
                         convergence_tol = 0.005,
                         check_convergence_every_n = 1,
                         verbose = FALSE) {
@@ -116,12 +115,26 @@ LDA <- function(n_topics,
 
   self <- function() {
     model = list(fit = fit,
-                 fit_predict = fit_predict,
-                 predict = predict,
+                 fit_transf = fit_transf,
+                 transf = transf,
                  get_params = get_params)
     class(model) <- c('text2vec_model', 'LDA_gibbs')
     model
   }
 
   self()
+}
+
+#' @rdname fit_transf
+#' @export
+#' @param initial named list of initial parameters
+#' @param check_convergence_every_n \code{integer} specify schedule for cost fucntion caclculation.
+#' For exaple, during LDA fitting calculation of perplexity can take noticable amount
+#' of time. So it make sense to do not calculate it at each iteration.
+fit_transf.LDA_gibbs <- function(object, X, n_iter,
+                                 convergence_tol = -1,
+                                 verbose = interactive(),
+                                 initial = list(),
+                                 check_convergence_every_n = 0, ...) {
+  object$fit_transf(X, n_iter, convergence_tol, verbose, initial, check_convergence_every_n, ...)
 }

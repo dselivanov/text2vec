@@ -51,7 +51,7 @@ test_that("euclidean", {
 
 test_that("relaxed word mover distance", {
   glove_model <- GloVe(word_vectors_size = 50, vocabulary = v, x_max = 10)
-  wv = fit_predict(glove_model, tcm, n_iter = 10, verbose = FALSE)
+  wv = fit_transf(glove_model, tcm, n_iter = 10, verbose = FALSE)
   rwmd_model = RWMD(word_vectors = wv)
   rwmd_dist <- dist2(dtm[i1, ], dtm[i2, ], method = rwmd_model, norm = 'none', verbose = F)
   expect_equal(nrow(rwmd_dist), length(i1))

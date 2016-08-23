@@ -2,7 +2,7 @@
 % Please edit documentation in R/model_LSA.R
 \name{LSA}
 \alias{LSA}
-\title{Creates LSA model}
+\title{Constructor for Latent Semantic Analysis model}
 \usage{
 LSA(n_topics, verbose = FALSE)
 }
@@ -13,19 +13,15 @@ LSA(n_topics, verbose = FALSE)
 \item{verbose}{\code{logical} print status messages}
 }
 \description{
-This function creates LSA(Latent semantic analysis) model.
-See \url{https://en.wikipedia.org/wiki/Latent_semantic_analysis} for details.
-Model can be fitted with \link{fit}, \link{fit_predict} methods.
+Wrapper for \code{LatentSemanticAnalysis$new()}
 }
 \examples{
 data("movie_review")
 N = 100
 tokens <- movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
 dtm <- create_dtm(itoken(tokens), hash_vectorizer())
-n_topics = 10
-fitted_model_1 = LSA(n_topics) \%>\% fit(dtm)
-lsa_model_2 = LSA(n_topics)
-
-all.equal(fit_predict(lsa_model_2, dtm), predict(fitted_model_1, dtm))
+lsa_model = LSA(20)
+fit(lsa_model, dtm) # same as lsa_model$fit(dtm)
+latent_docs = transf(lsa_model, dtm)
 }
 

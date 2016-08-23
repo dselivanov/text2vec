@@ -5,8 +5,8 @@ text2vec_model = R6::R6Class(
     fit = function() {stop("Method not implemented")},
     partial_fit = function() {stop("Method not implemented")},
     predict = function() {stop("Method not implemented")},
-    transform = function() {stop("Method not implemented")},
-    fit_transform = function() {stop("Method not implemented")}
+    transf = function() {stop("Method not implemented")},
+    fit_transf = function() {stop("Method not implemented")}
   ),
   private = list(
     verbose = FALSE,
@@ -22,8 +22,8 @@ text2vec_model = R6::R6Class(
 #' @param X matrix like object. At the moment usually one of
 #' \code{c("matrix", "dgCMatrix", "dgTMatrix", "lda_c")}
 #' @param ... arguments to underlying functions. Currently not used.
-#' @return fitted object of class \code{text2vec_model}, which can be used for predictions
-#' via \link{predict.text2vec_model} S3 method.
+#' @return fitted object of class \code{text2vec_model}, which can be used for transformations
+#' via \link{transf.text2vec_model} S3 method.
 #' @examples
 #' data("movie_review")
 #' N = 100
@@ -31,7 +31,7 @@ text2vec_model = R6::R6Class(
 #' dtm <- create_dtm(itoken(tokens), hash_vectorizer())
 #' n_factors = 10
 #' fitted_model = LSA(n_factors) %>% fit(dtm)
-#' document_vectors = predict(fitted_model, dtm)
+#' document_vectors = transf(fitted_model, dtm)
 #' @export
 fit <- function(object, X, ...) {
   UseMethod("fit")
@@ -40,11 +40,11 @@ fit <- function(object, X, ...) {
 #' @rdname fit
 #' @export
 fit.text2vec_model <- function(object, X, ...) {
-  call_model(object, X, "fit", ...)
+  object$fit(X, ...)
 }
 
-#' @name fit_predict
-#' @title Fit model to data, then predict input
+#' @name fit_transf
+#' @title Fit model to data, then transforms input
 #' @description This is generic function to fit text2vec models (class = "text2vec_model")
 #' and then apply fitted object to input.
 #' Note, that this function modifies input model during fitting! See example below.
@@ -61,51 +61,12 @@ fit.text2vec_model <- function(object, X, ...) {
 #' n_factors = 10
 #' model = LSA(n_factors)
 #' # model is closure! and it is mutable!
-#' documents_latent_factors =  fit_predict(model, dtm)
-#' documents_latent_factors_2 =  predict(model, dtm)
+#' documents_latent_factors =  fit_transf(model, dtm)
+#' documents_latent_factors_2 =  transf(model, dtm)
 #' all.equal(documents_latent_factors, documents_latent_factors_2)
 #' @export
-fit_predict <- function(object, X, ...) {
-  UseMethod("fit_predict")
-}
-
-#' @rdname fit_predict
-#' @export
-fit_predict.text2vec_model <- function(object, X, ...) {
-  call_model(object, X, "fit_predict", ...)
-}
-
-#' @rdname fit_predict
-fit_predict.LSA <- function(object, X, ...) {
-  fit_predict(object, X)
-}
-
-#' @rdname fit_predict
-#' @param n_iter number of iterations
-#' @param convergence_tol convergence tolerance
-#' @param verbose verbose
-#' @param dump_every_n dump model every n iterations
-fit_predict.GloVe <- function(object, X, n_iter,
-                                convergence_tol = -1,
-                                verbose = interactive(),
-                                dump_every_n = 0L, ...) {
-  fit_predict(object, X, n_iter = n_iter,
-                convergence_tol = convergence_tol,
-                verbose = verbose,
-                dump_every_n = dump_every_n, ...)
-}
-
-#' @rdname fit_predict
-#' @param initial named list of initial parameters
-#' @param check_convergence_every_n \code{integer} specify schedule for cost fucntion caclculation.
-#' For exaple, during LDA fitting calculation of perplexity can take noticable amount
-#' of time. So it make sense to do not calculate it at each iteration.
-fit_predict.LDA_gibbs <- function(object, X, n_iter,
-                                    convergence_tol = -1,
-                                    verbose = interactive(),
-                                    initial = list(),
-                                    check_convergence_every_n = 0, ...) {
-  fit_predict(object,X, n_iter, convergence_tol, verbose, initial, check_convergence_every_n, ...)
+fit_transf <- function(object, X, ...) {
+  UseMethod("fit_transf")
 }
 
 #' @name partial_fit
@@ -124,10 +85,10 @@ partial_fit <- function(object, X, ...) {
 #' @rdname partial_fit
 #' @export
 partial_fit.text2vec_model <- function(object, X, ...) {
-  call_model(object, X, "partial_fit", ...)
+  object$partial_fit(X, ...)
 }
 
-#' @name predict
+#' @name transf
 #' @title Transform new data with fitted model
 #' @description This is generic function to apply fitted text2vec models
 #' (class = "text2vec_model") to new data.
@@ -143,18 +104,14 @@ partial_fit.text2vec_model <- function(object, X, ...) {
 #' dtm <- create_dtm(itoken(tokens), hash_vectorizer())
 #' n_factors = 10
 #' fitted_model = LSA(n_factors) %>% fit(dtm)
-#' document_vectors = predict(fitted_model, dtm)
+#' document_vectors = transf(fitted_model, dtm)
 #' @export
-predict.text2vec_model <- function(object, X, ...) {
-  call_model(object, X, "predict", ...)
+transf <- function(object, X, ...) {
+  UseMethod("transf")
 }
 
-# helper function to call models
-call_model <- function(object, X, method, ...) {
-  if (method %in% names(object))
-    object[[method]](X, ...)
-  else
-    stop(paste("Method", method,
-               "not implemented for model of class(es)",
-               paste(class(object), collapse = ', ') ))
+#' @rdname transf
+#' @export
+transf.text2vec_model <- function(object, X, ...) {
+  object$transf(X, ...)
 }
