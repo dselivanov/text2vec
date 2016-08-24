@@ -29,7 +29,7 @@
 #' all.equal(fit_transf(lsa_2, dtm), transf(lsa_1, dtm))
 LatentSemanticAnalysis = R6::R6Class(
   "LSA",
-  inherit = text2vec_model,
+  inherit = text2vec_topic_model,
   public = list(
     initialize = function(n_topics, verbose = FALSE) {
       private$n_topics = n_topics
@@ -76,7 +76,6 @@ LatentSemanticAnalysis = R6::R6Class(
   ),
   private = list(
     singular_values = NULL,
-    n_topics = NULL,
     lsa_factors = NULL
   )
 )

@@ -13,7 +13,6 @@
 \method{fit_transf}{LSA}(object, X, ...)
 
 \method{fit_transf}{LDA_gibbs}(object, X, n_iter, convergence_tol = -1,
-  verbose = interactive(), initial = list(),
   check_convergence_every_n = 0, ...)
 
 fit_transf(object, X, ...)
@@ -33,8 +32,6 @@ fit_transf(object, X, ...)
 \item{dump_every_n}{dump model every n iterations}
 
 \item{...}{arguments to underlying functions. Currently not used.}
-
-\item{initial}{named list of initial parameters}
 
 \item{check_convergence_every_n}{\code{integer} specify schedule for cost fucntion caclculation.
 For exaple, during LDA fitting calculation of perplexity can take noticable amount

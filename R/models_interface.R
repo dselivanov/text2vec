@@ -1,12 +1,12 @@
 # all text2vec models should inherit from this class!
 text2vec_model = R6::R6Class(
-  classname = 'text2vec_model',
+  classname = "text2vec_model",
   public = list(
-    fit = function() {stop("Method not implemented")},
-    partial_fit = function() {stop("Method not implemented")},
-    predict = function() {stop("Method not implemented")},
-    transf = function() {stop("Method not implemented")},
-    fit_transf = function() {stop("Method not implemented")}
+    fit = function() {stop("Method is not implemented")},
+    partial_fit = function() {stop("Method is not implemented")},
+    predict = function() {stop("Method is not implemented")},
+    transf = function() {stop("Method is not implemented")},
+    fit_transf = function() {stop("Method is not implemented")}
   ),
   private = list(
     verbose = FALSE,
@@ -14,7 +14,16 @@ text2vec_model = R6::R6Class(
     internal_matrix_format = NULL
   )
 )
-
+text2vec_topic_model = R6::R6Class(
+  "text2vec_topic_model",
+  inherit = text2vec_model,
+  public = list(
+    get_term_topic_distr = function() {stop("Method is not implemented")}
+  ),
+  private = list(
+    n_topics = NULL
+  )
+)
 #' @name fit
 #' @title fit text2vec model
 #' @description This is generic function to fit text2vec models (class = "text2vec_model")
