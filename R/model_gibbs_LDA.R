@@ -1,142 +1,50 @@
-# #' @name LDA
-# #' @title Creates Latent Dirichlet Allocation model.
-# #' @description \bold{Iterative algorithm}. Model can be fitted
-# #' via Collapsed Gibbs Sampling algorithm using \code{fit} or \code{fit_transf} methods.
-# #' @param n_topics desired number of topics. Also knows as \bold{K}.
-# #' @param vocabulary vocabulary in a form of \code{character} vector or class of
-# #' \code{text2vec_vocab}
-# #' @param doc_topic_prior prior for document-topic multinomial distribution.
-# #' Also knows as \bold{alpha}.
-# #' @param topic_word_prior prior for topic-word multinomial distribution.
-# #' Also knows as \bold{eta}.
-# #' @param ... arguments passed to other methods (not used at the moment).
-# #' @export
-# #' @examples
-# #' library(text2vec)
-# #' data("movie_review")
-# #' N = 100
-# #' tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
-# #' it = itoken(tokens, ids = movie_review$id[1:N])
-# #' v = create_vocabulary(it) %>%
-# #' prune_vocabulary(term_count_min = 5, doc_proportion_max = 0.2)
-# #' dtm = create_dtm(it, vocab_vectorizer(v), 'lda_c')
-# #'      lda_model = LDA(n_topics = 10, vocabulary = v,
-# #'      doc_topic_prior = 0.1, topic_word_prior = 0.1,
-# #'      check_convergence_every_n = 5, verbose = T)
-# #' doc_topic_distr = fit_transf(lda_model, dtm, n_iter = 10)
-# LDA <- function(n_topics,
-#                 vocabulary,
-#                 doc_topic_prior = 1 / n_topics, # alpha
-#                 topic_word_prior = 1 / n_topics, # eta
-#                 ...) {
-#   #---------------------------------------------------
-#   # check input
-#   vocab_class = class(vocabulary)
-#   stopifnot(vocab_class == 'character' || vocab_class == 'text2vec_vocabulary')
-#   #---------------------------------------------------
-#   # internal parameters and helpers
-#   .internal_matrix_format = 'lda_c'
-#   .vocab_terms = if (vocab_class == 'character') vocabulary else vocabulary$vocab$terms
-#   .vocab_size = length(.vocab_terms)
-#   .fitted = FALSE
-#   #---------------------------------------------------
-#   # model parameters
-#   .n_topics <- n_topics
-#   .doc_topic_prior <- doc_topic_prior
-#   .topic_word_prior <- topic_word_prior
-#   # .check_convergence_every_n_train <- check_convergence_every_n
-#   .lda_fitted <- NULL
-#   #---------------------------------------------------
-#   # internal debug methods
-#   get_params <- function() {
-#     res = .lda_fitted
-#     res[['doc_topic_prior']] = .doc_topic_prior
-#     res[['topic_word_prior']] = .topic_word_prior
-#     res
-#   }
-#   #---------------------------------------------------
-#   # main methods
-#   fit <- function(X, n_iter, convergence_tol = -1, verbose = interactive(),
-#                   initial = list(), check_convergence_every_n = 0, ...) {
-#
-#     X = coerce_matrix(X, .internal_matrix_format, verbose = verbose)
-#     .lda_fitted <<- collapsedGibbsSampler( documents = X,
-#                                          n_topics = .n_topics,
-#                                          vocab_size = .vocab_size,
-#                                          n_iter = n_iter,
-#                                          alpha = .doc_topic_prior,
-#                                          eta = .topic_word_prior,
-#                                          initial = initial,
-#                                          convergence_tol = convergence_tol,
-#                                          check_convergence_every_n = check_convergence_every_n,
-#                                          trace = verbose,
-#                                          freeze_topics = FALSE)
-#     .fitted <<- TRUE
-#     invisible(self())
-#   }
-#
-#   fit_transf <- function(X, n_iter, convergence_tol = -1, verbose = interactive(),
-#                             initial = list(), check_convergence_every_n = 0, ...) {
-#     X = coerce_matrix(X, .internal_matrix_format, verbose = verbose)
-#     fit(X, n_iter, convergence_tol, verbose, initial, check_convergence_every_n, ...)
-#     .fitted <<- TRUE
-#
-#     res = t(.lda_fitted$document_topic_distr)
-#     res = res / rowSums(res)
-#     rownames(res) <- names(X)
-#     res
-#   }
-#
-#   transf <- function(X, n_iter = 100,
-#                         convergence_tol = 0.005,
-#                         check_convergence_every_n = 1,
-#                         verbose = FALSE) {
-#     if (.fitted) {
-#       X = coerce_matrix(X, .internal_matrix_format, verbose = verbose)
-#       inference_fit = collapsedGibbsSampler( documents = X,
-#                                              n_topics = .n_topics,
-#                                              vocab_size = .vocab_size,
-#                                              n_iter = n_iter,
-#                                              alpha = .doc_topic_prior,
-#                                              eta = .topic_word_prior,
-#                                              initial = .lda_fitted,
-#                                              convergence_tol = convergence_tol,
-#                                              check_convergence_every_n = check_convergence_every_n,
-#                                              trace = verbose,
-#                                              freeze_topics = TRUE)
-#       res = t(inference_fit$document_topic_distr)
-#       res = res / rowSums(res)
-#       rownames(res) <- names(X)
-#       res
-#     }
-#     else
-#       stop("Model was not fitted, please fit it first...")
-#   }
-#
-#   self <- function() {
-#     model = list(fit = fit,
-#                  fit_transf = fit_transf,
-#                  transf = transf,
-#                  get_params = get_params)
-#     class(model) <- c('text2vec_model', 'LDA_gibbs')
-#     model
-#   }
-#
-#   self()
-# }
-
 #' @name LatentDirichletAllocation
 #' @title Creates Latent Dirichlet Allocation model.
-#' @description \bold{Iterative algorithm}. Model can be fitted
-#' via Collapsed Gibbs Sampling algorithm using \code{fit} or \code{fit_transf} methods.
-#' @param n_topics desired number of topics. Also knows as \bold{K}.
-#' @param vocabulary vocabulary in a form of \code{character} vector or class of
-#' \code{text2vec_vocab}
-#' @param doc_topic_prior prior for document-topic multinomial distribution.
-#' Also knows as \bold{alpha}.
-#' @param topic_word_prior prior for topic-word multinomial distribution.
-#' Also knows as \bold{eta}.
-#' @param ... arguments passed to other methods (not used at the moment).
+#' @description Model can be fitted via Collapsed Gibbs Sampling algorithm using \code{fit} or
+#'   \code{fit_transf} methods.
+#' @section Usage:
+#' For usage details see \bold{Methods, Arguments and Examples} sections.
+#' \preformatted{
+#' lda = LatentDirichletAllocation$new(n_topics, vocabulary,
+#'               doc_topic_prior = 1 / n_topics,
+#'               topic_word_prior = 1 / n_topics)
+#' lda$fit_transf(X, n_iter, convergence_tol = -1,
+#'                check_convergence_every_n = 0)
+#' lda$get_word_vectors()
+#' }
+#' @section Methods:
+#' \describe{
+#'   \item{\code{$new(n_topics, vocabulary,
+#'               doc_topic_prior = 1 / n_topics, # alpha
+#'               topic_word_prior = 1 / n_topics)}}{Constructor for LDA vectors model.
+#'                     For description of arguments see \bold{Arguments} section.}
+#'   \item{\code{$fit(X, n_iter, convergence_tol = -1,
+#'                check_convergence_every_n = 0)}}{fit LDA model to input matrix \code{X}}
+#'   \item{\code{$fit_transf(X, n_iter, convergence_tol = -1,
+#'                check_convergence_every_n = 0)}}{fit LDA model to input matrix \code{X}
+#'                and transforms input documents to topic space}
+#'   \item{\code{$get_word_vectors()}}{get word-topic distribution}
+#'}
+#' @field verbose \code{logical = TRUE} whether to display training inforamtion
+#' @section Arguments:
+#' \describe{
+#'  \item{lda}{A \code{LDA} object}
+#'  \item{X}{An input term-cooccurence matrix. Preferably in \code{lda-c} format}
+#'  \item{n_topics}{\code{integer} desired number of topics. Also knows as \bold{K}}
+#'  \item{vocabulary}{vocabulary in a form of \code{character} or \code{text2vec_vocab} }
+#'  \item{doc_topic_prior}{\code{numeric} prior for document-topic multinomial distribution.
+#'    Also knows as \bold{alpha}}
+#'  \item{topic_word_prior}{\code{numeric} prior for topic-word multinomial distribution.
+#'    Also knows as \bold{eta}}
+#'  \item{n_iter}{\code{integer} number of Gibbs iterations}
+#'  \item{convergence_tol}{{\code{numeric = -1} defines early stopping strategy. We stop fitting
+#'     when one of two following conditions will be satisfied: (a) we have used
+#'     all iterations, or (b) \code{perplexity_previous_iter / perplexity_current_iter - 1 <
+#'     convergence_tol}. By default perform all iterations.}}
+#'  \item{check_convergence_every_n}{\code{integer} Defines frequency of perplexity calculation.
+#'    In some cases perplexity calculation during LDA fitting can take noticable amount of time.
+#'    It make sense to do not calculate it at each iteration.}
+#' }
 #' @export
 #' @examples
 #' library(text2vec)
@@ -149,8 +57,7 @@
 #' dtm = create_dtm(it, vocab_vectorizer(v), 'lda_c')
 #' lda_model = LatentDirichletAllocation$new(n_topics = 10, vocabulary = v,
 #'  doc_topic_prior = 0.1,
-#'  topic_word_prior = 0.1,
-#'  verbose = T)
+#'  topic_word_prior = 0.1)
 #'  doc_topic_distr = lda_model$fit_transf(dtm, n_iter = 100, check_convergence_every_n = 20)
 LatentDirichletAllocation = R6::R6Class(
   "LDA_gibbs",
@@ -161,14 +68,13 @@ LatentDirichletAllocation = R6::R6Class(
     initialize = function(n_topics,
                           vocabulary,
                           doc_topic_prior = 1 / n_topics, # alpha
-                          topic_word_prior = 1 / n_topics, # eta
-                          verbose = FALSE) {
+                          topic_word_prior = 1 / n_topics) # eta)
+      {
       vocab_class = class(vocabulary)
       stopifnot(vocab_class == 'character' || vocab_class == 'text2vec_vocabulary')
-
       private$n_topics = n_topics
       private$fitted = FALSE
-      private$verbose = verbose
+      # self$verbose = verbose
       private$internal_matrix_format = 'lda_c'
 
       private$vocab_terms =
@@ -177,8 +83,8 @@ LatentDirichletAllocation = R6::R6Class(
 
       private$vocab_size = length(private$vocab_terms)
 
-      private$doc_topic_prior <- doc_topic_prior
-      private$topic_word_prior <- topic_word_prior
+      private$doc_topic_prior = doc_topic_prior
+      private$topic_word_prior = topic_word_prior
     },
     #------------------------------------------------------------------------------
     fit = function(X, n_iter,
@@ -186,7 +92,7 @@ LatentDirichletAllocation = R6::R6Class(
                    check_convergence_every_n = 0,
                    ...) {
 
-      X = coerce_matrix(X, private$internal_matrix_format, private$verbose)
+      X = coerce_matrix(X, private$internal_matrix_format, self$verbose)
       private$doc_ids = names(X)
       private$fitted_LDA_model = private$internal_fit(X, n_iter,
                                                       convergence_tol,
@@ -203,29 +109,35 @@ LatentDirichletAllocation = R6::R6Class(
       self$fit(X, n_iter, convergence_tol, check_convergence_every_n)
       res = t(private$fitted_LDA_model$document_topic_distr)
       res = res / rowSums(res)
-      rownames(res) <- private$doc_ids
+      rownames(res) = private$doc_ids
       res
     },
     #------------------------------------------------------------------------------
-    transf = function(X, n_iter = 100,
-                      convergence_tol = 0.005,
-                      check_convergence_every_n = 1,
-                      ...) {
-      if (private$fitted) {
-        X = coerce_matrix(X, private$internal_matrix_format, verbose = private$verbose)
-        inference_LDA_model = private$internal_fit(X, n_iter,
-                                                convergence_tol,
-                                                check_convergence_every_n,
-                                                freeze_topics = TRUE,
-                                                initial = private$fitted_LDA_model
-                                                )
-        res = t(inference_LDA_model$document_topic_distr)
-        res = res / rowSums(res)
-        rownames(res) <- names(X)
-        res
-      }
-      else
-        stop("Model was not fitted, please fit it first...")
+    # transf = function(X, n_iter = 100,
+    #                   convergence_tol = 0.005,
+    #                   check_convergence_every_n = 1,
+    #                   ...) {
+    #   if (private$fitted) {
+    #     X = coerce_matrix(X, private$internal_matrix_format, verbose = self$verbose)
+    #     inference_LDA_model = private$internal_fit(X, n_iter,
+    #                                             convergence_tol,
+    #                                             check_convergence_every_n,
+    #                                             freeze_topics = TRUE,
+    #                                             initial = private$fitted_LDA_model
+    #                                             )
+    #     res = t(inference_LDA_model$document_topic_distr)
+    #     res = res / rowSums(res)
+    #     rownames(res) = names(X)
+    #     res
+    #   }
+    #   else
+    #     stop("Model was not fitted, please fit it first...")
+    # },
+    get_word_vectors = function() {
+      res = t(private$fitted_LDA_model$topics_word_distr)
+      res = res / rowSums(res)
+      rownames(res) = private$vocab_terms
+      res
     }
     ),
   #------------------------------------------------------------------------------
@@ -252,22 +164,25 @@ LatentDirichletAllocation = R6::R6Class(
                              initial = initial,
                              convergence_tol = convergence_tol,
                              check_convergence_every_n = check_convergence_every_n,
-                             trace = private$verbose,
+                             trace = self$verbose,
                              freeze_topics = freeze_topics)
     }
   )
 )
 
-#' @rdname fit_transf
+#' @rdname LatentDirichletAllocation
 #' @export
-#' @param check_convergence_every_n \code{integer} specify schedule for cost fucntion caclculation.
-#' For exaple, during LDA fitting calculation of perplexity can take noticable amount
-#' of time. So it make sense to do not calculate it at each iteration.
-fit_transf.LDA_gibbs <- function(object, X, n_iter,
-                                 convergence_tol = -1,
-                                 check_convergence_every_n = 0, ...) {
-  object$fit_transf(X, n_iter, convergence_tol, check_convergence_every_n, ...)
-}
+LDA = LatentDirichletAllocation
+
+# #' @rdname fit_transf
+# #' @export
+# #' @param check_convergence_every_n \code{integer} specify schedule for cost fucntion caclculation.
+# #' For exaple, during LDA fitting calculation of perplexity can take noticable amount
+# #' of time. So it make sense to do not calculate it at each iteration.
+# fit_transf.LDA_gibbs = function(object, X, n_iter, convergence_tol = -1,
+#                                  check_convergence_every_n = 0, ...) {
+#   object$fit_transf(X, n_iter, convergence_tol, check_convergence_every_n, ...)
+# }
 
 # library(text2vec)
 # data("movie_review")

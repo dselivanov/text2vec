@@ -2,29 +2,73 @@
 % Please edit documentation in R/model_gibbs_LDA.R
 \docType{data}
 \name{LatentDirichletAllocation}
+\alias{LDA}
 \alias{LatentDirichletAllocation}
 \title{Creates Latent Dirichlet Allocation model.}
 \format{An object of class \code{R6ClassGenerator} of length 24.}
 \usage{
 LatentDirichletAllocation
-}
-\arguments{
-\item{n_topics}{desired number of topics. Also knows as \bold{K}.}
 
-\item{vocabulary}{vocabulary in a form of \code{character} vector or class of
-\code{text2vec_vocab}}
-
-\item{doc_topic_prior}{prior for document-topic multinomial distribution.
-Also knows as \bold{alpha}.}
-
-\item{topic_word_prior}{prior for topic-word multinomial distribution.
-Also knows as \bold{eta}.}
-
-\item{...}{arguments passed to other methods (not used at the moment).}
+LDA
 }
 \description{
-\bold{Iterative algorithm}. Model can be fitted
-via Collapsed Gibbs Sampling algorithm using \code{fit} or \code{fit_transf} methods.
+Model can be fitted via Collapsed Gibbs Sampling algorithm using \code{fit} or
+  \code{fit_transf} methods.
+}
+\section{Fields}{
+
+\describe{
+\item{\code{verbose}}{\code{logical = TRUE} whether to display training inforamtion}
+}}
+\section{Usage}{
+
+For usage details see \bold{Methods, Arguments and Examples} sections.
+\preformatted{
+lda = LatentDirichletAllocation$new(n_topics, vocabulary,
+              doc_topic_prior = 1 / n_topics,
+              topic_word_prior = 1 / n_topics)
+lda$fit_transf(X, n_iter, convergence_tol = -1,
+               check_convergence_every_n = 0)
+lda$get_word_vectors()
+}
+}
+
+\section{Methods}{
+
+\describe{
+  \item{\code{$new(n_topics, vocabulary,
+              doc_topic_prior = 1 / n_topics, # alpha
+              topic_word_prior = 1 / n_topics)}}{Constructor for LDA vectors model.
+                    For description of arguments see \bold{Arguments} section.}
+  \item{\code{$fit(X, n_iter, convergence_tol = -1,
+               check_convergence_every_n = 0)}}{fit LDA model to input matrix \code{X}}
+  \item{\code{$fit_transf(X, n_iter, convergence_tol = -1,
+               check_convergence_every_n = 0)}}{fit LDA model to input matrix \code{X}
+               and transforms input documents to topic space}
+  \item{\code{$get_word_vectors()}}{get word-topic distribution}
+}
+}
+
+\section{Arguments}{
+
+\describe{
+ \item{lda}{A \code{LDA} object}
+ \item{X}{An input term-cooccurence matrix. Preferably in \code{lda-c} format}
+ \item{n_topics}{\code{integer} desired number of topics. Also knows as \bold{K}}
+ \item{vocabulary}{vocabulary in a form of \code{character} or \code{text2vec_vocab} }
+ \item{doc_topic_prior}{\code{numeric} prior for document-topic multinomial distribution.
+   Also knows as \bold{alpha}}
+ \item{topic_word_prior}{\code{numeric} prior for topic-word multinomial distribution.
+   Also knows as \bold{eta}}
+ \item{n_iter}{\code{integer} number of Gibbs iterations}
+ \item{convergence_tol}{{\code{numeric = -1} defines early stopping strategy. We stop fitting
+    when one of two following conditions will be satisfied: (a) we have used
+    all iterations, or (b) \code{perplexity_previous_iter / perplexity_current_iter - 1 <
+    convergence_tol}. By default perform all iterations.}}
+ \item{check_convergence_every_n}{\code{integer} Defines frequency of perplexity calculation.
+   In some cases perplexity calculation during LDA fitting can take noticable amount of time.
+   It make sense to do not calculate it at each iteration.}
+}
 }
 \examples{
 library(text2vec)
@@ -37,8 +81,7 @@ v = create_vocabulary(it) \%>\%
 dtm = create_dtm(it, vocab_vectorizer(v), 'lda_c')
 lda_model = LatentDirichletAllocation$new(n_topics = 10, vocabulary = v,
  doc_topic_prior = 0.1,
- topic_word_prior = 0.1,
- verbose = T)
+ topic_word_prior = 0.1)
  doc_topic_distr = lda_model$fit_transf(dtm, n_iter = 100, check_convergence_every_n = 20)
 }
 \keyword{datasets}

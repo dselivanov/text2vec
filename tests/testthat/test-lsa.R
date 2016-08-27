@@ -13,15 +13,15 @@ dtm <- create_dtm(itoken(txt, ids = ids), vocab_vectorizer(vocab))
 
 test_that("LSA", {
 
-  model = LSA(n_topics)
+  model = LatentSemanticAnalysis$new(n_topics)
   # suppressWarnings because we perform full rank SVD and Rspectra produce warning
-  suppressWarnings(fitted_model <- fit(model, dtm))
-  documents = transf(fitted_model, X = dtm)
+  suppressWarnings(model$fit(dtm))
+  documents = model$transf(dtm)
   expect_equal(rownames(documents), ids)
 
   # check fit_transform & (fit(); transform()) give similar results
   # suppressWarnings because we perform full rank SVD and Rspectra produce warning
-  suppressWarnings(documents_2 <- fit_transf(LSA(n_topics), X = dtm))
+  suppressWarnings(documents_2 <- fit_transf(LatentSemanticAnalysis$new(n_topics), X = dtm))
   expect_equal(documents, documents_2)
 
 

@@ -10,7 +10,7 @@
 fit_transf(object, X, ...)
 }
 \arguments{
-\item{object}{instance of class \code{text2vec_model}. See \link{LSA}.}
+\item{object}{instance of class \code{text2vec_model}. See \link{LatentSemanticAnalysis}.}
 
 \item{X}{matrix like object. At the moment usually one of
 \code{c("matrix", "dgCMatrix", "dgTMatrix", "lda_c")}}
@@ -31,10 +31,10 @@ N = 100
 tokens = movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
 dtm = create_dtm(itoken(tokens), hash_vectorizer())
 n_factors = 10
-model = LSA(n_factors)
-# model is closure! and it is mutable!
-documents_latent_factors =  fit_transf(model, dtm)
-documents_latent_factors_2 =  transf(model, dtm)
+model = LatentSemanticAnalysis$new(n_factors)
+# model is mutable!
+documents_latent_factors =  model$fit_transf(dtm)
+documents_latent_factors_2 =  model$transf(dtm)
 all.equal(documents_latent_factors, documents_latent_factors_2)
 }
 

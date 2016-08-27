@@ -2,11 +2,14 @@
 % Please edit documentation in R/model_LSA.R
 \docType{class}
 \name{LatentSemanticAnalysis}
+\alias{LSA}
 \alias{LatentSemanticAnalysis}
 \title{LatentSemanticAnalysis}
 \format{\code{\link{R6Class}} object.}
 \usage{
 LatentSemanticAnalysis
+
+LSA
 }
 \description{
 Creates LSA(Latent semantic analysis) model.
@@ -19,7 +22,7 @@ Latent Semantic Analysis model
 \section{Methods}{
 
 \describe{
-  \item{\code{new(n_topics, verbose = FALSE)}}{create LSA model with \code{n_topics} latent topics}
+  \item{\code{new(n_topics)}}{create LSA model with \code{n_topics} latent topics}
   \item{\code{fit(X)}}{fit model to an input DTM (preferably in "dgCMatrix" format)}
   \item{\code{fit_transf(X)}}{fit model to an input sparse matrix (preferably in "dgCMatrix"
    format) and then transform \code{X} to latent space}
@@ -29,8 +32,8 @@ Latent Semantic Analysis model
 \examples{
 data("movie_review")
 N = 100
-tokens <- movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
-dtm <- create_dtm(itoken(tokens), hash_vectorizer())
+tokens = movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
+dtm = create_dtm(itoken(tokens), hash_vectorizer())
 n_topics = 10
 lsa_1 = LatentSemanticAnalysis$new(n_topics)
 fit(lsa_1, dtm) # or lsa_1$fit(dtm)

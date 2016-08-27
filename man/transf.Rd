@@ -30,7 +30,8 @@ N = 100
 tokens <- movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
 dtm <- create_dtm(itoken(tokens), hash_vectorizer())
 n_factors = 10
-fitted_model = LSA(n_factors) \%>\% fit(dtm)
-document_vectors = transf(fitted_model, dtm)
+lsa = LatentSemanticAnalysis$new(n_factors)
+lsa$fit(dtm)
+document_vectors = lsa$transf(dtm)
 }
 

@@ -13,7 +13,7 @@ fit(object, X, ...)
 \method{fit}{text2vec_model}(object, X, ...)
 }
 \arguments{
-\item{object}{instance of class \code{text2vec_model}. See \link{LSA}.}
+\item{object}{instance of class \code{text2vec_model}. See \link{LatentSemanticAnalysis}.}
 
 \item{X}{matrix like object. At the moment usually one of
 \code{c("matrix", "dgCMatrix", "dgTMatrix", "lda_c")}}
@@ -37,7 +37,8 @@ N = 100
 tokens <- movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
 dtm <- create_dtm(itoken(tokens), hash_vectorizer())
 n_factors = 10
-fitted_model = LSA(n_factors) \%>\% fit(dtm)
-document_vectors = transf(fitted_model, dtm)
+lsa = LatentSemanticAnalysis$new(n_factors)
+lsa$fit(dtm)
+document_vectors = lsa$transf(dtm)
 }
 

@@ -3,13 +3,12 @@ text2vec_model = R6::R6Class(
   classname = "text2vec_model",
   public = list(
     fit = function() {stop("Method is not implemented")},
-    partial_fit = function() {stop("Method is not implemented")},
-    predict = function() {stop("Method is not implemented")},
-    transf = function() {stop("Method is not implemented")},
-    fit_transf = function() {stop("Method is not implemented")}
+    get_word_vectors = function() {stop("Method is not implemented")},
+    # partial_fit = function() {stop("Method is not implemented")},
+    # predict = function() {stop("Method is not implemented")},
+    verbose = FALSE
   ),
   private = list(
-    verbose = FALSE,
     fitted = FALSE,
     internal_matrix_format = NULL
   )
@@ -18,7 +17,8 @@ text2vec_topic_model = R6::R6Class(
   "text2vec_topic_model",
   inherit = text2vec_model,
   public = list(
-    get_term_topic_distr = function() {stop("Method is not implemented")}
+    fit_transf = function() {stop("Method is not implemented")},
+    transf = function() {stop("Method is not implemented")}
   ),
   private = list(
     n_topics = NULL
@@ -27,7 +27,7 @@ text2vec_topic_model = R6::R6Class(
 #' @name fit
 #' @title fit text2vec model
 #' @description This is generic function to fit text2vec models (class = "text2vec_model")
-#' @param object instance of class \code{text2vec_model}. See \link{LSA}.
+#' @param object instance of class \code{text2vec_model}. See \link{LatentSemanticAnalysis}.
 #' @param X matrix like object. At the moment usually one of
 #' \code{c("matrix", "dgCMatrix", "dgTMatrix", "lda_c")}
 #' @param ... arguments to underlying functions. Currently not used.
@@ -39,8 +39,9 @@ text2vec_topic_model = R6::R6Class(
 #' tokens <- movie_review$review[1:N] %>% tolower %>% word_tokenizer
 #' dtm <- create_dtm(itoken(tokens), hash_vectorizer())
 #' n_factors = 10
-#' fitted_model = LSA(n_factors) %>% fit(dtm)
-#' document_vectors = transf(fitted_model, dtm)
+#' lsa = LatentSemanticAnalysis$new(n_factors)
+#' lsa$fit(dtm)
+#' document_vectors = lsa$transf(dtm)
 #' @export
 fit <- function(object, X, ...) {
   UseMethod("fit")
@@ -57,7 +58,7 @@ fit.text2vec_model <- function(object, X, ...) {
 #' @description This is generic function to fit text2vec models (class = "text2vec_model")
 #' and then apply fitted object to input.
 #' Note, that this function modifies input model during fitting! See example below.
-#' @param object instance of class \code{text2vec_model}. See \link{LSA}.
+#' @param object instance of class \code{text2vec_model}. See \link{LatentSemanticAnalysis}.
 #' @param X matrix like object. At the moment usually one of
 #' \code{c("matrix", "dgCMatrix", "dgTMatrix", "lda_c")}
 #' @param ... arguments to underlying functions. Currently not used.
@@ -68,10 +69,10 @@ fit.text2vec_model <- function(object, X, ...) {
 #' tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
 #' dtm = create_dtm(itoken(tokens), hash_vectorizer())
 #' n_factors = 10
-#' model = LSA(n_factors)
-#' # model is closure! and it is mutable!
-#' documents_latent_factors =  fit_transf(model, dtm)
-#' documents_latent_factors_2 =  transf(model, dtm)
+#' model = LatentSemanticAnalysis$new(n_factors)
+#' # model is mutable!
+#' documents_latent_factors =  model$fit_transf(dtm)
+#' documents_latent_factors_2 =  model$transf(dtm)
 #' all.equal(documents_latent_factors, documents_latent_factors_2)
 #' @export
 fit_transf <- function(object, X, ...) {
@@ -112,8 +113,9 @@ partial_fit.text2vec_model <- function(object, X, ...) {
 #' tokens <- movie_review$review[1:N] %>% tolower %>% word_tokenizer
 #' dtm <- create_dtm(itoken(tokens), hash_vectorizer())
 #' n_factors = 10
-#' fitted_model = LSA(n_factors) %>% fit(dtm)
-#' document_vectors = transf(fitted_model, dtm)
+#' lsa = LatentSemanticAnalysis$new(n_factors)
+#' lsa$fit(dtm)
+#' document_vectors = lsa$transf(dtm)
 #' @export
 transf <- function(object, X, ...) {
   UseMethod("transf")
