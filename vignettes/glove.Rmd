@@ -47,10 +47,9 @@ Let's download the same Wikipedia data used as a demo by word2vec:
 
 ```{r, eval=FALSE}
 library(text2vec)
-library(readr)
 temp <- tempfile()
 download.file('http://mattmahoney.net/dc/text8.zip', temp)
-wiki <- read_lines(unz(temp, "text8"))
+wiki <- readLines(unz(temp, "text8"))
 unlink(temp)
 ```
 
