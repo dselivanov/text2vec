@@ -172,6 +172,7 @@ transform_tf <- function(dtm, sublinear_tf = FALSE, norm = c('l1', 'l2', 'none')
 #' @describeIn transform_tf Scale a document-term matrix via TF-IDF
 #' @export
 transform_tfidf <- function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
+  .Deprecated("TfIdf")
   norm = match.arg(norm)
 
   if (!inherits(dtm, 'dgCMatrix'))
