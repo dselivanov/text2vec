@@ -40,24 +40,24 @@ which is used in constructing a corpus.
 }
 \examples{
 data("movie_review")
-N <- 100
-vectorizer <- hash_vectorizer(2 ^ 18, c(1L, 2L))
-it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+N = 100
+vectorizer = hash_vectorizer(2 ^ 18, c(1L, 2L))
+it = itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer, chunks_number = 10)
-corpus <- create_corpus(it, vectorizer)
-hash_dtm <- get_dtm(corpus)
+corpus = create_corpus(it, vectorizer)
+hash_dtm = get_dtm(corpus)
 
-it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+it = itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer, chunks_number = 10)
-v <- create_vocabulary(it, c(1L, 1L) )
+v = create_vocabulary(it, c(1L, 1L) )
 
-vectorizer <- vocab_vectorizer(v)
+vectorizer = vocab_vectorizer(v)
 
-it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+it = itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer, chunks_number = 10)
 
-corpus <- create_corpus(it, vectorizer)
-voacb_dtm <- get_dtm(corpus)
+corpus = create_corpus(it, vectorizer)
+voacb_dtm = get_dtm(corpus)
 }
 \seealso{
 \link{create_corpus} \link{create_dtm} \link{create_tcm} \link{create_vocabulary}

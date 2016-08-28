@@ -1,5 +1,5 @@
 # work on 0,1 valued sparse matrices
-jaccard_dist <- function(x, y = NULL, format = 'dgCMatrix') {
+jaccard_dist = function(x, y = NULL, format = 'dgCMatrix') {
   if (!inherits(x, 'sparseMatrix'))
     stop("at the moment jaccard distance defined only for sparse matrices")
   # union x
@@ -19,7 +19,7 @@ jaccard_dist <- function(x, y = NULL, format = 'dgCMatrix') {
   RESULT = as(RESULT, 'dgTMatrix')
   # add 1 to indices because of zero-based indices in sparse matrices
   # 1 - (...) because we calculate distance, not similarity
-  RESULT@x <- 1 - RESULT@x / (rs_x[RESULT@i + 1L] + rs_y[RESULT@j + 1L] - RESULT@x)
+  RESULT@x = 1 - RESULT@x / (rs_x[RESULT@i + 1L] + rs_y[RESULT@j + 1L] - RESULT@x)
   if (!inherits(RESULT, format))
     RESULT = as(RESULT, format)
   RESULT
@@ -43,7 +43,7 @@ jaccard_dist <- function(x, y = NULL, format = 'dgCMatrix') {
 #' @return \code{dist2} returns \code{matrix} of distances between each row of
 #' matrix \code{x} and each row of matrix \code{y}.
 #' @export
-dist2 <- function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
+dist2 = function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
                      norm = c('none', 'l1', 'l2'), verbose = TRUE) {
   stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix"))
   stopifnot(inherits(method, "text2vec_distance") || inherits(method, "character"))
@@ -118,7 +118,7 @@ dist2 <- function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
 #' @return \code{pdist2} returns \code{vector} of "parallel" distances between rows
 #' of \code{x} and \code{y}.
 #' @export
-pdist2 <- function(x, y, method = c('cosine', 'euclidean', 'jaccard'),
+pdist2 = function(x, y, method = c('cosine', 'euclidean', 'jaccard'),
                   norm = c('none', 'l1', 'l2'), verbose = TRUE) {
   stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix"))
   stopifnot(inherits(method, "text2vec_distance") || inherits(method, "character"))

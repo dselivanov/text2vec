@@ -44,7 +44,7 @@ NULL
 magrittr::`%>%`
 
 if (getRversion() >= "2.15.1") {
-  trick_pass_r_cmd_check <-
+  trick_pass_r_cmd_check =
     c(".", "doc_counts", "it", "pair", "terms", "terms_counts", "tokens", "val")
   utils::globalVariables(trick_pass_r_cmd_check)
 }

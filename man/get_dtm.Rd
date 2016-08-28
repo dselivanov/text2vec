@@ -19,19 +19,19 @@ This function extracts a document-term matrix from a
   \code{Corpus} object.
 }
 \examples{
-N <- 1000
-tokens <- movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
-it <- itoken(tokens)
-v <- create_vocabulary(it)
+N = 1000
+tokens = movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
+it = itoken(tokens)
+v = create_vocabulary(it)
 
 #remove very common and uncommon words
 pruned_vocab = prune_vocabulary(v, term_count_min = 10,
  doc_proportion_max = 0.8, doc_proportion_min = 0.001,
  max_number_of_terms = 10000)
 
-vectorizer <- vocab_vectorizer(v)
-it <- itoken(tokens)
-corpus <- create_corpus(it, vectorizer)
-dtm <- get_dtm(corpus)
+vectorizer = vocab_vectorizer(v)
+it = itoken(tokens)
+corpus = create_corpus(it, vectorizer)
+dtm = get_dtm(corpus)
 }
 

@@ -4,8 +4,6 @@ text2vec_model = R6::R6Class(
   public = list(
     fit = function() {stop("Method is not implemented")},
     get_word_vectors = function() {stop("Method is not implemented")},
-    # partial_fit = function() {stop("Method is not implemented")},
-    # predict = function() {stop("Method is not implemented")},
     verbose = FALSE
   ),
   private = list(
@@ -19,6 +17,8 @@ text2vec_topic_model = R6::R6Class(
   public = list(
     fit_transf = function() {stop("Method is not implemented")},
     transf = function() {stop("Method is not implemented")}
+    # partial_fit = function() {stop("Method is not implemented")},
+    # predict = function() {stop("Method is not implemented")},
   ),
   private = list(
     n_topics = NULL
@@ -36,20 +36,20 @@ text2vec_topic_model = R6::R6Class(
 #' @examples
 #' data("movie_review")
 #' N = 100
-#' tokens <- movie_review$review[1:N] %>% tolower %>% word_tokenizer
-#' dtm <- create_dtm(itoken(tokens), hash_vectorizer())
+#' tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
+#' dtm = create_dtm(itoken(tokens), hash_vectorizer())
 #' n_factors = 10
 #' lsa = LatentSemanticAnalysis$new(n_factors)
 #' lsa$fit(dtm)
 #' document_vectors = lsa$transf(dtm)
 #' @export
-fit <- function(object, X, ...) {
+fit = function(object, X, ...) {
   UseMethod("fit")
 }
 
 #' @rdname fit
 #' @export
-fit.text2vec_model <- function(object, X, ...) {
+fit.text2vec_model = function(object, X, ...) {
   object$fit(X, ...)
 }
 
@@ -75,7 +75,7 @@ fit.text2vec_model <- function(object, X, ...) {
 #' documents_latent_factors_2 =  model$transf(dtm)
 #' all.equal(documents_latent_factors, documents_latent_factors_2)
 #' @export
-fit_transf <- function(object, X, ...) {
+fit_transf = function(object, X, ...) {
   UseMethod("fit_transf")
 }
 
@@ -89,12 +89,12 @@ fit_transf <- function(object, X, ...) {
 #' @param ... arguments to underlying functions. Currently not used.
 #' @return Current estimate of model-specific cost function.
 #' @export
-partial_fit <- function(object, X, ...) {
+partial_fit = function(object, X, ...) {
   UseMethod("partial_fit")
 }
 #' @rdname partial_fit
 #' @export
-partial_fit.text2vec_model <- function(object, X, ...) {
+partial_fit.text2vec_model = function(object, X, ...) {
   object$partial_fit(X, ...)
 }
 
@@ -110,19 +110,19 @@ partial_fit.text2vec_model <- function(object, X, ...) {
 #' @examples
 #' data("movie_review")
 #' N = 100
-#' tokens <- movie_review$review[1:N] %>% tolower %>% word_tokenizer
-#' dtm <- create_dtm(itoken(tokens), hash_vectorizer())
+#' tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
+#' dtm = create_dtm(itoken(tokens), hash_vectorizer())
 #' n_factors = 10
 #' lsa = LatentSemanticAnalysis$new(n_factors)
 #' lsa$fit(dtm)
 #' document_vectors = lsa$transf(dtm)
 #' @export
-transf <- function(object, X, ...) {
+transf = function(object, X, ...) {
   UseMethod("transf")
 }
 
 #' @rdname transf
 #' @export
-transf.text2vec_model <- function(object, X, ...) {
+transf.text2vec_model = function(object, X, ...) {
   object$transf(X, ...)
 }

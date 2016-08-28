@@ -64,12 +64,12 @@ S3 methods for creating an itoken iterator from list of tokens
 }
 \examples{
 data("movie_review")
-txt <- movie_review$review[1:100]
-ids <- movie_review$id[1:100]
-it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
-it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
+txt = movie_review$review[1:100]
+ids = movie_review$id[1:100]
+it = itoken(txt, tolower, word_tokenizer, chunks_number = 10)
+it = itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
 # Example of stemming tokenizer
-# stem_tokenizer <- function(x) {
+# stem_tokenizer = function(x) {
 #  word_tokenizer(x) \%>\% lapply(SnowballC::wordStem('en'))
 # }
 }

@@ -22,11 +22,11 @@ Latent Semantic Analysis model
 \section{Methods}{
 
 \describe{
-  \item{\code{new(n_topics)}}{create LSA model with \code{n_topics} latent topics}
-  \item{\code{fit(X)}}{fit model to an input DTM (preferably in "dgCMatrix" format)}
-  \item{\code{fit_transf(X)}}{fit model to an input sparse matrix (preferably in "dgCMatrix"
+  \item{\code{$new(n_topics)}}{create LSA model with \code{n_topics} latent topics}
+  \item{\code{$fit(X)}}{fit model to an input DTM (preferably in "dgCMatrix" format)}
+  \item{\code{$fit_transf(X)}}{fit model to an input sparse matrix (preferably in "dgCMatrix"
    format) and then transform \code{X} to latent space}
-  \item{\code{transf(X)}}{transform new data \code{X} to latent space}
+  \item{\code{$transf(X)}}{transform new data \code{X} to latent space}
 }
 }
 \examples{

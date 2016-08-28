@@ -36,7 +36,7 @@ The reason for not including this packages to \code{text2vec} dependencies is ou
 desare to keep number of dependencies as small as possible.
 }
 \examples{
-doc <- c("first  second", "bla, bla, blaa")
+doc = c("first  second", "bla, bla, blaa")
 # split by words
 word_tokenizer(doc)
 #faster, but far less general - perform split by a fixed single whitespace symbol.

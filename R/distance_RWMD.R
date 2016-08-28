@@ -11,7 +11,7 @@ euclidean_dist_internal = function(wv, i, j) {
   euclidean_dist(wv[, i, drop = F], wv[, j, drop = F])
 }
 
-dist_internal <- function(wv, i, j, method) {
+dist_internal = function(wv, i, j, method) {
   switch(method,
          cosine = cosine_dist_internal(wv, i, j),
          euclidean = euclidean_dist_internal(wv, i, j))
@@ -32,7 +32,7 @@ dist_internal <- function(wv, i, j, method) {
 #' @examples
 #' \dontrun{
 #' data("movie_review")
-#' tokens <- movie_review$review %>%
+#' tokens = movie_review$review %>%
 #'   tolower %>%
 #'   word_tokenizer
 #' v = create_vocabulary(itoken(tokens)) %>%
@@ -40,16 +40,16 @@ dist_internal <- function(wv, i, j, method) {
 #' corpus = create_corpus(itoken(tokens), vocab_vectorizer(v, skip_grams_window = 5))
 #' dtm = get_dtm(corpus)
 #' tcm = get_tcm(corpus)
-#' glove_model <- GloVe(word_vectors_size = 50, vocabulary = v, x_max = 10)
+#' glove_model = GloVe(word_vectors_size = 50, vocabulary = v, x_max = 10)
 #' wv = fit_predict(glove_model, tcm, n_iter = 10)
 #' rwmd_model = RWMD(word_vectors = wv)
-#' rwmd_dist <- dist2(dtm[1:10, ], dtm[1:100, ], metrics = rwmd_model, norm = 'none')
+#' rwmd_dist = dist2(dtm[1:10, ], dtm[1:100, ], metrics = rwmd_model, norm = 'none')
 #'}
 #' @export
-RWMD <- function(word_vectors, method = c('cosine', 'euclidean'), normalize = TRUE) {
+RWMD = function(word_vectors, method = c('cosine', 'euclidean'), normalize = TRUE) {
 
   .internal_matrix_format = 'RsparseMatrix'
-  method <- match.arg(method)
+  method = match.arg(method)
 
   if (normalize)
     wv = t(word_vectors / sqrt(rowSums(word_vectors ^ 2)))
@@ -62,7 +62,7 @@ RWMD <- function(word_vectors, method = c('cosine', 'euclidean'), normalize = TR
   # j - indices of words for document d_j
   # weight_i nBOW weights for words in document d_i
   # weight_j nBOW weights for words in document d_j
-  rwmd <- function(wv, i, j, weight_i, weight_j) {
+  rwmd = function(wv, i, j, weight_i, weight_j) {
     dist_matrix = dist_internal(wv, i, j, method)
     # message(paste(dim(dist_matrix), collapse = 'x'))
     d1 = sum( rowMins(dist_matrix) * weight_i)
@@ -70,7 +70,7 @@ RWMD <- function(word_vectors, method = c('cosine', 'euclidean'), normalize = TR
     max(d1, d2)
   }
   # main methods
-  dist2 <- function(x, y, verbose = verbose) {
+  dist2 = function(x, y, verbose = verbose) {
     stopifnot( colnames(x) == colnames(y) )
     # take only words that appear both in word vectors
     terms = intersect(colnames(x), colnames(wv))
@@ -80,7 +80,7 @@ RWMD <- function(word_vectors, method = c('cosine', 'euclidean'), normalize = TR
     x_csr = x[, terms, drop = FALSE] %>% transform_tf %>% as(.internal_matrix_format)
     y_csr = y[, terms, drop = FALSE] %>% transform_tf %>% as(.internal_matrix_format)
     if (verbose)
-      pb <- txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)
+      pb = txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)
     res = matrix(Inf, nrow = nrow(x_csr), ncol = nrow(y_csr))
     for (j in 2L:(length(x_csr@p))) {
       if (verbose) setTxtProgressBar(pb, j)
@@ -102,7 +102,7 @@ RWMD <- function(word_vectors, method = c('cosine', 'euclidean'), normalize = TR
     res
   }
 
-  pdist2 <- function(x, y, verbose = T) {
+  pdist2 = function(x, y, verbose = T) {
     stopifnot( ncol(x) == ncol(y) )
     stopifnot( colnames(x) == colnames(y) )
     stopifnot( nrow(x) == nrow(y) )
@@ -114,7 +114,7 @@ RWMD <- function(word_vectors, method = c('cosine', 'euclidean'), normalize = TR
     x_csr = x[, terms, drop = FALSE] %>% transform_tf %>% as(.internal_matrix_format)
     y_csr = y[, terms, drop = FALSE] %>% transform_tf %>% as(.internal_matrix_format)
     if (verbose)
-      pb <- txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)
+      pb = txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)
     res = rep(Inf,  nrow(x_csr))
     for (j in 2L:(length(x_csr@p))) {
       if (verbose) setTxtProgressBar(pb, j)
@@ -129,9 +129,9 @@ RWMD <- function(word_vectors, method = c('cosine', 'euclidean'), normalize = TR
     res
   }
 
-  self <- function() {
+  self = function() {
     model = list(dist2 = dist2, pdist2 = pdist2)
-    class(model) <- c('text2vec_distance', 'RWMD')
+    class(model) = c('text2vec_distance', 'RWMD')
     model
   }
 

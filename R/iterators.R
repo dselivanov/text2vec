@@ -2,8 +2,8 @@
 # R6 iterator workhorse
 # partially inspired by rivr package - https://github.com/vsbuffalo/rivr
 #------------------------------------------------------------------------------------------
-StopIteration <- function(message="Iteration is complete", call=NULL) {
-  class <- c("StopIteration", "error", "condition")
+StopIteration = function(message="Iteration is complete", call=NULL) {
+  class = c("StopIteration", "error", "condition")
   structure(list(message = as.character(message), call = call),
             class = class)
 }
@@ -32,7 +32,7 @@ finite_iterator_R6 = R6::R6Class(
       new_counter = min(self$counter + self$chunk_size, self$length)
       ix = (self$counter + 1L):new_counter
       ret = self$iterable[ix]
-      self$counter <- new_counter
+      self$counter = new_counter
       if (self$progress)
         setTxtProgressBar(self$progressbar, self$counter)
       ret
@@ -103,7 +103,7 @@ itoken_character_R6 = R6::R6Class(
       tokens = self$tokenizer(tokens)
 
       ret = list(tokens = tokens, ids = self$ids[ix])
-      self$counter <- new_counter
+      self$counter = new_counter
       if (self$progress)
         setTxtProgressBar(self$progressbar, self$counter)
       ret
@@ -221,20 +221,20 @@ itoken_iterator_R6 = R6::R6Class(
 #'   files from disk, which should take a path as its first argument.
 #' @seealso \link{itoken}
 #' @examples
-#' current_dir_files <- list.files(path = ".", full.names = TRUE)
-#' files_iterator <- ifiles(current_dir_files)
+#' current_dir_files = list.files(path = ".", full.names = TRUE)
+#' files_iterator = ifiles(current_dir_files)
 #' @export
-ifiles <- function(file_paths, reader_function = readLines) {
+ifiles = function(file_paths, reader_function = readLines) {
   ifiles_R6$new(file_paths, reader = reader_function)
 }
 #------------------------------------------------------------------------------------------
 #' @rdname ifiles
 #' @param path \code{character} path of directory. All files in the directory will be read.
 #' @examples
-#' dir_files_iterator <- idir(path = ".")
+#' dir_files_iterator = idir(path = ".")
 #' @export
-idir <- function(path, reader_function = readLines) {
-  fls <- list.files(path, full.names = T)
+idir = function(path, reader_function = readLines) {
+  fls = list.files(path, full.names = T)
   return( ifiles(fls, reader_function = reader_function) )
 }
 #------------------------------------------------------------------------------------------
@@ -261,16 +261,16 @@ idir <- function(path, reader_function = readLines) {
 #'   \link{create_tcm}
 #' @examples
 #' data("movie_review")
-#' txt <- movie_review$review[1:100]
-#' ids <- movie_review$id[1:100]
-#' it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
-#' it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
+#' txt = movie_review$review[1:100]
+#' ids = movie_review$id[1:100]
+#' it = itoken(txt, tolower, word_tokenizer, chunks_number = 10)
+#' it = itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
 #' # Example of stemming tokenizer
-#' # stem_tokenizer <- function(x) {
+#' # stem_tokenizer = function(x) {
 #' #  word_tokenizer(x) %>% lapply(SnowballC::wordStem('en'))
 #' # }
 #' @export
-itoken <- function(iterable, ...) {
+itoken = function(iterable, ...) {
   UseMethod("itoken")
 }
 
@@ -279,7 +279,7 @@ itoken <- function(iterable, ...) {
 #'   \code{names(iterable)} will be used. If \code{names(iterable) == NULL},
 #'   incremental ids will be assigned.
 #' @export
-itoken.list <- function(iterable,
+itoken.list = function(iterable,
                         chunks_number = 10,
                         progressbar = interactive(),
                         ids = NULL, ...) {
@@ -303,7 +303,7 @@ itoken.list <- function(iterable,
 #'   be divided into.
 #' @param progressbar \code{logical} indicates whether to show progress bar.
 #' @export
-itoken.character <- function(iterable,
+itoken.character = function(iterable,
                              preprocess_function = identity,
                              tokenizer = space_tokenizer,
                              chunks_number = 10,
@@ -315,7 +315,7 @@ itoken.character <- function(iterable,
 
 #' @rdname itoken
 #' @export
-itoken.iterator <- function(iterable,
+itoken.iterator = function(iterable,
                             preprocess_function = identity,
                             tokenizer = space_tokenizer,
                             progressbar = interactive(), ...) {
@@ -343,7 +343,7 @@ itoken.iterator <- function(iterable,
 # #' @param ... arguments passed to \link{readLines} function.
 # #' @seealso \link{itoken}, \link{readLines}
 # #' @export
-# ilines <- function(con, n, ...) {
+# ilines = function(con, n, ...) {
 #   ilines_R6$new(con = con, chunk_size = n)
 # }
 
@@ -356,7 +356,7 @@ itoken.iterator <- function(iterable,
 #     initialize = function(con, chunk_size) {
 #       if (is.character(con)) {
 #         self$con = file(con, open = "r")
-#         self$do_close <- TRUE
+#         self$do_close = TRUE
 #       }
 #       self$progress = FALSE
 #       # self$ids = as.character(ids)
@@ -365,7 +365,7 @@ itoken.iterator <- function(iterable,
 #     nextElem = function() {
 #       if (is.null(self$con))
 #         stop(StopIteration("StopIteration"))
-#       res <- readLines(self$con, n = self$chunk_size)
+#       res = readLines(self$con, n = self$chunk_size)
 #       if (length(res) == 0) {
 #         if (self$do_close)
 #           close(self$con)

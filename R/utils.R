@@ -12,7 +12,7 @@
 # Usually should be equal to number of cores in the machine.
 # @return \link{list} each element is a \link{integer} \link{vector} pair.
 # First element in pair is lower index, second element is upper index.
-split_vector <- function(vec, splits, granularity = 1) {
+split_vector = function(vec, splits, granularity = 1) {
   if ( !is.vector(vec)) stop("vec must be vector or list")
   if (length(vec) < splits * granularity) {
     warning("Length of input is too small for splitting for a given number
@@ -29,7 +29,7 @@ split_vector <- function(vec, splits, granularity = 1) {
 #' @description Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lda_c' format
 #' @param X Document-Term matrix
 #' @export
-as.lda_c <- function(X) {
+as.lda_c = function(X) {
   # recieved matrix in lda_c format, but without class attribute
   if (class(X) == 'list' && all(vapply(X, function(x) is.matrix(x) && is.integer(x), FALSE)) ) {
     return(X)
@@ -37,13 +37,13 @@ as.lda_c <- function(X) {
 
   # receive dtm in dgTMatrix format
   if (!inherits(X, "dgCMatrix"))
-    X <- as( X, "dgCMatrix")
+    X = as( X, "dgCMatrix")
 
   # convert to TDM dgCMatrix format
   # for simpler lda_c conversion below
-  X <- t(X)
+  X = t(X)
 
-  m_lda_c <-
+  m_lda_c =
     Map(f = function(i1, i2, ind, val) rbind(ind[i1:i2], as.integer(val[i1:i2])),
         X@p[-length(X@p)] + 1L,
         X@p[-1L],
@@ -53,37 +53,37 @@ as.lda_c <- function(X) {
   # X now TDM (because of transpose above)
   # so use colnames!
   if ( length(colnames(X)) > 0 )
-    names(m_lda_c) <- colnames(X)
-  class(m_lda_c) <- 'lda_c'
+    names(m_lda_c) = colnames(X)
+  class(m_lda_c) = 'lda_c'
   m_lda_c
 }
 
-to_lda_c <- function(X) {
+to_lda_c = function(X) {
   .Deprecated("as.lda_c")
   as.lda_c(X)
 }
 
-rbind_dgTMatrix <- function(...) {
-  res <- new('dgTMatrix')
-  mat_list <- list(...)
+rbind_dgTMatrix = function(...) {
+  res = new('dgTMatrix')
+  mat_list = list(...)
 
-  ncols <- vapply(mat_list, ncol, FUN.VALUE = 0L)
+  ncols = vapply(mat_list, ncol, FUN.VALUE = 0L)
   stopifnot( length(unique(ncols)) == 1)
 
-  all_colnames <- lapply(mat_list, colnames)
+  all_colnames = lapply(mat_list, colnames)
   stopifnot( length(unique(all_colnames)) == 1)
 
-  nrows <- vapply(mat_list, nrow, FUN.VALUE = 0L)
-  offset <- cumsum(c(0L, nrows[-length(nrows)]))
+  nrows = vapply(mat_list, nrow, FUN.VALUE = 0L)
+  offset = cumsum(c(0L, nrows[-length(nrows)]))
 
-  res@i <- do.call(c, Map(function(m, offs) m@i + offs, mat_list, offset))
+  res@i = do.call(c, Map(function(m, offs) m@i + offs, mat_list, offset))
 
-  res@j <- do.call(c, lapply(mat_list, function(m) m@j) )
-  res@x <- do.call(c, lapply(mat_list, function(m) m@x) )
-  res_rownames <- do.call(c, lapply(mat_list, rownames) )
+  res@j = do.call(c, lapply(mat_list, function(m) m@j) )
+  res@x = do.call(c, lapply(mat_list, function(m) m@x) )
+  res_rownames = do.call(c, lapply(mat_list, rownames) )
 
-  res@Dim <- c(sum(nrows), ncols[[1]])
-  res@Dimnames <- list(res_rownames, all_colnames[[1]] )
+  res@Dim = c(sum(nrows), ncols[[1]])
+  res@Dimnames = list(res_rownames, all_colnames[[1]] )
   res
 }
 
@@ -97,35 +97,35 @@ rbind_dgTMatrix <- function(...) {
 #' @param n \code{integer} desired number of chunks
 #' @return \code{list} with \code{n} elements, each of roughly equal length
 #' @export
-split_into <- function(vec, n) {
-  vec_len <- length(vec)
-  chunk_len <- vec_len %/% n
+split_into = function(vec, n) {
+  vec_len = length(vec)
+  chunk_len = vec_len %/% n
   # number of vectrors of size (chunk_len + 1)
-  n2 <- (vec_len - chunk_len * n)
+  n2 = (vec_len - chunk_len * n)
   if (n2 == 0) {
-    split_factors <- rep( 1:n, each = chunk_len)
+    split_factors = rep( 1:n, each = chunk_len)
   } else
-    split_factors <- c( rep( 1:n2, each = chunk_len + 1),
+    split_factors = c( rep( 1:n2, each = chunk_len + 1),
                         rep( (n2 + 1):n,  each = chunk_len))
   split(vec, split_factors)
 }
 
-coerce_matrix <- function(X, target_class = c("dgCMatrix", "dgTMatrix", "RsparseMatrix", "lda_c"), verbose = FALSE) {
+coerce_matrix = function(X, target_class = c("dgCMatrix", "dgTMatrix", "RsparseMatrix", "lda_c"), verbose = FALSE) {
   target_class = match.arg(target_class)
   X_class = class(X)
   if (X_class != target_class ) {
     if (verbose)
       message(paste0('coercing X from ', X_class, ' to ', target_class, '...'))
     if (target_class != 'lda_c')
-      X <- try(as(X, target_class))
+      X = try(as(X, target_class))
     else
-      X <- try(as.lda_c(X))
+      X = try(as.lda_c(X))
     if (class(X) == 'try-error')
       stop(paste("cannot coerce input to", target_class))
   }
   X
 }
 
-coerce_dgTMatrix <- function(X, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
+coerce_dgTMatrix = function(X, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
   coerce_matrix(X, type)
 }

@@ -22,9 +22,9 @@ The result of this function usually used in an \link{itoken}
   function.
 }
 \examples{
-current_dir_files <- list.files(path = ".", full.names = TRUE)
-files_iterator <- ifiles(current_dir_files)
-dir_files_iterator <- idir(path = ".")
+current_dir_files = list.files(path = ".", full.names = TRUE)
+files_iterator = ifiles(current_dir_files)
+dir_files_iterator = idir(path = ".")
 }
 \seealso{
 \link{itoken}

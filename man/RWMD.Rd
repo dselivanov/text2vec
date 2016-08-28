@@ -25,7 +25,7 @@ and vice versa. For more detail see original article: \url{http://mkusner.github
 \examples{
 \dontrun{
 data("movie_review")
-tokens <- movie_review$review \%>\%
+tokens = movie_review$review \%>\%
   tolower \%>\%
   word_tokenizer
 v = create_vocabulary(itoken(tokens)) \%>\%
@@ -33,10 +33,10 @@ v = create_vocabulary(itoken(tokens)) \%>\%
 corpus = create_corpus(itoken(tokens), vocab_vectorizer(v, skip_grams_window = 5))
 dtm = get_dtm(corpus)
 tcm = get_tcm(corpus)
-glove_model <- GloVe(word_vectors_size = 50, vocabulary = v, x_max = 10)
+glove_model = GloVe(word_vectors_size = 50, vocabulary = v, x_max = 10)
 wv = fit_predict(glove_model, tcm, n_iter = 10)
 rwmd_model = RWMD(word_vectors = wv)
-rwmd_dist <- dist2(dtm[1:10, ], dtm[1:100, ], metrics = rwmd_model, norm = 'none')
+rwmd_dist = dist2(dtm[1:10, ], dtm[1:100, ], metrics = rwmd_model, norm = 'none')
 }
 }
 

@@ -1,4 +1,4 @@
-corpus_insert <- function(corpus, iterator, grow_dtm = TRUE) {
+corpus_insert = function(corpus, iterator, grow_dtm = TRUE) {
   if (inherits(iterator, 'R6'))
     it = iterator$clone(deep = TRUE)
   else {
@@ -7,7 +7,7 @@ corpus_insert <- function(corpus, iterator, grow_dtm = TRUE) {
   }
   foreach(val = it ) %do% {
     corpus$insert_document_batch(val$tokens, grow_dtm)
-    attr(corpus, 'ids') <- c(attr(corpus, 'ids'), val$ids)
+    attr(corpus, 'ids') = c(attr(corpus, 'ids'), val$ids)
   }
   corpus
 }
@@ -30,12 +30,12 @@ corpus_insert <- function(corpus, iterator, grow_dtm = TRUE) {
 #' @seealso \link{vectorizers}, \link{create_dtm}, \link{get_dtm},
 #'   \link{get_tcm}, \link{create_tcm}
 #' @export
-create_corpus <- function(iterator,
+create_corpus = function(iterator,
                           vectorizer) {
   if (!inherits(iterator, 'iter'))
     stop("iterator argument should be iterator over list of tokens (class 'iter')")
 
-  corpus <- vectorizer(iterator)
+  corpus = vectorizer(iterator)
   corpus
 }
 
@@ -51,30 +51,30 @@ create_corpus <- function(iterator,
 #' @seealso \link{create_corpus} \link{create_dtm} \link{create_tcm} \link{create_vocabulary}
 #' @examples
 #' data("movie_review")
-#' N <- 100
-#' vectorizer <- hash_vectorizer(2 ^ 18, c(1L, 2L))
-#' it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+#' N = 100
+#' vectorizer = hash_vectorizer(2 ^ 18, c(1L, 2L))
+#' it = itoken(movie_review$review[1:N], preprocess_function = tolower,
 #'              tokenizer = word_tokenizer, chunks_number = 10)
-#' corpus <- create_corpus(it, vectorizer)
-#' hash_dtm <- get_dtm(corpus)
+#' corpus = create_corpus(it, vectorizer)
+#' hash_dtm = get_dtm(corpus)
 #'
-#' it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+#' it = itoken(movie_review$review[1:N], preprocess_function = tolower,
 #'              tokenizer = word_tokenizer, chunks_number = 10)
-#' v <- create_vocabulary(it, c(1L, 1L) )
+#' v = create_vocabulary(it, c(1L, 1L) )
 #'
-#' vectorizer <- vocab_vectorizer(v)
+#' vectorizer = vocab_vectorizer(v)
 #'
-#' it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+#' it = itoken(movie_review$review[1:N], preprocess_function = tolower,
 #'              tokenizer = word_tokenizer, chunks_number = 10)
 #'
-#' corpus <- create_corpus(it, vectorizer)
-#' voacb_dtm <- get_dtm(corpus)
+#' corpus = create_corpus(it, vectorizer)
+#' voacb_dtm = get_dtm(corpus)
 
 
 #' @rdname vectorizers
 #' @param vocabulary \code{text2vec_vocabulary} object, see \link{create_vocabulary}.
 #' @export
-vocab_vectorizer <- function(vocabulary,
+vocab_vectorizer = function(vocabulary,
                              grow_dtm = TRUE,
                              skip_grams_window = 0L) {
 
@@ -85,9 +85,9 @@ vocab_vectorizer <- function(vocabulary,
   if ( skip_grams_window > 0 && vocabulary$ngram[[2]] > 1)
     stop("skip_grams_window > 0 can be used only with ngram = c(1, 1)")
 
-  vectorizer <- function(iterator) {
+  vectorizer = function(iterator) {
 
-    vocab_corpus <- new(VocabCorpus,
+    vocab_corpus = new(VocabCorpus,
                         vocab = vocabulary$vocab$terms,
                         ngram_min = vocabulary$ngram[["ngram_min"]],
                         ngram_max = vocabulary$ngram[["ngram_max"]],
@@ -95,7 +95,7 @@ vocab_vectorizer <- function(vocabulary,
                         stopwords = vocabulary$stopwords,
                         delim = vocabulary$sep_ngram)
 
-    attr(vocab_corpus, 'ids') <- character(0)
+    attr(vocab_corpus, 'ids') = character(0)
     corpus_insert(vocab_corpus, iterator, grow_dtm)
   }
   vectorizer
@@ -111,7 +111,7 @@ vocab_vectorizer <- function(vocabulary,
 #' @param signed_hash \code{logical},  indicating whether to use a signed
 #'   hash-function to reduce collisions when hashing.
 #' @export
-hash_vectorizer <- function(hash_size = 2 ^ 18,
+hash_vectorizer = function(hash_size = 2 ^ 18,
                             ngram = c(1L, 1L),
                             signed_hash = FALSE,
                             grow_dtm = TRUE,
@@ -125,14 +125,14 @@ hash_vectorizer <- function(hash_size = 2 ^ 18,
     stop("At least one of the arguments 'grow_dtm', 'skip_grams_window' should
          satisfy grow_dtm == TRUE or skip_grams_window > 0")
 
-  vectorizer <- function(iterator) {
-    hash_corpus <- new(HashCorpus,
+  vectorizer = function(iterator) {
+    hash_corpus = new(HashCorpus,
                        hash_size = hash_size,
                        ngram_min = ngram[[1]],
                        ngram_max = ngram[[2]],
                        window_size = 0,
                        signed_hash)
-    attr(hash_corpus, 'ids') <- character(0)
+    attr(hash_corpus, 'ids') = character(0)
     corpus_insert(hash_corpus, iterator, grow_dtm)
   }
   vectorizer

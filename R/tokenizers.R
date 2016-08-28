@@ -12,7 +12,7 @@
 #' @return \code{list} of \code{character} vectors.
 #' Each element of list containts vector of tokens.
 #' @examples
-#' doc <- c("first  second", "bla, bla, blaa")
+#' doc = c("first  second", "bla, bla, blaa")
 #' # split by words
 #' word_tokenizer(doc)
 #' #faster, but far less general - perform split by a fixed single whitespace symbol.
@@ -20,28 +20,28 @@
 
 #' @rdname tokenizers
 #' @export
-word_tokenizer <- function(strings, ...)
+word_tokenizer = function(strings, ...)
 {
   strsplit(strings, "\\W", ...) %>% lapply(function(x) x[nchar(x) > 0])
 }
 
 #' @rdname tokenizers
 #' @export
-regexp_tokenizer <- function(strings, pattern, ...)
+regexp_tokenizer = function(strings, pattern, ...)
 {
   strsplit(strings, pattern, ...)
 }
 
 #' @rdname tokenizers
 #' @export
-char_tokenizer <- function(strings, ...)
+char_tokenizer = function(strings, ...)
 {
   strsplit(strings, "", TRUE, ...)
 }
 
 #' @rdname tokenizers
 #' @export
-space_tokenizer <- function(strings, ...)
+space_tokenizer = function(strings, ...)
 {
   strsplit(strings, " ", TRUE, ...)
 }

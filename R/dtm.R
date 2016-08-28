@@ -8,28 +8,28 @@
 #'   \code{"lda_c"} is Blei's lda-c format (a list of 2 * doc_terms_size); see
 #'   \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
 #' @examples
-#' N <- 1000
-#' tokens <- movie_review$review[1:N] %>% tolower %>% word_tokenizer
-#' it <- itoken(tokens)
-#' v <- create_vocabulary(it)
+#' N = 1000
+#' tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
+#' it = itoken(tokens)
+#' v = create_vocabulary(it)
 #'
 #' #remove very common and uncommon words
 #' pruned_vocab = prune_vocabulary(v, term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001,
 #'  max_number_of_terms = 10000)
 #'
-#' vectorizer <- vocab_vectorizer(v)
-#' it <- itoken(tokens)
-#' corpus <- create_corpus(it, vectorizer)
-#' dtm <- get_dtm(corpus)
+#' vectorizer = vocab_vectorizer(v)
+#' it = itoken(tokens)
+#' corpus = create_corpus(it, vectorizer)
+#' dtm = get_dtm(corpus)
 #' @export
-get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
+get_dtm = function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
   if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
-    type <- match.arg(type)
-    dtm <- corpus$get_dtm()
+    type = match.arg(type)
+    dtm = corpus$get_dtm()
     if (length(dtm@x) == 0)
       warning("dtm has 0 rows. Empty iterator?", immediate. = T)
-    dtm@Dimnames[[1]] <- attr(corpus, 'ids')
+    dtm@Dimnames[[1]] = attr(corpus, 'ids')
     coerce_dgTMatrix(dtm, type)
   }
   else
@@ -59,31 +59,31 @@ get_dtm <- function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' @examples
 #' \dontrun{
 #' data("movie_review")
-#' N <- 1000
-#' it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+#' N = 1000
+#' it = itoken(movie_review$review[1:N], preprocess_function = tolower,
 #'              tokenizer = word_tokenizer)
-#' v <- create_vocabulary(it)
+#' v = create_vocabulary(it)
 #' #remove very common and uncommon words
 #' pruned_vocab = prune_vocabulary(v, term_count_min = 10,
 #'  doc_proportion_max = 0.5, doc_proportion_min = 0.001)
-#' vectorizer <- vocab_vectorizer(v)
-#' it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+#' vectorizer = vocab_vectorizer(v)
+#' it = itoken(movie_review$review[1:N], preprocess_function = tolower,
 #'              tokenizer = word_tokenizer)
-#' dtm <- create_dtm(it, vectorizer)
+#' dtm = create_dtm(it, vectorizer)
 #' # get tf-idf matrix from bag-of-words matrix
-#' dtm_tfidf <- transformer_tfidf(dtm)
+#' dtm_tfidf = transformer_tfidf(dtm)
 #'
 #' ## Example of parallel mode
 #' # set to number of cores on your machine
-#' N_WORKERS <- 1
+#' N_WORKERS = 1
 #' doParallel::registerDoParallel(N_WORKERS)
-#' splits <- split_into(movie_review$review, N_WORKERS)
-#' jobs <- lapply(splits, itoken, tolower, word_tokenizer, chunks_number = 1)
-#' vectorizer <- hash_vectorizer()
-#' dtm <- create_dtm(jobs, vectorizer, type = 'dgTMatrix')
+#' splits = split_into(movie_review$review, N_WORKERS)
+#' jobs = lapply(splits, itoken, tolower, word_tokenizer, chunks_number = 1)
+#' vectorizer = hash_vectorizer()
+#' dtm = create_dtm(jobs, vectorizer, type = 'dgTMatrix')
 #' }
 #' @export
-create_dtm <- function(itoken_src, vectorizer,
+create_dtm = function(itoken_src, vectorizer,
                        type = c("dgCMatrix", "dgTMatrix", "lda_c"),
                        ...) {
   UseMethod("create_dtm")
@@ -91,15 +91,15 @@ create_dtm <- function(itoken_src, vectorizer,
 
 #' @rdname create_dtm
 #' @export
-create_dtm.itoken <- function(itoken_src, vectorizer,
+create_dtm.itoken = function(itoken_src, vectorizer,
                             type = c("dgCMatrix", "dgTMatrix", "lda_c"),
                             ...) {
-  corp <- vectorizer(itoken_src)
-  type <- match.arg(type)
+  corp = vectorizer(itoken_src)
+  type = match.arg(type)
   # get it in triplet form - fastest and most
   # memory efficient way because internally it
   # kept in triplet form
-  dtm <- get_dtm(corp, 'dgTMatrix')
+  dtm = get_dtm(corp, 'dgTMatrix')
   # remove corpus and trigger gc()!
   # this will release a lot of memory
   rm(corp); gc();
@@ -112,18 +112,18 @@ create_dtm.itoken <- function(itoken_src, vectorizer,
 #' @rdname create_dtm
 #' @param verbose \code{logical} print status messages
 #' @export
-create_dtm.list <- function(itoken_src, vectorizer,
+create_dtm.list = function(itoken_src, vectorizer,
                        type = c("dgCMatrix", "dgTMatrix", "lda_c"),
                        verbose = FALSE,
                        ...) {
-  check_itoken <- sapply(itoken_src, inherits, 'itoken', USE.NAMES = F)
+  check_itoken = sapply(itoken_src, inherits, 'itoken', USE.NAMES = F)
   stopifnot(all( check_itoken ))
-  type <- match.arg(type)
-  combine_fun <- function(...) {
-    f <- switch(type,
+  type = match.arg(type)
+  combine_fun = function(...) {
+    f = switch(type,
                 dgCMatrix = rbind,
                 dgTMatrix = rbind_dgTMatrix,
-                lda_c = function(...) {x <- c(...); class(x) <- 'lda_c'; x})
+                lda_c = function(...) {x = c(...); class(x) = 'lda_c'; x})
     if (verbose)
       print(paste(Sys.time(), "got results from workers, call combine ..."))
     f(...)

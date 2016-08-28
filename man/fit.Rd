@@ -34,8 +34,8 @@ This is generic function to fit text2vec models (class = "text2vec_model")
 \examples{
 data("movie_review")
 N = 100
-tokens <- movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
-dtm <- create_dtm(itoken(tokens), hash_vectorizer())
+tokens = movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
+dtm = create_dtm(itoken(tokens), hash_vectorizer())
 n_factors = 10
 lsa = LatentSemanticAnalysis$new(n_factors)
 lsa$fit(dtm)

@@ -48,28 +48,28 @@ thread and combined at the end of processing.
 \examples{
 \dontrun{
 data("movie_review")
-N <- 1000
-it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+N = 1000
+it = itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer)
-v <- create_vocabulary(it)
+v = create_vocabulary(it)
 #remove very common and uncommon words
 pruned_vocab = prune_vocabulary(v, term_count_min = 10,
  doc_proportion_max = 0.5, doc_proportion_min = 0.001)
-vectorizer <- vocab_vectorizer(v)
-it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+vectorizer = vocab_vectorizer(v)
+it = itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer)
-dtm <- create_dtm(it, vectorizer)
+dtm = create_dtm(it, vectorizer)
 # get tf-idf matrix from bag-of-words matrix
-dtm_tfidf <- transformer_tfidf(dtm)
+dtm_tfidf = transformer_tfidf(dtm)
 
 ## Example of parallel mode
 # set to number of cores on your machine
-N_WORKERS <- 1
+N_WORKERS = 1
 doParallel::registerDoParallel(N_WORKERS)
-splits <- split_into(movie_review$review, N_WORKERS)
-jobs <- lapply(splits, itoken, tolower, word_tokenizer, chunks_number = 1)
-vectorizer <- hash_vectorizer()
-dtm <- create_dtm(jobs, vectorizer, type = 'dgTMatrix')
+splits = split_into(movie_review$review, N_WORKERS)
+jobs = lapply(splits, itoken, tolower, word_tokenizer, chunks_number = 1)
+vectorizer = hash_vectorizer()
+dtm = create_dtm(jobs, vectorizer, type = 'dgTMatrix')
 }
 }
 \seealso{

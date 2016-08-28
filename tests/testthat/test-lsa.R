@@ -1,7 +1,7 @@
 context("lsa model")
 N = 100
 n_topics = 100
-train_ind <- 1:N
+train_ind = 1:N
 
 txt = movie_review[['review']][train_ind] %>% tolower %>% word_tokenizer
 ids = movie_review[['id']][train_ind]
@@ -9,7 +9,7 @@ ids = movie_review[['id']][train_ind]
 vocab = create_vocabulary(itoken(txt)) %>%
   prune_vocabulary(term_count_min = 5, doc_proportion_max = 0.5)
 
-dtm <- create_dtm(itoken(txt, ids = ids), vocab_vectorizer(vocab))
+dtm = create_dtm(itoken(txt, ids = ids), vocab_vectorizer(vocab))
 
 test_that("LSA", {
 
