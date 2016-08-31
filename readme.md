@@ -2,11 +2,11 @@
 [![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=master)](https://travis-ci.org/dselivanov/text2vec)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://badges.mit-license.org)
 [![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/text2vec)](http://cran.r-project.org/package=text2vec)
-[![Follow](https://img.shields.io/twitter/follow/dselvan0v.svg?style=social)](https://twitter.com/intent/follow?screen_name=dselvan0v)
+[![Follow](https://img.shields.io/twitter/follow/dselivanov_.svg?style=social)](https://twitter.com/intent/follow?screen_name=dselivanov_)
 
 # Development
 
-We keep **stable (last CRAN release) version in master**. Current **active development is in [0.4 branch](https://github.com/dselivanov/text2vec/tree/0.4).**
+We keep **stable (last CRAN release) version in master**. **Development is in [0.4 branch](https://github.com/dselivanov/text2vec/tree/0.4).**
 
 # Tutorials
 
