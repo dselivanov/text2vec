@@ -77,8 +77,8 @@ RWMD = function(word_vectors, method = c('cosine', 'euclidean'), normalize = TRU
     # make sure we don't have empty string - matrices doesn't allow subsetting by empty string
     terms = setdiff(terms, "")
     wv = wv[, terms, drop = FALSE]
-    x_csr = x[, terms, drop = FALSE] %>% transform_tf %>% as(.internal_matrix_format)
-    y_csr = y[, terms, drop = FALSE] %>% transform_tf %>% as(.internal_matrix_format)
+    x_csr = x[, terms, drop = FALSE] %>% normalize %>% as(.internal_matrix_format)
+    y_csr = y[, terms, drop = FALSE] %>% normalize %>% as(.internal_matrix_format)
     if (verbose)
       pb = txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)
     res = matrix(Inf, nrow = nrow(x_csr), ncol = nrow(y_csr))
@@ -111,8 +111,8 @@ RWMD = function(word_vectors, method = c('cosine', 'euclidean'), normalize = TRU
     # make sure we don't have empty string - matrices doesn't allow subsetting by empty string
     terms = setdiff(terms, "")
     wv = wv[, terms, drop = FALSE]
-    x_csr = x[, terms, drop = FALSE] %>% transform_tf %>% as(.internal_matrix_format)
-    y_csr = y[, terms, drop = FALSE] %>% transform_tf %>% as(.internal_matrix_format)
+    x_csr = x[, terms, drop = FALSE] %>% normalize %>% as(.internal_matrix_format)
+    y_csr = y[, terms, drop = FALSE] %>% normalize %>% as(.internal_matrix_format)
     if (verbose)
       pb = txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)
     res = rep(Inf,  nrow(x_csr))
