@@ -16,30 +16,6 @@
 #' @useDynLib text2vec
 NULL
 
-#' Rcpp module: VocabCorpus
-#' Exposes C++ functions to construct Document-Term Matrix
-#' @name VocabCorpus
-#' @export
-NULL
-
-#' Rcpp module: HashCorpus
-#' Exposes C++ functions to construct hashed Document-Term Matrix
-#' @name HashCorpus
-#' @export
-NULL
-
-#' Rcpp module: VocabularyBuilder
-#' Exposes C++ functions to construct Vocabulary
-#' @name VocabularyBuilder
-#' @export
-NULL
-
-#' Rcpp module: GloveFitter
-#' Exposes C++ functions to fit GloVe model
-#' @name GloveFitter
-#' @export
-NULL
-
 #' @export
 magrittr::`%>%`
 
