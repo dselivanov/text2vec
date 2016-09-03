@@ -41,5 +41,5 @@ test_that("S3 tf-idf", {
   expect_equal(d1, d2)
   expect_equal(dim(d1), dim(dtm))
   expect_equal(dimnames(d1), dimnames(dtm))
-  expect_equal(d1['5814_8', colnames(d1)[[10]] ], 0.01453148)
+  expect_equal(d1['5814_8', 'alone' ], 0.01453148, tolerance = .0001)
 })
