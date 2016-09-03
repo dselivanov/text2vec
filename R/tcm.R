@@ -41,15 +41,15 @@ get_tcm = function(corpus) {
 #'   construct the TCM in multiple threads.
 #' @details The user should keep in mind that he or she should split data and
 #'   and provide a list of \link{itoken} iterators. Each element of
-#'   \code{itoken_src} will be handled in a separate thread combined at the end
+#'   \code{it} will be handled in a separate thread combined at the end
 #'   of processing.
-#' @param itoken_src \code{list} of iterators over tokens from \link{itoken}.
+#' @param it \code{list} of iterators over tokens from \link{itoken}.
 #'   Each element is a list of tokens, that is, tokenized and normalized
 #'   strings.
 #' @param vectorizer \code{function} vectorizer function. See
 #'   \link{vectorizers}.
 #' @param ... arguments to \link{foreach} function which is used to iterate over
-#'   \code{itoken_src}.
+#'   \code{it}.
 #' @return \code{dgCMatrix} TCM matrix
 #' @seealso \link{itoken}
 #' @examples
@@ -77,14 +77,14 @@ get_tcm = function(corpus) {
 #' tcm = create_tcm(jobs, vectorizer)
 #' }
 #' @export
-create_tcm = function(itoken_src, vectorizer, ...) {
+create_tcm = function(it, vectorizer, ...) {
   UseMethod("create_tcm")
 }
 
 #' @rdname create_tcm
 #' @export
-create_tcm.itoken = function(itoken_src, vectorizer, ...) {
-  corp = vectorizer(itoken_src)
+create_tcm.itoken = function(it, vectorizer, ...) {
+  corp = vectorizer(it)
   # get it in triplet form - fastest and most
   # memory efficient way because internally it
   # kept in triplet form
@@ -99,10 +99,10 @@ create_tcm.itoken = function(itoken_src, vectorizer, ...) {
 #' @param verbose \code{logical} print status messages
 #' @param work_dir working directory for intermediate results
 #' @export
-create_tcm.list = function(itoken_src, vectorizer, verbose = FALSE, work_dir = tempdir(), ...) {
-  jobs = Map(function(job_id, it) list(job_id = job_id, it = it), seq_along(itoken_src), itoken_src)
+create_tcm.list = function(it, vectorizer, verbose = FALSE, work_dir = tempdir(), ...) {
+  jobs = Map(function(job_id, it) list(job_id = job_id, it = it), seq_along(it), it)
   tcm_files =
-    foreach(it = jobs,
+    foreach(batch = jobs,
             .combine = c,
             #.combine = function(...) triplet_sum(..., verbose = verbose),
             .inorder = F,
@@ -112,8 +112,8 @@ create_tcm.list = function(itoken_src, vectorizer, verbose = FALSE, work_dir = t
             .options.multicore = list(preschedule = FALSE),
             ...) %dopar%
             {
-              tcm = create_tcm(it$it, vectorizer, ...)
-              file_to_save = tempfile(pattern = paste0("tcm_map_part_", it$job_id, "_"), tmpdir = work_dir, fileext = '.rds')
+              tcm = create_tcm(batch$it, vectorizer, ...)
+              file_to_save = tempfile(pattern = paste0("tcm_map_part_", batch$job_id, "_"), tmpdir = work_dir, fileext = '.rds')
               saveRDS(tcm, file_to_save, compress = F)
               file_to_save
             }

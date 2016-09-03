@@ -43,9 +43,9 @@ get_dtm = function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' @details If a parallel backend is registered and first argument is a list of \code{itoken},
 #' itereators, fucntion will construct the DTM in multiple threads.
 #' User should keep in mind that he or she should split the data itself and provide a list of
-#' \link{itoken} iterators. Each element of \code{itoken_src} will be handled in separate
+#' \link{itoken} iterators. Each element of \code{it} will be handled in separate
 #' thread and combined at the end of processing.
-#' @param itoken_src \link{itoken} iterator or \code{list} of \code{itoken} iterators.
+#' @param it \link{itoken} iterator or \code{list} of \code{itoken} iterators.
 #' @param vectorizer \code{function} vectorizer function; see
 #'   \link{vectorizers}.
 #' @param type \code{character}, one of \code{c("dgCMatrix", "dgTMatrix",
@@ -53,7 +53,7 @@ get_dtm = function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #'   doc_terms_size); see
 #'   \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
 #' @param ... arguments to the \link{foreach} function which is used to iterate
-#'   over \code{itoken_src}.
+#'   over \code{it}.
 #' @return A document-term matrix
 #' @seealso \link{itoken} \link{vectorizers} \link{create_corpus} \link{get_dtm}
 #' @examples
@@ -83,7 +83,7 @@ get_dtm = function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' dtm = create_dtm(jobs, vectorizer, type = 'dgTMatrix')
 #' }
 #' @export
-create_dtm = function(itoken_src, vectorizer,
+create_dtm = function(it, vectorizer,
                        type = c("dgCMatrix", "dgTMatrix", "lda_c"),
                        ...) {
   UseMethod("create_dtm")
@@ -91,10 +91,10 @@ create_dtm = function(itoken_src, vectorizer,
 
 #' @rdname create_dtm
 #' @export
-create_dtm.itoken = function(itoken_src, vectorizer,
+create_dtm.itoken = function(it, vectorizer,
                             type = c("dgCMatrix", "dgTMatrix", "lda_c"),
                             ...) {
-  corp = vectorizer(itoken_src)
+  corp = vectorizer(it)
   type = match.arg(type)
   # get it in triplet form - fastest and most
   # memory efficient way because internally it
@@ -112,11 +112,11 @@ create_dtm.itoken = function(itoken_src, vectorizer,
 #' @rdname create_dtm
 #' @param verbose \code{logical} print status messages
 #' @export
-create_dtm.list = function(itoken_src, vectorizer,
+create_dtm.list = function(it, vectorizer,
                        type = c("dgCMatrix", "dgTMatrix", "lda_c"),
                        verbose = FALSE,
                        ...) {
-  check_itoken = sapply(itoken_src, inherits, 'itoken', USE.NAMES = F)
+  check_itoken = sapply(it, inherits, 'itoken', USE.NAMES = F)
   stopifnot(all( check_itoken ))
   type = match.arg(type)
   combine_fun = function(...) {
@@ -129,7 +129,7 @@ create_dtm.list = function(itoken_src, vectorizer,
     f(...)
   }
 
-  foreach(it = itoken_src,
+  foreach(batch = it,
         .combine = combine_fun,
         .multicombine = TRUE,
         # user already made split for jobs
@@ -137,6 +137,6 @@ create_dtm.list = function(itoken_src, vectorizer,
         .options.multicore = list(preschedule = FALSE),
         ...) %dopar%
         {
-          create_dtm(it, vectorizer, type)
+          create_dtm(batch, vectorizer, type)
         }
 }

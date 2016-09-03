@@ -6,15 +6,15 @@
 \alias{create_tcm.list}
 \title{Term-co-occurence matrix construction}
 \usage{
-create_tcm(itoken_src, vectorizer, ...)
+create_tcm(it, vectorizer, ...)
 
-\method{create_tcm}{itoken}(itoken_src, vectorizer, ...)
+\method{create_tcm}{itoken}(it, vectorizer, ...)
 
-\method{create_tcm}{list}(itoken_src, vectorizer, verbose = FALSE,
+\method{create_tcm}{list}(it, vectorizer, verbose = FALSE,
   work_dir = tempdir(), ...)
 }
 \arguments{
-\item{itoken_src}{\code{list} of iterators over tokens from \link{itoken}.
+\item{it}{\code{list} of iterators over tokens from \link{itoken}.
 Each element is a list of tokens, that is, tokenized and normalized
 strings.}
 
@@ -22,7 +22,7 @@ strings.}
 \link{vectorizers}.}
 
 \item{...}{arguments to \link{foreach} function which is used to iterate over
-\code{itoken_src}.}
+\code{it}.}
 
 \item{verbose}{\code{logical} print status messages}
 
@@ -39,7 +39,7 @@ This is a high-level function for constructing a
 \details{
 The user should keep in mind that he or she should split data and
   and provide a list of \link{itoken} iterators. Each element of
-  \code{itoken_src} will be handled in a separate thread combined at the end
+  \code{it} will be handled in a separate thread combined at the end
   of processing.
 }
 \examples{

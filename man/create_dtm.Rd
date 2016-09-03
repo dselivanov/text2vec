@@ -6,17 +6,16 @@
 \alias{create_dtm.list}
 \title{Document-term matrix construction}
 \usage{
-create_dtm(itoken_src, vectorizer, type = c("dgCMatrix", "dgTMatrix",
+create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix", "lda_c"), ...)
+
+\method{create_dtm}{itoken}(it, vectorizer, type = c("dgCMatrix", "dgTMatrix",
   "lda_c"), ...)
 
-\method{create_dtm}{itoken}(itoken_src, vectorizer, type = c("dgCMatrix",
-  "dgTMatrix", "lda_c"), ...)
-
-\method{create_dtm}{list}(itoken_src, vectorizer, type = c("dgCMatrix",
-  "dgTMatrix", "lda_c"), verbose = FALSE, ...)
+\method{create_dtm}{list}(it, vectorizer, type = c("dgCMatrix", "dgTMatrix",
+  "lda_c"), verbose = FALSE, ...)
 }
 \arguments{
-\item{itoken_src}{\link{itoken} iterator or \code{list} of \code{itoken} iterators.}
+\item{it}{\link{itoken} iterator or \code{list} of \code{itoken} iterators.}
 
 \item{vectorizer}{\code{function} vectorizer function; see
 \link{vectorizers}.}
@@ -27,7 +26,7 @@ doc_terms_size); see
 \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}}
 
 \item{...}{arguments to the \link{foreach} function which is used to iterate
-over \code{itoken_src}.}
+over \code{it}.}
 
 \item{verbose}{\code{logical} print status messages}
 }
@@ -42,7 +41,7 @@ This is a high-level function for creating a document-term
 If a parallel backend is registered and first argument is a list of \code{itoken},
 itereators, fucntion will construct the DTM in multiple threads.
 User should keep in mind that he or she should split the data itself and provide a list of
-\link{itoken} iterators. Each element of \code{itoken_src} will be handled in separate
+\link{itoken} iterators. Each element of \code{it} will be handled in separate
 thread and combined at the end of processing.
 }
 \examples{

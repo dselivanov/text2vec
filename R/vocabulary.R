@@ -2,7 +2,7 @@
 #'@title Creates a vocabulary of unique terms
 #'@description This function collects unique terms and corresponding statistics.
 #'  See the below for details.
-#'@param itoken_src iterator over a \code{list} of \code{character} vectors,
+#'@param it iterator over a \code{list} of \code{character} vectors,
 #'  which are the documents from which the user wants to construct a vocabulary.
 #'  Alternatively, a \code{character} vector of user-defined vocabulary terms
 #'  (which will be used "as is").
@@ -34,7 +34,7 @@
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
 #'@export
-create_vocabulary = function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                        stopwords = character(0), sep_ngram = "_") {
   stopifnot(is.numeric(ngram) && length(ngram) == 2 && ngram[[2]] >= ngram[[1]])
   UseMethod("create_vocabulary")
@@ -42,26 +42,26 @@ create_vocabulary = function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max'
 
 #' @rdname create_vocabulary
 #' @export
-vocabulary = function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+vocabulary = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                        stopwords = character(0), sep_ngram = "_") {
   .Deprecated("create_vocabulary")
-  create_vocabulary(itoken_src, ngram, stopwords)
+  create_vocabulary(it, ngram, stopwords)
 }
 #' @describeIn create_vocabulary creates \code{text2vec_vocabulary} from predefined
 #' character vector. Terms will be inserted \bold{as is}, without any checks
 #' (ngrams numner, ngram delimiters, etc.).
 #' @export
-create_vocabulary.character = function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary.character = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                                  stopwords = character(0), sep_ngram = "_") {
 
   ngram_min = as.integer( ngram[[1]] )
   ngram_max = as.integer( ngram[[2]] )
-  vocab_length = length(itoken_src)
+  vocab_length = length(it)
 
   res = list(
     # keep structure similar to `create_vocabulary.itoken` object. not used at the moment,
     # but we should keep same structure (keep in mind prune_vocabulary)
-    vocab = data.table('terms' = setdiff(itoken_src, stopwords),
+    vocab = data.table('terms' = setdiff(it, stopwords),
                        'terms_counts' = rep(NA_integer_, vocab_length),
                        'doc_counts' = rep(NA_integer_, vocab_length)
                        ),
@@ -78,13 +78,13 @@ create_vocabulary.character = function(itoken_src, ngram = c('ngram_min' = 1L, '
 
 #' @describeIn create_vocabulary collects unique terms and corresponding statistics from object.
 #' @export
-create_vocabulary.itoken = function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary.itoken = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                               stopwords = character(0), sep_ngram = "_") {
-  if (inherits(itoken_src, 'R6'))
-    it = itoken_src$clone(deep = TRUE)
+  if (inherits(it, 'R6'))
+    it = it$clone(deep = TRUE)
   else {
     warning("Can't clone input iterator. It will be modified by current function call", immediate. = T)
-    it = itoken_src
+    it = it
   }
 
   ngram_min = as.integer( ngram[[1]] )
@@ -116,11 +116,11 @@ create_vocabulary.itoken = function(itoken_src, ngram = c('ngram_min' = 1L, 'ngr
 #'   registered, it will build vocabulary in parallel using \link{foreach}.
 #' @param ... additional arguments to \link{foreach} function.
 #' @export
-create_vocabulary.list = function(itoken_src, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary.list = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                             stopwords = character(0), sep_ngram = "_", ...) {
-  stopifnot( all( vapply(X = itoken_src, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
+  stopifnot( all( vapply(X = it, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
   res =
-    foreach(it = itoken_src,
+    foreach(it = it,
           .combine = combine_vocabulary,
           .inorder = FALSE,
           .multicombine = TRUE,

@@ -8,23 +8,23 @@
 \alias{vocabulary}
 \title{Creates a vocabulary of unique terms}
 \usage{
-create_vocabulary(itoken_src, ngram = c(ngram_min = 1L, ngram_max = 1L),
+create_vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
   stopwords = character(0), sep_ngram = "_")
 
-vocabulary(itoken_src, ngram = c(ngram_min = 1L, ngram_max = 1L),
+vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
   stopwords = character(0), sep_ngram = "_")
 
-\method{create_vocabulary}{character}(itoken_src, ngram = c(ngram_min = 1L,
-  ngram_max = 1L), stopwords = character(0), sep_ngram = "_")
+\method{create_vocabulary}{character}(it, ngram = c(ngram_min = 1L, ngram_max
+  = 1L), stopwords = character(0), sep_ngram = "_")
 
-\method{create_vocabulary}{itoken}(itoken_src, ngram = c(ngram_min = 1L,
-  ngram_max = 1L), stopwords = character(0), sep_ngram = "_")
+\method{create_vocabulary}{itoken}(it, ngram = c(ngram_min = 1L, ngram_max =
+  1L), stopwords = character(0), sep_ngram = "_")
 
-\method{create_vocabulary}{list}(itoken_src, ngram = c(ngram_min = 1L,
-  ngram_max = 1L), stopwords = character(0), sep_ngram = "_", ...)
+\method{create_vocabulary}{list}(it, ngram = c(ngram_min = 1L, ngram_max =
+  1L), stopwords = character(0), sep_ngram = "_", ...)
 }
 \arguments{
-\item{itoken_src}{iterator over a \code{list} of \code{character} vectors,
+\item{it}{iterator over a \code{list} of \code{character} vectors,
 which are the documents from which the user wants to construct a vocabulary.
 Alternatively, a \code{character} vector of user-defined vocabulary terms
 (which will be used "as is").}
