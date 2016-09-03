@@ -16,12 +16,12 @@ test_that("LSA", {
   model = LatentSemanticAnalysis$new(n_topics)
   # suppressWarnings because we perform full rank SVD and Rspectra produce warning
   suppressWarnings(model$fit(dtm))
-  documents = model$transf(dtm)
+  documents = model$transform(dtm)
   expect_equal(rownames(documents), ids)
 
   # check fit_transform & (fit(); transform()) give similar results
   # suppressWarnings because we perform full rank SVD and Rspectra produce warning
-  suppressWarnings(documents_2 <- fit_transf(LatentSemanticAnalysis$new(n_topics), X = dtm))
+  suppressWarnings(documents_2 <- fit_transform(dtm, LatentSemanticAnalysis$new(n_topics)))
   expect_equal(documents, documents_2)
 
 
