@@ -1,0 +1,98 @@
+#' @name fit
+#' @title Fits model to data
+#' @description Generic function to fit models - inherited from \code{estimator}
+#' @param x a matrix like object, should inherit from \code{Matrix} or \code{matrix}
+#' @param model instance of class \code{estimator} which should implement method
+#' with signature \code{$fit(x, ...)}
+# ' @param y optional response variable, should inherit from \code{vector} \code{Matrix} or \code{matrix}
+#' @param ... additional data/model dependent arguments to downstream functions.
+#' For supervised learning (if any) responese should be called \code{y}.
+#' @return \code{invisible(object$self())}
+#' @export
+fit = function(x, model, ...) {
+  stopifnot(inherits(model, "estimator"))
+  UseMethod("fit")
+}
+
+#' @rdname fit
+#' @export
+fit.Matrix = function(x, model, ...) {
+  model$fit(x, ...)
+}
+
+#' @rdname fit
+#' @export
+fit.matrix = function(x, model, ...) {
+  model$fit(x, ...)
+}
+
+#' @name fit_transform
+#' @title Fit model to data, then transform it
+#' @description This is generic function to fit transformers (class = "transformer")
+#' and then apply fitted model to input.
+#' @param x a matrix like object, should inherit from \code{Matrix} or \code{matrix}
+#' @param model instance of class \code{estimator} which should implement method
+#' with signature \code{$fit(x, ...)}
+# ' @param y optional response variable, should inherit from \code{vector} \code{Matrix} or \code{matrix}
+#' @param ... additional data/model dependent arguments to downstream functions.
+#' For supervised learning (if any) responese should be called \code{y}.
+#' @return Transformed version of \code{x}
+#' @export
+fit_transform = function(x, model, ...) {
+  stopifnot(inherits(model, "transformer"))
+  UseMethod("fit_transform")
+}
+
+#' @rdname fit_transform
+#' @export
+fit_transform.Matrix = function(x, model, ...) {
+  model$fit_transform(x, ...)
+}
+
+#' @rdname fit_transform
+#' @export
+fit_transform.matrix = function(x, model, ...) {
+  model$fit_transform(x, ...)
+}
+
+#' @name transform
+#' @title Transforms Matrix-like object using \code{model}
+#' @description Transforms Matrix-like object using \code{model}
+#' @export
+#' @method transform Matrix
+#' @param _data \bold{ = x} in other methods.
+#' A matrix like object, should inherit from \code{Matrix} or \code{matrix}
+#' @param model object of class \code{transformer} which
+#' implements method \code{$transform(x, ...)}
+#' @param ... additional data/model dependent arguments to downstream functions.
+transform.Matrix = function(`_data`, model, ...) {
+  stopifnot(inherits(model, "transformer"))
+  model$transform(`_data`, ...)
+}
+
+#' @rdname transform
+#' @export
+#' @method transform matrix
+transform.matrix = function(`_data`, model, ...) {
+  stopifnot(inherits(model, "transformer"))
+  model$transform(`_data`, ...)
+}
+
+# #' @name partial_fit
+# #' @title Fit model to chunk of data
+# #' @description This is generic function to fit text2vec models (class = "text2vec_model")
+# #' to subset of data. \strong{Note, that this function modifies input model during fitting!}
+# #' @param object instance of class \code{text2vec_model}.
+# #' @param x matrix like object. At the moment usually one of
+# #' \code{c("matrix", "dgCMatrix", "dgTMatrix", "lda_c")}
+# #' @param ... arguments to underlying functions. Currently not used.
+# #' @return Current estimate of model-specific cost function.
+# #' @export
+# partial_fit = function(object, x, ...) {
+#   UseMethod("partial_fit")
+# }
+# #' @rdname partial_fit
+# #' @export
+# partial_fit.text2vec_model = function(object, x, ...) {
+#   object$partial_fit(x, ...)
+# }

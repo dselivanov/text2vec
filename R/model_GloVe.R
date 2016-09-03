@@ -3,11 +3,12 @@
 #' @description Class for GloVe word-embeddings model.
 #' It can be trained via fully can asynchronous and parallel
 #' AdaGrad with \code{$fit()} method.
+#' @format \code{\link{R6Class}} object.
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
 #' glove = GlobalVectors$new(word_vectors_size, vocabulary, x_max)
-#' glove$fit(X, n_iter)
+#' glove$fit(x, n_iter)
 #' glove$get_word_vectors()
 #' glove$dump_model()
 #' }
@@ -17,10 +18,10 @@
 #'                     max_cost = 10, alpha = 0.75, lambda = 0, shuffle = FALSE,
 #'                     initial = NULL)}}{Constructor for Global vectors model.
 #'                     For description of arguments see \bold{Arguments} section.}
-#'   \item{\code{$fit(X)}}{fit Glove model to input matrix \code{X}}
+#'   \item{\code{$fit(x)}}{fit Glove model to input matrix \code{x}}
 #'   \item{\code{$get_word_vectors()}}{get word vector - obtain GloVe word embeddings}
 #'   \item{\code{$dump_model()}}{get model internals - word vectors and biases for main and context words}
-#'   \item{\code{$get_history}}{get history of SGD costs and word vectors (if \code{dump_every_n > 0}}
+#'   \item{\code{$get_history}}{get history of SGD costs and word vectors (if \code{dump_every_n > 0)}}
 #'}
 #' @field dump_every_n \code{integer = 0L} by default. Defines frequency of dumping word vectors. For example user
 #' can ask to dump word vectors each 5 iteration.
@@ -35,7 +36,7 @@
 #' @section Arguments:
 #' \describe{
 #'  \item{glove}{A \code{GloVe} object}
-#'  \item{X}{An input term-cooccurence matrix. Preferably in \code{dgTMatrix} format}
+#'  \item{x}{An input term-cooccurence matrix. Preferably in \code{dgTMatrix} format}
 #'  \item{n_iter}{\code{integer} number of SGD iterations}
 #'  \item{word_vectors_size}{desired dimenson for word vectors}
 #'  \item{vocabulary}{\code{character} vector or instance of
@@ -77,16 +78,18 @@
 #' v_vect = vocab_vectorizer(vocab, grow_dtm = FALSE, skip_grams_window = 5L)
 #' tcm = create_tcm(it, v_vect)
 #'
-#' glove_model = GloVe(word_vectors_size = 50, vocabulary = vocab,
-#'  x_max = 10, learning_rate = 0.25)
+#' glove_model = GloVe(word_vectors_size = 50, vocabulary = vocab, x_max = 10, learning_rate = .25)
 #' # fit model and get word vectors
-#' fit(glove_model, tcm, n_iter = 10)
+#' fit(tcm, glove_model, n_iter = 10)
 #' wv = glove_model$get_word_vectors()
 #' }
+NULL
+
 #' @export
+
 GlobalVectors = R6::R6Class(
   "GloVe",
-  inherit = text2vec_model,
+  inherit = text2vec_word_embedding_model,
   public = list(
     dump_every_n = 0L,
     shuffle = FALSE,
@@ -152,9 +155,9 @@ GlobalVectors = R6::R6Class(
       }
     },
     # fit method will work only with sparse matrices coercible to "dgTMatrix"
-    fit = function(X, n_iter, convergence_tol = -1) {
+    fit = function(x, n_iter, convergence_tol = -1) {
       # convert to internal native format
-      X = coerce_matrix(X, private$internal_matrix_format, verbose = self$verbose)
+      x = coerce_matrix(x, private$internal_matrix_format, verbose = self$verbose)
       # params in a specific format to pass to C++ backend
       initial = list(w_i = private$w_i, w_j = private$w_j,
                      b_i = private$b_i, b_j = private$b_j)
@@ -173,7 +176,7 @@ GlobalVectors = R6::R6Class(
       private$glove_fitter = new(GloveFitter, glove_params)
       private$cost_history = numeric(0)
       # number of non-zero elements in cooccurence matrix
-      n_nnz = length(X@i)
+      n_nnz = length(x@i)
       # create list for saving word vectors if need to dump between iterations
       if (self$dump_every_n > 0) {
         n_elem = n_iter %/% self$dump_every_n
@@ -196,9 +199,9 @@ GlobalVectors = R6::R6Class(
           iter_order = sample.int( n_nnz, replace = F )
 
         # perform fit on upper-diagonal elements
-        cost = private$glove_fitter$partial_fit(X@i, X@j, X@x, iter_order)
+        cost = private$glove_fitter$partial_fit(x@i, x@j, x@x, iter_order)
         # perform fit on lower-diagonal elements
-        cost = cost + private$glove_fitter$partial_fit(X@j, X@i, X@x, iter_order)
+        cost = cost + private$glove_fitter$partial_fit(x@j, x@i, x@x, iter_order)
 
         # check whether SGD is numerically correct - no NaN at C++ level
         if (is.nan(cost))
@@ -284,14 +287,6 @@ GlobalVectors = R6::R6Class(
 #' @rdname GlobalVectors
 #' @export
 GloVe = GlobalVectors
-
-#' @rdname fit
-#' @export
-#' @param n_iter number of iterations
-#' @param convergence_tol convergence tolerance
-fit.GloVe = function(object, X, n_iter, convergence_tol = -1, ...) {
-  object$fit(X, n_iter = n_iter, convergence_tol = convergence_tol, ...)
-}
 
 #' @name glove
 #' @title Fit a GloVe word-embedded model

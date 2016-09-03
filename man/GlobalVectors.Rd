@@ -5,10 +5,8 @@
 \alias{GloVe}
 \alias{GlobalVectors}
 \title{Creates Global Vectors word-embeddings model.}
-\format{An object of class \code{R6ClassGenerator} of length 24.}
+\format{\code{\link{R6Class}} object.}
 \usage{
-GlobalVectors
-
 GloVe
 }
 \description{
@@ -38,7 +36,7 @@ grain_size for \code{RcppParallel::parallelReduce}. For details, see
 For usage details see \bold{Methods, Arguments and Examples} sections.
 \preformatted{
 glove = GlobalVectors$new(word_vectors_size, vocabulary, x_max)
-glove$fit(X, n_iter)
+glove$fit(x, n_iter)
 glove$get_word_vectors()
 glove$dump_model()
 }
@@ -51,10 +49,10 @@ glove$dump_model()
                     max_cost = 10, alpha = 0.75, lambda = 0, shuffle = FALSE,
                     initial = NULL)}}{Constructor for Global vectors model.
                     For description of arguments see \bold{Arguments} section.}
-  \item{\code{$fit(X)}}{fit Glove model to input matrix \code{X}}
+  \item{\code{$fit(x)}}{fit Glove model to input matrix \code{x}}
   \item{\code{$get_word_vectors()}}{get word vector - obtain GloVe word embeddings}
   \item{\code{$dump_model()}}{get model internals - word vectors and biases for main and context words}
-  \item{\code{$get_history}}{get history of SGD costs and word vectors (if \code{dump_every_n > 0}}
+  \item{\code{$get_history}}{get history of SGD costs and word vectors (if \code{dump_every_n > 0)}}
 }
 }
 
@@ -62,7 +60,7 @@ glove$dump_model()
 
 \describe{
  \item{glove}{A \code{GloVe} object}
- \item{X}{An input term-cooccurence matrix. Preferably in \code{dgTMatrix} format}
+ \item{x}{An input term-cooccurence matrix. Preferably in \code{dgTMatrix} format}
  \item{n_iter}{\code{integer} number of SGD iterations}
  \item{word_vectors_size}{desired dimenson for word vectors}
  \item{vocabulary}{\code{character} vector or instance of
@@ -104,10 +102,9 @@ vocab = create_vocabulary(it) \%>\%
 v_vect = vocab_vectorizer(vocab, grow_dtm = FALSE, skip_grams_window = 5L)
 tcm = create_tcm(it, v_vect)
 
-glove_model = GloVe(word_vectors_size = 50, vocabulary = vocab,
- x_max = 10, learning_rate = 0.25)
+glove_model = GloVe(word_vectors_size = 50, vocabulary = vocab, x_max = 10, learning_rate = .25)
 # fit model and get word vectors
-fit(glove_model, tcm, n_iter = 10)
+fit(tcm, glove_model, n_iter = 10)
 wv = glove_model$get_word_vectors()
 }
 }
