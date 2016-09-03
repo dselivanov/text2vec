@@ -15,18 +15,17 @@
 // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
 
 // Code below is based on code from R lda package: https://github.com/slycoder/R-lda-deprecated
-// All credits to Jonathan Chang - https://github.com/slycoder
+// All credits should go to Jonathan Chang - https://github.com/slycoder
 // Original code is under LGPL license
-
 #include "text2vec.h"
 using namespace Rcpp;
 
-IntegerMatrix subtract_matrices(IntegerMatrix m1, IntegerMatrix m2) {
-  IntegerMatrix res(m1.nrow(), m1.ncol());
-  for(uint32_t i = 0; i < m1.length(); i++ )
-    res[i] = m1[i] - m2[i];
-  return(res);
-}
+// IntegerMatrix subtract_matrices(IntegerMatrix m1, IntegerMatrix m2) {
+//   IntegerMatrix res(m1.nrow(), m1.ncol());
+//   for(uint32_t i = 0; i < m1.length(); i++ )
+//     res[i] = m1[i] - m2[i];
+//   return(res);
+// }
 
 double docs_likelihood(IntegerMatrix M, double prior) {
   double ll = 0;
@@ -88,11 +87,22 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
   GetRNGstate();
   uint32_t i_doc;
   int kk;
-
   uint32_t n_documents = documents.size();
+
+  double doc_ll;
+  double topic_ll;
+
+  //log B(\alpha)
+  const double const_prior = (n_topics * R::lgammafn(alpha) - R::lgammafn(alpha * n_topics)) * n_documents;
+  //log B(\eta)
+  const  double const_ll = (vocab_size * R::lgammafn(eta) - R::lgammafn(eta * vocab_size)) * n_topics;
+
+
   uint32_t total_words = 0;
   for(uint32_t i = 0; i < n_documents; i++ )
     total_words += sum(documents[i].row(1));
+  uint32_t initial_topic_total_words = total_words;
+  // Rprintf("total_words = %d\n", total_words);
 
   IntegerMatrix document_topic_distr;
   List assignements;
@@ -101,61 +111,33 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
 
   IntegerMatrix topics_word_distr;
   IntegerVector topic_sums;
-  IntegerMatrix initial_topics_word_distr;
-  IntegerVector initial_topic_sums;
   IntegerMatrix initial_document_topic_distr;
-  int have_initial_word_topic_distr = (initial.size() > 0);
-  int have_initial_document_topic_distr = 0;
+  int have_initial_word_topic_distr =
+    initial.containsElementNamed("topics_word_distr") &&
+    initial.containsElementNamed("topic_sums");
   int have_initial_assignements = 0;
-  //if(initial.containsElementNamed("document_topic_distr")) have_initial_document_topic_distr = 1;
-  if(initial.containsElementNamed("assignements")) have_initial_assignements = 1;
-
-  // List initial_assignements(n_documents);
 
 //   IntegerMatrix document_expects;
 //   if (burnin > -1) {
 //     IntegerMatrix document_expects(n_topics, n_documents);
 //   }
-  if (have_initial_word_topic_distr) {
-    initial_topics_word_distr = as<IntegerMatrix>(initial["topics_word_distr"]);
-    initial_topic_sums = as<IntegerVector>(initial["topic_sums"]);
-    // make deep copies, since we will modify by reference below
-    topics_word_distr = clone(initial_topics_word_distr);
-    topic_sums = clone(initial_topic_sums);
 
-//     if(have_initial_document_topic_distr) {
-//       initial_document_topic_distr = as<IntegerMatrix>(initial["document_topic_distr"]);
-//       // make deep copies, since we will modify by reference below
-//       document_topic_distr = clone(initial_document_topic_distr);
-//     } else
-      document_topic_distr = IntegerMatrix(n_topics, n_documents);
-    if(have_initial_assignements)
-      assignements = initial["assignements"];
-    else {
-      assignements = List(n_documents);
-      for(i_doc = 0; i_doc < n_documents; i_doc++)
-        assignements[i_doc] = IntegerVector(documents[i_doc].ncol(), -1);
-    }
+  if (have_initial_word_topic_distr) {
+    topics_word_distr = as<IntegerMatrix>(initial["topics_word_distr"]);
+    topic_sums = as<IntegerVector>(initial["topic_sums"]);
+    initial_topic_total_words = std::accumulate(topic_sums.begin(), topic_sums.end(), 0);
+    topic_ll = topics_likelihood(topics_word_distr, eta) - const_ll;;
 
   } else {
     topics_word_distr = IntegerMatrix(n_topics, vocab_size);
-    document_topic_distr = IntegerMatrix(n_topics, n_documents);
     topic_sums = IntegerVector(n_topics);
-    assignements = List(n_documents);
-    for(i_doc = 0; i_doc < n_documents; i_doc++)
-      assignements[i_doc] = IntegerVector(documents[i_doc].ncol(), -1);
   }
+  document_topic_distr = IntegerMatrix(n_topics, n_documents);
+  assignements = List(n_documents);
+  for(i_doc = 0; i_doc < n_documents; i_doc++)
+    assignements[i_doc] = IntegerVector(documents[i_doc].ncol(), -1);
 
-  // NumericVector p(n_topics);
   vector<double> p(n_topics);
-
-  double const_prior = 0;
-  double const_ll = 0;
-
-  //log B(\alpha)
-  const_prior = (n_topics * R::lgammafn(alpha) - R::lgammafn(alpha * n_topics)) * n_documents;
-  //log B(\eta)
-  const_ll = (vocab_size * R::lgammafn(eta) - R::lgammafn(eta * vocab_size)) * n_topics;
 
   size_t j = 0;
   for (int iteration = 1; iteration <= n_iter; ++iteration) {
@@ -170,28 +152,21 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
       }
       for (uint32_t i_word = 0; i_word < nw; ++i_word) {
         int z = zs[i_word];
-        long word = -1;
-        int count = 1;
-        int* topic_wk;
-        int* topic_k;
-        int* document_k;
+        long word = document(0, i_word);
+        int count = document(1, i_word);
+        long i_wk = z + n_topics * word;
+        long i_dk = n_topics * i_doc + z;
 
-        word  = document(0, i_word);
-        count = document(1, i_word);
         if (z != -1) {
-          topic_wk = &topics_word_distr[z + n_topics * word];
-          topic_k = &topic_sums[z];
-
           if(!freeze_topics) {
-            *topic_wk -= count;
-            *topic_k -= count;
+            topics_word_distr[i_wk] -= count;
+            topic_sums[z] -= count;
           }
-          document_k = &document_topic_distr[n_topics * i_doc + z];
-          *document_k -= count;
+          document_topic_distr[i_dk] -= count;
 
-          if (*topic_wk < 0 || *topic_k < 0 || *document_k < 0) {
+          if (topics_word_distr[i_wk] < 0 || topic_sums[z] < 0 || document_topic_distr[i_dk] < 0) {
             stop("Counts became negative for word (%ld): (%d, %d, %d)",
-                  word, *topic_wk, *topic_k, *document_k);
+                  word, topics_word_distr[i_wk], topic_sums[z], document_topic_distr[i_dk]);
           }
         }
 
@@ -239,35 +214,26 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
 //           document_expects[n_topics * i_doc + zs[i_word]] += count;
       }
     }
-
     //Compute the likelihoods, check convergence
     if(check_convergence_every_n > 0 && iteration % check_convergence_every_n == 0) {
-      double doc_ll;
-      if(have_initial_document_topic_distr)
-        doc_ll = docs_likelihood(subtract_matrices(document_topic_distr, initial_document_topic_distr), alpha);
-      else
-        doc_ll = docs_likelihood(document_topic_distr, alpha);
-        // IntegerMatrix temp = initial_document_topic_distr - document_topic_distr;
-        // doc_ll = docs_likelihood(initial_document_topic_distr - document_topic_distr, alpha);
+      doc_ll = docs_likelihood(document_topic_distr, alpha) - const_prior;
+      // calculate topics_likelihood only when we don't have it initial fixed topics_word_distr
+      if(!(have_initial_word_topic_distr && freeze_topics))
+        topic_ll = topics_likelihood(topics_word_distr, eta) - const_ll;
 
-      double topic_ll;
-      if(have_initial_word_topic_distr)
-        topic_ll = topics_likelihood(subtract_matrices(topics_word_distr, initial_topics_word_distr), eta);
-      else
-        topic_ll = topics_likelihood(topics_word_distr, eta);
-
-      log_likelihood.push_back(doc_ll - const_prior + topic_ll - const_ll);
-      perpl.push_back( exp ( -log_likelihood[j] / total_words) );
+      log_likelihood.push_back(doc_ll + topic_ll );
+      perpl.push_back( exp ( (-doc_ll) / total_words + (-topic_ll) / initial_topic_total_words) );
       if (trace >= 1) {
-        Rprintf("\r%s iteration %d, perplexity: %0.2f likelihood %0.2f\n",
+        Rprintf("\r%s iteration %d, perplexity: %0.2f likelihood %0.2f doc_topic_ll %0.2f topic_word_ll %0.2f\n",
                 currentDateTime().c_str(),
                 iteration,
                 perpl[j],
-                log_likelihood[j]
+                log_likelihood[j],
+                doc_ll,
+                topic_ll
         );
         R_FlushConsole();
       }
-
       // check convergence
       if(j > 0) {
         double perpl_improvement =  perpl[j - 1] / perpl[j] - 1;
@@ -290,7 +256,7 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
   return List::create(_["topics_word_distr"] = topics_word_distr,
                       _["topic_sums"] = topic_sums,
                       _["document_topic_distr"] = document_topic_distr,
-                      _["log_likelihood"] = wrap(log_likelihood),
-                      _["assignements"] = assignements);
+                      _["log_likelihood"] = wrap(log_likelihood));
+                      // _["assignements"] = assignements);
 
 }
