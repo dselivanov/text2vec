@@ -17,4 +17,4 @@ before_install:
   - mkdir ~/.R
   - echo "CXX1X=g++-4.9" > ~/.R/Makevars
 after_success:
-  - Rscript -e 'options(covr.gcov = "gcov-4.9");library(covr);coveralls()'
+  - Rscript -e 'options(covr.gcov = "gcov-4.9");library(covr);codecov()'
