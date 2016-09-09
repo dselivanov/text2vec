@@ -64,21 +64,25 @@ itoken_character_R6 = R6::R6Class(
   inherit = finite_iterator_R6,
   public = list(
     #------------------------
-    preprocessor = NULL,
-    tokenizer = NULL,
+    # FIXME - https://github.com/wch/R6/issues/94
+    preprocessor = list(),
+    tokenizer = list(),
+    #------------------------------------------------
     ids = NULL,
     #------------------------
     initialize = function(iterable,
                           ids = NULL,
                           chunks_number = 10,
-                          progress = interactive(),
-                          preprocessor = identity,
-                          tokenizer = identity) {
+                          progress_ = interactive(),
+                          preprocessor_ = identity,
+                          tokenizer_ = identity) {
       self$iterable = iterable
       self$counter = 0L
-      self$preprocessor = preprocessor
-      self$tokenizer = tokenizer
-      self$progress = progress
+      # FIXME - https://github.com/wch/R6/issues/94
+      self$preprocessor = list(preprocessor_)
+      self$tokenizer = list(tokenizer_)
+      #------------------------------------------------
+      self$progress = progress_
       if (is.null(ids)) {
         self$ids = names(self$iterable)
         if (is.null(self$ids))
@@ -98,10 +102,10 @@ itoken_character_R6 = R6::R6Class(
       }
       new_counter = min(self$counter + self$chunk_size, self$length)
       ix = (self$counter + 1L):new_counter
-
-      tokens = self$preprocessor(self$iterable[ix])
-      tokens = self$tokenizer(tokens)
-
+      # FIXME - https://github.com/wch/R6/issues/94
+      tokens = self$preprocessor[[1]](self$iterable[ix])
+      tokens = self$tokenizer[[1]](tokens)
+      #-----------------------------------------------
       ret = list(tokens = tokens, ids = self$ids[ix])
       self$counter = new_counter
       if (self$progress)
@@ -120,25 +124,19 @@ ifiles_R6 = R6::R6Class(
   "ifiles",
   inherit = finite_iterator_R6,
   public = list(
-    reader_function = NULL,
+    reader_function = list(),
     initialize = function(iterable,  reader = readLines) {
       stopifnot(is.function(reader))
       self$iterable = iterable
-      # self$reader_function = function(x) force(reader(x, ...))
-      self$reader_function = reader
+      self$reader_function = list(reader)
       self$counter = 0
     },
-    # set_reader_function = function(f) {
-    #   self$reader_function = f
-    # },
     nextElem = function() {
       if (self$is_complete) {
         stop(StopIteration("StopIteration"))
       }
       self$counter = self$counter + 1L
-      self$reader_function(self$iterable[[self$counter]])
-      # self$reader_function(self$iterable[[self$counter]])
-      # readLines(self$iterable[[self$counter]])
+      self$reader_function[[1]](self$iterable[[self$counter]])
     }
   )
 )
@@ -158,13 +156,13 @@ itoken_iterator_R6 = R6::R6Class(
     initialize = function(input_iterator,
                           chunks_number = 1,
                           progress = interactive(),
-                          preprocessor = identity,
-                          tokenizer = identity) {
+                          preprocessor_ = identity,
+                          tokenizer_ = identity) {
       self$iterator = input_iterator
       self$outer_length = self$iterator$length
       self$progress = FALSE
-      self$preprocessor = preprocessor
-      self$tokenizer = tokenizer
+      self$preprocessor = list(preprocessor_)
+      self$tokenizer = list(tokenizer_)
       self$chunks_number = chunks_number
       if (!is.null(self$iterator$length))
         self$outer_progress = progress
@@ -286,17 +284,17 @@ itoken.list = function(iterable,
 
   stopifnot( all( vapply(X = iterable, FUN = inherits, FUN.VALUE = FALSE, "character") ) )
   itoken_character_R6$new(iterable, chunks_number = chunks_number, progress = progressbar, ids = ids,
-                          preprocessor = identity, tokenizer = identity)
+                          preprocessor_ = identity, tokenizer_ = identity)
 }
 
 #' @rdname itoken
-#' @param preprocess_function \code{function} which takes chunk of
+#' @param preprocessor \code{function} which takes chunk of
 #'   \code{character} vectors and does all pre-processing.
-#'   Usually \code{preprocess_function} should return a
+#'   Usually \code{preprocessor} should return a
 #'   \code{character} vector of preprocessed/cleaned documents. See "Details"
 #'   section.
 #' @param tokenizer \code{function} which takes a \code{character} vector from
-#'   \code{preprocess_function}, split it into tokens and returns a \code{list}
+#'   \code{preprocessor}, split it into tokens and returns a \code{list}
 #'   of \code{character} vectors. If you need to perform stemming -
 #'   call stemmer inside tokenizer. See examples section.
 #' @param chunks_number \code{integer}, the number of pieces that object should
@@ -304,19 +302,21 @@ itoken.list = function(iterable,
 #' @param progressbar \code{logical} indicates whether to show progress bar.
 #' @export
 itoken.character = function(iterable,
-                             preprocess_function = identity,
+                             preprocessor = identity,
                              tokenizer = space_tokenizer,
                              chunks_number = 10,
                              progressbar = interactive(),
                              ids = NULL, ...) {
+  # preprocessor2 = function(...) preprocessor(...)
+  # tokenizer2 = function(...) tokenizer(...)
   itoken_character_R6$new(iterable, chunks_number = chunks_number, progress = progressbar, ids = ids,
-                          preprocessor = preprocess_function, tokenizer = tokenizer)
+                          preprocessor_ = preprocessor, tokenizer_ = tokenizer)
 }
 
 #' @rdname itoken
 #' @export
 itoken.iterator = function(iterable,
-                            preprocess_function = identity,
+                            preprocessor = identity,
                             tokenizer = space_tokenizer,
                             progressbar = interactive(), ...) {
   if (inherits(iterable, 'R6'))
@@ -328,8 +328,8 @@ itoken.iterator = function(iterable,
 
   itoken_iterator_R6$new(it,
                          progress = progressbar,
-                         preprocessor = preprocess_function,
-                         tokenizer = tokenizer)
+                         preprocessor_ = preprocessor,
+                         tokenizer_ = tokenizer)
 }
 
 # #' @name ilines

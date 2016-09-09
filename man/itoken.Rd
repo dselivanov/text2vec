@@ -12,11 +12,11 @@ itoken(iterable, ...)
 \method{itoken}{list}(iterable, chunks_number = 10,
   progressbar = interactive(), ids = NULL, ...)
 
-\method{itoken}{character}(iterable, preprocess_function = identity,
+\method{itoken}{character}(iterable, preprocessor = identity,
   tokenizer = space_tokenizer, chunks_number = 10,
   progressbar = interactive(), ids = NULL, ...)
 
-\method{itoken}{iterator}(iterable, preprocess_function = identity,
+\method{itoken}{iterator}(iterable, preprocessor = identity,
   tokenizer = space_tokenizer, progressbar = interactive(), ...)
 }
 \arguments{
@@ -33,14 +33,14 @@ be divided into.}
 \code{names(iterable)} will be used. If \code{names(iterable) == NULL},
 incremental ids will be assigned.}
 
-\item{preprocess_function}{\code{function} which takes chunk of
+\item{preprocessor}{\code{function} which takes chunk of
 \code{character} vectors and does all pre-processing.
-Usually \code{preprocess_function} should return a
+Usually \code{preprocessor} should return a
 \code{character} vector of preprocessed/cleaned documents. See "Details"
 section.}
 
 \item{tokenizer}{\code{function} which takes a \code{character} vector from
-\code{preprocess_function}, split it into tokens and returns a \code{list}
+\code{preprocessor}, split it into tokens and returns a \code{list}
 of \code{character} vectors. If you need to perform stemming -
 call stemmer inside tokenizer. See examples section.}
 }
