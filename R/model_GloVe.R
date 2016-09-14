@@ -18,7 +18,7 @@
 #'                     max_cost = 10, alpha = 0.75, lambda = 0, shuffle = FALSE,
 #'                     initial = NULL)}}{Constructor for Global vectors model.
 #'                     For description of arguments see \bold{Arguments} section.}
-#'   \item{\code{$fit(x)}}{fit Glove model to input matrix \code{x}}
+#'   \item{\code{$fit(x, n_iter, convergence_tol = -1)}}{fit Glove model to input matrix \code{x}}
 #'   \item{\code{$get_word_vectors()}}{get word vector - obtain GloVe word embeddings}
 #'   \item{\code{$dump_model()}}{get model internals - word vectors and biases for main and context words}
 #'   \item{\code{$get_history}}{get history of SGD costs and word vectors (if \code{dump_every_n > 0)}}
@@ -36,12 +36,12 @@
 #' @section Arguments:
 #' \describe{
 #'  \item{glove}{A \code{GloVe} object}
-#'  \item{x}{An input term-cooccurence matrix. Preferably in \code{dgTMatrix} format}
+#'  \item{x}{An input term co-occurence matrix. Preferably in \code{dgTMatrix} format}
 #'  \item{n_iter}{\code{integer} number of SGD iterations}
 #'  \item{word_vectors_size}{desired dimenson for word vectors}
 #'  \item{vocabulary}{\code{character} vector or instance of
 #'    \code{text2vec_vocabulary} class. Each word should correspond to dimension
-#'    of cooccurence matrix.}
+#'    of co-occurence matrix.}
 #'  \item{x_max}{\code{integer} maximum number of co-occurrences to use in the weighting function.
 #'    see the GloVe paper for details: \url{http://nlp.stanford.edu/pubs/glove.pdf}}
 #'  \item{learning_rate}{\code{numeric} learning rate for SGD. I do not recommend that you
