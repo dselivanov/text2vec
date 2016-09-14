@@ -53,7 +53,7 @@ test_that("relaxed word mover distance", {
   glove = GlobalVectors$new(word_vectors_size = 50, vocabulary = v, x_max = 10)
   glove$fit(tcm, n_iter = 10)
   wv = glove$get_word_vectors()
-  rwmd_model = RWMD(word_vectors = wv)
+  rwmd_model = RWMD$new(wv)
   rwmd_dist = dist2(dtm[i1, ], dtm[i2, ], method = rwmd_model, norm = 'none', verbose = F)
   expect_equal(nrow(rwmd_dist), length(i1))
   expect_equal(ncol(rwmd_dist), length(i2))

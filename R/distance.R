@@ -46,7 +46,7 @@ jaccard_dist = function(x, y = NULL, format = 'dgCMatrix') {
 dist2 = function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
                      norm = c('none', 'l1', 'l2'), verbose = TRUE) {
   stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix"))
-  stopifnot(inherits(method, "text2vec_distance") || inherits(method, "character"))
+  stopifnot(inherits(method, "distance_model") || inherits(method, "character"))
 
   FLAG_TWO_MATRICES_INPUT = FALSE
   if (!is.null(y)) {
@@ -96,12 +96,12 @@ dist2 = function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
       RESULT = jaccard_dist(x, y)
     }
   }
-  if (inherits(method, "text2vec_distance")) {
+  if (inherits(method, "distance_model")) {
     if (inherits(method, "RWMD")) {
       if (norm != 'none')
         warning("RWMD can be computed only on bag-of-words matrices - raw word-counts.
                 Usually no normalization is needed - l1 normalization will be done aumatically!")
-      RESULT = method$dist2(x, y,  verbose)
+      RESULT = method$dist2(x, y)
     }
   }
   if (is.null(RESULT))
@@ -121,7 +121,7 @@ dist2 = function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
 pdist2 = function(x, y, method = c('cosine', 'euclidean', 'jaccard'),
                   norm = c('none', 'l1', 'l2'), verbose = TRUE) {
   stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix"))
-  stopifnot(inherits(method, "text2vec_distance") || inherits(method, "character"))
+  stopifnot(inherits(method, "distance_model") || inherits(method, "character"))
   stopifnot(ncol(x) == ncol(y))
   stopifnot(nrow(x) == nrow(y))
   stopifnot(colnames(x) == colnames(y))
@@ -156,12 +156,12 @@ pdist2 = function(x, y, method = c('cosine', 'euclidean', 'jaccard'),
       RESULT = 1 - intrs / (rowSums(x) + rowSums(y) - intrs)
     }
   }
-  if (inherits(method, "text2vec_distance")) {
+  if (inherits(method, "distance_model")) {
     if (inherits(method, "RWMD")) {
       if (norm != 'none')
         warning("RWMD can be computed only on bag-of-words matrices - raw word-counts.
                 Usually no normalization is needed - l1 normalization will be done aumatically!")
-      RESULT = method$pdist2(x, y,  verbose)
+      RESULT = method$pdist2(x, y)
     }
   }
   if (is.null(RESULT))
