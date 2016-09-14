@@ -224,14 +224,11 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
       log_likelihood.push_back(doc_ll + topic_ll );
       perpl.push_back( exp ( (-doc_ll) / total_words + (-topic_ll) / initial_topic_total_words) );
       if (trace >= 1) {
+        // Rprintf("\r%s iteration %d, perplexity: %0.2f likelihood %0.2f doc_topic_ll %0.2f topic_word_ll %0.2f\n",
+        //         currentDateTime().c_str(), iteration, perpl[j], log_likelihood[j],
+        //         doc_ll, topic_ll);
         Rprintf("\r%s iteration %d, perplexity: %0.2f likelihood %0.2f doc_topic_ll %0.2f topic_word_ll %0.2f\n",
-                currentDateTime().c_str(),
-                iteration,
-                perpl[j],
-                log_likelihood[j],
-                doc_ll,
-                topic_ll
-        );
+                currentDateTime().c_str(), iteration, perpl[j], log_likelihood[j]);
         R_FlushConsole();
       }
       // check convergence
