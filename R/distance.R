@@ -32,6 +32,7 @@ jaccard_dist = function(x, y = NULL, format = 'dgCMatrix') {
 #' The distance measure to be used. One of \code{c("cosine", "euclidean", "jaccard")} or \link{RWMD}.
 #' \code{RWMD} works only on bag-of-words matrices.
 #' Also user should keep in mind, that distance = 1 - similarity.
+#' \bold{In case of \code{"cosine"} distance function will return \code{1 - abs(similarity)}}
 #' @param norm \code{character} - how to scale input matrices.
 #' @param verbose \code{logical} whether to display additional information during calculations
 #' @title Pairwise Distance Matrix Computation
@@ -64,9 +65,14 @@ dist2 = function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
     method = match.arg(method)
     if (method == 'cosine') {
       if (norm == 'l1') stop("l2 norm should be used with 'cosine' method")
-      if (FLAG_TWO_MATRICES_INPUT) y = normalize(y, norm)
       x = normalize(x, norm)
-      RESULT = 1 - tcrossprod(x, y)
+
+      if (FLAG_TWO_MATRICES_INPUT)
+        y = normalize(y, norm)
+      else
+        y = x
+
+      RESULT = 1 - abs(tcrossprod(x, y))
     }
     if (method == 'euclidean') {
       if (!inherits(x, 'matrix') || !inherits(y, 'matrix'))
@@ -133,7 +139,7 @@ pdist2 = function(x, y, method = c('cosine', 'euclidean', 'jaccard'),
       if (norm == 'l1') stop("l2 norm should be used with 'cosine' method")
       y = normalize(y, norm)
       x = normalize(x, norm)
-      RESULT = 1 - rowSums(x * y)
+      RESULT = 1 - abs(rowSums(x * y))
     }
     if (method == 'euclidean') {
       if (!inherits(x, 'matrix') || !inherits(y, 'matrix'))

@@ -20,7 +20,8 @@ pdist2(x, y, method = c("cosine", "euclidean", "jaccard"), norm = c("none",
 \item{method}{\code{character} or instance of \code{tet2vec_distance} class.
 The distance measure to be used. One of \code{c("cosine", "euclidean", "jaccard")} or \link{RWMD}.
 \code{RWMD} works only on bag-of-words matrices.
-Also user should keep in mind, that distance = 1 - similarity.}
+Also user should keep in mind, that distance = 1 - similarity.
+\bold{In case of \code{"cosine"} distance function will return \code{1 - abs(similarity)}}}
 
 \item{norm}{\code{character} - how to scale input matrices.}
 
