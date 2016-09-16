@@ -8,7 +8,9 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE)
+```
 # Word embeddings
 
 After Tomas Mikolov et al. released the [word2vec](https://code.google.com/p/word2vec/) tool, there was a boom of articles about word vector representations. One of the best of these articles is Stanford's [GloVe: Global Vectors for Word Representation](http://nlp.stanford.edu/projects/glove/), which explained why such algorithms work and reformulated word2vec optimizations as a special kind of factoriazation for word co-occurence matrices. 
@@ -37,42 +39,43 @@ $$
 
 # Canonical example: linguistic regularities
 
-Now let's examine how GloVe embeddings works. As commonly known, word2vec word vectors capture many linguistic regularities. To give the canonical example, if we take word vectors for the words "paris," "france," and "italy" and perform the following operation: 
+Now let's examine how GloVe embeddings works. As commonly known, word2vec word vectors capture many linguistic regularities. To give the canonical example, if we take word vectors for the words "paris," "france," and "germany" and perform the following operation: 
 
-$$vector('paris') - vector('france') + vector('italy')$$ 
+$$vector("paris") - vector("france") + vector('germany")$$ 
 
 the resulting vector will be close to the vector for "rome."
 
 Let's download the same Wikipedia data used as a demo by word2vec:
 
-```{r, eval=FALSE}
+```{r}
 library(text2vec)
-temp <- tempfile()
-download.file('http://mattmahoney.net/dc/text8.zip', temp)
-wiki <- readLines(unz(temp, "text8"))
-unlink(temp)
+text8_file = "~/text8"
+if (!file.exists(text8_file)) {
+  download.file("http://mattmahoney.net/dc/text8.zip", "~/text8.zip")
+  unzip ("~/text8.zip", files = "text8", exdir = "~/")
+}
+wiki = readLines(text8_file, n = 1, warn = FALSE)
 ```
 
 In the next step we will create a vocabulary, a set of words for which we want to learn word vectors. Note, that all of text2vec's functions which operate on raw text data (`create_vocabulary`, `create_corpus`, `create_dtm`, `create_tcm`) have a streaming API and you should iterate over tokens as the first argument for these functions.
 
-```{r, eval=FALSE}
+```{r}
 # Create iterator over tokens
-tokens <- strsplit(wiki, split = " ", fixed = T)
+tokens <- space_tokenizer(wiki)
 # Create vocabulary. Terms will be unigrams (simple words).
-vocab <- create_vocabulary(itoken(tokens))
+it = itoken(tokens)
+vocab <- create_vocabulary(it)
 ```
 
 These words should not be too uncommon. Fot example we cannot calculate a meaningful word vector for a word which we saw only once in the entire corpus. Here we will take only words which appear at least five times. text2vec provides additional options to filter vocabulary (see `?prune_vocabulary`).
 
-```{r, eval=FALSE}
+```{r}
 vocab <- prune_vocabulary(vocab, term_count_min = 5L)
 ```
 
 Now we have 71,290 terms in the vocabulary and are ready to construct term-co-occurence matrix (TCM).
 
-```{r, eval=FALSE}
-# We provide an iterator to create_vocab_corpus function
-it <- itoken(tokens)
+```{r}
 # Use our filtered vocabulary
 vectorizer <- vocab_vectorizer(vocab, 
                                # don't vectorize input
@@ -87,50 +90,56 @@ text2vec uses a parallel stochastic gradient descent algorithm. By default it wi
 
 Let's fit our model. (It can take several minutes to fit!)
 
-```{r, eval = FALSE}
-fit <- glove(tcm = tcm,
-             word_vectors_size = 50,
-             x_max = 10, learning_rate = 0.2, num_iters = 15)
+```{r, message=TRUE}
+glove = GlobalVectors$new(word_vectors_size = 50, vocabulary = vocab, x_max = 10)
+glove$fit(tcm, n_iter = 20)
 ```
 
-> 2016-01-10 14:12:37 - epoch 1, expected cost 0.0662  
-2016-01-10 14:12:51 - epoch 2, expected cost 0.0472  
-2016-01-10 14:13:06 - epoch 3, expected cost 0.0429  
-2016-01-10 14:13:21 - epoch 4, expected cost 0.0406  
-2016-01-10 14:13:36 - epoch 5, expected cost 0.0391  
-2016-01-10 14:13:50 - epoch 6, expected cost 0.0381   
-2016-01-10 14:14:05 - epoch 7, expected cost 0.0373  
-2016-01-10 14:14:19 - epoch 8, expected cost 0.0366  
-2016-01-10 14:14:33 - epoch 9, expected cost 0.0362  
-2016-01-10 14:14:47 - epoch 10, expected cost 0.0358  
-2016-01-10 14:15:01 - epoch 11, expected cost 0.0355  
-2016-01-10 14:15:16 - epoch 12, expected cost 0.0351  
-2016-01-10 14:15:30 - epoch 13, expected cost 0.0349  
-2016-01-10 14:15:44 - epoch 14, expected cost 0.0347  
-2016-01-10 14:15:59 - epoch 15, expected cost 0.0345  
+> 
+2016-09-16 13:38:52 - epoch 1, expected cost 0.0897  
+2016-09-16 13:38:55 - epoch 2, expected cost 0.0607  
+2016-09-16 13:38:57 - epoch 3, expected cost 0.0542  
+2016-09-16 13:39:00 - epoch 4, expected cost 0.0502  
+2016-09-16 13:39:03 - epoch 5, expected cost 0.0477  
+2016-09-16 13:39:05 - epoch 6, expected cost 0.0457  
+2016-09-16 13:39:08 - epoch 7, expected cost 0.0443  
+2016-09-16 13:39:10 - epoch 8, expected cost 0.0433  
+2016-09-16 13:39:13 - epoch 9, expected cost 0.0424  
+2016-09-16 13:39:16 - epoch 10, expected cost 0.0416  
+2016-09-16 13:39:18 - epoch 11, expected cost 0.0411  
+2016-09-16 13:39:21 - epoch 12, expected cost 0.0404  
+2016-09-16 13:39:23 - epoch 13, expected cost 0.0400  
+2016-09-16 13:39:26 - epoch 14, expected cost 0.0396  
+2016-09-16 13:39:29 - epoch 15, expected cost 0.0392  
+2016-09-16 13:39:31 - epoch 16, expected cost 0.0389  
+2016-09-16 13:39:34 - epoch 17, expected cost 0.0386  
+2016-09-16 13:39:37 - epoch 18, expected cost 0.0383  
+2016-09-16 13:39:39 - epoch 19, expected cost 0.0380  
+2016-09-16 13:39:42 - epoch 20, expected cost 0.0379  
+
+Alternatively we can train model with R's `S3` interface (but keep in mind that all text2vec models are R6 classes and they are mutable! So `fit`, `fit_transform` methods modify models!):
+```{r, message=TRUE, eval=FALSE}
+glove = GlobalVectors$new(word_vectors_size = 50, vocabulary = vocab, x_max = 10)
+# `glove` object will be modified by `fit()` call !
+fit(tcm, glove, n_iter = 20)
+```
 
 And now we get the word vectors:
 
-```{r, eval = FALSE}
-word_vectors <- fit$word_vectors[[1]] + fit$word_vectors[[2]]
-rownames(word_vectors) <- rownames(tcm)
+```{r}
+word_vectors <- glove$get_word_vectors()
 ```
 
-We can find the closest word vectors for our *paris - france + italy* example:
+We can find the closest word vectors for our *paris - france + germany* example:
 
-```{r, eval = FALSE}
-word_vectors_norm <- sqrt(rowSums(word_vectors ^ 2))
-
-rome <- word_vectors['paris', , drop = FALSE] - 
-  word_vectors['france', , drop = FALSE] + 
-  word_vectors['italy', , drop = FALSE]
-
-cos_dist <- text2vec:::cosine(rome, 
-                              word_vectors, 
-                              word_vectors_norm)
-head(sort(cos_dist[1,], decreasing = T), 10)
-##     paris    venice     genoa      rome  florence
-## 0.7811252 0.7763088 0.7048109 0.6696540 0.6580989
+```{r}
+berlin <- word_vectors["paris", , drop = FALSE] - 
+  word_vectors["france", , drop = FALSE] + 
+  word_vectors["germany", , drop = FALSE]
+cos_dist = dist2(x = word_vectors, y = berlin, method = "cosine", norm = "l2")
+head(sort(cos_dist[,1], decreasing = FALSE), 5)
+# berlin          paris         munich          leipzig        germany
+# 0.1919756       0.2171310      0.2511661      0.2885004      0.3007912
 ```
 
-You can achieve much better results by experimenting with `skip_grams_window` and the parameters of the `glove()` function (including word vectors size and the number of iterations). For more details and large-scale experiments on wikipedia data see this [post](http://dsnotes.com/blog/text2vec/2015/12/01/glove-enwiki/) on my blog.
+You can achieve much better results by experimenting with `skip_grams_window` and the parameters of the `GloVe` class (including word vectors size and the number of iterations). For more details and large-scale experiments on wikipedia data see this [post](http://dsnotes.com/blog/text2vec/2015/12/01/glove-enwiki/) on my blog.
