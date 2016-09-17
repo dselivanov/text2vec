@@ -227,7 +227,7 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
         // Rprintf("\r%s iteration %d, perplexity: %0.2f likelihood %0.2f doc_topic_ll %0.2f topic_word_ll %0.2f\n",
         //         currentDateTime().c_str(), iteration, perpl[j], log_likelihood[j],
         //         doc_ll, topic_ll);
-        Rprintf("\r%s iteration %d, perplexity: %0.2f likelihood %0.2f doc_topic_ll %0.2f topic_word_ll %0.2f\n",
+        Rprintf("\r%s iteration %d, perplexity: %0.2f likelihood %0.2f\n",
                 currentDateTime().c_str(), iteration, perpl[j], log_likelihood[j]);
         R_FlushConsole();
       }
