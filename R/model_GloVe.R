@@ -290,7 +290,7 @@ GloVe = GlobalVectors
 
 #' @name glove
 #' @title Fit a GloVe word-embedded model
-#' @description This function trains a GloVe word-embeddings model via fully
+#' @description \bold{DEPRECIATED}.This function trains a GloVe word-embeddings model via fully
 #'   asynchronous and parallel AdaGrad.
 #' @param tcm an object which represents a term-co-occurrence matrix, which is
 #'   used in training. At the moment only \code{dgTMatrix} or objects coercible
@@ -326,6 +326,7 @@ GloVe = GlobalVectors
 #' @param alpha the alpha in weighting function formula : \eqn{f(x) = 1 if x >
 #'   x_max; else (x/x_max)^alpha}
 #' @param ... arguments passed to other methods (not used at the moment).
+#' @export
 glove = function(tcm,
                  vocabulary_size = nrow(tcm),
                  word_vectors_size,
@@ -339,7 +340,7 @@ glove = function(tcm,
                  max_cost = 10.0,
                  alpha = 0.75,
                  ...) {
-  .Deprecated("GlobalVectors")
+  .Deprecated("GloVe")
   stopifnot( !is.null(rownames(tcm) ))
 
   if ( !inherits(tcm, 'dgTMatrix') )
