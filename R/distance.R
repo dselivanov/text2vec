@@ -27,7 +27,8 @@ jaccard_dist = function(x, y = NULL, format = 'dgCMatrix') {
 
 #' @name distances
 #' @param x first matrix.
-#' @param y second matrix. \code{y = NULL} is taken to be the same matrix as \code{x}.
+#' @param y second matrix. For \code{dist2} \code{y = NULL} set by default.
+#' This means that we will assume \code{y = x} and calculate distances between all rows of the \code{x}.
 #' @param method \code{character} or instance of \code{tet2vec_distance} class.
 #' The distance measure to be used. One of \code{c("cosine", "euclidean", "jaccard")} or \link{RWMD}.
 #' \code{RWMD} works only on bag-of-words matrices.
@@ -74,8 +75,10 @@ dist2 = function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
 
       RESULT = 1 - abs(tcrossprod(x, y))
     }
-    if (method == 'euclidean') {
-      if (!inherits(x, 'matrix') || !inherits(y, 'matrix'))
+    if (method == "euclidean") {
+      if (!FLAG_TWO_MATRICES_INPUT)
+        y = x
+      if (!inherits(x, "matrix") || !inherits(y, "matrix"))
         stop("At the moment eucludian distance can be calculated only for
               dense matrices of class 'matrix'")
       # transpose, because euclidean_dist() function calculates dist between columns
@@ -103,6 +106,9 @@ dist2 = function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
     }
   }
   if (inherits(method, "distance_model")) {
+    if (!FLAG_TWO_MATRICES_INPUT)
+      y = x
+
     if (inherits(method, "RWMD")) {
       if (norm != 'none')
         warning("RWMD can be computed only on bag-of-words matrices - raw word-counts.

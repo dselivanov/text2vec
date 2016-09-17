@@ -15,7 +15,8 @@ pdist2(x, y, method = c("cosine", "euclidean", "jaccard"), norm = c("none",
 \arguments{
 \item{x}{first matrix.}
 
-\item{y}{second matrix. \code{y = NULL} is taken to be the same matrix as \code{x}.}
+\item{y}{second matrix. For \code{dist2} \code{y = NULL} set by default.
+This means that we will assume \code{y = x} and calculate distances between all rows of the \code{x}.}
 
 \item{method}{\code{character} or instance of \code{tet2vec_distance} class.
 The distance measure to be used. One of \code{c("cosine", "euclidean", "jaccard")} or \link{RWMD}.

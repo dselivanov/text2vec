@@ -2,6 +2,7 @@ context("distances")
 ind = 1:100
 m1 = matrix(1:15, nrow = 5)
 m2 = matrix(1:12, nrow = 4)
+tol = 1e-5
 
 tokens = movie_review$review[ind] %>% tolower %>% word_tokenizer
 v = create_vocabulary(itoken(tokens, progessbar = F)) %>% prune_vocabulary(term_count_min = 3)
@@ -17,9 +18,12 @@ test_that("cosine", {
   cos_dist = dist2(dtm[i1, ], dtm[i2, ], method = 'cosine', norm = 'l2')
   expect_equal(nrow(cos_dist), length(i1))
   expect_equal(ncol(cos_dist), length(i2))
-  expect_true(cos_dist[1, 1] < 1e-10)
-  expect_true(cos_dist[1, 2] - 0.4294539 < 1e-5 )
+  expect_equal(cos_dist[1, 1], 0, tol = tol)
+  expect_equal(cos_dist[1, 2], 0.4294539, tol = tol )
   expect_lte(max(cos_dist), 1)
+  # check case when x = y (y = NULL)
+  expect_equal(dist2(dtm[i1, ], method = 'cosine', norm = 'l2'),
+               dist2(dtm[i1, ], dtm[i1, ], method = 'cosine', norm = 'l2'))
 })
 
 test_that("jaccard", {
@@ -27,17 +31,18 @@ test_that("jaccard", {
   jac_dist = dist2(dtm[i1, ], dtm[i2, ], method = 'jaccard', norm = 'none')
   expect_equal(nrow(jac_dist), length(i1))
   expect_equal(ncol(jac_dist), length(i2))
-  expect_true(jac_dist[1, 1] < 1e-10)
-  expect_true(jac_dist[1, 2] - 0.8207547 < 1e-5 )
+  expect_equal(jac_dist[1, 1], 0, tol = tol)
+  expect_equal(jac_dist[1, 2], 0.8207547, tol = tol)
   expect_lte(max(jac_dist), 1)
-  m1 = matrix(1, nrow = 5, ncol = 4)
-  m2 = matrix(1, nrow = 3, ncol = 4)
+  expect_equal(dist2(dtm[i1, ], method = 'jaccard', norm = 'none'),
+               dist2(dtm[i1, ], dtm[i1, ], method = 'jaccard', norm = 'none'))
 })
 
 test_that("euclidean", {
   # euclidean works only with dense matrices
   expect_error(dist2(dtm[i1, ], dtm[i2, ], method = 'euclidean'))
-
+  # m1 = matrix(1, nrow = 5, ncol = 4)
+  # m2 = matrix(1, nrow = 3, ncol = 4)
   euc_dist = dist2(m1, m2, method = 'euclidean')
   expect_equal(nrow(euc_dist), nrow(m1))
   expect_equal(ncol(euc_dist), nrow(m2))
@@ -47,6 +52,8 @@ test_that("euclidean", {
   base_dist = as.matrix(base_dist)[1:nrow(m1), nrow(m1) + 1:nrow(m2)]
   dimnames(base_dist) = NULL
   expect_equal(base_dist, euc_dist)
+  expect_equal(dist2(m1, method = 'euclidean', norm = 'none'),
+               dist2(m1, m1, method = 'euclidean', norm = 'none'))
 })
 
 test_that("relaxed word mover distance", {
@@ -54,9 +61,11 @@ test_that("relaxed word mover distance", {
   glove$fit(tcm, n_iter = 10)
   wv = glove$get_word_vectors()
   rwmd_model = RWMD$new(wv)
-  rwmd_dist = dist2(dtm[i1, ], dtm[i2, ], method = rwmd_model, norm = 'none', verbose = F)
+  rwmd_dist = dist2(dtm[i1, ], dtm[i2, ], method = rwmd_model, norm = 'none')
   expect_equal(nrow(rwmd_dist), length(i1))
   expect_equal(ncol(rwmd_dist), length(i2))
-  expect_lte(rwmd_dist[1,1], 1e-10)
-  # expect_lte(rwmd_dist[2,1] - 3.564279e-01, 1e-5)
+  expect_equal(rwmd_dist[1,1], 0, tol = tol)
+  expect_equal(dist2(dtm[i1, ], method = rwmd_model, norm = 'none'),
+               dist2(dtm[i1, ], dtm[i1, ], method = rwmd_model, norm = 'none'))
+
 })
