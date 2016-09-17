@@ -29,8 +29,9 @@
 #' @return \code{ddiMatrix} IDF scaling diagonal sparse matrix.
 #' @seealso \link{get_tf}, \link{get_dtm}, \link{create_dtm}
 #' @export
-get_idf <- function(dtm, log_scale = log, smooth_idf = TRUE)
+get_idf = function(dtm, log_scale = log, smooth_idf = TRUE)
 {
+  .Deprecated("TfIdf")
   # abs is needed for case when dtm is matrix from HashCorpus and signed_hash is used!
   cs = colSums( abs(sign(dtm) ) )
   if (smooth_idf)
@@ -52,11 +53,11 @@ get_idf <- function(dtm, log_scale = log, smooth_idf = TRUE)
 #' @seealso \link{get_idf}, \link{get_dtm}, \link{create_dtm}
 #' @return \code{ddiMatrix} TF scaling diagonal sparse matrix.
 #' @export
-get_tf <- function(dtm, norm = c('l1', 'l2'))
+get_tf = function(dtm, norm = c("l1", "l2"))
 {
-  .Deprecated('normalize')
-  norm <- match.arg(norm)
-  norm_vec <- switch(norm,
+  .Deprecated("normalize")
+  norm = match.arg(norm)
+  norm_vec = switch(norm,
                      # abs is needed for case when dtm is
                      # matrix from HashCorpus and signed_hash is used!
                      l1 = 1 / rowSums(abs(dtm)),
@@ -73,10 +74,10 @@ get_tf <- function(dtm, norm = c('l1', 'l2'))
 #' @seealso \link{get_idf}, \link{get_dtm}, \link{create_dtm}
 #' @return normalized matrix
 #' @export
-normalize <- function(m, norm = c('l1', 'l2', 'none')) {
+normalize = function(m, norm = c("l1", "l2", "none")) {
   norm = match.arg(norm)
 
-  if (norm == 'none')
+  if (norm == "none")
     return(m)
 
   norm_vec = switch(norm,
@@ -102,14 +103,15 @@ normalize <- function(m, norm = c('l1', 'l2', 'none')) {
 #' @seealso \link{prune_vocabulary}, \link{transform_tf},
 #'   \link{transform_tfidf}, \link{transform_binary}
 #' @export
-transform_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, common = 0.975) )
+transform_filter_commons = function(dtm, term_freq = c(uncommon = 0.001, common = 0.975) )
 {
+  .Deprecated("prune_vocabulary")
   uncommon = term_freq[[1]]
   common = term_freq[[2]]
-  tdm <- t(dtm)
-  tab <- c(sum(tdm@i == 0), tabulate(tdm@i, nbins = dim(tdm)[[1]] - 1))
-  t1 <- tab > tdm@Dim[[2]] * uncommon
-  t2 <- tab < tdm@Dim[[2]] * common
+  tdm = t(dtm)
+  tab = c(sum(tdm@i == 0), tabulate(tdm@i, nbins = dim(tdm)[[1]] - 1))
+  t1 = tab > tdm@Dim[[2]] * uncommon
+  t2 = tab < tdm@Dim[[2]] * common
   t(tdm[t1 & t2, ])
 }
 
@@ -147,57 +149,57 @@ transform_filter_commons <- function(dtm, term_freq = c(uncommon = 0.001, common
 #' \dontrun{
 #' data(moview_review)
 #'
-#' txt <- movie_review[['review']][1:1000]
-#' it <- itoken(txt, tolower, word_tokenizer)
-#' vocab <- vocabulary(it)
+#' txt = movie_review[["review"]][1:1000]
+#' it = itoken(txt, tolower, word_tokenizer)
+#' vocab = vocabulary(it)
 #' #remove very common and uncommon words
 #' pruned_vocab = prune_vocabulary(vocab,
 #'  term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001,
 #'  max_number_of_terms = 20000)
 #'
-#' it <- itoken(txt, tolower, word_tokenizer)
-#' dtm <- create_dtm(it, pruned_vocab)
+#' it = itoken(txt, tolower, word_tokenizer)
+#' dtm = create_dtm(it, pruned_vocab)
 #'
-#' dtm_filtered <- dtm %>%
+#' dtm_filtered = dtm %>%
 #'  # functionality overlaps with prune_vocabulary(),
 #'  # but still can be useful in some cases
 #'  # filter out very common and very uncommon terms
 #'  transform_filter_commons( c(0.001, 0.975) )
 #'
 #' # simple term-frequency transormation
-#' transformed_tf <- dtm %>%
+#' transformed_tf = dtm %>%
 #'  transform_tf
 #'
 #' # tf-idf transormation
-#' idf <- get_idf(dtm)
-#' transformed_tfidf <- transform_tfidf(dtm,  idf)
+#' idf = get_idf(dtm)
+#' transformed_tfidf = transform_tfidf(dtm,  idf)
 #' }
 #' @export
-transform_tf <- function(dtm, sublinear_tf = FALSE, norm = c('l1', 'l2', 'none')) {
-  .Deprecated('normalize')
-  norm <- match.arg(norm)
+transform_tf = function(dtm, sublinear_tf = FALSE, norm = c("l1", "l2", "none")) {
+  .Deprecated("normalize")
+  norm = match.arg(norm)
 
   if (sublinear_tf)
-    dtm@x <- 1 + log(dtm@x)
+    dtm@x = 1 + log(dtm@x)
 
   normalize(dtm, norm)
 }
 
 #' @describeIn transform_tf Scale a document-term matrix via TF-IDF
 #' @export
-transform_tfidf <- function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c('l1', 'l2')) {
+transform_tfidf = function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c("l1", "l2")) {
   .Deprecated("TfIdf")
   norm = match.arg(norm)
 
-  if (!inherits(dtm, 'dgCMatrix'))
-    dtm <- as(dtm, "dgCMatrix")
+  if (!inherits(dtm, "dgCMatrix"))
+    dtm = as(dtm, "dgCMatrix")
 
-  tf <- transform_tf(dtm, sublinear_tf, norm)
+  tf = transform_tf(dtm, sublinear_tf, norm)
 
-  if (!inherits(idf, 'ddiMatrix')) {
+  if (!inherits(idf, "ddiMatrix")) {
     message("IDF scaling matrix not provided; calculating it from input matrix.")
-    idf <- get_idf(dtm)
+    idf = get_idf(dtm)
   }
 
   tf %*% idf
@@ -205,7 +207,7 @@ transform_tfidf <- function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c('l1'
 
 #' @describeIn transform_tf Transform a document-term matrix into binary representation
 #' @export
-transform_binary <- function(dtm) {
-  .Deprecated('sign')
+transform_binary = function(dtm) {
+  .Deprecated("sign")
   sign(abs(dtm))
 }
