@@ -54,31 +54,31 @@ particular word in a document) / (number of documents where the term appears
 \dontrun{
 data(moview_review)
 
-txt <- movie_review[['review']][1:1000]
-it <- itoken(txt, tolower, word_tokenizer)
-vocab <- vocabulary(it)
+txt = movie_review[["review"]][1:1000]
+it = itoken(txt, tolower, word_tokenizer)
+vocab = vocabulary(it)
 #remove very common and uncommon words
 pruned_vocab = prune_vocabulary(vocab,
  term_count_min = 10,
  doc_proportion_max = 0.8, doc_proportion_min = 0.001,
  max_number_of_terms = 20000)
 
-it <- itoken(txt, tolower, word_tokenizer)
-dtm <- create_dtm(it, pruned_vocab)
+it = itoken(txt, tolower, word_tokenizer)
+dtm = create_dtm(it, pruned_vocab)
 
-dtm_filtered <- dtm \%>\%
+dtm_filtered = dtm \%>\%
  # functionality overlaps with prune_vocabulary(),
  # but still can be useful in some cases
  # filter out very common and very uncommon terms
  transform_filter_commons( c(0.001, 0.975) )
 
 # simple term-frequency transormation
-transformed_tf <- dtm \%>\%
+transformed_tf = dtm \%>\%
  transform_tf
 
 # tf-idf transormation
-idf <- get_idf(dtm)
-transformed_tfidf <- transform_tfidf(dtm,  idf)
+idf = get_idf(dtm)
+transformed_tfidf = transform_tfidf(dtm,  idf)
 }
 }
 \seealso{
