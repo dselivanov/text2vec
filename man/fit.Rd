@@ -6,17 +6,21 @@
 \alias{fit.matrix}
 \title{Fits model to data}
 \usage{
-fit(x, model, ...)
+fit(x, model, y = NULL, ...)
 
-\method{fit}{Matrix}(x, model, ...)
+\method{fit}{Matrix}(x, model, y = NULL, ...)
 
-\method{fit}{matrix}(x, model, ...)
+\method{fit}{matrix}(x, model, y = NULL, ...)
 }
 \arguments{
 \item{x}{a matrix like object, should inherit from \code{Matrix} or \code{matrix}}
 
 \item{model}{instance of class \code{estimator} which should implement method
 with signature \code{$fit(x, ...)}}
+
+\item{y}{\code{NULL} by default. Optional response variable for supervised models.
+Should inherit from \code{vector} \code{Matrix} or \code{matrix}. See documentation
+for corresponding models.}
 
 \item{...}{additional data/model dependent arguments to downstream functions.
 For supervised learning (if any) responese should be called \code{y}.}

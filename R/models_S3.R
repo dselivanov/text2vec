@@ -20,26 +20,28 @@
 #' @param x a matrix like object, should inherit from \code{Matrix} or \code{matrix}
 #' @param model instance of class \code{estimator} which should implement method
 #' with signature \code{$fit(x, ...)}
-# ' @param y optional response variable, should inherit from \code{vector} \code{Matrix} or \code{matrix}
+#' @param y \code{NULL} by default. Optional response variable for supervised models.
+#' Should inherit from \code{vector} \code{Matrix} or \code{matrix}. See documentation
+#' for corresponding models.
 #' @param ... additional data/model dependent arguments to downstream functions.
 #' For supervised learning (if any) responese should be called \code{y}.
 #' @return \code{invisible(object$self())}
 #' @export
-fit = function(x, model, ...) {
+fit = function(x, model, y = NULL, ...) {
   stopifnot(inherits(model, "estimator"))
   UseMethod("fit")
 }
 
 #' @rdname fit
 #' @export
-fit.Matrix = function(x, model, ...) {
-  model$fit(x, ...)
+fit.Matrix = function(x, model, y = NULL, ...) {
+  model$fit(x, y = y, ...)
 }
 
 #' @rdname fit
 #' @export
-fit.matrix = function(x, model, ...) {
-  model$fit(x, ...)
+fit.matrix = function(x, model, y = NULL, ...) {
+  model$fit(x, y = y, ...)
 }
 
 #' @name fit_transform
@@ -49,26 +51,28 @@ fit.matrix = function(x, model, ...) {
 #' @param x a matrix like object, should inherit from \code{Matrix} or \code{matrix}
 #' @param model instance of class \code{estimator} which should implement method
 #' with signature \code{$fit(x, ...)}
-# ' @param y optional response variable, should inherit from \code{vector} \code{Matrix} or \code{matrix}
+#' @param y \code{NULL} by default. Optional response variable for supervised models.
+#' Should inherit from \code{vector} \code{Matrix} or \code{matrix}. See documentation
+#' for corresponding models.
 #' @param ... additional data/model dependent arguments to downstream functions.
 #' For supervised learning (if any) responese should be called \code{y}.
 #' @return Transformed version of \code{x}
 #' @export
-fit_transform = function(x, model, ...) {
+fit_transform = function(x, model, y = NULL, ...) {
   stopifnot(inherits(model, "transformer"))
   UseMethod("fit_transform")
 }
 
 #' @rdname fit_transform
 #' @export
-fit_transform.Matrix = function(x, model, ...) {
-  model$fit_transform(x, ...)
+fit_transform.Matrix = function(x, model, y = NULL, ...) {
+  model$fit_transform(x, y = y, ...)
 }
 
 #' @rdname fit_transform
 #' @export
-fit_transform.matrix = function(x, model, ...) {
-  model$fit_transform(x, ...)
+fit_transform.matrix = function(x, model, y = NULL, ...) {
+  model$fit_transform(x, y = y, ...)
 }
 
 #' @name transform

@@ -14,9 +14,9 @@
 #   // You should have received a copy of the GNU General Public License
 # // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
 
-#' LatentSemanticAnalysis
+#' @name LatentSemanticAnalysis
 #'
-#' Latent Semantic Analysis model
+#' @title Latent Semantic Analysis model
 #' @description Creates LSA(Latent semantic analysis) model.
 #' See \url{https://en.wikipedia.org/wiki/Latent_semantic_analysis} for details.
 #' @format \code{\link{R6Class}} object.
@@ -59,7 +59,7 @@ LatentSemanticAnalysis = R6::R6Class(
       private$fitted = FALSE
       private$internal_matrix_format = 'dgCMatrix'
     },
-    fit = function(x) {
+    fit = function(x, ...) {
       x_internal = coerce_matrix(x, private$internal_matrix_format, verbose = self$verbose)
       svd_fit = RSpectra::svds(x_internal, k = private$n_topics, nv = private$n_topics, nu = 0)
 
@@ -70,7 +70,7 @@ LatentSemanticAnalysis = R6::R6Class(
       private$fitted = TRUE
       invisible(self)
     },
-    fit_transform = function(x) {
+    fit_transform = function(x, ...) {
       x_internal = coerce_matrix(x, private$internal_matrix_format, verbose = self$verbose)
       svd_fit = RSpectra::svds(x_internal, k = private$n_topics, nv = private$n_topics, nu = private$n_topics)
       # save parameters
@@ -82,7 +82,7 @@ LatentSemanticAnalysis = R6::R6Class(
       private$fitted = TRUE
       documents
     },
-    transform = function(x) {
+    transform = function(x, ...) {
       if (private$fitted)
         as.matrix(x %*% private$lsa_factor_matrix)
       else

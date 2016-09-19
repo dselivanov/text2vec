@@ -4,7 +4,7 @@
 \name{LatentSemanticAnalysis}
 \alias{LSA}
 \alias{LatentSemanticAnalysis}
-\title{LatentSemanticAnalysis}
+\title{Latent Semantic Analysis model}
 \format{\code{\link{R6Class}} object.}
 \usage{
 LatentSemanticAnalysis
@@ -14,9 +14,6 @@ LSA
 \description{
 Creates LSA(Latent semantic analysis) model.
 See \url{https://en.wikipedia.org/wiki/Latent_semantic_analysis} for details.
-}
-\details{
-Latent Semantic Analysis model
 }
 \section{Usage}{
 

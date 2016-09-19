@@ -170,7 +170,7 @@ GlobalVectors = R6::R6Class(
       }
     },
     # fit method will work only with sparse matrices coercible to "dgTMatrix"
-    fit = function(x, n_iter, convergence_tol = -1) {
+    fit = function(x, n_iter, convergence_tol = -1, ...) {
       # convert to internal native format
       x = coerce_matrix(x, private$internal_matrix_format, verbose = self$verbose)
       # params in a specific format to pass to C++ backend

@@ -72,18 +72,18 @@ TfIdf = R6::R6Class(
       private$norm = match.arg(norm)
       private$internal_matrix_format = 'dgCMatrix'
     },
-    fit = function(x) {
+    fit = function(x, ...) {
       x_internal = private$prepare_x(x)
       private$idf = private$get_idf(x_internal)
       private$fitted = TRUE
       invisible(self)
     },
-    fit_transform = function(x) {
+    fit_transform = function(x, ...) {
       x_internal = private$prepare_x(x)
       self$fit(x)
       x_internal %*% private$idf
     },
-    transform = function(x) {
+    transform = function(x, ...) {
       if (private$fitted)
         private$prepare_x(x) %*% private$idf
       else
