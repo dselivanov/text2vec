@@ -40,6 +40,7 @@
 #'   \item{\code{$transform(x, n_iter = 100, convergence_tol = 0.005,
 #'                check_convergence_every_n = 1)}}{ transforms new documents to topic space}
 #'   \item{\code{$get_word_vectors()}}{get word-topic distribution}
+#'   \item{\code{$plot(...)}}{plot LDA model using \url{https://cran.r-project.org/web/packages/LDAvis/index.html} package.}
 #'}
 #' @field verbose \code{logical = TRUE} whether to display training inforamtion
 #' @section Arguments:
@@ -75,6 +76,8 @@
 #'  doc_topic_prior = 0.1,
 #'  topic_word_prior = 0.1)
 #'  doc_topic_distr = lda_model$fit_transform(dtm, n_iter =20, check_convergence_every_n = 5)
+#'  # run LDAvis visualisation if needed (make sure LDAvis package installed)
+#'  # lda_model$plot()
 LatentDirichletAllocation = R6::R6Class(
   "LDA",
   inherit = text2vec_topic_model,
@@ -97,6 +100,10 @@ LatentDirichletAllocation = R6::R6Class(
         if (vocab_class == 'character') vocabulary
         else vocabulary$vocab$terms
 
+      if(vocab_class == 'text2vec_vocabulary')
+        private$terms_counts = vocabulary$vocab$terms_counts
+
+
       private$vocab_size = length(private$vocab_terms)
 
       private$doc_topic_prior = doc_topic_prior
@@ -109,6 +116,14 @@ LatentDirichletAllocation = R6::R6Class(
                    ...) {
 
       x = coerce_matrix(x, private$internal_matrix_format, self$verbose)
+      # need only for plot()
+      #----------------------------------------
+      # when vocabulary was character
+      if(is.null(private$terms_counts)) {
+        private$terms_counts = private$get_term_count_lda_c(x)
+      }
+      private$doc_lengths = vapply(x, ncol, 0L)
+      #----------------------------------------
       private$doc_ids = names(x)
       private$fitted_LDA_model = private$internal_fit(x, n_iter,
                                                       convergence_tol,
@@ -124,7 +139,7 @@ LatentDirichletAllocation = R6::R6Class(
                           ...) {
       self$fit(x, n_iter, convergence_tol, check_convergence_every_n)
       res = t(private$fitted_LDA_model$document_topic_distr)
-      res = res / rowSums(res)
+      # res = res / rowSums(res)
       rownames(res) = private$doc_ids
       res
     },
@@ -142,7 +157,7 @@ LatentDirichletAllocation = R6::R6Class(
                                                 initial = private$fitted_LDA_model
                                                 )
         res = t(inference_LDA_model$document_topic_distr)
-        res = res / rowSums(res)
+        # res = res / rowSums(res)
         rownames(res) = names(x)
         res
       }
@@ -151,12 +166,33 @@ LatentDirichletAllocation = R6::R6Class(
     },
     get_word_vectors = function() {
       res = t(private$fitted_LDA_model$topics_word_distr)
-      res = res / rowSums(res)
+      # res = res / rowSums(res)
       rownames(res) = private$vocab_terms
       res
     },
     get_fitted_LDA_model = function() {
       private$fitted_LDA_model
+    },
+    plot = function(...) {
+      if("LDAvis" %in% rownames(installed.packages())) {
+        if (private$fitted) {
+          phi = (self$get_word_vectors() + private$topic_word_prior) %>%
+            t %>% normalize("l1") %>% as.matrix
+
+          theta = (private$fitted_LDA_model$document_topic_distr + private$doc_topic_prior) %>%
+            t %>% normalize("l1") %>% as.matrix
+
+          json = LDAvis::createJSON(phi = phi,
+                                     theta = theta,
+                                     doc.length = private$doc_lengths,
+                                     vocab = private$vocab_terms,
+                                     term.frequency = private$terms_counts)
+          LDAvis::serVis(json, ...)
+        } else {
+          stop("Model was not fitted, please fit it first...")
+        }
+      } else
+        stop("To use visualisation, please install 'LDAvis' package first.")
     }
     ),
   #------------------------------------------------------------------------------
@@ -165,6 +201,11 @@ LatentDirichletAllocation = R6::R6Class(
     topic_word_prior = NULL,
     vocab_size = NULL,
     vocab_terms = NULL,
+    # for plotting
+    #------------------
+    terms_counts = NULL,
+    doc_lengths = NULL,
+    #------------------
     fitted_LDA_model = NULL,
     doc_ids = NULL,
     # at prediction step for new documents stop sampling
@@ -185,6 +226,10 @@ LatentDirichletAllocation = R6::R6Class(
                              check_convergence_every_n = check_convergence_every_n,
                              trace = self$verbose,
                              freeze_topics = freeze_topics)
+    },
+    get_term_count_lda_c = function(m) {
+      tmp = do.call(cbind, m) %>% t %>% as.data.table()
+      tmp[, .(cnt = sum(V2)), keyby = V1][, cnt]
     }
   )
 )

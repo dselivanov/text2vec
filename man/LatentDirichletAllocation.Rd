@@ -46,6 +46,7 @@ lda$get_word_vectors()
   \item{\code{$transform(x, n_iter = 100, convergence_tol = 0.005,
                check_convergence_every_n = 1)}}{ transforms new documents to topic space}
   \item{\code{$get_word_vectors()}}{get word-topic distribution}
+  \item{\code{$plot(...)}}{plot LDA model using \url{https://cran.r-project.org/web/packages/LDAvis/index.html} package.}
 }
 }
 
@@ -83,6 +84,8 @@ lda_model = LatentDirichletAllocation$new(n_topics = 10, vocabulary = v,
  doc_topic_prior = 0.1,
  topic_word_prior = 0.1)
  doc_topic_distr = lda_model$fit_transform(dtm, n_iter =20, check_convergence_every_n = 5)
+ # run LDAvis visualisation if needed (make sure LDAvis package installed)
+ # lda_model$plot()
 }
 \keyword{datasets}
 
