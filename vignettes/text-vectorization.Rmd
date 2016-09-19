@@ -37,7 +37,7 @@ In this vignette we will primarily discuss the first step. Texts themselves can 
 
 ## Example: Sentiment analysis on IMDB movie review dataset
 
-This package provides the `movie_review` dataset. It consists of 5000 movie reviews, each of which is marked as positive or negative. Also we will use `data.table` package for data wrangling.
+This package provides the `movie_review` dataset. It consists of 5000 movie reviews, each of which is marked as positive or negative. We will use also use the [data.table](https://cran.r-project.org/package=data.table) package for data wrangling.
 
 ```{r, loading-data, eval=TRUE}
 library(text2vec)
@@ -68,8 +68,8 @@ vocab = create_vocabulary(it_train)
 ```
 What was done here?
 
-1. First we created iterator over tokens with `itoken()` function (all functions from `create_*` family work with iterators over tokens). `R` users can find this confusing or at least unusual. But please don't worry - iterator is just a nice abstraction which allows to hide most of details about input and process data in chunks (so be memory friendly). We are pretty sure that `itoken()` will cover 99% of users needs.
-2. We built vocabulary with `create_vocabulary()` function.
+1. We created an iterator over tokens with the `itoken()` function. All functions prefixed with `create_` work with these iterators. R users might find this idiom unusual, but the iterator abstraction allows us to hide most of details about input and to process data in memory-friendly chunks.
+2. We built the vocabulary with the `create_vocabulary()` function.
 
 Alternatively, we could create list of tokens and reuse it in further steps. Each element of the list should represent a document, and each element should be a character vector of tokens.
 
@@ -80,7 +80,8 @@ train_tokens = train$review %>%
 it_train = itoken(train_tokens, ids = train$id)
 vocab = create_vocabulary(it_train)
 ```
-Note that `text2vec` provides a few tokenizer functions (see `?tokenizers`). Actually they are just a simple wrappers for `base::gsub()` funcion and not very fast or flexible. If you need something more smart or fast I suggest to use regular expression engine from `stringi` package. Or use `tokenizers` package which is built on top of `stringi` and usually covers 90% of use cases.
+
+Note that `text2vec` provides a few tokenizer functions (see `?tokenizers`). These are just simple wrappers for the `base::gsub()` function and are not very fast or flexible. If you need something smarter or faster you can use the [tokenizers](https://cran.r-project.org/package=tokenizers) package which will cover most use cases, or write your own tokenizer using the [stringi](https://cran.r-project.org/package=stringi) package.
 
 Now that we have a vocabulary, we can construct a document-term matrix.
 
@@ -98,7 +99,7 @@ identical(rownames(dtm_train), train$id)
 
 As you can see, the DTM has `r dim(dtm_train)[[1]]` rows, equal to the number of documents, and `r dim(dtm_train)[[2]]` columns, equal to the number of unique terms.
 
-Now we are ready to fit our first model. Here we will use the `glmnet` package to fit a logistic regression model with an L1 penalty and 4 fold cross-validation.
+Now we are ready to fit our first model. Here we will use the [glmnet](https://cran.r-project.org/package=glmnet) package to fit a logistic regression model with an L1 penalty and 4 fold cross-validation.
 
 ```{r, fit_1, message=FALSE, warning=FALSE, eval=TRUE}
 library(glmnet)
@@ -121,9 +122,10 @@ plot(fit)
 print(paste("max AUC =", round(max(fit$cvm), 4)))
 ```
 
-We have successfully fit a model to our DTM. Now we can check model performance on test data:
+We have successfully fit a model to our DTM. Now we can check the model's performance on test data.
+
 ```{r, test_1, message=FALSE, warning=FALSE, eval=TRUE}
-# note that most of text2vec functions are pipe friendly!
+# Note that most text2vec functions are pipe friendly!
 it_test = test$review %>% 
   tolower %>% 
   word_tokenizer %>% 
@@ -180,7 +182,8 @@ plot(fit_2)
 print(paste("max AUC =", round(max(fit_2$cvm), 4)))
 ```
 
-Lets check model performance on test dataset:
+Let's check the model performance on the test dataset.
+
 ```{r}
 dtm_test = create_dtm(it_test, vectorizer)
 dtm_test_tfidf = dtm_test %>% transform_tfidf(idf)
