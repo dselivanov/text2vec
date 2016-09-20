@@ -177,10 +177,10 @@ LatentDirichletAllocation = R6::R6Class(
       if("LDAvis" %in% rownames(installed.packages())) {
         if (private$fitted) {
           phi = (self$get_word_vectors() + private$topic_word_prior) %>%
-            t %>% normalize("l1") %>% as.matrix
+            t %>% normalize("l1")
 
           theta = (private$fitted_LDA_model$document_topic_distr + private$doc_topic_prior) %>%
-            t %>% normalize("l1") %>% as.matrix
+            t %>% normalize("l1")
 
           json = LDAvis::createJSON(phi = phi,
                                      theta = theta,

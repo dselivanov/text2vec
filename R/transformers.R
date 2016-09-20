@@ -86,7 +86,11 @@ normalize = function(m, norm = c("l1", "l2", "none")) {
   )
   # case when sum row elements == 0
   norm_vec[is.infinite(norm_vec)] = 0
-  Diagonal(x = norm_vec) %*% m
+
+  if(inherits(m, "sparseMatrix"))
+    Diagonal(x = norm_vec) %*% m
+  else
+    m * norm_vec
 }
 
 #' @name transform_filter_commons
