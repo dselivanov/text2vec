@@ -21,10 +21,11 @@ corpus_insert = function(corpus, iterator, grow_dtm = TRUE) {
     warning("Can't clone input iterator. It will be modified by current function call", immediate. = T)
     it = iterator
   }
-  foreach(val = it ) %do% {
+  ids = foreach(val = it, .combine = c, .multicombine = TRUE ) %do% {
     corpus$insert_document_batch(val$tokens, grow_dtm)
-    attr(corpus, 'ids') = c(attr(corpus, 'ids'), val$ids)
+    val$ids
   }
+  attr(corpus, "ids") = ids
   corpus
 }
 
