@@ -59,7 +59,7 @@ reader <- function(x, ...) {
   res
 }
 # create iterator over files
-it_files  <- ifiles(files, reader_function = reader)
+it_files  <- ifiles(files, reader = reader)
 # create iterator over tokens from files iterator
 it_tokens <- itoken(it_files, preprocess_function = tolower, 
                     tokenizer = word_tokenizer, progessbar = FALSE)
@@ -115,7 +115,7 @@ N_SPLITS <- 4
 
 jobs <- files %>% 
   split_into(N_SPLITS) %>% 
-  lapply(ifiles, reader_function = reader) %>% 
+  lapply(ifiles, reader = reader) %>% 
   # Worth to set chunks_number to 1 because we already splitted input
   lapply(itoken, chunks_number = 1, preprocess_function = tolower, 
          tokenizer = word_tokenizer, progessbar = FALSE)

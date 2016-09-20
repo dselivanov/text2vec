@@ -215,15 +215,16 @@ itoken_iterator_R6 = R6::R6Class(
 #' @description The result of this function usually used in an \link{itoken}
 #'   function.
 #' @param file_paths \code{character} paths of input files
-#' @param reader_function \code{function} which will perform reading of text
+#' @param reader \code{function} which will perform reading of text
 #'   files from disk, which should take a path as its first argument.
 #' @seealso \link{itoken}
 #' @examples
 #' current_dir_files = list.files(path = ".", full.names = TRUE)
 #' files_iterator = ifiles(current_dir_files)
 #' @export
-ifiles = function(file_paths, reader_function = readLines) {
-  ifiles_R6$new(file_paths, reader = reader_function)
+ifiles = function(file_paths, reader = readLines) {
+  stopifnot(length(file_paths) > 0)
+  ifiles_R6$new(file_paths, reader = reader)
 }
 #------------------------------------------------------------------------------------------
 #' @rdname ifiles
@@ -231,9 +232,9 @@ ifiles = function(file_paths, reader_function = readLines) {
 #' @examples
 #' dir_files_iterator = idir(path = ".")
 #' @export
-idir = function(path, reader_function = readLines) {
+idir = function(path, reader = readLines) {
   fls = list.files(path, full.names = T)
-  return( ifiles(fls, reader_function = reader_function) )
+  return( ifiles(fls, reader = reader) )
 }
 #------------------------------------------------------------------------------------------
 #' @name itoken
