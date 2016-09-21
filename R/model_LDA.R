@@ -40,7 +40,8 @@
 #'   \item{\code{$transform(x, n_iter = 100, convergence_tol = 0.005,
 #'                check_convergence_every_n = 1)}}{ transforms new documents to topic space}
 #'   \item{\code{$get_word_vectors()}}{get word-topic distribution}
-#'   \item{\code{$plot(...)}}{plot LDA model using \url{https://cran.r-project.org/web/packages/LDAvis/index.html} package.}
+#'   \item{\code{$plot(...)}}{plot LDA model using \url{https://cran.r-project.org/web/packages/LDAvis/index.html} package.
+#'                \code{...} will be passed to \code{LDAvis::createJSON} and \code{LDAvis::serVis} functions}
 #'}
 #' @field verbose \code{logical = TRUE} whether to display training inforamtion
 #' @section Arguments:
@@ -183,10 +184,11 @@ LatentDirichletAllocation = R6::R6Class(
             t %>% normalize("l1")
 
           json = LDAvis::createJSON(phi = phi,
-                                     theta = theta,
-                                     doc.length = private$doc_lengths,
-                                     vocab = private$vocab_terms,
-                                     term.frequency = private$terms_counts)
+                                    theta = theta,
+                                    doc.length = private$doc_lengths,
+                                    vocab = private$vocab_terms,
+                                    term.frequency = private$terms_counts,
+                                    ...)
           LDAvis::serVis(json, ...)
         } else {
           stop("Model was not fitted, please fit it first...")
