@@ -136,7 +136,19 @@ ifiles_R6 = R6::R6Class(
         stop(StopIteration("StopIteration"))
       }
       self$counter = self$counter + 1L
-      self$reader_function[[1]](self$iterable[[self$counter]])
+      path = self$iterable[[self$counter]]
+      filename = basename(path)
+      docs = self$reader_function[[1]](path)
+      if(!inherits(docs, "character"))
+        stop("reader function should return character vector!")
+      # if user didn't assign names/ids to documents we will generate
+      # names = file name + doc number
+      if(is.null(names(docs))) {
+        #warning("reader function doesn't provide ids for documents (see ?ifiles).
+        #        Generating ids internally: id = file_name + '_' + doc_number_in_file")
+        names(docs) = paste(filename, seq_along(docs), sep = "_")
+      }
+      docs
     }
   )
 )
@@ -212,11 +224,14 @@ itoken_iterator_R6 = R6::R6Class(
 #------------------------------------------------------------------------------------------
 #' @name ifiles
 #' @title Creates iterator over text files from the disk
-#' @description The result of this function usually used in an \link{itoken}
-#'   function.
+#' @description The result of this function usually used in an \link{itoken} function.
 #' @param file_paths \code{character} paths of input files
 #' @param reader \code{function} which will perform reading of text
-#'   files from disk, which should take a path as its first argument.
+#' files from disk, which should take a path as its first argument. \code{reader()} function should
+#' return \bold{named} character vector: elements of vector = documents,
+#' names of the elements = document ids which will be used in DTM construction.
+#' If user doesn't provied names character vector, document ids will be generated as
+#' file_name + line_number (assuming that each line is a document).
 #' @seealso \link{itoken}
 #' @examples
 #' current_dir_files = list.files(path = ".", full.names = TRUE)

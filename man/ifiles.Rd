@@ -13,13 +13,16 @@ idir(path, reader = readLines)
 \item{file_paths}{\code{character} paths of input files}
 
 \item{reader}{\code{function} which will perform reading of text
-files from disk, which should take a path as its first argument.}
+files from disk, which should take a path as its first argument. \code{reader()} function should
+return \bold{named} character vector: elements of vector = documents,
+names of the elements = document ids which will be used in DTM construction.
+If user doesn't provied names character vector, document ids will be generated as
+file_name + line_number (assuming that each line is a document).}
 
 \item{path}{\code{character} path of directory. All files in the directory will be read.}
 }
 \description{
-The result of this function usually used in an \link{itoken}
-  function.
+The result of this function usually used in an \link{itoken} function.
 }
 \examples{
 current_dir_files = list.files(path = ".", full.names = TRUE)
