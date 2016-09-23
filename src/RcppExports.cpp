@@ -5,6 +5,18 @@
 
 using namespace Rcpp;
 
+// hasher
+IntegerVector hasher(CharacterVector x, int hash_size);
+RcppExport SEXP text2vec_hasher(SEXP xSEXP, SEXP hash_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type hash_size(hash_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(hasher(x, hash_size));
+    return rcpp_result_gen;
+END_RCPP
+}
 // total_likelihood
 double total_likelihood(IntegerMatrix topic_distr, IntegerMatrix doc_distr, double topic_prior, double doc_prior);
 RcppExport SEXP text2vec_total_likelihood(SEXP topic_distrSEXP, SEXP doc_distrSEXP, SEXP topic_priorSEXP, SEXP doc_priorSEXP) {

@@ -30,6 +30,18 @@ uint32_t murmurhash3_hash ( string &str) {
   return PMurHash32(MURMURHASH3_HASH_SEED, str.c_str(), str.size());
 }
 
+//[[Rcpp::export]]
+IntegerVector hasher(CharacterVector x, int hash_size) {
+  IntegerVector res(x.size());
+  const char * ptr;
+  for (auto i = 0; i < x.size(); i++) {
+    ptr = x[i].begin();
+    res[i] = PMurHash32(MURMURHASH3_HASH_SEED, ptr, strlen(ptr)) % hash_size;
+  }
+  return res;
+}
+
+
 // feature sign hash
 int murmurhash3_sign (const string &str) {
   return (int)PMurHash32(MURMURHASH3_SIGN_SEED, str.c_str(), str.size());
