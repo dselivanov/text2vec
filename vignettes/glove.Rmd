@@ -2,7 +2,14 @@
 title: "GloVe Word Embeddings"
 author: "Dmitriy Selivanov"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    fig_caption: false
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    toc_depth: 3
 vignette: >
   %\VignetteIndexEntry{GloVe Word Embeddings}
   %\VignetteEngine{knitr::rmarkdown}
@@ -37,9 +44,9 @@ f(X_{ij}) =
 \end{cases}
 $$
 
-# Canonical example: linguistic regularities
+# Linguistic Regularities
 
-Now let's examine how GloVe embeddings works. As commonly known, word2vec word vectors capture many linguistic regularities. To give the canonical example, if we take word vectors for the words "paris," "france," and "germany" and perform the following operation: 
+Now let's examine how GloVe embeddings works. As commonly known, word2vec word vectors capture many linguistic regularities. To give the canonical example, if we take word vectors for the words "paris", "france", and "germany" and perform the following operation: 
 
 $$vector("paris") - vector("france") + vector('germany")$$ 
 

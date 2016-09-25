@@ -4,7 +4,14 @@ title: |
   | Taking the advantage of multicore machines.
 author: "Dmitriy Selivanov"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    fig_caption: false
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    toc_depth: 3
 vignette: >
   %\VignetteIndexEntry{Advanced topics}
   %\VignetteEngine{knitr::rmarkdown}
@@ -15,7 +22,7 @@ knitr::opts_chunk$set(echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE)
 ```
 This vignette demonstrates some advanced features of the text2vec package: how to read large collections of text stored on disk rather than in memory, and how to let text2vec functions use multiple cores.
 
-## Working with files
+# Working with files
 
 In many cases, you will have a corpus of texts which are too large to fit in memory. This section demonstrates how to use `text2vec` to vectorize large collections of text stored in files. 
 
@@ -82,8 +89,7 @@ str(dtm, list.len = 5)
 
 Note that the DTM has document ids. They are inherited from the document names we assigned in `reader` function. This is a convenient way to assign document IDs when working with files.
 
-### Fall back to auto-generated ids
-
+**Fall back to auto-generated ids.**
 Lets see how `text2vec` would handle the cases when user didn't provide document ids:
 
 ```{r}
@@ -100,9 +106,9 @@ dtm = create_dtm(it_tokens, vectorizer = hash_vectorizer())
 str(dtm, list.len = 5)
 ```
 
-## Taking the advantage of multicore machines
+# Multicore machines
 
-The functions `create_dtm()`, `create_tcm()`, and `create_vocabulary()` are able to take advantage of multicore machines. In contrast to GloVe fitting which uses low-level thread parallelism via `RcppParallel`, these functions use standard high-level R parallelizatin  provided by the `foreach` package. They are flexible and can use diffrent parallel backends, such as `doParallel()` or `doRedis()`. But remember that such high-level parallelism might involve significant overhead.
+For many tasks `text2vec` allows to take the advantage of multicore machines. The functions `create_dtm()`, `create_tcm()`, and `create_vocabulary()` are good example. In contrast to GloVe fitting which uses low-level thread parallelism via `RcppParallel`, these functions use standard high-level R parallelizatin  provided by the `foreach` package. They are flexible and can use diffrent parallel backends, such as `doParallel()` or `doRedis()`. But remember that such high-level parallelism might involve significant overhead.
 
 The user must do two things manually to take advantage of a multicore machine: 
 
