@@ -1,5 +1,5 @@
 ---
-title: "Analyzing Texts with the text2vec Package"
+title: "Analyzing Texts with the text2vec package"
 author: "Dmitriy Selivanov"
 date: "`r Sys.Date()`"
 output:
@@ -15,16 +15,16 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
 ```{r, echo=FALSE}
 op = options(width = 80, str = strOptions(strict.width = "cut"))
 ```
 
-# Text vectorization
+# Text analysis pipeline
 
 Most text mining and NLP modeling use [bag of words](https://en.wikipedia.org/wiki/Bag-of-words_model) or [bag of n-grams](https://en.wikipedia.org/wiki/N-gram) methods. Despite their simplicity, these models usually demonstrate good performance on text categorization and classification tasks. But in contrast to their theoretical simplicity and practical efficiency building bag-of-words models involves technical challenges. This is especially the case in R because of its copy-on-modify semantics. 
-
-## Text analysis pipeline 
 
 Let's briefly review some of the steps in a typical text analysis pipeline:  
 
@@ -34,7 +34,7 @@ Let's briefly review some of the steps in a typical text analysis pipeline:
 
 In this vignette we will primarily discuss the first step. Texts themselves can take up a lot of memory, but vectorized texts usually do not, because they are stored as sparse matrices. Because of R's copy-on-modify semantics, it is not easy to iteratively grow a DTM. Thus constructing a DTM, even for a small collections of documents, can be a serious bottleneck for analysts and researchers. It involves reading the whole collection of text documents into RAM and processing it as single vector, which can easily increase memory use by a factor of 2 to 4. The text2vec package solves this problem by providing a better way of constructing a document-term matrix.
 
-### Example: Sentiment analysis on IMDB movie review dataset
+Lets demonstrate package core functionality by applying it to a real problem - sentiment analysis.
 
 This package provides the `movie_review` dataset. It consists of 5000 movie reviews, each of which is marked as positive or negative. We will use also use the [data.table](https://cran.r-project.org/package=data.table) package for data wrangling.
 
@@ -54,13 +54,15 @@ train = movie_review[J(train_ids)]
 test = movie_review[J(test_ids)]
 ```
 
+# Vectorization
+
 To represent documents in vector space, we first have to create mappings from terms to term IDS. We call them *terms* instead of *words* because they can be arbitrary n-grams not just single words. We represent a set of documents as a sparse matrix, where each row corresponds to a document and each column corresponds to a term. This can be done in 2 ways: using the vocabulary itself or by [feature hashing](https://en.wikipedia.org/wiki/Feature_hashing).
 
 ## Vocabulary-based vectorization
 
 Let's first create a vocabulary-based DTM. Here we collect unique terms from all documents and mark each of them with a unique ID using the `create_vocabulary()` function. We use an iterator to create the vocabulary.
 
-```{r, vocab-iterator, eval=TRUE}
+```{r, vocab-iterator, eval=TRUE, message=FALSE}
 # define preprocessing function and tokenization fucntion
 prep_fun = tolower
 tok_fun = word_tokenizer
@@ -68,7 +70,8 @@ tok_fun = word_tokenizer
 it_train = itoken(train$review, 
              preprocessor = prep_fun, 
              tokenizer = tok_fun, 
-             ids = train$id)
+             ids = train$id, 
+             progressbar = FALSE)
 vocab = create_vocabulary(it_train)
 ```
 What was done here?
@@ -82,7 +85,11 @@ Alternatively, we could create list of tokens and reuse it in further steps. Eac
 train_tokens = train$review %>% 
   prep_fun %>% 
   tok_fun
-it_train = itoken(train_tokens, ids = train$id)
+it_train = itoken(train_tokens, 
+                  ids = train$id,
+                  # turn off progressbar because it won't look nice in rmd
+                  progressbar = FALSE)
+
 vocab = create_vocabulary(it_train)
 vocab
 ```
@@ -137,7 +144,9 @@ Note that we use eactly the same functions from preprosessing and tokenization. 
 it_test = test$review %>% 
   prep_fun %>% 
   tok_fun %>% 
-  itoken(ids = test$id) 
+  itoken(ids = test$id, 
+         # turn off progressbar because it won't look nice in rmd
+         progressbar = FALSE)
 
 dtm_test = create_dtm(it_test, vectorizer)
 
@@ -174,7 +183,7 @@ print(difftime(Sys.time(), t1, units = 'sec'))
 dim(dtm_train)
 ```
 
-Note that the new DTM has many fewer columns than the original DTM. This usually leads to both accuracy improvement (because we removed "noise") and reduce of the training time.
+Note that the new DTM has many fewer columns than the original DTM. This usually leads to both accuracy improvement (because we removed "noise") and reduction of the training time.
 
 Also we need to create DTM for test data with the same vectorizer:
 
@@ -182,51 +191,8 @@ Also we need to create DTM for test data with the same vectorizer:
 dtm_test   = create_dtm(it_test, vectorizer)
 dim(dtm_test)
 ```
-## TF-IDF
 
-We can (and usually should) also apply a [TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) transformation to our DTM, which will increase the weight of terms which are specific to a single document or handful of documents and decrease the weight for terms used in most documents:
-
-```{r, tfidf_dtm_1}
-# define tfidf model
-tfidf = TfIdf$new()
-# fit model to train data and transform train data with fitted model
-dtm_train_tfidf = fit_transform(dtm_train, tfidf)
-```
-
-Note that here we first time touched *model* object in `text2vec`. At this moment reader should remember several important things about text2vec models:
-
-1. **Models are mutable** - once you pass model to `fit()` or `fit_transform()` function, model will be fitted (modifed by `fit` or `fit_tranform` function).
-1. Once model is fitted, it can be applied to new data with `transform(new_data, fitted_model)` method call.
-
-More detailed overview of models and models API will be available soon in a separate vignette.
-
-Once we have tf-idf reweighted DTM matrix we can fit our linear classifier again:
-```{r, fit_2, message=FALSE, warning=FALSE, eval=TRUE}
-t1 = Sys.time()
-glmnet_classifier = cv.glmnet(x = dtm_train_tfidf, y = train[['sentiment']], 
-                              family = 'binomial', 
-                              alpha = 1,
-                              type.measure = "auc",
-                              nfolds = NFOLDS,
-                              thresh = 1e-3,
-                              maxit = 1e3)
-print(difftime(Sys.time(), t1, units = 'sec'))
-plot(glmnet_classifier)
-print(paste("max AUC =", round(max(glmnet_classifier$cvm), 4)))
-```
-Let's check the model performance on the test dataset.
-
-```{r}
-dtm_test_tfidf = dtm_test %>% 
-  transform(tfidf)
-preds = predict(glmnet_classifier, dtm_test_tfidf, type = 'response')[,1]
-glmnet:::auc(test$sentiment, preds)
-```
-```{r, echo=FALSE}
-rm(glmnet_classifier)
-```
-
-### N-grams
+## N-grams
 
 Can we improve the model? Definitely - we can use n-grams instead of words. Here we will use up to 2-grams:
 ```{r, ngram_dtm_1}
@@ -240,13 +206,10 @@ vocab = vocab %>% prune_vocabulary(term_count_min = 10,
 
 bigram_vectorizer = vocab_vectorizer(vocab)
 
-tfidf = TfIdf$new()
-dtm_train = create_dtm(it_train, bigram_vectorizer) %>% 
-  # note that we are modifying existing model from previous snippet
-  fit_transform(tfidf)
+dtm_train = create_dtm(it_train, bigram_vectorizer)
 
 t1 = Sys.time()
-glmnet_classifier = cv.glmnet(x = dtm_train_tfidf, y = train[['sentiment']], 
+glmnet_classifier = cv.glmnet(x = dtm_train, y = train[['sentiment']], 
                  family = 'binomial', 
                  alpha = 1,
                  type.measure = "auc",
@@ -263,10 +226,8 @@ Seems that usage of n-grams improved our model a little bit more. Lets check per
 
 ```{r}
 # apply vectorizer
-dtm_test = create_dtm(it_test, bigram_vectorizer) %>% 
-  # apply tf-idf model
-  transform(tfidf) 
-preds = predict(glmnet_classifier, dtm_test_tfidf, type = 'response')[,1]
+dtm_test = create_dtm(it_test, bigram_vectorizer)
+preds = predict(glmnet_classifier, dtm_test, type = 'response')[,1]
 glmnet:::auc(test$sentiment, preds)
 ```
 ```{r, echo=FALSE}
@@ -282,15 +243,11 @@ If you are not familiar with feature hashing (the so-called "hashing trick") I r
 Here is how to use feature hashing in text2vec.
 
 ```{r, hash_dtm}
-h_vectorizer = hash_vectorizer(hash_size = 2 ^ 16, ngram = c(1L, 2L))
+h_vectorizer = hash_vectorizer(hash_size = 2 ^ 14, ngram = c(1L, 2L))
 
 t1 = Sys.time()
 dtm_train = create_dtm(it_train, h_vectorizer)
 print(difftime(Sys.time(), t1, units = 'sec'))
-
-tfidf = TfIdf$new()
-dtm_train = dtm_train %>% 
-  fit_transform(tfidf)
 
 t1 = Sys.time()
 glmnet_classifier = cv.glmnet(x = dtm_train, y = train[['sentiment']], 
@@ -305,11 +262,76 @@ print(difftime(Sys.time(), t1, units = 'sec'))
 plot(glmnet_classifier)
 print(paste("max AUC =", round(max(glmnet_classifier$cvm), 4)))
 
-dtm_test = create_dtm(it_test, h_vectorizer) %>% 
-  transform(tfidf)
+dtm_test = create_dtm(it_test, h_vectorizer)
 
 preds = predict(glmnet_classifier, dtm_test , type = 'response')[, 1]
 glmnet:::auc(test$sentiment, preds)
 ```
 
 As you can see, we our AUC is a bit worse, but DTM construction time was considerably lower. On large collections of documents this can be a significant advantage.
+
+# Basic transformations
+
+Before doing analysis it usually can be useful to *transform* DTM. For example lengths of the documents in collection can significantly vary. At this case it can be useful to apply normalization.
+
+## Normalization
+
+By "normalization" we assume *transformation* of the *rows* of DTM so we adjust values measured on different scales to a notionally common scale. For the case when length of the documents vary we can apply "L1" normalization. It means we will transform rows in a way that `sum` of the row values will be equal to `1`:
+
+```{r}
+dtm_train_l1_norm = normalize(dtm_train, "l1")
+```
+
+After that we can do our analysis and probably have more chance for success.
+
+## TF-IDF
+
+Another popular technique is [TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) transformation.
+We can (and usually should) apply it to our DTM. It will not only normalize DTM, but also increase the weight of terms which are specific to a single document or handful of documents and decrease the weight for terms used in most documents:
+
+```{r, tfidf_dtm_1}
+vocab = create_vocabulary(it_train)
+vectorizer = vocab_vectorizer(vocab)
+dtm_train = create_dtm(it_train, vectorizer)
+
+# define tfidf model
+tfidf = TfIdf$new()
+# fit model to train data and transform train data with fitted model
+dtm_train_tfidf = fit_transform(dtm_train, tfidf)
+# tfidf modified by fit_transform() call!
+# apply pre-trained tf-idf transformation to test data
+dtm_test_tfidf  = create_dtm(it_test, vectorizer) %>% 
+  transform(tfidf)
+```
+
+Note that here we first time touched *model* object in `text2vec`. At this moment reader should remember several important things about text2vec models:
+
+1. Models can be fitted on a given data (train) and applied to unseen data (test)
+1. **Models are mutable** - once you will pass model to `fit()` or `fit_transform()` function, model will be modifed by it.
+1. After model is fitted, it can be applied to a new data with `transform(new_data, fitted_model)` method.
+
+More detailed overview of models and models API will be available soon in a separate vignette.
+
+Once we have tf-idf reweighted DTM we can fit our linear classifier again:
+```{r, fit_2, message=FALSE, warning=FALSE, eval=TRUE}
+t1 = Sys.time()
+glmnet_classifier = cv.glmnet(x = dtm_train_tfidf, y = train[['sentiment']], 
+                              family = 'binomial', 
+                              alpha = 1,
+                              type.measure = "auc",
+                              nfolds = NFOLDS,
+                              thresh = 1e-3,
+                              maxit = 1e3)
+print(difftime(Sys.time(), t1, units = 'sec'))
+plot(glmnet_classifier)
+print(paste("max AUC =", round(max(glmnet_classifier$cvm), 4)))
+```
+Let's check the model performance on the test dataset.
+
+```{r}
+preds = predict(glmnet_classifier, dtm_test_tfidf, type = 'response')[,1]
+glmnet:::auc(test$sentiment, preds)
+```
+```{r, echo=FALSE}
+rm(glmnet_classifier)
+```
