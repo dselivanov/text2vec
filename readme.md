@@ -4,6 +4,8 @@
 [![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/text2vec)](http://cran.r-project.org/package=text2vec)
 [![Follow](https://img.shields.io/twitter/follow/dselivanov_.svg?style=social)](https://twitter.com/intent/follow?screen_name=dselivanov_)
 
+# We are choosing logo, please proceed to the [link](https://github.com/dselivanov/text2vec/issues/131) and vote.
+
 # Development
 
 We keep **stable (last CRAN release) version in master**. **Development is in [0.4 branch](https://github.com/dselivanov/text2vec/tree/0.4).**
