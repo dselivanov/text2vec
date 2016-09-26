@@ -22,7 +22,7 @@ This means that we will assume \code{y = x} and calculate distances between all 
 The distance measure to be used. One of \code{c("cosine", "euclidean", "jaccard")} or \link{RWMD}.
 \code{RWMD} works only on bag-of-words matrices.
 Also user should keep in mind, that distance = 1 - similarity.
-\bold{In case of \code{"cosine"} distance function will return \code{1 - abs(similarity)}}}
+\bold{In case of \code{"cosine"} distance max distance will be 1 - (-1) = 2}}
 
 \item{norm}{\code{character} - how to scale input matrices.}
 
