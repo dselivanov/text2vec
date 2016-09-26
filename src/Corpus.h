@@ -60,7 +60,7 @@ protected:
   // stopwords
   RCPP_UNORDERED_SET<string> stopwords;
   // documents
-  SparseTripletMatrix<uint32_t> dtm;
+  SparseTripletMatrix<int> dtm;
 
   //#####Glove related
   uint64_t cooc_tokens_number;

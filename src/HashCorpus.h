@@ -106,7 +106,7 @@ HashCorpus::HashCorpus(uint32_t size,
   this->window_size = win_size;
   this->ngram_delim = "_";
   // init dtm with ncol = hash_size
-  dtm = SparseTripletMatrix<uint32_t>(0, size);
+  dtm = SparseTripletMatrix<int>(0, size);
   tcm = SparseTripletMatrix<float>(size, size);
 };
 //-----------------------------------------------------------------
@@ -121,12 +121,10 @@ void HashCorpus::insert_terms (vector< string> &terms, int grow_dtm) {
     this->token_count++;
     term_index = murmurhash3_hash(term) % buckets_size;
     if(grow_dtm) {
-      if(signed_hash && murmurhash3_sign(term) < 0) {
-        dtm.add(doc_count, term_index, -1);
-      }
-      else {
-        dtm.add(doc_count, term_index, 1);
-      }
+      int wcnt = 1;
+      if(signed_hash && murmurhash3_sign(term) < 0)
+        wcnt = -1;
+      dtm.add(doc_count, term_index, wcnt);
     }
     //###########################################
     // cooccurence related
