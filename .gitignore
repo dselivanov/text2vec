@@ -6,3 +6,4 @@ src/*.so
 src/*.dll
 inst/doc
 vignettes/*.html
+.DS_store
