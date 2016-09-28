@@ -30,11 +30,20 @@
 #' @section Methods:
 #' \describe{
 #'   \item{\code{$new(n_topics)}}{create LSA model with \code{n_topics} latent topics}
-#'   \item{\code{$fit(x)}}{fit model to an input DTM (preferably in "dgCMatrix" format)}
-#'   \item{\code{$fit_transform(x)}}{fit model to an input sparse matrix (preferably in "dgCMatrix"
+#'   \item{\code{$fit(x, ...)}}{fit model to an input DTM (preferably in "dgCMatrix" format)}
+#'   \item{\code{$fit_transform(x, ...)}}{fit model to an input sparse matrix (preferably in "dgCMatrix"
 #'    format) and then transform \code{x} to latent space}
-#'   \item{\code{$transform(x)}}{transform new data \code{x} to latent space}
+#'   \item{\code{$transform(x, ...)}}{transform new data \code{x} to latent space}
 #'}
+#' @field verbose \code{logical = TRUE} whether to display training inforamtion
+#' @section Arguments:
+#' \describe{
+#'  \item{lsa}{A \code{LSA} object.}
+#'  \item{x}{An input document-term matrix.}
+#'  \item{n_topics}{\code{integer} desired number of latent topics.}
+#'  \item{...}{Arguments to internal functions. Notably useful for \code{fit(), fit_transform()} -
+#'  these arguments will be passed to \link{irlba} function which is used as backend for SVD.}
+#' }
 #' @export
 #' @examples
 #' data("movie_review")
@@ -61,8 +70,14 @@ LatentSemanticAnalysis = R6::R6Class(
     },
     fit = function(x, ...) {
       x_internal = coerce_matrix(x, private$internal_matrix_format, verbose = self$verbose)
-      svd_fit = RSpectra::svds(x_internal, k = private$n_topics, nv = private$n_topics, nu = 0)
+      # old RSpectra version
+      # svd_fit = RSpectra::svds(x_internal, k = private$n_topics, nv = private$n_topics, nu = 0)
 
+      # http://stackoverflow.com/questions/7028385/can-i-remove-an-element-in-dot-dot-dot-and-pass-it-on
+      # remove "y" from S3 call
+      fit_svd = function(..., y)
+        irlba::irlba(x_internal, nv = private$n_topics, nu = 0, verbose = self$verbose, ...)
+      svd_fit = fit_svd(...)
       private$lsa_factor_matrix = svd_fit$v;
       rownames(private$lsa_factor_matrix) = colnames(x_internal)
 
@@ -72,7 +87,14 @@ LatentSemanticAnalysis = R6::R6Class(
     },
     fit_transform = function(x, ...) {
       x_internal = coerce_matrix(x, private$internal_matrix_format, verbose = self$verbose)
-      svd_fit = RSpectra::svds(x_internal, k = private$n_topics, nv = private$n_topics, nu = private$n_topics)
+      # old RSpectra version
+      # svd_fit = RSpectra::svds(x_internal, k = private$n_topics, nv = private$n_topics, nu = private$n_topics)
+
+      # http://stackoverflow.com/questions/7028385/can-i-remove-an-element-in-dot-dot-dot-and-pass-it-on
+      # remove "y" from S3 call
+      fit_svd = function(..., y)
+        irlba::irlba(x_internal, nv = private$n_topics, nu = private$n_topics, verbose = self$verbose, ...)
+      svd_fit = fit_svd(...)
       # save parameters
       private$singular_values = svd_fit$d
       private$lsa_factor_matrix = svd_fit$v

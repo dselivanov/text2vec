@@ -15,6 +15,11 @@ LSA
 Creates LSA(Latent semantic analysis) model.
 See \url{https://en.wikipedia.org/wiki/Latent_semantic_analysis} for details.
 }
+\section{Fields}{
+
+\describe{
+\item{\code{verbose}}{\code{logical = TRUE} whether to display training inforamtion}
+}}
 \section{Usage}{
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
@@ -29,10 +34,21 @@ lsa$get_word_vectors()
 
 \describe{
   \item{\code{$new(n_topics)}}{create LSA model with \code{n_topics} latent topics}
-  \item{\code{$fit(x)}}{fit model to an input DTM (preferably in "dgCMatrix" format)}
-  \item{\code{$fit_transform(x)}}{fit model to an input sparse matrix (preferably in "dgCMatrix"
+  \item{\code{$fit(x, ...)}}{fit model to an input DTM (preferably in "dgCMatrix" format)}
+  \item{\code{$fit_transform(x, ...)}}{fit model to an input sparse matrix (preferably in "dgCMatrix"
    format) and then transform \code{x} to latent space}
-  \item{\code{$transform(x)}}{transform new data \code{x} to latent space}
+  \item{\code{$transform(x, ...)}}{transform new data \code{x} to latent space}
+}
+}
+
+\section{Arguments}{
+
+\describe{
+ \item{lsa}{A \code{LSA} object.}
+ \item{x}{An input document-term matrix.}
+ \item{n_topics}{\code{integer} desired number of latent topics.}
+ \item{...}{Arguments to internal functions. Notably useful for \code{fit(), fit_transform()} -
+ these arguments will be passed to \link{irlba} function which is used as backend for SVD.}
 }
 }
 \examples{
