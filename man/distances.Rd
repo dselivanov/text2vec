@@ -7,7 +7,7 @@
 \title{Pairwise Distance Matrix Computation}
 \usage{
 dist2(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
-  norm = c("none", "l1", "l2"), verbose = TRUE)
+  norm = c("l2", "l1", "none"), verbose = TRUE)
 
 pdist2(x, y, method = c("cosine", "euclidean", "jaccard"), norm = c("none",
   "l1", "l2"), verbose = TRUE)
@@ -24,7 +24,8 @@ The distance measure to be used. One of \code{c("cosine", "euclidean", "jaccard"
 Also user should keep in mind, that distance = 1 - similarity.
 \bold{In case of \code{"cosine"} distance max distance will be 1 - (-1) = 2}}
 
-\item{norm}{\code{character} - how to scale input matrices.}
+\item{norm}{\code{character = c("l2", "l1", "none")} - how to scale input matrices.
+If they already scaled - use \code{"none"}}
 
 \item{verbose}{\code{logical} whether to display additional information during calculations}
 }

@@ -15,8 +15,8 @@
 # // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
 
 # work on 0,1 valued sparse matrices
-jaccard_dist = function(x, y = NULL, format = 'dgCMatrix') {
-  if (!inherits(x, 'sparseMatrix'))
+jaccard_dist = function(x, y = NULL, format = "dgCMatrix") {
+  if (!inherits(x, "sparseMatrix"))
     stop("at the moment jaccard distance defined only for sparse matrices")
   # union x
   rs_x = rowSums(x)
@@ -25,14 +25,14 @@ jaccard_dist = function(x, y = NULL, format = 'dgCMatrix') {
     RESULT = tcrossprod(x)
     rs_y = rs_x
   } else {
-    if (!inherits(y, 'sparseMatrix'))
+    if (!inherits(y, "sparseMatrix"))
       stop("at the moment jaccard distance defined only for sparse matrices")
     # intersect x y
     RESULT = tcrossprod(x, y)
     # union y
     rs_y = rowSums(y)
   }
-  RESULT = as(RESULT, 'dgTMatrix')
+  RESULT = as(RESULT, "dgTMatrix")
   # add 1 to indices because of zero-based indices in sparse matrices
   # 1 - (...) because we calculate distance, not similarity
   RESULT@x = 1 - RESULT@x / (rs_x[RESULT@i + 1L] + rs_y[RESULT@j + 1L] - RESULT@x)
@@ -50,7 +50,8 @@ jaccard_dist = function(x, y = NULL, format = 'dgCMatrix') {
 #' \code{RWMD} works only on bag-of-words matrices.
 #' Also user should keep in mind, that distance = 1 - similarity.
 #' \bold{In case of \code{"cosine"} distance max distance will be 1 - (-1) = 2}
-#' @param norm \code{character} - how to scale input matrices.
+#' @param norm \code{character = c("l2", "l1", "none")} - how to scale input matrices.
+#' If they already scaled - use \code{"none"}
 #' @param verbose \code{logical} whether to display additional information during calculations
 #' @title Pairwise Distance Matrix Computation
 #' @description \code{dist2} calculates pairwise distances between the
@@ -61,8 +62,8 @@ jaccard_dist = function(x, y = NULL, format = 'dgCMatrix') {
 #' @return \code{dist2} returns \code{matrix} of distances between each row of
 #' matrix \code{x} and each row of matrix \code{y}.
 #' @export
-dist2 = function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
-                     norm = c('none', 'l1', 'l2'), verbose = TRUE) {
+dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
+                     norm = c("l2", "l1", "none"), verbose = TRUE) {
   stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix"))
   stopifnot(inherits(method, "distance_model") || inherits(method, "character"))
 
@@ -80,8 +81,8 @@ dist2 = function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
   RESULT = NULL
   if (inherits(method, "character")) {
     method = match.arg(method)
-    if (method == 'cosine') {
-      if (norm == 'l1') stop("l2 norm should be used with 'cosine' method")
+    if (method == "cosine") {
+      if (norm == "l1") stop("'l2' norm or 'none' should be used with 'cosine' method")
       x = normalize(x, norm)
 
       if (FLAG_TWO_MATRICES_INPUT)
@@ -105,11 +106,11 @@ dist2 = function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
       } else
         RESULT = euclidean_dist(x, x)
     }
-    if (method == 'jaccard') {
-      if (!inherits(x, 'sparseMatrix'))
+    if (method == "jaccard") {
+      if (!inherits(x, "sparseMatrix"))
         stop("at the moment jaccard distance defined only for sparse matrices")
 
-      if (norm != 'none')
+      if (norm != "none")
         warning("No normalization is needed - values will be convertet to 0, 1 aumatically! \\
                 'jaccard' can be computed only on sets which should be encoded as sparse matrices of 0, 1.")
 
@@ -126,9 +127,9 @@ dist2 = function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
       y = x
 
     if (inherits(method, "RWMD")) {
-      if (norm != 'none')
+      if (norm != "none")
         warning("RWMD can be computed only on bag-of-words matrices - raw word-counts.
-                Usually no normalization is needed - l1 normalization will be done aumatically!")
+                No normalization is needed - 'l1' normalization will be done aumatically!")
       RESULT = method$dist2(x, y)
     }
   }
@@ -146,8 +147,8 @@ dist2 = function(x, y = NULL, method = c('cosine', 'euclidean', 'jaccard'),
 #' @return \code{pdist2} returns \code{vector} of "parallel" distances between rows
 #' of \code{x} and \code{y}.
 #' @export
-pdist2 = function(x, y, method = c('cosine', 'euclidean', 'jaccard'),
-                  norm = c('none', 'l1', 'l2'), verbose = TRUE) {
+pdist2 = function(x, y, method = c("cosine", "euclidean", "jaccard"),
+                  norm = c("l2", "l1", "none"), verbose = TRUE) {
   stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix"))
   stopifnot(inherits(method, "distance_model") || inherits(method, "character"))
   stopifnot(ncol(x) == ncol(y))
@@ -157,23 +158,23 @@ pdist2 = function(x, y, method = c('cosine', 'euclidean', 'jaccard'),
   RESULT = NULL
   if (inherits(method, "character")) {
     method = match.arg(method)
-    if (method == 'cosine') {
-      if (norm == 'l1') stop("l2 norm should be used with 'cosine' method")
+    if (method == "cosine") {
+      if (norm == "l1") stop("l2 norm should be used with 'cosine' method")
       y = normalize(y, norm)
       x = normalize(x, norm)
       RESULT = 1 - rowSums(x * y)
     }
-    if (method == 'euclidean') {
-      if (!inherits(x, 'matrix') || !inherits(y, 'matrix'))
+    if (method == "euclidean") {
+      if (!inherits(x, "matrix") || !inherits(y, "matrix"))
         stop("At the moment eucludian distance can be calculated only for
               dense matrices of class 'matrix'")
         RESULT = sqrt(rowSums((x - y) * 2))
     }
-    if (method == 'jaccard') {
-      if (!inherits(x, 'sparseMatrix'))
+    if (method == "jaccard") {
+      if (!inherits(x, "sparseMatrix"))
         stop("at the moment jaccard distance defined only for sparse matrices")
 
-      if (norm != 'none')
+      if (norm != "none")
         warning("No normalization is needed - values will be convertet to 0, 1 aumatically! \\
                 'jaccard' can be computed only on sets which should be encoded as sparse matrices of 0, 1.")
 
@@ -186,7 +187,7 @@ pdist2 = function(x, y, method = c('cosine', 'euclidean', 'jaccard'),
   }
   if (inherits(method, "distance_model")) {
     if (inherits(method, "RWMD")) {
-      if (norm != 'none')
+      if (norm != "none")
         warning("RWMD can be computed only on bag-of-words matrices - raw word-counts.
                 Usually no normalization is needed - l1 normalization will be done aumatically!")
       RESULT = method$pdist2(x, y)
@@ -196,4 +197,3 @@ pdist2 = function(x, y, method = c('cosine', 'euclidean', 'jaccard'),
     stop(paste("not implemented for class", class(method)))
   RESULT
 }
-
