@@ -32,13 +32,13 @@ Let's briefly review some of the steps in a typical text analysis pipeline:
 2. The researcher fits a model to that DTM. These models might include text classification, topic modeling, similarity search, etc. Fitting the model will include tuning and validating the model.
 3. Finally the researcher applies the model to new data.
 
-In this vignette we will primarily discuss the first step. Texts themselves can take up a lot of memory, but vectorized texts usually do not, because they are stored as sparse matrices. Because of R's copy-on-modify semantics, it is not easy to iteratively grow a DTM. Thus constructing a DTM, even for a small collections of documents, can be a serious bottleneck for analysts and researchers. It involves reading the whole collection of text documents into RAM and processing it as single vector, which can easily increase memory use by a factor of 2 to 4. The text2vec package solves this problem by providing a better way of constructing a document-term matrix.
+In this vignette we will primarily discuss the first step. Texts themselves can take up a lot of memory, but vectorized texts usually do not, because they are stored as sparse matrices. Because of R's copy-on-modify semantics, it is not easy to iteratively grow a DTM. Thus constructing a DTM, even for a small collections of documents, can be a serious bottleneck for analysts and researchers. It involves reading the whole collection of text documents into RAM and processing it as single vector, which can easily increase memory use by a factor of 2 to 4. The *text2vec* package solves this problem by providing a better way of constructing a document-term matrix.
 
-Lets demonstrate package core functionality by applying it to a real problem - sentiment analysis.
+Let's demonstrate package core functionality by applying it to a real case problem - sentiment analysis.
 
-This package provides the `movie_review` dataset. It consists of 5000 movie reviews, each of which is marked as positive or negative. We will use also use the [data.table](https://cran.r-project.org/package=data.table) package for data wrangling.
+*text2vec* package provides the `movie_review` dataset. It consists of 5000 movie reviews, each of which is marked as positive or negative. We will also use the [data.table](https://cran.r-project.org/package=data.table) package for data wrangling.
 
-First of all lets split out dataset into two parts - *train* and *test*. We will show how to perform data manipulations on *train* set and then apply exactly the same manipulations on the *test* set:
+First of all let's split out dataset into two parts - *train* and *test*. We will show how to perform data manipulations on *train* set and then apply exactly the same manipulations on the *test* set:
 
 ```{r, loading-data, eval=TRUE, message=FALSE}
 library(text2vec)
@@ -94,7 +94,7 @@ vocab = create_vocabulary(it_train)
 vocab
 ```
 
-Note that text2vec provides a few tokenizer functions (see `?tokenizers`). These are just simple wrappers for the `base::gsub()` function and are not very fast or flexible. If you need something smarter or faster you can use the [tokenizers](https://cran.r-project.org/package=tokenizers) package which will cover most use cases, or write your own tokenizer using the [stringi](https://cran.r-project.org/package=stringi) package.
+Note that *text2vec* provides a few tokenizer functions (see `?tokenizers`). These are just simple wrappers for the `base::gsub()` function and are not very fast or flexible. If you need something smarter or faster you can use the [tokenizers](https://cran.r-project.org/package=tokenizers) package which will cover most use cases, or write your own tokenizer using the [stringi](https://cran.r-project.org/package=stringi) package.
 
 Now that we have a vocabulary, we can construct a document-term matrix.
 
@@ -138,7 +138,7 @@ print(paste("max AUC =", round(max(glmnet_classifier$cvm), 4)))
 ```
 
 We have successfully fit a model to our DTM. Now we can check the model's performance on test data.
-Note that we use eactly the same functions from preprosessing and tokenization. Also we reuse/use the same `vectorizer` - function which maps terms to indices.
+Note that we use exactly the same functions from preprosessing and tokenization. Also we reuse/use the same `vectorizer` - function which maps terms to indices.
 ```{r, test_1, message=FALSE, warning=FALSE, eval=TRUE}
 # Note that most text2vec functions are pipe friendly!
 it_test = test$review %>% 
@@ -156,7 +156,7 @@ glmnet:::auc(test$sentiment, preds)
 ```{r, echo=FALSE}
 rm(glmnet_classifier)
 ```
-As we can see, performance on the test data is roughy the same as we expect from cross-validation.
+As we can see, performance on the test data is roughly the same as we expect from cross-validation.
 
 ### Pruning vocabulary
 
@@ -238,9 +238,9 @@ Further tuning is left up to the reader.
 
 ## Feature hashing
 
-If you are not familiar with feature hashing (the so-called "hashing trick") I recommend that you start with the [Wikipedia article](https://en.wikipedia.org/wiki/Feature_hashing), then read the [original paper](http://alex.smola.org/papers/2009/Weinbergeretal09.pdf) by a Yahoo! research team. This techique is very fast because we don't have to perform a lookup over an associative array. Another benefit is that it leads to a very low memory footprint, since we can map an arbitrary number of features into much more compact space. This method was popularized by Yahoo! and is widely used in [Vowpal Wabbit](https://github.com/JohnLangford/vowpal_wabbit/). 
+If you are not familiar with feature hashing (the so-called "hashing trick") I recommend you start with the [Wikipedia article](https://en.wikipedia.org/wiki/Feature_hashing), then read the [original paper](http://alex.smola.org/papers/2009/Weinbergeretal09.pdf) by a Yahoo! research team. This techique is very fast because we don't have to perform a lookup over an associative array. Another benefit is that it leads to a very low memory footprint, since we can map an arbitrary number of features into much more compact space. This method was popularized by Yahoo! and is widely used in [Vowpal Wabbit](https://github.com/JohnLangford/vowpal_wabbit/). 
 
-Here is how to use feature hashing in text2vec.
+Here is how to use feature hashing in *text2vec*.
 
 ```{r, hash_dtm}
 h_vectorizer = hash_vectorizer(hash_size = 2 ^ 14, ngram = c(1L, 2L))
@@ -268,11 +268,11 @@ preds = predict(glmnet_classifier, dtm_test , type = 'response')[, 1]
 glmnet:::auc(test$sentiment, preds)
 ```
 
-As you can see, we our AUC is a bit worse, but DTM construction time was considerably lower. On large collections of documents this can be a significant advantage.
+As you can see our AUC is a bit worse but DTM construction time is considerably lower. On large collections of documents this can be a significant advantage.
 
 # Basic transformations
 
-Before doing analysis it usually can be useful to *transform* DTM. For example lengths of the documents in collection can significantly vary. At this case it can be useful to apply normalization.
+Before doing analysis it usually can be useful to *transform* DTM. For example lengths of the documents in collection can significantly vary. In this case it can be useful to apply normalization.
 
 ## Normalization
 
@@ -282,7 +282,7 @@ By "normalization" we assume *transformation* of the *rows* of DTM so we adjust 
 dtm_train_l1_norm = normalize(dtm_train, "l1")
 ```
 
-After that we can do our analysis and probably have more chance for success.
+By this transformation we should improve the quality of data preparation.
 
 ## TF-IDF
 
@@ -304,7 +304,7 @@ dtm_test_tfidf  = create_dtm(it_test, vectorizer) %>%
   transform(tfidf)
 ```
 
-Note that here we first time touched *model* object in `text2vec`. At this moment reader should remember several important things about text2vec models:
+Note that here we first time touched *model* object in *text2vec*. At this moment the user should remember several important things about *text2vec* models:
 
 1. Models can be fitted on a given data (train) and applied to unseen data (test)
 1. **Models are mutable** - once you will pass model to `fit()` or `fit_transform()` function, model will be modifed by it.
@@ -326,8 +326,8 @@ print(difftime(Sys.time(), t1, units = 'sec'))
 plot(glmnet_classifier)
 print(paste("max AUC =", round(max(glmnet_classifier$cvm), 4)))
 ```
-Let's check the model performance on the test dataset.
 
+Let's check the model performance on the test dataset:
 ```{r}
 preds = predict(glmnet_classifier, dtm_test_tfidf, type = 'response')[,1]
 glmnet:::auc(test$sentiment, preds)
@@ -335,3 +335,5 @@ glmnet:::auc(test$sentiment, preds)
 ```{r, echo=FALSE}
 rm(glmnet_classifier)
 ```
+
+Usually *tf-idf* transformation **significantly** improve performance on most of the dowstream tasks.
