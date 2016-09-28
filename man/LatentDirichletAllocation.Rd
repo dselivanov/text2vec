@@ -55,8 +55,8 @@ lda$get_word_vectors()
 
 \describe{
  \item{lda}{A \code{LDA} object}
- \item{x}{An input term-cooccurence matrix. Preferably in \code{lda-c} format}
- \item{n_topics}{\code{integer} desired number of topics. Also knows as \bold{K}}
+ \item{x}{An input document-term matrix.}
+ \item{n_topics}{\code{integer} desired number of latent topics. Also knows as \bold{K}}
  \item{vocabulary}{vocabulary in a form of \code{character} or \code{text2vec_vocab} }
  \item{doc_topic_prior}{\code{numeric} prior for document-topic multinomial distribution.
    Also knows as \bold{alpha}}

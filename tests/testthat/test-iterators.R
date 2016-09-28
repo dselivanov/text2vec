@@ -32,7 +32,7 @@ test_that("ifiles", {
 
 test_that("idir", {
   it = idir(path = tmp_dir)
-  it2 = itoken(it, preprocessor = tolower, tokenizer = word_tokenizer)
+  it2 = itoken(it, preprocessor = tolower, tokenizer = word_tokenizer, progressbar = FALSE)
   v = create_vocabulary(it2)
   expect_equal(nrow(v$vocab), 7261)
 })

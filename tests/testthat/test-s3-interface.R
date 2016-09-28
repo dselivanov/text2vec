@@ -15,9 +15,7 @@ test_that("S3 LSA", {
   lsa = LatentSemanticAnalysis$new(n_topics)
   fit(dtm, lsa)
   d1 = dtm %>% transform(lsa)
-  d2 = dtm %>% fit_transform(lsa)
   expect_equal(rownames(d1), ids)
-  expect_equal(d1, d2)
 })
 
 test_that("S3 LDA", {
