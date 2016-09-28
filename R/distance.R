@@ -110,9 +110,12 @@ dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
       if (!inherits(x, "sparseMatrix"))
         stop("at the moment jaccard distance defined only for sparse matrices")
 
-      if (norm != "none")
-        warning("No normalization is needed - values will be convertet to 0, 1 aumatically! \\
-                'jaccard' can be computed only on sets which should be encoded as sparse matrices of 0, 1.")
+      if (norm != "none") {
+        msg = paste(norm, "norm provided. Howewer matrix will be converted to binary (0,1) automatically.")
+        msg = paste(msg, "'jaccard' can be computed only on sets which should be encoded as sparse matrices of 0, 1.")
+        message(msg)
+      }
+
 
       x@x = sign(x@x)
 
@@ -127,9 +130,10 @@ dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
       y = x
 
     if (inherits(method, "RWMD")) {
-      if (norm != "none")
-        warning("RWMD can be computed only on bag-of-words matrices - raw word-counts.
-                No normalization is needed - 'l1' normalization will be done aumatically!")
+      if (norm != "none") {
+        msg = paste(norm, "norm provided. RWMD can be computed only on bag-of-words matrices - raw word-counts")
+        message(msg)
+      }
       RESULT = method$dist2(x, y)
     }
   }
@@ -174,9 +178,11 @@ pdist2 = function(x, y, method = c("cosine", "euclidean", "jaccard"),
       if (!inherits(x, "sparseMatrix"))
         stop("at the moment jaccard distance defined only for sparse matrices")
 
-      if (norm != "none")
-        warning("No normalization is needed - values will be convertet to 0, 1 aumatically! \\
-                'jaccard' can be computed only on sets which should be encoded as sparse matrices of 0, 1.")
+      if (norm != "none") {
+        msg = paste(norm, "norm provided. Howewer matrix will be converted to binary (0,1) automatically.")
+        msg = paste(msg, "'jaccard' can be computed only on sets which should be encoded as sparse matrices of 0, 1.")
+        message(msg)
+      }
 
       x@x = sign(x@x)
       y@x = sign(y@x)
@@ -187,9 +193,10 @@ pdist2 = function(x, y, method = c("cosine", "euclidean", "jaccard"),
   }
   if (inherits(method, "distance_model")) {
     if (inherits(method, "RWMD")) {
-      if (norm != "none")
-        warning("RWMD can be computed only on bag-of-words matrices - raw word-counts.
-                Usually no normalization is needed - l1 normalization will be done aumatically!")
+      if (norm != "none") {
+        msg = paste(norm, "norm provided. RWMD can be computed only on bag-of-words matrices - raw word-counts")
+        message(msg)
+      }
       RESULT = method$pdist2(x, y)
     }
   }
