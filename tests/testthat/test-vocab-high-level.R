@@ -4,7 +4,7 @@ get_test_iterator <- function(txt)
   itoken(txt,
          preprocess_function = tolower,
          tokenizer = word_tokenizer,
-         progessbar = F)
+         progressbar = F)
 
 train_ind <- 1:1000
 N_WORKER <- 4

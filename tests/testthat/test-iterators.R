@@ -45,7 +45,7 @@ test_that("idir", {
 # })
 
 test_that("itoken character", {
-  it2 = itoken(txt_1, preprocessor = tolower, tokenizer = word_tokenizer)
+  it2 = itoken(txt_1, preprocessor = tolower, tokenizer = word_tokenizer, progressbar = FALSE)
   v = create_vocabulary(it2)
   expect_equal(nrow(v$vocab), 4464)
 })
@@ -70,7 +70,7 @@ test_that("itoken character", {
 ########################################
 test_that("immutable input iterators", {
   tokens = movie_review[seq_len(N),]$review %>% tolower %>% space_tokenizer
-  it = itoken(tokens)
+  it = itoken(tokens, progressbar = FALSE)
   v = create_vocabulary(it)
   dtm1 = create_dtm(it, vocab_vectorizer(v))
   dtm2 = create_dtm(it, vocab_vectorizer(v))

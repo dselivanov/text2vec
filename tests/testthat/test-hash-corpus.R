@@ -3,7 +3,7 @@ context("hash-corpus construction")
 train_ind <- 1:1000
 
 txt <- movie_review[['review']][train_ind]
-it = itoken(txt, tolower, word_tokenizer, progessbar = F)
+it = itoken(txt, tolower, word_tokenizer, progressbar = F)
 
 test_that("Unigram Hash Corpus construction", {
   h_size = 2 ^ 14;

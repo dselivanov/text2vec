@@ -6,7 +6,7 @@ txt <- movie_review[['review']][train_ind]
 ids <- movie_review[['id']][train_ind]
 names(txt) <- ids
 
-it = itoken(txt, tolower, word_tokenizer, progessbar = F)
+it = itoken(txt, tolower, word_tokenizer, progressbar = F)
 
 test_that("Vocabulary pruning", {
   vocab <- create_vocabulary(it)
