@@ -9,19 +9,18 @@
 dist2(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
   norm = c("l2", "l1", "none"), verbose = TRUE)
 
-pdist2(x, y, method = c("cosine", "euclidean", "jaccard"), norm = c("none",
-  "l1", "l2"), verbose = TRUE)
+pdist2(x, y, method = c("cosine", "euclidean", "jaccard"), norm = c("l2",
+  "l1", "none"), verbose = TRUE)
 }
 \arguments{
 \item{x}{first matrix.}
 
 \item{y}{second matrix. For \code{dist2} \code{y = NULL} set by default.
-This means that we will assume \code{y = x} and calculate distances between all rows of the \code{x}.}
+This means that we will assume \code{y = x} and calculate distances/similarities between all rows of the \code{x}.}
 
-\item{method}{\code{character} or instance of \code{tet2vec_distance} class.
-The distance measure to be used. One of \code{c("cosine", "euclidean", "jaccard")} or \link{RWMD}.
+\item{method}{usually \code{character} or instance of \code{tet2vec_distance} class.
+The distances/similarity measure to be used. One of \code{c("cosine", "euclidean", "jaccard")} or \link{RWMD}.
 \code{RWMD} works only on bag-of-words matrices.
-Also user should keep in mind, that distance = 1 - similarity.
 \bold{In case of \code{"cosine"} distance max distance will be 1 - (-1) = 2}}
 
 \item{norm}{\code{character = c("l2", "l1", "none")} - how to scale input matrices.
@@ -30,14 +29,14 @@ If they already scaled - use \code{"none"}}
 \item{verbose}{\code{logical} whether to display additional information during calculations}
 }
 \value{
-\code{dist2} returns \code{matrix} of distances between each row of
+\code{dist2} returns \code{matrix} of distances/similarities between each row of
 matrix \code{x} and each row of matrix \code{y}.
 
 \code{pdist2} returns \code{vector} of "parallel" distances between rows
 of \code{x} and \code{y}.
 }
 \description{
-\code{dist2} calculates pairwise distances between the
+\code{dist2} calculates pairwise distances/similarities between the
 rows of two data matrices. \bold{Note} that some methods work only on sparse matrices and
 others work only on dense matrices.
 

@@ -5,7 +5,7 @@ m2 = matrix(1:12, nrow = 4)
 tol = 1e-5
 
 tokens = movie_review$review[ind] %>% tolower %>% word_tokenizer
-it = itoken(tokens, progessbar = F)
+it = itoken(tokens, progressbar = F)
 v = create_vocabulary(it) %>% prune_vocabulary(term_count_min = 3)
 dtm = create_dtm(it, vectorizer = vocab_vectorizer(v))
 tcm = create_tcm(it, vectorizer = vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 5))
@@ -16,6 +16,9 @@ test_that("cosine", {
   expect_error(dist2(dtm[i1, ], dtm[i2, ], method = "cosine", norm = "l1"))
 
   cos_dist = dist2(dtm[i1, ], dtm[i2, ], method = "cosine", norm = "l2")
+  cos_sim = sim2(dtm[i1, ], dtm[i2, ], method = "cosine", norm = "l2")
+  expect_equal(1 - cos_sim, cos_dist)
+  expect_lte(max(cos_dist), 1)
   expect_equal(nrow(cos_dist), length(i1))
   expect_equal(ncol(cos_dist), length(i2))
   expect_equal(cos_dist[1, 1], 0, tol = tol)
@@ -29,6 +32,9 @@ test_that("cosine", {
 test_that("jaccard", {
   expect_error(dist2(m1, m2, method = "jaccard", norm = "l2"))
   jac_dist = dist2(dtm[i1, ], dtm[i2, ], method = "jaccard", norm = "none")
+  jac_sim = sim2(dtm[i1, ], dtm[i2, ], method = "jaccard", norm = "l2")
+  expect_equal(1 - jac_sim, jac_dist)
+  expect_lte(max(jac_dist), 1)
   expect_equal(nrow(jac_dist), length(i1))
   expect_equal(ncol(jac_dist), length(i2))
   expect_equal(jac_dist[1, 1], 0, tol = tol)
@@ -61,6 +67,7 @@ test_that("relaxed word mover distance", {
   glove$fit(tcm, n_iter = 10)
   wv = glove$get_word_vectors()
   rwmd_model = RWMD$new(wv)
+  rwmd_model$verbose = FALSE
   rwmd_dist = dist2(dtm[i1, ], dtm[i2, ], method = rwmd_model, norm = "none")
   expect_equal(nrow(rwmd_dist), length(i1))
   expect_equal(ncol(rwmd_dist), length(i2))
