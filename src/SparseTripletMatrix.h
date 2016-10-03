@@ -1,3 +1,19 @@
+// Copyright (C) 2015 - 2016  Dmitriy Selivanov
+// This file is part of text2vec
+//
+// text2vec is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
+//
+// text2vec is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
+
 #include <Rcpp.h>
 #include <string>
 #include <vector>
@@ -24,14 +40,14 @@ namespace std {
 }
 
 
-template<typename T>
-NumericMatrix convert2Rmat(vector<vector<T> > &mat, size_t ncol) {
-  NumericMatrix res(mat.size(), ncol);
-  for (size_t i = 0; i < mat.size(); i++)
-    for (size_t j = 0; j < ncol; j++)
-      res(i, j) = mat[i][j];
-  return res;
-}
+// template<typename T>
+// NumericMatrix convert2Rmat(vector<vector<T> > &mat, size_t ncol) {
+//   NumericMatrix res(mat.size(), ncol);
+//   for (size_t i = 0; i < mat.size(); i++)
+//     for (size_t j = 0; j < ncol; j++)
+//       res(i, j) = mat[i][j];
+//   return res;
+// }
 
 template<typename T>
 class SparseTripletMatrix {
@@ -58,39 +74,7 @@ public:
     this->sparse_container[make_pair(i, j)] += increment;
   };
 
-  SEXP get_sparse_triplet_matrix(vector< string>  &rownames, vector< string>  &colnames) {
-    // non-zero values count
-    size_t NNZ = this->size();
-
-    // result triplet sparse matrix
-    S4 triplet_matrix("dgTMatrix");
-
-    // index vectors
-    IntegerVector I(NNZ), J(NNZ);
-    // value vector
-    NumericVector X(NNZ);
-
-    size_t n = 0;
-    for(auto it : sparse_container) {
-      // fill first half of our symmetric cooccurence matrix
-      I[n] = it.first.first;
-      J[n] = it.first.second;
-      X[n] = it.second;
-      n++;
-    }
-    // construct matrix
-    triplet_matrix.slot("i") = I;
-    triplet_matrix.slot("j") = J;
-    triplet_matrix.slot("x") = X;
-    // set dimensions
-    triplet_matrix.slot("Dim") =
-      IntegerVector::create(max(nrow, (uint32_t)rownames.size()),
-                            max(ncol, (uint32_t)colnames.size()));
-    // set dimension names
-    triplet_matrix.slot("Dimnames") = List::create(rownames, colnames);
-    return triplet_matrix;
-  }
-
+  SEXP get_sparse_triplet_matrix(CharacterVector  &rownames, CharacterVector  &colnames);
 private:
   // dimensionality of matrix
   uint32_t nrow;
@@ -100,3 +84,37 @@ private:
   // container for sparse matrix in triplet form
   unordered_map< pair<uint32_t, uint32_t>, T >  sparse_container;
 };
+
+template<typename T>
+SEXP SparseTripletMatrix<T>::get_sparse_triplet_matrix(CharacterVector  &rownames, CharacterVector  &colnames) {
+  // non-zero values count
+  size_t NNZ = this->size();
+
+  // result triplet sparse matrix
+  S4 triplet_matrix("dgTMatrix");
+
+  // index vectors
+  IntegerVector I(NNZ), J(NNZ);
+  // value vector
+  NumericVector X(NNZ);
+
+  size_t n = 0;
+  for(auto it : sparse_container) {
+    // fill first half of our symmetric cooccurence matrix
+    I[n] = it.first.first;
+    J[n] = it.first.second;
+    X[n] = it.second;
+    n++;
+  }
+  // construct matrix
+  triplet_matrix.slot("i") = I;
+  triplet_matrix.slot("j") = J;
+  triplet_matrix.slot("x") = X;
+  // set dimensions
+  triplet_matrix.slot("Dim") =
+    IntegerVector::create(max(nrow, (uint32_t)rownames.size()),
+                          max(ncol, (uint32_t)colnames.size()));
+  // set dimension names
+  triplet_matrix.slot("Dimnames") = List::create(rownames, colnames);
+  return triplet_matrix;
+}

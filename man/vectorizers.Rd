@@ -18,7 +18,9 @@ hash_vectorizer(hash_size = 2^18, ngram = c(1L, 1L), signed_hash = FALSE,
 during corpus construction or not.}
 
 \item{skip_grams_window}{\code{integer} window for term-co-occurence matrix
-construction. A value of \code{0L} does not construct the TCM.}
+construction. \code{skip_grams_window} should be > 0 if you plan to use
+\code{vectorizer} in \link{create_tcm} function.
+Value of \code{0L} means to not construct the TCM.}
 
 \item{hash_size}{\code{integer} The number of of hash-buckets for the feature
 hashing trick. The number must be greater than 0, and preferably it will be
@@ -36,30 +38,30 @@ A vectorizer \code{function}
 }
 \description{
 This function creates a text vectorizer function
-which is used in constructing a corpus.
+which is used in constructing a dtm/tcm/corpus.
 }
 \examples{
 data("movie_review")
-N <- 100
-vectorizer <- hash_vectorizer(2 ^ 18, c(1L, 2L))
-it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+N = 100
+vectorizer = hash_vectorizer(2 ^ 18, c(1L, 2L))
+it = itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer, chunks_number = 10)
-corpus <- create_corpus(it, vectorizer)
-hash_dtm <- get_dtm(corpus)
+corpus = create_corpus(it, vectorizer)
+hash_dtm = get_dtm(corpus)
 
-it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+it = itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer, chunks_number = 10)
-v <- create_vocabulary(it, c(1L, 1L) )
+v = create_vocabulary(it, c(1L, 1L) )
 
-vectorizer <- vocab_vectorizer(v)
+vectorizer = vocab_vectorizer(v)
 
-it <- itoken(movie_review$review[1:N], preprocess_function = tolower,
+it = itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer, chunks_number = 10)
 
-corpus <- create_corpus(it, vectorizer)
-voacb_dtm <- get_dtm(corpus)
+corpus = create_corpus(it, vectorizer)
+voacb_dtm = get_dtm(corpus)
 }
 \seealso{
-\link{create_corpus} \link{create_dtm} \link{create_tcm} \link{create_vocabulary}
+\link{create_dtm} \link{create_tcm} \link{create_vocabulary} \link{create_corpus}
 }
 

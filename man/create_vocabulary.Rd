@@ -8,24 +8,25 @@
 \alias{vocabulary}
 \title{Creates a vocabulary of unique terms}
 \usage{
-create_vocabulary(itoken_src, ngram = c(ngram_min = 1L, ngram_max = 1L),
-  stopwords = character(0))
+create_vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
+  stopwords = character(0), sep_ngram = "_")
 
-vocabulary(itoken_src, ngram = c(ngram_min = 1L, ngram_max = 1L),
-  stopwords = character(0))
+vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
+  stopwords = character(0), sep_ngram = "_")
 
-\method{create_vocabulary}{character}(itoken_src, ngram = c(ngram_min = 1L,
-  ngram_max = 1L), stopwords = character(0))
+\method{create_vocabulary}{character}(it, ngram = c(ngram_min = 1L, ngram_max
+  = 1L), stopwords = character(0), sep_ngram = "_")
 
-\method{create_vocabulary}{itoken}(itoken_src, ngram = c(ngram_min = 1L,
-  ngram_max = 1L), stopwords = character(0))
+\method{create_vocabulary}{itoken}(it, ngram = c(ngram_min = 1L, ngram_max =
+  1L), stopwords = character(0), sep_ngram = "_")
 
-\method{create_vocabulary}{list}(itoken_src, ngram = c(ngram_min = 1L,
-  ngram_max = 1L), stopwords = character(0), ...)
+\method{create_vocabulary}{list}(it, ngram = c(ngram_min = 1L, ngram_max =
+  1L), stopwords = character(0), sep_ngram = "_", ...)
 }
 \arguments{
-\item{itoken_src}{iterator over a \code{list} of \code{character} vectors,
+\item{it}{iterator over a \code{list} of \code{character} vectors,
 which are the documents from which the user wants to construct a vocabulary.
+See \link{itoken}.
 Alternatively, a \code{character} vector of user-defined vocabulary terms
 (which will be used "as is").}
 
@@ -34,6 +35,8 @@ of n-values for different n-grams to be extracted. All values of \code{n}
 such that ngram_min <= n <= ngram_max will be used.}
 
 \item{stopwords}{\code{character} vector of stopwords to filter out}
+
+\item{sep_ngram}{\code{character} a character string to concatenate words in ngrams}
 
 \item{...}{additional arguments to \link{foreach} function.}
 }
@@ -71,9 +74,9 @@ registered, it will build vocabulary in parallel using \link{foreach}.
 }}
 \examples{
 data("movie_review")
-txt <- movie_review[['review']][1:100]
-it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
-vocab <- create_vocabulary(it)
+txt = movie_review[['review']][1:100]
+it = itoken(txt, tolower, word_tokenizer, chunks_number = 10)
+vocab = create_vocabulary(it)
 pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
 }

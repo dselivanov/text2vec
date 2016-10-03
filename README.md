@@ -1,14 +1,9 @@
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/text2vec)](http://cran.r-project.org/package=text2vec)
 [![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=master)](https://travis-ci.org/dselivanov/text2vec)
-[![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://badges.mit-license.org)
+[![codecov](https://codecov.io/gh/dselivanov/text2vec/branch/0.4/graph/badge.svg)](https://codecov.io/gh/dselivanov/text2vec/branch/0.4)
+[![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
 [![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/text2vec)](http://cran.r-project.org/package=text2vec)
 [![Follow](https://img.shields.io/twitter/follow/dselivanov_.svg?style=social)](https://twitter.com/intent/follow?screen_name=dselivanov_)
-
-# We are choosing logo, please proceed to the [link](https://github.com/dselivanov/text2vec/issues/131) and vote.
-
-# Development
-
-We keep **stable (last CRAN release) version in master**. **Development is in [0.4 branch](https://github.com/dselivanov/text2vec/tree/0.4).**
 
 # Tutorials
 
@@ -26,7 +21,10 @@ See also the [text2vec articles](http://dsnotes.com/tags/text2vec/) on my blog.
 The core functionality at the moment includes
 
 1. Fast text vectorization on arbitrary n-grams, using vocabulary or feature hashing.
-2. State-of-the-art [GloVe](http://www-nlp.stanford.edu/projects/glove/) word embeddings.
+2. [GloVe](http://www-nlp.stanford.edu/projects/glove/) word embeddings.
+3. Topic modeling with:
+  - Latent Dirichlet Allocation
+  - Latent Sematic Analysis
 
 The core of this package is carefully written in C++, which means text2vec is fast and memory friendly. Some parts (GloVe training) are fully parallelized using the excellent [RcppParallel](http://rcppcore.github.io/RcppParallel/) package. This means that parallel processing works on OS X, Linux, Windows and Solaris (x86) without any additional hacking or tricks. In addition, there is a higher-level parallelization for text vectorization and vocabulary construction on top of the [foreach](https://cran.r-project.org/package=foreach) package, and text2vec has a streaming API so that users don't have to load all of the data into RAM.
 
@@ -41,3 +39,7 @@ Contributors are welcome. You can help by
 - testing and leaving feedback on the [GitHub issuer tracker](https://github.com/dselivanov/text2vec/issues) (preferably) or directly by e-mail.
 - forking and contributing. Vignettes, docs, tests, and use cases are very welcome.
 - by giving me a star on [project page](https://github.com/dselivanov/text2vec) :-)
+
+# License
+
+GPL (>= 2)

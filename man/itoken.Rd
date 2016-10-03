@@ -3,26 +3,21 @@
 \name{itoken}
 \alias{itoken}
 \alias{itoken.character}
-\alias{itoken.ifiles}
-\alias{itoken.ilines}
+\alias{itoken.iterator}
 \alias{itoken.list}
 \title{Iterators over input objects}
 \usage{
 itoken(iterable, ...)
 
 \method{itoken}{list}(iterable, chunks_number = 10,
-  progessbar = interactive(), ids = NULL, ...)
+  progressbar = interactive(), ids = NULL, ...)
 
-\method{itoken}{character}(iterable, preprocess_function = identity,
-  tokenizer = function(x) strsplit(x, " ", TRUE), chunks_number = 10,
-  progessbar = interactive(), ids = NULL, ...)
+\method{itoken}{character}(iterable, preprocessor = identity,
+  tokenizer = space_tokenizer, chunks_number = 10,
+  progressbar = interactive(), ids = NULL, ...)
 
-\method{itoken}{ifiles}(iterable, preprocess_function = identity,
-  tokenizer = function(x) strsplit(x, " ", TRUE),
-  progessbar = interactive(), ...)
-
-\method{itoken}{ilines}(iterable, preprocess_function = identity,
-  tokenizer = function(x) strsplit(x, " ", TRUE), ...)
+\method{itoken}{iterator}(iterable, preprocessor = identity,
+  tokenizer = space_tokenizer, progressbar = interactive(), ...)
 }
 \arguments{
 \item{iterable}{an object from which to generate an iterator}
@@ -32,20 +27,20 @@ itoken(iterable, ...)
 \item{chunks_number}{\code{integer}, the number of pieces that object should
 be divided into.}
 
-\item{progessbar}{\code{logical} indicates whether to show progress bar.}
+\item{progressbar}{\code{logical} indicates whether to show progress bar.}
 
 \item{ids}{\code{vector} of document ids. If \code{ids} is not provided,
 \code{names(iterable)} will be used. If \code{names(iterable) == NULL},
 incremental ids will be assigned.}
 
-\item{preprocess_function}{\code{function} which takes chunk of
+\item{preprocessor}{\code{function} which takes chunk of
 \code{character} vectors and does all pre-processing.
-Usually \code{preprocess_function} should return a
+Usually \code{preprocessor} should return a
 \code{character} vector of preprocessed/cleaned documents. See "Details"
 section.}
 
 \item{tokenizer}{\code{function} which takes a \code{character} vector from
-\code{preprocess_function}, split it into tokens and returns a \code{list}
+\code{preprocessor}, split it into tokens and returns a \code{list}
 of \code{character} vectors. If you need to perform stemming -
 call stemmer inside tokenizer. See examples section.}
 }
@@ -65,22 +60,21 @@ S3 methods for creating an itoken iterator from list of tokens
   \link{ifiles}) and a function to tokenize it (to \link{itoken})}
   \item{\code{idir}: from a directory, the user must provide a function to
   read in the files (to \link{idir}) and a function to tokenize it (to
-  \link{itoken})} \item{\code{ilines}: from lines, the user must provide
-  functions to tokenize}}
+  \link{itoken})}}
 }
 \examples{
 data("movie_review")
-txt <- movie_review$review[1:100]
-ids <- movie_review$id[1:100]
-it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10)
-it <- itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
+txt = movie_review$review[1:100]
+ids = movie_review$id[1:100]
+it = itoken(txt, tolower, word_tokenizer, chunks_number = 10)
+it = itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
 # Example of stemming tokenizer
-# stem_tokenizer <- function(x) {
+# stem_tokenizer = function(x) {
 #  word_tokenizer(x) \%>\% lapply(SnowballC::wordStem('en'))
 # }
 }
 \seealso{
-\link{ifiles}, \link{idir}, \link{ilines}, \link{create_vocabulary},
+\link{ifiles}, \link{idir}, \link{create_vocabulary},
   \link{create_corpus}, \link{create_dtm}, \link{vectorizers},
   \link{create_tcm}
 }

@@ -1,0 +1,164 @@
+---
+title: |
+  | Working with files on disk.
+  | Taking the advantage of multicore machines.
+author: "Dmitriy Selivanov"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    fig_caption: false
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Advanced topics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r global_options, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE)
+```
+This vignette demonstrates some advanced features of the text2vec package: how to read large collections of text stored on disk rather than in memory, and how to let text2vec functions use multiple cores.
+
+# Working with files
+
+In many cases, you will have a corpus of texts which are too large to fit in memory. This section demonstrates how to use `text2vec` to vectorize large collections of text stored in files. 
+
+Imagine we have a collection of movie reviews stored in multiple text files on disk. For this vignette, we will create files on disk using the `movie_review` dataset:
+
+```{r}
+library(text2vec)
+library(magrittr)
+data("movie_review")
+
+# remove all internal EOL to simplify reading
+movie_review$review = gsub(pattern = '\n', replacement = ' ', 
+                            x = movie_review$review, fixed = TRUE)
+N_FILES = 10
+CHUNK_LEN = nrow(movie_review) / N_FILES
+files = sapply(1:N_FILES, function(x) tempfile())
+chunks = split(movie_review, rep(1:N_FILES, 
+                                  each = nrow(movie_review) / N_FILES ))
+for (i in 1:N_FILES ) {
+  write.table(chunks[[i]], files[[i]], quote = T, row.names = F,
+              col.names = T, sep = '|')
+}
+
+# Note what the moview review data looks like
+str(movie_review, strict.width = 'cut')
+```
+
+The `text2vec` provides functions to easily work with files. You need to follow a few steps.
+
+1. Construct an iterator over the files with the `ifiles()` function.
+2. Provide a `reader()` function to `ifiles()` that can read those files. You can use a function from base R or any other package to read plain text, XML, or other files and convert them to text. The `text2vec` package doesn't handle the reading itself. **`reader` function should return NAMED `character` vector**:
+    * elements of character vector will be treated as documents  
+    * names of the elements will will be treated as documents `ids`  
+    * If user won't provide named character vector, text2vec will generate document ids `filename + line_number` (assuming that each line is a separate document)
+3. Construct a tokens iterator from the files iterator using the `itoken()` function.
+
+Let's see how it works:
+
+```{r}
+library(data.table)
+reader = function(x, ...) {
+  # read
+  chunk = data.table::fread(x, header = T, sep = '|')
+  # select column with review
+  res = chunk$review
+  # assign ids to reviews
+  names(res) = chunk$id
+  res
+}
+# create iterator over files
+it_files  = ifiles(files, reader = reader)
+# create iterator over tokens from files iterator
+it_tokens = itoken(it_files, preprocess_function = tolower, 
+                    tokenizer = word_tokenizer, progessbar = FALSE)
+
+vocab = create_vocabulary(it_tokens)
+```
+
+Now are able to construct DTM:
+```{r}
+dtm = create_dtm(it_tokens, vectorizer = vocab_vectorizer(vocab))
+str(dtm, list.len = 5)
+```
+
+Note that the DTM has document ids. They are inherited from the document names we assigned in `reader` function. This is a convenient way to assign document IDs when working with files.
+
+**Fall back to auto-generated ids.**
+Lets see how `text2vec` would handle the cases when user didn't provide document ids:
+
+```{r}
+for (i in 1:N_FILES ) {
+  write.table(chunks[[i]][["review"]], files[[i]], quote = T, row.names = F,
+              col.names = T, sep = '|')
+}
+# read with default reader - readLines
+it_files  = ifiles(files)
+# create iterator over tokens from files iterator
+it_tokens = itoken(it_files, preprocess_function = tolower, 
+                    tokenizer = word_tokenizer, progessbar = FALSE)
+dtm = create_dtm(it_tokens, vectorizer = hash_vectorizer())
+str(dtm, list.len = 5)
+```
+
+# Multicore machines
+
+For many tasks `text2vec` allows to take the advantage of multicore machines. The functions `create_dtm()`, `create_tcm()`, and `create_vocabulary()` are good example. In contrast to GloVe fitting which uses low-level thread parallelism via `RcppParallel`, these functions use standard high-level R parallelizatin  provided by the `foreach` package. They are flexible and can use diffrent parallel backends, such as `doParallel()` or `doRedis()`. But remember that such high-level parallelism might involve significant overhead.
+
+The user must do two things manually to take advantage of a multicore machine: 
+
+1. Register a parallel backend.
+2. Prepare splits of the input data in the form of a list of `itoken` iterators.
+
+Here is simple example:
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+N_WORKERS = 4
+library(doParallel)
+# register parallel backend
+registerDoParallel(N_WORKERS)
+
+#  prepare splits
+# "jobs" is a list of itoken iterators!
+N_SPLITS = 4
+
+jobs = files %>% 
+  split_into(N_SPLITS) %>% 
+  lapply(ifiles, reader = reader) %>% 
+  # Worth to set chunks_number to 1 because we already splitted input
+  lapply(itoken, chunks_number = 1, preprocess_function = tolower, 
+         tokenizer = word_tokenizer, progessbar = FALSE)
+
+# Alternatively when data is in memory we can perform splite in the following way:
+#
+# review_chunks = split_into(movie_review$review, N_SPLITS)
+# review_ids = split_into(movie_review$id, N_SPLITS)
+#
+# jobs = Map(function(doc, ids) {
+#  itoken(iterable = doc, ids = ids, preprocess_function = tolower, 
+#         tokenizer = word_tokenizer, chunks_number = 1, progessbar = FALSE) 
+# }, review_chunks, review_ids)
+
+# Now all below function calls will benefit from multicore machines
+# Each job will be evaluated in separate process
+
+# vocabulary creation
+vocab = create_vocabulary(jobs)
+
+# DTM vocabulary vectorization
+v_vectorizer = vocab_vectorizer(vocab)
+vocab_dtm_parallel = create_dtm(jobs, vectorizer = v_vectorizer)
+
+# DTM hash vectorization
+h_vectorizer = hash_vectorizer()
+hash_dtm_parallel = create_dtm(jobs, vectorizer = h_vectorizer)
+
+# co-ocurence statistics
+tcm_vectorizer = vocab_vectorizer(vocab, grow_dtm = FALSE, skip_grams_window = 5)
+tcm_parallel = create_tcm(jobs, vectorizer = tcm_vectorizer)
+```

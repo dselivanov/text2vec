@@ -1,14 +1,14 @@
 Package: text2vec
 Type: Package
-Version: 0.3.1
-Date: 2016-07-11
+Version: 0.4.0
+Date: 2016-03-31
 Title: Fast Text Mining Framework for Vectorization and Word Embeddings
-License: MIT + file LICENSE
-Description: Very fast and memory-friendly tools for text vectorization and
-    state-of-the-art word embeddings (GloVe). This package provides a
-    source-agnostic streaming API, which allows researchers to perform analysis
-    of collections of documents which are much larger than available RAM. All
-    core functions are parallelized to benefit from multicore machines.
+License: GPL (>= 2) | file LICENSE
+Description: Fast and memory-friendly tools for text vectorization, 
+    topic modeling (LDA, LSA) and word embeddings (GloVe). 
+    This package provides a source-agnostic streaming API, which allows researchers 
+    to perform analysis of collections of documents which are larger than available RAM. 
+    All core functions are parallelized to benefit from multicore machines.
 Authors@R: c(person("Dmitriy", "Selivanov", role = c("aut", "cre"),
     email = "selivanov.dmitriy@gmail.com"),
     person("Lincoln", "Mullen", role = c("ctb"),
@@ -24,17 +24,19 @@ Imports:
     Rcpp (>= 0.11),
     RcppParallel (>= 4.3.14),
     digest (>= 0.6.8),
-    iterators (>= 1.0.8),
     foreach(>= 1.4.3),
     data.table(>= 1.9.6),
-    stringr (>= 1.0.0),
-    magrittr (>= 1.5)
+    magrittr (>= 1.5),
+    irlba (>= 2.1.2),
+    R6 (>= 2.1.2)
 LinkingTo:
     Rcpp,
     RcppParallel,
     digest
 Suggests:
+    stringr (>= 1.1.0),
     testthat,
+    covr,
     knitr,
     rmarkdown,
     glmnet,

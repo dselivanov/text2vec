@@ -5,21 +5,21 @@
 #'   vocabulary and word embeddings matrix.
 #' @param verbose \code{logical} whether to print messages during evaluation.
 #' @description  This function prepares a list of questions from a
-#'   \code{questions-words.txt} format. For full examples see \link{glove}.
-#' @seealso \link{check_analogy_accuracy}, \link{glove}
+#'   \code{questions-words.txt} format. For full examples see \link{GloVe}.
+#' @seealso \link{check_analogy_accuracy}, \link{GloVe}
 #' @export
-prepare_analogy_questions <- function(questions_file_path, vocab_terms, verbose = TRUE) {
-  lines <- readLines(questions_file_path) %>%
+prepare_analogy_questions = function(questions_file_path, vocab_terms, verbose = TRUE) {# nocov start
+  lines = readLines(questions_file_path) %>%
     tolower %>%
-    str_split(fixed(" "))
+    strsplit(split = " ", fixed = TRUE)
 
   # identify categories of questions
-  section_name_ind <- which( sapply(lines, length) != 4 )
+  section_name_ind = which( sapply(lines, length) != 4 )
   # identify start and end of questions by category
-  section_start_ind <- section_name_ind + 1
-  section_end_ind <- c(section_name_ind[ -1 ] - 1, length(lines))
+  section_start_ind = section_name_ind + 1
+  section_end_ind = c(section_name_ind[ -1 ] - 1, length(lines))
   # construct question matrices by category
-  q <- Map(
+  q = Map(
     function(i1, i2, quetsions)
       # take questions strings
       quetsions[i1:i2] %>%
@@ -32,7 +32,7 @@ prepare_analogy_questions <- function(questions_file_path, vocab_terms, verbose 
       # detect whether vocabulary contains all words from question
       # filter out question if vocabulary does not contain all words
       (function(x) {
-        any_na_ind <- apply(x, 1, anyNA)
+        any_na_ind = apply(x, 1, anyNA)
         x[!any_na_ind, ]
       }),
     section_start_ind,
@@ -40,10 +40,10 @@ prepare_analogy_questions <- function(questions_file_path, vocab_terms, verbose 
     MoreArgs = list(quetsions = lines)
   )
 
-  questions_number <- sapply(q, nrow) %>% sum
+  questions_number = sapply(q, nrow) %>% sum
 
   if (verbose) {
-    msg <- sprintf("%s -  %d full questions found out of %d total",
+    msg = sprintf("%s -  %d full questions found out of %d total",
                    as.character(Sys.time()),
                    questions_number,
                    length(lines) - length(section_name_ind)
@@ -68,41 +68,39 @@ prepare_analogy_questions <- function(questions_file_path, vocab_terms, verbose 
 #'   the analogy task. For full examples see \link{glove}.
 #' @seealso \link{prepare_analogy_questions}, \link{glove}
 #' @export
-check_analogy_accuracy <- function(questions_list, m_word_vectors, verbose = TRUE) {
+check_analogy_accuracy = function(questions_list, m_word_vectors, verbose = TRUE) {
 
-  m_word_vectors_norm <-  sqrt(rowSums(m_word_vectors ^ 2))
+  m_word_vectors_norm =  sqrt(rowSums(m_word_vectors ^ 2))
+  m_word_vectors_normalized = m_word_vectors / m_word_vectors_norm
 
-  categories_number <- length(questions_list)
+  categories_number = length(questions_list)
 
-  res <- vector(mode = 'list', length = categories_number)
+  res = vector(mode = 'list', length = categories_number)
 
   for (i in 1:categories_number) {
-    q_mat <- questions_list[[i]]
-    q_number <- nrow(q_mat)
-    category <- names(questions_list)[[i]]
+    q_mat = questions_list[[i]]
+    q_number = nrow(q_mat)
+    category = names(questions_list)[[i]]
 
-    m_query <-
-      (m_word_vectors[q_mat[, 2], ] +
-         m_word_vectors[q_mat[, 3], ] -
-         m_word_vectors[q_mat[, 1], ])
-    query_norm <- m_query %>%
-      (function(x) x ^ 2) %>%
-      rowSums %>%
-      sqrt
+    m_query =
+      m_word_vectors[q_mat[, 2], ] +
+      m_word_vectors[q_mat[, 3], ] -
+      m_word_vectors[q_mat[, 1], ]
 
-    m_query / query_norm
+    m_query_norm = sqrt(rowSums(m_query ^ 2))
+    m_query_normalized = m_query / m_query_norm
 
-    cos_mat <- cosine(m_query , m_word_vectors, m_word_vectors_norm)
+    cos_mat = tcrossprod(m_query_normalized, m_word_vectors_normalized)
 
     for (j in 1:q_number)
-      cos_mat[j, q_mat[j, c(1, 2, 3)]] <- -Inf
+      cos_mat[j, q_mat[j, c(1, 2, 3)]] = -Inf
 
-    preds <- max.col(cos_mat)
-    act <- q_mat[, 4]
-    correct_number <- sum(preds == act)
+    preds = max.col(cos_mat, ties.method = 'first')
+    act = q_mat[, 4]
+    correct_number = sum(preds == act)
 
     if (verbose) {
-      msg <- sprintf("%s - %s: correct %d out of %d, accuracy = %.4f",
+      msg = sprintf("%s - %s: correct %d out of %d, accuracy = %.4f",
                      as.character(Sys.time()),
                      category,
                      correct_number,
@@ -110,20 +108,20 @@ check_analogy_accuracy <- function(questions_list, m_word_vectors, verbose = TRU
                      correct_number / q_number )
       message(msg)
     }
-    res[[i]] <-
-      data.frame(
+    res[[i]] =
+      data.table(
         'predicted' = preds,
         'actual' = act,
-        'category' = category,
-        stringsAsFactors = FALSE
+        'category' = category
       )
   }
-  res <- do.call(rbind, res)
+  res = rbindlist(res)
+  # res = do.call(rbind, res)
 
   if (verbose) {
-    msg <- sprintf("%s - OVERALL ACCURACY = %.4f", as.character(Sys.time()),
+    msg = sprintf("%s - OVERALL ACCURACY = %.4f", as.character(Sys.time()),
                    sum(res[['predicted']] == res[['actual']]) / nrow(res) )
     message(msg)
   }
   res
-}
+}# nocov end

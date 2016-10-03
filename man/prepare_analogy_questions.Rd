@@ -16,9 +16,9 @@ vocabulary and word embeddings matrix.}
 }
 \description{
 This function prepares a list of questions from a
-  \code{questions-words.txt} format. For full examples see \link{glove}.
+  \code{questions-words.txt} format. For full examples see \link{GloVe}.
 }
 \seealso{
-\link{check_analogy_accuracy}, \link{glove}
+\link{check_analogy_accuracy}, \link{GloVe}
 }
 

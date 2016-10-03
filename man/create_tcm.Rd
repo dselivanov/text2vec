@@ -6,14 +6,15 @@
 \alias{create_tcm.list}
 \title{Term-co-occurence matrix construction}
 \usage{
-create_tcm(itoken_src, vectorizer, ...)
+create_tcm(it, vectorizer, ...)
 
-\method{create_tcm}{itoken}(itoken_src, vectorizer, ...)
+\method{create_tcm}{itoken}(it, vectorizer, ...)
 
-\method{create_tcm}{list}(itoken_src, vectorizer, verbose = FALSE, ...)
+\method{create_tcm}{list}(it, vectorizer, verbose = FALSE,
+  work_dir = tempdir(), ...)
 }
 \arguments{
-\item{itoken_src}{\code{list} of iterators over tokens from \link{itoken}.
+\item{it}{\code{list} of iterators over tokens from \link{itoken}.
 Each element is a list of tokens, that is, tokenized and normalized
 strings.}
 
@@ -21,50 +22,51 @@ strings.}
 \link{vectorizers}.}
 
 \item{...}{arguments to \link{foreach} function which is used to iterate over
-\code{itoken_src}.}
+\code{it}.}
 
 \item{verbose}{\code{logical} print status messages}
+
+\item{work_dir}{working directory for intermediate results}
 }
 \value{
-\code{dgCMatrix} TCM matrix
+\code{dgTMatrix} TCM matrix
 }
 \description{
-This is a high-level function for constructing a
-  term-co-occurrence matrix. If a parallel backend is registered, it will
-  construct the TCM in multiple threads.
+This is a function for constructing a
+term-co-occurrence matrix(TCM). TCM matrix usually used with \link{GloVe} word embedding model.
 }
 \details{
-The user should keep in mind that he or she should split data and
-  and provide a list of \link{itoken} iterators. Each element of
-  \code{itoken_src} will be handled in a separate thread combined at the end
-  of processing.
+If a parallel backend is registered, it will onstruct the TCM in multiple threads.
+The user should keep in mind that he/she should split data and provide a list
+of \link{itoken} iterators. Each element of \code{it} will be handled
+in a separate thread combined at the end of processing.
 }
 \examples{
 \dontrun{
 data("movie_review")
 
-# single threadx
+# single thread
 
-tokens <- movie_review$review \%>\% tolower \%>\% word_tokenizer
-it <- itoken(tokens)
-v <- create_vocabulary(it)
-vectorizer <- vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)
-tcm <- create_tcm(itoken(tokens), vectorizer)
+tokens = movie_review$review \%>\% tolower \%>\% word_tokenizer
+it = itoken(tokens)
+v = create_vocabulary(jobs)
+vectorizer = vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)
+tcm = create_tcm(itoken(tokens), vectorizer)
 
 # parallel version
 
 # set to number of cores on your machine
-N_WORKERS <- 1
-splits <- split_into(movie_review$review, N_WORKERS)
-jobs <- lapply(splits, itoken, tolower, word_tokenizer)
-v <- create_vocabulary(jobs)
-vectorizer <- vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)
-jobs <- lapply(splits, itoken, tolower, word_tokenizer)
+N_WORKERS = 1
+splits = split_into(movie_review$review, N_WORKERS)
+jobs = lapply(splits, itoken, tolower, word_tokenizer)
+v = create_vocabulary(jobs)
+vectorizer = vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)
+jobs = lapply(splits, itoken, tolower, word_tokenizer)
 doParallel::registerDoParallel(N_WORKERS)
-tcm <- create_tcm(jobs, vectorizer)
+tcm = create_tcm(jobs, vectorizer)
 }
 }
 \seealso{
-\link{itoken}
+\link{itoken} \link{create_dtm}
 }
 
