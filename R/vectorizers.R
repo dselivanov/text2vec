@@ -59,13 +59,15 @@ create_corpus = function(iterator,
 #' @name vectorizers
 #' @title Vocabulary and hash vectorizers
 #' @description This function creates a text vectorizer function
-#' which is used in constructing a corpus.
+#' which is used in constructing a dtm/tcm/corpus.
 #' @param grow_dtm \code{logical} Should we grow the document-term matrix
 #' during corpus construction or not.
 #' @param skip_grams_window \code{integer} window for term-co-occurence matrix
-#' construction. A value of \code{0L} does not construct the TCM.
+#' construction. \code{skip_grams_window} should be > 0 if you plan to use
+#' \code{vectorizer} in \link{create_tcm} function.
+#' Value of \code{0L} means to not construct the TCM.
 #' @return A vectorizer \code{function}
-#' @seealso \link{create_corpus} \link{create_dtm} \link{create_tcm} \link{create_vocabulary}
+#' @seealso \link{create_dtm} \link{create_tcm} \link{create_vocabulary} \link{create_corpus}
 #' @examples
 #' data("movie_review")
 #' N = 100
@@ -99,8 +101,11 @@ vocab_vectorizer = function(vocabulary,
     stop("At least one of the arguments 'grow_dtm', 'skip_grams_window' should
          satisfy grow_dtm == TRUE or skip_grams_window > 0")
 
-  if ( skip_grams_window > 0 && vocabulary$ngram[[2]] > 1)
-    stop("skip_grams_window > 0 can be used only with ngram = c(1, 1)")
+  if ( skip_grams_window > 0 && vocabulary$ngram[[2]] > 1) {
+    msg = "skip_grams_window > 0 with ngram != c(1, 1) looks strange!"
+    msg = paste(msg, "We hope you know what are you doing!")
+    warning(msg, immediate. = TRUE)
+  }
 
   vectorizer = function(iterator) {
 
@@ -115,6 +120,8 @@ vocab_vectorizer = function(vocabulary,
     attr(vocab_corpus, 'ids') = character(0)
     corpus_insert(vocab_corpus, iterator, grow_dtm)
   }
+  attr(vectorizer, "skip_grams_window") = skip_grams_window
+  attr(vectorizer, "grow_dtm") = grow_dtm
   vectorizer
 }
 
@@ -135,12 +142,15 @@ hash_vectorizer = function(hash_size = 2 ^ 18,
                             skip_grams_window = 0L) {
   stopifnot(is.numeric(ngram) && length(ngram) == 2 && ngram[[2]] >= ngram[[1]])
 
-  if ( skip_grams_window > 0 && ngram[[2]] > 1)
-    stop("skip_grams_window > 0 can be used only with ngram = c(1, 1)")
+  if ( skip_grams_window > 0 && ngram[[2]] > 1) {
+    msg = "skip_grams_window > 0 with ngram != c(1, 1) looks strange!"
+    msg = paste(msg, "We hope you know what are you doing!")
+    warning(msg, immediate. = TRUE)
+  }
 
   if (!grow_dtm && skip_grams_window == 0L)
-    stop("At least one of the arguments 'grow_dtm', 'skip_grams_window' should
-         satisfy grow_dtm == TRUE or skip_grams_window > 0")
+    stop("At least one of the arguments 'grow_dtm', 'skip_grams_window' should be defined:
+          grow_dtm == TRUE or skip_grams_window > 0")
 
   vectorizer = function(iterator) {
     hash_corpus = new(HashCorpus,
@@ -152,5 +162,8 @@ hash_vectorizer = function(hash_size = 2 ^ 18,
     attr(hash_corpus, 'ids') = character(0)
     corpus_insert(hash_corpus, iterator, grow_dtm)
   }
+  attr(vectorizer, "skip_grams_window") = skip_grams_window
+  attr(vectorizer, "grow_dtm") = grow_dtm
+  vectorizer
   vectorizer
 }
