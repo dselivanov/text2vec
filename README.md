@@ -1,8 +1,8 @@
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/text2vec)](https://cran.r-project.org/package==text2vec)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/text2vec)](https://cran.r-project.org/package=text2vec)
 [![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=master)](https://travis-ci.org/dselivanov/text2vec)
 [![codecov](https://codecov.io/gh/dselivanov/text2vec/branch/master/graph/badge.svg)](https://codecov.io/gh/dselivanov/text2vec/branch/master)
 [![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
-[![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/text2vec)](http://cran.r-project.org/package=text2vec)
+[![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/text2vec)](https://cran.r-project.org/package=text2vec)
 [![Follow](https://img.shields.io/twitter/follow/dselivanov_.svg?style=social)](https://twitter.com/intent/follow?screen_name=dselivanov_)
 
 
@@ -43,7 +43,7 @@ The core functionality at the moment includes
 *Author of the package is a little bit obsessed about efficiency.*
 
 This package is efficient because it is carefully written in C++, which also means that text2vec is memory friendly. Some parts, such as training GloVe word embeddings, are fully parallelized using the excellent [RcppParallel](http://rcppcore.github.io/RcppParallel/) package. This means that the word embeddings are computed in parallel on OS X, Linux, Windows, and Solaris (x86) without any additional tuning or tricks.
-Other emrassingly parallel tasks such as vectorization can use any parallel backend wich supports [foreach](https://cran.r-project.org/package==foreach) package. So they can achieve near-linear scalability with number of available cores. 
+Other emrassingly parallel tasks such as vectorization can use any parallel backend wich supports [foreach](https://cran.r-project.org/package=foreach) package. So they can achieve near-linear scalability with number of available cores. 
 Finally, a streaming API means that  users do not have to load all the data into RAM. 
 
 # Contributing
