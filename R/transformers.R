@@ -13,6 +13,33 @@
 # //
 #   // You should have received a copy of the GNU General Public License
 # // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
+
+#' @name normalize
+#' @title Matrix normalization
+#' @description normalize matrix rows using given norm
+#' @param m \code{matrix} (sparse or dense).
+#' @param norm \code{character} the method used to normalize term vectors
+#' @seealso \link{get_idf}, \link{get_dtm}, \link{create_dtm}
+#' @return normalized matrix
+#' @export
+normalize = function(m, norm = c("l1", "l2", "none")) {
+  norm = match.arg(norm)
+
+  if (norm == "none")
+    return(m)
+
+  norm_vec = switch(norm,
+                    l1 = 1 / rowSums(m),
+                    l2 = 1 / sqrt(rowSums(m ^ 2))
+  )
+  # case when sum row elements == 0
+  norm_vec[is.infinite(norm_vec)] = 0
+
+  if(inherits(m, "sparseMatrix"))
+    Diagonal(x = norm_vec) %*% m
+  else
+    m * norm_vec
+}
 #' @name get_idf
 #' @title Inverse document-frequency scaling matrix
 #' @description This function creates an inverse-document-frequency (IDF)
@@ -29,8 +56,7 @@
 #' @return \code{ddiMatrix} IDF scaling diagonal sparse matrix.
 #' @seealso \link{get_tf}, \link{get_dtm}, \link{create_dtm}
 #' @export
-get_idf = function(dtm, log_scale = log, smooth_idf = TRUE)
-{
+get_idf = function(dtm, log_scale = log, smooth_idf = TRUE) {# nocov start
   .Deprecated("TfIdf")
   # abs is needed for case when dtm is matrix from HashCorpus and signed_hash is used!
   cs = colSums( abs(sign(dtm) ) )
@@ -64,33 +90,6 @@ get_tf = function(dtm, norm = c("l1", "l2"))
                      l2 = 1 / sqrt(rowSums(dtm ^ 2)))
   norm_vec[is.infinite(norm_vec)] = 0
   Diagonal(x = norm_vec)
-}
-
-#' @name normalize
-#' @title Matrix normalization
-#' @description normalize matrix rows using given norm
-#' @param m \code{matrix} (sparse or dense).
-#' @param norm \code{character} the method used to normalize term vectors
-#' @seealso \link{get_idf}, \link{get_dtm}, \link{create_dtm}
-#' @return normalized matrix
-#' @export
-normalize = function(m, norm = c("l1", "l2", "none")) {
-  norm = match.arg(norm)
-
-  if (norm == "none")
-    return(m)
-
-  norm_vec = switch(norm,
-                l1 = 1 / rowSums(m),
-                l2 = 1 / sqrt(rowSums(m ^ 2))
-  )
-  # case when sum row elements == 0
-  norm_vec[is.infinite(norm_vec)] = 0
-
-  if(inherits(m, "sparseMatrix"))
-    Diagonal(x = norm_vec) %*% m
-  else
-    m * norm_vec
 }
 
 #' @name transform_filter_commons
@@ -214,4 +213,4 @@ transform_tfidf = function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c("l1",
 transform_binary = function(dtm) {
   .Deprecated("sign")
   sign(abs(dtm))
-}
+}# nocov end

@@ -5,10 +5,10 @@
 #'   vocabulary and word embeddings matrix.
 #' @param verbose \code{logical} whether to print messages during evaluation.
 #' @description  This function prepares a list of questions from a
-#'   \code{questions-words.txt} format. For full examples see \link{glove}.
-#' @seealso \link{check_analogy_accuracy}, \link{glove}
+#'   \code{questions-words.txt} format. For full examples see \link{GloVe}.
+#' @seealso \link{check_analogy_accuracy}, \link{GloVe}
 #' @export
-prepare_analogy_questions = function(questions_file_path, vocab_terms, verbose = TRUE) {
+prepare_analogy_questions = function(questions_file_path, vocab_terms, verbose = TRUE) {# nocov start
   lines = readLines(questions_file_path) %>%
     tolower %>%
     strsplit(split = " ", fixed = TRUE)
@@ -124,4 +124,4 @@ check_analogy_accuracy = function(questions_list, m_word_vectors, verbose = TRUE
     message(msg)
   }
   res
-}
+}# nocov end
