@@ -43,6 +43,6 @@ Suggests:
     parallel
 URL: https://github.com/dselivanov/text2vec
 BugReports: https://github.com/dselivanov/text2vec/issues
-VignetteBuilder: knitr
+VignetteBuilder: rmarkdown
 LazyData: true
 RoxygenNote: 5.0.1

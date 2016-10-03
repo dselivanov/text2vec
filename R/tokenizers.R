@@ -18,7 +18,7 @@
 #' @title Simple tokenization functions, which performs string splitting
 #' @description simple wrappers around \code{base} regular expressions.
 #' For much more faster and functional tokenizers see \code{tokenizers} package:
-#' \url{https://cran.r-project.org/web/packages/tokenizers/index.html}.
+#' \url{https://cran.r-project.org/package=tokenizers}.
 #' Also see \code{str_split_*} functions in \code{stringi} and \code{stringr} packages.
 #' The reason for not including this packages to \code{text2vec} dependencies is our
 #' desare to keep number of dependencies as small as possible.
