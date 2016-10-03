@@ -1,3 +1,15 @@
+# text2vec 0.4.0
+
+2016-10-03. See [0.4 milestone tags](https://github.com/dselivanov/text2vec/milestone/3).
+
+1. Now under GPL (>= 2) Licence
+1. "immutable" iterators - no need to reinitialize them
+1. unified models interface
+1. New models: LSA, LDA, GloVe with L1 regularization
+1. Fast similarity and distances calculation: Cosine, Jaccard, Relaxed Word Mover's Distance, Euclidean
+1. Better hadnling UTF-8 strings, thanks to @qinwf
+1. iterators and models rely on `R6` package
+
 # text2vec 0.3.0
 
 1. 2016-01-13 fix for #46, thanks to @[buhrmann](https://github.com/buhrmann) for reporting 
