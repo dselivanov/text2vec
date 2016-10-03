@@ -30,7 +30,7 @@ get_dtm = function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
     if (length(dtm@x) == 0)
       warning("dtm has 0 rows. Empty iterator?", immediate. = T)
     dtm@Dimnames[[1]] = attr(corpus, 'ids')
-    coerce_dgTMatrix(dtm, type)
+    coerce_matrix(dtm, type)
   }
   else
     stop("corpus should be instance of Rcpp_HashCorpus or Rcpp_VocabCorpus classes")
@@ -86,6 +86,8 @@ get_dtm = function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 create_dtm = function(it, vectorizer,
                        type = c("dgCMatrix", "dgTMatrix", "lda_c"),
                        ...) {
+  if(attr(vectorizer, "grow_dtm", TRUE) == FALSE)
+    stop("You should provide vectorizer with grow_dtm = TRUE")
   UseMethod("create_dtm")
 }
 
@@ -103,10 +105,7 @@ create_dtm.itoken = function(it, vectorizer,
   # remove corpus and trigger gc()!
   # this will release a lot of memory
   rm(corp); gc();
-  if (type != 'dgTMatrix')
-    coerce_dgTMatrix(dtm, type)
-  else
-    dtm
+  coerce_matrix(dtm, type)
 }
 
 #' @rdname create_dtm

@@ -41,7 +41,7 @@ get_tcm = function(corpus) {
   if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
     tcm = corpus$get_tcm()
     if (length(tcm@x) == 0)
-      stop("tcm has 0 rows. Did you miss to reinitialise iterator over tokens?")
+      warning("Something goes wrong, tcm has 0 rows...")
     dim_names = colnames(tcm)
     tcm@Dimnames = list(dim_names, dim_names)
     tcm
@@ -52,13 +52,12 @@ get_tcm = function(corpus) {
 
 #' @name create_tcm
 #' @title Term-co-occurence matrix construction
-#' @description This is a high-level function for constructing a
-#'   term-co-occurrence matrix. If a parallel backend is registered, it will
-#'   construct the TCM in multiple threads.
-#' @details The user should keep in mind that he or she should split data and
-#'   and provide a list of \link{itoken} iterators. Each element of
-#'   \code{it} will be handled in a separate thread combined at the end
-#'   of processing.
+#' @description This is a function for constructing a
+#' term-co-occurrence matrix(TCM). TCM matrix usually used with \link{GloVe} word embedding model.
+#' @details If a parallel backend is registered, it will onstruct the TCM in multiple threads.
+#' The user should keep in mind that he/she should split data and provide a list
+#' of \link{itoken} iterators. Each element of \code{it} will be handled
+#' in a separate thread combined at the end of processing.
 #' @param it \code{list} of iterators over tokens from \link{itoken}.
 #'   Each element is a list of tokens, that is, tokenized and normalized
 #'   strings.
@@ -66,13 +65,13 @@ get_tcm = function(corpus) {
 #'   \link{vectorizers}.
 #' @param ... arguments to \link{foreach} function which is used to iterate over
 #'   \code{it}.
-#' @return \code{dgCMatrix} TCM matrix
-#' @seealso \link{itoken}
+#' @return \code{dgTMatrix} TCM matrix
+#' @seealso \link{itoken} \link{create_dtm}
 #' @examples
 #' \dontrun{
 #' data("movie_review")
 #'
-#' # single threadx
+#' # single thread
 #'
 #' tokens = movie_review$review %>% tolower %>% word_tokenizer
 #' it = itoken(tokens)
@@ -94,6 +93,8 @@ get_tcm = function(corpus) {
 #' }
 #' @export
 create_tcm = function(it, vectorizer, ...) {
+  if(attr(vectorizer, "skip_grams_window", TRUE) == 0)
+    stop("You should provide vectorizer with skip_grams_window > 0")
   UseMethod("create_tcm")
 }
 

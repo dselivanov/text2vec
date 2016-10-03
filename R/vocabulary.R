@@ -20,6 +20,7 @@
 #'  See the below for details.
 #'@param it iterator over a \code{list} of \code{character} vectors,
 #'  which are the documents from which the user wants to construct a vocabulary.
+#'  See \link{itoken}.
 #'  Alternatively, a \code{character} vector of user-defined vocabulary terms
 #'  (which will be used "as is").
 #'@param ngram \code{integer} vector. The lower and upper boundary of the range

@@ -14,11 +14,19 @@
 #   // You should have received a copy of the GNU General Public License
 # // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
 
-#' text2vec is a package that provides an efficient framework with a concise API
-#' for text analysis and natural language processing in R.
+
+#' text2vec
 #'
-#' @docType package
+#' Fast vectorization, topic modeling, distances and GloVe word embeddings in R.
+#'
+#' To learn more about text2vec visit project website: \url{text2vec.org}
+#' Or start with the vignettes:
+#' \code{browseVignettes(package = "text2vec")}
+#'
 #' @name text2vec
+#' @docType package
+NULL
+
 #' @import methods
 #' @import Matrix
 #' @import Rcpp

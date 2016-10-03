@@ -4,10 +4,13 @@
 \name{text2vec}
 \alias{text2vec}
 \alias{text2vec-package}
-\title{text2vec is a package that provides an efficient framework with a concise API
-for text analysis and natural language processing in R.}
+\title{text2vec}
 \description{
-text2vec is a package that provides an efficient framework with a concise API
-for text analysis and natural language processing in R.
+Fast vectorization, topic modeling, distances and GloVe word embeddings in R.
+}
+\details{
+To learn more about text2vec visit project website: \url{text2vec.org}
+Or start with the vignettes:
+\code{browseVignettes(package = "text2vec")}
 }
 

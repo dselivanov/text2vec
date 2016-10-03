@@ -19,12 +19,11 @@
 #' @description Generic function to fit models - inherited from \code{estimator}
 #' @param x a matrix like object, should inherit from \code{Matrix} or \code{matrix}
 #' @param model instance of class \code{estimator} which should implement method
-#' with signature \code{$fit(x, ...)}
+#' with signature \code{$fit(x, y, ...)}
 #' @param y \code{NULL} by default. Optional response variable for supervised models.
 #' Should inherit from \code{vector} \code{Matrix} or \code{matrix}. See documentation
 #' for corresponding models.
 #' @param ... additional data/model dependent arguments to downstream functions.
-#' For supervised learning (if any) responese should be called \code{y}.
 #' @return \code{invisible(object$self())}
 #' @export
 fit = function(x, model, y = NULL, ...) {
@@ -55,7 +54,6 @@ fit.matrix = function(x, model, y = NULL, ...) {
 #' Should inherit from \code{vector} \code{Matrix} or \code{matrix}. See documentation
 #' for corresponding models.
 #' @param ... additional data/model dependent arguments to downstream functions.
-#' For supervised learning (if any) responese should be called \code{y}.
 #' @return Transformed version of \code{x}
 #' @export
 fit_transform = function(x, model, y = NULL, ...) {

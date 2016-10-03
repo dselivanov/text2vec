@@ -16,14 +16,13 @@ fit(x, model, y = NULL, ...)
 \item{x}{a matrix like object, should inherit from \code{Matrix} or \code{matrix}}
 
 \item{model}{instance of class \code{estimator} which should implement method
-with signature \code{$fit(x, ...)}}
+with signature \code{$fit(x, y, ...)}}
 
 \item{y}{\code{NULL} by default. Optional response variable for supervised models.
 Should inherit from \code{vector} \code{Matrix} or \code{matrix}. See documentation
 for corresponding models.}
 
-\item{...}{additional data/model dependent arguments to downstream functions.
-For supervised learning (if any) responese should be called \code{y}.}
+\item{...}{additional data/model dependent arguments to downstream functions.}
 }
 \value{
 \code{invisible(object$self())}

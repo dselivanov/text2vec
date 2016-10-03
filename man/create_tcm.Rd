@@ -29,24 +29,23 @@ strings.}
 \item{work_dir}{working directory for intermediate results}
 }
 \value{
-\code{dgCMatrix} TCM matrix
+\code{dgTMatrix} TCM matrix
 }
 \description{
-This is a high-level function for constructing a
-  term-co-occurrence matrix. If a parallel backend is registered, it will
-  construct the TCM in multiple threads.
+This is a function for constructing a
+term-co-occurrence matrix(TCM). TCM matrix usually used with \link{GloVe} word embedding model.
 }
 \details{
-The user should keep in mind that he or she should split data and
-  and provide a list of \link{itoken} iterators. Each element of
-  \code{it} will be handled in a separate thread combined at the end
-  of processing.
+If a parallel backend is registered, it will onstruct the TCM in multiple threads.
+The user should keep in mind that he/she should split data and provide a list
+of \link{itoken} iterators. Each element of \code{it} will be handled
+in a separate thread combined at the end of processing.
 }
 \examples{
 \dontrun{
 data("movie_review")
 
-# single threadx
+# single thread
 
 tokens = movie_review$review \%>\% tolower \%>\% word_tokenizer
 it = itoken(tokens)
@@ -68,6 +67,6 @@ tcm = create_tcm(jobs, vectorizer)
 }
 }
 \seealso{
-\link{itoken}
+\link{itoken} \link{create_dtm}
 }
 

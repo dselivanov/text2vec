@@ -22,8 +22,7 @@ with signature \code{$fit(x, ...)}}
 Should inherit from \code{vector} \code{Matrix} or \code{matrix}. See documentation
 for corresponding models.}
 
-\item{...}{additional data/model dependent arguments to downstream functions.
-For supervised learning (if any) responese should be called \code{y}.}
+\item{...}{additional data/model dependent arguments to downstream functions.}
 }
 \value{
 Transformed version of \code{x}

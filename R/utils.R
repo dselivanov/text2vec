@@ -142,6 +142,6 @@ coerce_matrix = function(X, target_class = c("dgCMatrix", "dgTMatrix", "RsparseM
   X
 }
 
-coerce_dgTMatrix = function(X, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
-  coerce_matrix(X, type)
-}
+# coerce_dgTMatrix = function(X, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
+#   coerce_matrix(X, type)
+# }

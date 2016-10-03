@@ -26,6 +26,7 @@ vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
 \arguments{
 \item{it}{iterator over a \code{list} of \code{character} vectors,
 which are the documents from which the user wants to construct a vocabulary.
+See \link{itoken}.
 Alternatively, a \code{character} vector of user-defined vocabulary terms
 (which will be used "as is").}
 
