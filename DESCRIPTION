@@ -34,6 +34,7 @@ LinkingTo:
     RcppParallel,
     digest
 Suggests:
+    stringr (>= 1.1.0),
     testthat,
     covr,
     knitr,
