@@ -1,22 +1,29 @@
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/text2vec)](http://cran.r-project.org/package=text2vec)
 [![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=master)](https://travis-ci.org/dselivanov/text2vec)
-[![codecov](https://codecov.io/gh/dselivanov/text2vec/branch/0.4/graph/badge.svg)](https://codecov.io/gh/dselivanov/text2vec/branch/0.4)
+[![codecov](https://codecov.io/gh/dselivanov/text2vec/branch/master/graph/badge.svg)](https://codecov.io/gh/dselivanov/text2vec/branch/master)
 [![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
 [![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/text2vec)](http://cran.r-project.org/package=text2vec)
 [![Follow](https://img.shields.io/twitter/follow/dselivanov_.svg?style=social)](https://twitter.com/intent/follow?screen_name=dselivanov_)
 
+
+You've just discovered **[text2vec](http://text2vec.org)**!
+
+**text2vec** is an R package which provides an efficient framework with a concise API for text analysis and natural language processing (NLP). 
+
+Goals which we aimed to achieve as a result of development of `text2vec`:
+
+* **Concise** - expose as few functions as possible
+* **Consistent** - expose unified interfaces, no need to explore new interface for each task
+* **Flexible** - allow to easily solve complex tasks
+* **Fast** - maximize efficiency per single thread, transparently scale to multiple threads on multicore machines
+* **Memory efficient** - use streams and iterators, not keep data in RAM if possible
+
 # Tutorials
 
-To learn how to use this package, see the package vignettes.
-
-1. [Text vectorization](https://cran.r-project.org/web/packages/text2vec/vignettes/text-vectorization.html): `vignette("text-vectorization", package = "text2vec")`
-2. [GloVe word embeddings](https://cran.r-project.org/web/packages/text2vec/vignettes/glove.html): `vignette("glove", package = "text2vec")`
-
+To learn how to use this package, see [text2vec.org](http://text2vec.org) and the package vignettes.
 See also the [text2vec articles](http://dsnotes.com/tags/text2vec/) on my blog.
 
 # Features
-
-**text2vec** is a package that provides an efficient framework with a concise API for text analysis and natural language processing (NLP) in R. It is inspired by [gensim](http://radimrehurek.com/gensim/), an excellent Python library for NLP.
 
 The core functionality at the moment includes
 
@@ -25,19 +32,28 @@ The core functionality at the moment includes
 3. Topic modeling with:
   - Latent Dirichlet Allocation
   - Latent Sematic Analysis
+4. Similarities/distances between 2 matrices
+  - Cosine
+  - Jaccard
+  - [Relaxed Word Mover's Distance](http://vene.ro/blog/word-movers-distance-in-python.html)
+  - Euclidean
 
-The core of this package is carefully written in C++, which means text2vec is fast and memory friendly. Some parts (GloVe training) are fully parallelized using the excellent [RcppParallel](http://rcppcore.github.io/RcppParallel/) package. This means that parallel processing works on OS X, Linux, Windows and Solaris (x86) without any additional hacking or tricks. In addition, there is a higher-level parallelization for text vectorization and vocabulary construction on top of the [foreach](https://cran.r-project.org/package=foreach) package, and text2vec has a streaming API so that users don't have to load all of the data into RAM.
+# Performance
+![htop](https://raw.githubusercontent.com/dselivanov/text2vec/gh-pages/images/htop.png)
+*Author of the package is a little bit obsessed about efficiency.*
 
-The API is built around the [iterator](https://en.wikipedia.org/wiki/Iterator) abstraction. The API is concise, providing only a few functions which do their job well. The package does not (and probably will not in the future) provide trivial very high-level functions. But other packages can build on top of the framework that text2vec provides.
+This package is efficient because it is carefully written in C++, which also means that text2vec is memory friendly. Some parts, such as training GloVe word embeddings, are fully parallelized using the excellent [RcppParallel](http://rcppcore.github.io/RcppParallel/) package. This means that the word embeddings are computed in parallel on OS X, Linux, Windows, and Solaris (x86) without any additional tuning or tricks.
+Other emrassingly parallel tasks such as vectorization can use any parallel backend wich supports [foreach](https://cran.r-project.org/web/packages/foreach/index.html) package. So they can achieve near-linear scalability with number of available cores. 
+Finally, a streaming API means that  users do not have to load all the data into RAM. 
 
 # Contributing
 
 The package has [issue tracker on GitHub](https://github.com/dselivanov/text2vec/issues) where I'm filing feature requests and notes for future work. Any ideas are appreciated.
 
-Contributors are welcome. You can help by
+Contributors are welcome. You can help by:
 
-- testing and leaving feedback on the [GitHub issuer tracker](https://github.com/dselivanov/text2vec/issues) (preferably) or directly by e-mail.
-- forking and contributing. Vignettes, docs, tests, and use cases are very welcome.
+- testing and leaving feedback on the [GitHub issuer tracker](https://github.com/dselivanov/text2vec/issues) (preferably) or directly by e-mail
+- forking and contributing (chech [code style guide](https://github.com/dselivanov/text2vec/wiki/Code-style-guide)). Vignettes, docs, tests, and use cases are very welcome
 - by giving me a star on [project page](https://github.com/dselivanov/text2vec) :-)
 
 # License
