@@ -2,4 +2,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^cran-comments\.md$
-^NEWS\.md$
+R/drafts/*
+src/drafts/*
+vignettes/drafts/*
