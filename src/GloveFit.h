@@ -136,17 +136,9 @@ class GloveFit {
         i_iter_order = iter_order [ i ] - 1;
       else
         i_iter_order = i;
-      // we assume input matrix initially is **symmetrical and upper-triangular**
-      // partial_fit will be called 2 times - on this upper-triangular matrix and on transposed one.
-      // So if we want to iterate with random order we will swap indices to
-      // emulate upper-diagonal and lower-diagonal elements
-      if ( is_odd( i_iter_order ) ) {
-        x_irow_i = x_irow[ i_iter_order ];
-        x_icol_i = x_icol[ i_iter_order ];
-      } else {
-        x_irow_i = x_icol[ i_iter_order ];
-        x_icol_i = x_irow[ i_iter_order ];
-      }
+
+      x_irow_i = x_irow[ i_iter_order ];
+      x_icol_i = x_icol[ i_iter_order ];
 
       weight = weighting_fun(x_val[ i_iter_order ], x_max, this->alpha);
       // when we fit with L1 regularization, we simulteniously grow
@@ -210,7 +202,9 @@ class GloveFit {
         // Update squared gradient sums for biases
         grad_sq_b_i[ x_irow_i ] += grad_b_i * grad_b_i;
         grad_sq_b_i[ x_icol_i ] += grad_b_j * grad_b_j;
-      } else {
+      } else
+        // vanilla GloVe
+      {
         cost_inner = inner_product(w_i[ x_irow_i ].begin(), w_i[ x_irow_i ].end() ,
                                    w_j[ x_icol_i].begin(),
                                    // init with (b_i + b_j - log(x_ij))

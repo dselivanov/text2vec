@@ -173,6 +173,7 @@ GlobalVectors = R6::R6Class(
     fit = function(x, n_iter, convergence_tol = -1, ...) {
       # convert to internal native format
       x = coerce_matrix(x, private$internal_matrix_format, verbose = self$verbose)
+      IS_TRIANGULAR = isTriangular(x)
       # params in a specific format to pass to C++ backend
       initial = list(w_i = private$w_i, w_j = private$w_j,
                      b_i = private$b_i, b_j = private$b_j)
@@ -213,10 +214,10 @@ GlobalVectors = R6::R6Class(
         if ( self$shuffle )
           iter_order = sample.int( n_nnz, replace = F )
 
-        # perform fit on upper-diagonal elements
         cost = private$glove_fitter$partial_fit(x@i, x@j, x@x, iter_order)
-        # perform fit on lower-diagonal elements
-        cost = cost + private$glove_fitter$partial_fit(x@j, x@i, x@x, iter_order)
+        if(IS_TRIANGULAR)
+          #if matrix is triangular fit another iterations on transposed one
+          cost = cost + private$glove_fitter$partial_fit(x@j, x@i, x@x, iter_order)
 
         # check whether SGD is numerically correct - no NaN at C++ level
         if (is.nan(cost))
