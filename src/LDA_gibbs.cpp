@@ -171,8 +171,8 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
         }
 
         double p_sum = 0.0;
-        for (kk = 0; kk < n_topics; ++kk) {
-          if (z == -1) {
+        if (z == -1) {
+          for (kk = 0; kk < n_topics; ++kk) {
             if (have_initial_assignements) {
               if (initial_d[i_word] == kk) {
                 p[kk] = 1;
@@ -182,12 +182,15 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
             } else {
               p[kk] = 1;
             }
-          } else {
+            p_sum += p[kk];
+          }
+        } else {
+          for (kk = 0; kk < n_topics; ++kk) {
             p[kk] = (document_topic_distr[n_topics * i_doc + kk] + alpha);
             p[kk] *= (topics_word_distr[kk + n_topics * word] + eta);
             p[kk] /= (topic_sums[kk] + vocab_size * eta);
+            p_sum += p[kk];
           }
-          p_sum += p[kk];
         }
 
         double r = unif_rand();
