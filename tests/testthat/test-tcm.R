@@ -8,10 +8,10 @@ ids = movie_review[['id']][train_ind]
 tokens = txt %>% tolower %>% word_tokenizer
 it = itoken(tokens, progressbar = FALSE, ids = ids)
 
-test_that("tcm with foreach", {
+test_that("tcm", {
   v = create_vocabulary(it, c(1L, 1L) )
   v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.5)
-
+  v$vocab = v$vocab[order(-terms)]
   vectorizer = vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 1L,
                                 skip_grams_window_context = "symmetric")
   tcm = create_tcm(it, vectorizer)
