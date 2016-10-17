@@ -14,7 +14,14 @@
 #   // You should have received a copy of the GNU General Public License
 # // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
 
-corpus_insert = function(corpus, iterator, grow_dtm = TRUE) {
+encode_context = function(context_string_name) {
+    switch(context_string_name,
+           symmetric = 0L,
+           right = 1L,
+           left = -1L)
+}
+
+corpus_insert = function(corpus, iterator, grow_dtm = TRUE, skip_grams_window_context = 0L) {
   if (inherits(iterator, 'R6'))
     it = iterator$clone(deep = TRUE)
   else {
@@ -22,7 +29,7 @@ corpus_insert = function(corpus, iterator, grow_dtm = TRUE) {
     it = iterator
   }
   ids = foreach(val = it, .combine = c, .multicombine = TRUE ) %do% {
-    corpus$insert_document_batch(val$tokens, grow_dtm)
+    corpus$insert_document_batch(val$tokens, grow_dtm, skip_grams_window_context)
     val$ids
   }
   attr(corpus, "ids") = ids
@@ -66,6 +73,9 @@ create_corpus = function(iterator,
 #' construction. \code{skip_grams_window} should be > 0 if you plan to use
 #' \code{vectorizer} in \link{create_tcm} function.
 #' Value of \code{0L} means to not construct the TCM.
+#' @param skip_grams_window_context one of \code{c("symmetric", "right", "left")} -
+#' which context words to use when count co-occurence statistics.
+#' \code{"symmetric"} by default - take into account \code{skip_grams_window} left and right.
 #' @return A vectorizer \code{function}
 #' @seealso \link{create_dtm} \link{create_tcm} \link{create_vocabulary} \link{create_corpus}
 #' @examples
@@ -94,8 +104,12 @@ create_corpus = function(iterator,
 #' @param vocabulary \code{text2vec_vocabulary} object, see \link{create_vocabulary}.
 #' @export
 vocab_vectorizer = function(vocabulary,
-                             grow_dtm = TRUE,
-                             skip_grams_window = 0L) {
+                            grow_dtm = TRUE,
+                            skip_grams_window = 0L,
+                            skip_grams_window_context = c("symmetric", "right", "left")) {
+  skip_grams_window_context = match.arg(skip_grams_window_context)
+  # encode to integer as it used in c++ code
+  skip_grams_window_context_code = encode_context(skip_grams_window_context)
 
   if (!grow_dtm && skip_grams_window == 0L)
     stop("At least one of the arguments 'grow_dtm', 'skip_grams_window' should
@@ -118,7 +132,7 @@ vocab_vectorizer = function(vocabulary,
                         delim = vocabulary$sep_ngram)
 
     attr(vocab_corpus, 'ids') = character(0)
-    corpus_insert(vocab_corpus, iterator, grow_dtm)
+    corpus_insert(vocab_corpus, iterator, grow_dtm, skip_grams_window_context_code)
   }
   attr(vectorizer, "skip_grams_window") = skip_grams_window
   attr(vectorizer, "grow_dtm") = grow_dtm
@@ -136,11 +150,15 @@ vocab_vectorizer = function(vocabulary,
 #'   hash-function to reduce collisions when hashing.
 #' @export
 hash_vectorizer = function(hash_size = 2 ^ 18,
-                            ngram = c(1L, 1L),
-                            signed_hash = FALSE,
-                            grow_dtm = TRUE,
-                            skip_grams_window = 0L) {
+                           ngram = c(1L, 1L),
+                           signed_hash = FALSE,
+                           grow_dtm = TRUE,
+                           skip_grams_window = 0L,
+                           skip_grams_window_context = c("symmetric", "right", "left")) {
   stopifnot(is.numeric(ngram) && length(ngram) == 2 && ngram[[2]] >= ngram[[1]])
+  skip_grams_window_context = match.arg(skip_grams_window_context)
+  # encode to integer as it used in c++ code
+  skip_grams_window_context_code = encode_context(skip_grams_window_context)
 
   if ( skip_grams_window > 0 && ngram[[2]] > 1) {
     msg = "skip_grams_window > 0 with ngram != c(1, 1) looks strange!"
@@ -160,7 +178,7 @@ hash_vectorizer = function(hash_size = 2 ^ 18,
                        window_size = 0,
                        signed_hash)
     attr(hash_corpus, 'ids') = character(0)
-    corpus_insert(hash_corpus, iterator, grow_dtm)
+    corpus_insert(hash_corpus, iterator, grow_dtm, skip_grams_window_context_code)
   }
   attr(vectorizer, "skip_grams_window") = skip_grams_window
   attr(vectorizer, "grow_dtm") = grow_dtm

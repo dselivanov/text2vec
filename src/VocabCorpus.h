@@ -30,9 +30,9 @@ public:
   // contructor with window_size for term cooccurence matrix
   VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, uint32_t window_size,
               const CharacterVector stopwords_R, const String delim);
-  void insert_terms (vector< string> &terms, int grow_dtm);
-  void insert_document(const CharacterVector doc, int grow_dtm = 1);
-  void insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm = 1);
+  void insert_terms (vector< string> &terms, int grow_dtm, int context);
+  void insert_document(const CharacterVector doc, int grow_dtm = 1, int context = 0);
+  void insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm = 1, int context = 0);
   // total number of tokens in corpus
   int get_token_count() {return this -> token_count;};
   int get_doc_count() { return this -> doc_count; };
@@ -98,7 +98,11 @@ void VocabCorpus::init(const CharacterVector vocab_R, uint32_t n_min, uint32_t n
 }
 
 //-----------------------------------------------------------------
-void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm) {
+// int context = 0 means symmetric context for co-occurence - matrix will be symmetric
+// So we will keep only right upper-diagonal elements
+// int context = 1 means right words context only
+// int context = -1 means left words context only
+void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context) {
 
   uint32_t term_index, context_term_index;
   size_t K = terms.size();
@@ -139,39 +143,62 @@ void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm) {
             context_term_index = context_term_iterator->second;
             // calculate cooccurence increment for particular position j of context word
             increment = weighting_fun(j);
-            // map stores only elements above diagonal because our matrix is symmetrical
-            if(term_index < context_term_index) {
-              this->tcm.add(term_index, context_term_index, increment);
-            }
-            else {
-              // also we are not interested in context words equal to main word
-              // diagonal elememts will be zeros
-              if(term_index != context_term_index)
+            // int context = 0 means symmetric context for co-occurence - matrix will be symmetric
+            // So we will keep only right upper-diagonal elements
+            // int context = 1 means right words context only
+            // int context = -1 means left words context only
+            switch(context) {
+              // handle symmetric context
+              case 0:
+                // map stores only elements above diagonal because our matrix is symmetrical
+                if(term_index < context_term_index)
+                  this->tcm.add(term_index, context_term_index, increment);
+                else {
+                  // also we are not interested in context words equal to main word
+                  // diagonal elememts will be zeros
+                  // if(term_index != context_term_index)
+                  // commented out because experiments showed that it is better to have diagonal elements
+                  this->tcm.add(context_term_index, term_index, increment);
+                  // since diagonal matrix will be passed 2 times for symmetric matrix
+                  // (we do 2 pass in glove for)
+                  // worth to think about dividing weights by 2
+                  //this->tcm.add(context_term_index, term_index, increment / 2);
+                }
+                break;
+              // handle right context
+              case 1:
+                this->tcm.add(term_index, context_term_index, increment);
+                break;
+              // handle left context
+              case -1:
                 this->tcm.add(context_term_index, term_index, increment);
+                break;
+              default:
+                stop("call to insert_terms with context !in [0,1, -1]");
+              }
             }
           }
-        }
       }
     }
     i++;
   }
 }
 //-----------------------------------------------------------------
-void VocabCorpus::insert_document(const CharacterVector doc, int grow_dtm) {
+void VocabCorpus::insert_document(const CharacterVector doc, int grow_dtm, int context) {
   checkUserInterrupt();
   generate_ngrams(doc, this->ngram_min, this->ngram_max,
                   this->stopwords,
                   this->terms_filtered_buffer,
                   this->ngrams_buffer,
                   this->ngram_delim);
-  insert_terms(this->ngrams_buffer, grow_dtm);
+  insert_terms(this->ngrams_buffer, grow_dtm, context);
   this->dtm.increment_nrows();
   this->doc_count++;
 }
 //-----------------------------------------------------------------
-void VocabCorpus::insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm) {
+void VocabCorpus::insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm, int context) {
   for (auto it:docs_batch) {
-    insert_document(it, grow_dtm);
+    insert_document(it, grow_dtm, context);
   }
 }
 

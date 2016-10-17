@@ -1,25 +1,33 @@
 context("tcm construction")
 
-train_ind = 1:1000
-N_WORKER = 4
+train_ind = 1:100
 
 txt = movie_review[['review']][train_ind]
 ids = movie_review[['id']][train_ind]
 
-txt_splits = split_into(txt, N_WORKER)
-
+tokens = txt %>% tolower %>% word_tokenizer
+it = itoken(tokens, progressbar = FALSE, ids = ids)
 
 test_that("tcm with foreach", {
-  TERMS_LIMIT = 3000L
-  jobs = lapply(txt_splits, itoken, tolower, word_tokenizer, chunks_number = 1, progressbar = FALSE)
+  v = create_vocabulary(it, c(1L, 1L) )
+  v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.5)
 
-  suppressWarnings(v <- create_vocabulary(jobs, c(1L, 1L) ))
-  v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.5, max_number_of_terms = TERMS_LIMIT)
+  vectorizer = vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 1L,
+                                skip_grams_window_context = "symmetric")
+  tcm = create_tcm(it, vectorizer)
 
-  vectorizer = vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 3L)
+  expect_equal(tcm["you", "are"], 6)
+  expect_true(Matrix::isTriangular(tcm, upper = TRUE))
 
-  tcm = create_tcm(jobs, vectorizer)
-  expect_true(tcm["who", "from"] - 9 < 1e-5)
-  expect_equal(dim(tcm),  c(TERMS_LIMIT, TERMS_LIMIT))
-  expect_true(isTriangular(tcm, upper = TRUE))
+  vectorizer_right = vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 1L,
+                                skip_grams_window_context = "right")
+  tcm_right = create_tcm(it, vectorizer_right)
+  expect_equal(tcm_right["you", "are"], 5)
+  expect_equal(tcm_right["are", "you"], 1)
+
+  vectorizer_left = vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 1L,
+                                      skip_grams_window_context = "left")
+  tcm_left = create_tcm(it, vectorizer_left)
+  expect_equal(tcm_left["you", "are"], 1)
+  expect_equal(tcm_left["are", "you"], 5)
 })

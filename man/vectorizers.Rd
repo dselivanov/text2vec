@@ -6,10 +6,12 @@
 \alias{vocab_vectorizer}
 \title{Vocabulary and hash vectorizers}
 \usage{
-vocab_vectorizer(vocabulary, grow_dtm = TRUE, skip_grams_window = 0L)
+vocab_vectorizer(vocabulary, grow_dtm = TRUE, skip_grams_window = 0L,
+  skip_grams_window_context = c("symmetric", "right", "left"))
 
 hash_vectorizer(hash_size = 2^18, ngram = c(1L, 1L), signed_hash = FALSE,
-  grow_dtm = TRUE, skip_grams_window = 0L)
+  grow_dtm = TRUE, skip_grams_window = 0L,
+  skip_grams_window_context = c("symmetric", "right", "left"))
 }
 \arguments{
 \item{vocabulary}{\code{text2vec_vocabulary} object, see \link{create_vocabulary}.}
@@ -21,6 +23,10 @@ during corpus construction or not.}
 construction. \code{skip_grams_window} should be > 0 if you plan to use
 \code{vectorizer} in \link{create_tcm} function.
 Value of \code{0L} means to not construct the TCM.}
+
+\item{skip_grams_window_context}{one of \code{c("symmetric", "right", "left")} -
+which context words to use when count co-occurence statistics.
+\code{"symmetric"} by default - take into account \code{skip_grams_window} left and right.}
 
 \item{hash_size}{\code{integer} The number of of hash-buckets for the feature
 hashing trick. The number must be greater than 0, and preferably it will be
