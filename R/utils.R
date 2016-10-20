@@ -48,28 +48,31 @@ split_vector = function(vec, splits, granularity = 1) {
 as.lda_c = function(X) {
   # recieved matrix in lda_c format, but without class attribute
   if (class(X) == 'list' && all(vapply(X, function(x) is.matrix(x) && is.integer(x), FALSE)) ) {
+    class(X) = "lda_c"
     return(X)
   }
-
-  # receive dtm in dgTMatrix format
-  if (!inherits(X, "dgCMatrix"))
-    X = as( X, "dgCMatrix")
-
-  # convert to TDM dgCMatrix format
-  # for simpler lda_c conversion below
-  X = t(X)
-
-  m_lda_c =
-    Map(f = function(i1, i2, ind, val) rbind(ind[i1:i2], as.integer(val[i1:i2])),
-        X@p[-length(X@p)] + 1L,
-        X@p[-1L],
-        MoreArgs = list(ind = X@i, val = X@x),
-        USE.NAMES = F)
-  # preserve names
-  # X now TDM (because of transpose above)
-  # so use colnames!
-  if ( length(colnames(X)) > 0 )
-    names(m_lda_c) = colnames(X)
+  if (!inherits(X, "RsparseMatrix"))
+    X = as( X, "RsparseMatrix")
+  len = nrow(X)
+  input_ids = rownames(X)
+  m_lda_c = vector("list", len)
+  for(i in seq_len(len)) {
+    i_start = X@p[i] + 1L
+    i_end = X@p[i + 1L]
+    # normal path -
+    if(i_start <= i_end) {
+      i_range = i_start:i_end
+      # print(i_range)
+      m_lda_c[[i]] = rbind(X@j[i_range], as.integer(X@x[i_range]))
+    } # case when document is empty!
+    else {
+      # print("skip")
+      m = integer()
+      dim(m) = c(2L, 0L)
+      m_lda_c[[i]] = m
+    }
+  }
+  names(m_lda_c) = input_ids
   class(m_lda_c) = 'lda_c'
   m_lda_c
 }

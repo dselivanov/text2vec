@@ -58,9 +58,22 @@ test_that("rbind_dgTMatrix ", {
                Matrix::uniqTsparse(dtm))
 })
 test_that("as.lda_c ", {
+  K = 100
+  train_tokens = movie_review$review[1:K] %>%
+    tolower %>%
+    word_tokenizer
+
+  it_train = itoken(train_tokens,
+                    ids = movie_review$id[1:K])
+
+  vocab = create_vocabulary(it_train) %>%
+    prune_vocabulary(term_count_min = 10, doc_proportion_max = 0.1)
+  dtm = create_dtm(it_train, vocab_vectorizer(vocab))
+  rs = Matrix::rowSums(sign(dtm))
+  expect_equal(sum(rs == 0) , 2)
   dtm_lda_c = as.lda_c(dtm)
-  expect_equal(names(dtm_lda_c), movie_review$id[1:N])
-  expect_equal(Matrix::rowSums(sign(dtm)), vapply(dtm_lda_c, ncol, 0L))
+  expect_equal(names(dtm_lda_c), movie_review$id[1:K])
+  expect_equal(rs, vapply(dtm_lda_c, ncol, 0L))
   expect_equal(Matrix::rowSums(dtm), vapply(dtm_lda_c, function(x) sum(x[2, ]), 0L))
   expect_equal(text2vec:::coerce_matrix(dtm, "lda_c"), dtm_lda_c)
 })
