@@ -10,9 +10,7 @@ Description: Fast and memory-friendly tools for text vectorization,
     to perform analysis of collections of documents which are larger than available RAM. 
     All core functions are parallelized to benefit from multicore machines.
 Authors@R: c(person("Dmitriy", "Selivanov", role = c("aut", "cre"),
-    email = "selivanov.dmitriy@gmail.com"),
-    person("Lincoln", "Mullen", role = c("ctb"),
-    email = "lincoln@lincolnmullen.com"))
+    email = "selivanov.dmitriy@gmail.com"))
 Maintainer: Dmitriy Selivanov <selivanov.dmitriy@gmail.com>
 Encoding: UTF-8
 SystemRequirements: GNU make, C++11
