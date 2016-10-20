@@ -102,9 +102,10 @@ create_dtm.itoken = function(it, vectorizer,
   # memory efficient way because internally it
   # kept in triplet form
   dtm = get_dtm(corp, 'dgTMatrix')
+  rm(corp);
   # remove corpus and trigger gc()!
   # this will release a lot of memory
-  rm(corp); gc();
+  # gc();
   coerce_matrix(dtm, type)
 }
 
