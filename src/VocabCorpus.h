@@ -42,9 +42,9 @@ public:
 
   CharacterVector get_vocab();
   // get term cooccurence matrix
-  SEXP get_tcm();
-  SEXP get_dtm_triplet();
-  SEXP get_dtm() {return get_dtm_triplet();};
+  S4 get_tcm();
+  // S4 get_dtm_triplet();
+  S4 get_dtm();// {return get_dtm_triplet();};
 
 private:
   int verbose;
@@ -61,6 +61,7 @@ VocabCorpus::VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t
   tcm = SparseTripletMatrix<float>(vocab_R.size(), vocab_R.size());
   this->window_size = window_size;
   init(vocab_R, n_min, n_max, stopwords_R, delim);
+  word_count.resize(vocab_R.size());
 };
 //-----------------------------------------------------------------
 void VocabCorpus::init(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max,
@@ -124,6 +125,7 @@ void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int contex
     if(term_iterator != this->vocab.end()) {
       // get main word index from vocab
       term_index = term_iterator->second;
+      word_count[term_index]++;
       if(grow_dtm) {
         // increment count for input term
         dtm.add(doc_count, term_index, 1);
@@ -133,51 +135,52 @@ void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int contex
       // will check 1 == ngram_min == ngram_max on R side
       // and set window_size = 0 if not
       // will not go into this loop if window_size == 0
-      for (uint32_t j = 1; j <= this->window_size; j++) {
+      // for (uint32_t j = 1; j <= this->window_size; j++) {
+
+      // uint32_t j2 = 1;
+      uint32_t j = 1;
+      while(j <= this->window_size && i + j < K) {
         // check doc bounds
-        if( i + j < K) {
-          context_term_iterator = this->vocab.find((terms[i + j]) );
-          // if context word in vocab
-          if(context_term_iterator != this->vocab.end()) {
-            // get context word index from vocab
-            context_term_index = context_term_iterator->second;
-            // calculate cooccurence increment for particular position j of context word
-            increment = weighting_fun(j);
-            // int context = 0 means symmetric context for co-occurence - matrix will be symmetric
-            // So we will keep only right upper-diagonal elements
-            // int context = 1 means right words context only
-            // int context = -1 means left words context only
-            switch(context) {
-              // handle symmetric context
-              case 0:
-                // map stores only elements above diagonal because our matrix is symmetrical
-                if(term_index < context_term_index)
-                  this->tcm.add(term_index, context_term_index, increment);
-                else {
-                  // also we are not interested in context words equal to main word
-                  // diagonal elememts will be zeros
-                  // if(term_index != context_term_index)
-                  // commented out because experiments showed that it is better to have diagonal elements
-                  this->tcm.add(context_term_index, term_index, increment);
-                  // since diagonal matrix will be passed 2 times for symmetric matrix
-                  // (we do 2 pass in glove for)
-                  // worth to think about dividing weights by 2
-                  //this->tcm.add(context_term_index, term_index, increment / 2);
-                }
-                break;
-              // handle right context
-              case 1:
+        context_term_iterator = this->vocab.find((terms[i + j]) );
+        // if context word in vocab
+        if(context_term_iterator != this->vocab.end()) {
+          // get context word index from vocab
+          context_term_index = context_term_iterator->second;
+          // calculate cooccurence increment for particular position j of context word
+          increment = weighting_fun(j);
+          // increment = weighting_fun(j2);
+          // int context = 0 means symmetric context for co-occurence - matrix will be symmetric
+          // So we will keep only right upper-diagonal elements
+          // int context = 1 means right words context only
+          // int context = -1 means left words context only
+          switch(context) {
+            // handle symmetric context
+            case 0:
+              // map stores only elements above diagonal because our matrix is symmetrical
+              if(term_index < context_term_index)
                 this->tcm.add(term_index, context_term_index, increment);
-                break;
-              // handle left context
-              case -1:
+              else {
+                // also we are not interested in context words equal to main word
+                // diagonal elememts will be zeros
+                // if(term_index != context_term_index)
+                // commented out because experiments showed that it is better to have diagonal elements
                 this->tcm.add(context_term_index, term_index, increment);
-                break;
-              default:
-                stop("call to insert_terms with context !in [0,1, -1]");
               }
+              break;
+            // handle right context
+            case 1:
+              this->tcm.add(term_index, context_term_index, increment);
+              break;
+            // handle left context
+            case -1:
+              this->tcm.add(context_term_index, term_index, increment);
+              break;
+            default:
+              stop("call to insert_terms with context !in [0,1, -1]");
             }
-          }
+          // j2++;
+        }
+        j++;
       }
     }
     i++;
@@ -210,14 +213,16 @@ CharacterVector VocabCorpus::get_vocab() {
   return vocab_R;
 }
 //-----------------------------------------------------------------
-SEXP VocabCorpus::get_tcm() {
+S4 VocabCorpus::get_tcm() {
   CharacterVector dimnames(vocab.size());
   for(auto it:vocab)
     dimnames[it.second] = Rf_mkCharLenCE( it.first.c_str(), it.first.size(), CE_UTF8);
-  return tcm.get_sparse_triplet_matrix(dimnames, dimnames);
+  S4 res = tcm.get_sparse_triplet_matrix(dimnames, dimnames);
+  res.attr("word_count") = wrap(word_count);
+  return res;
 }
 //-----------------------------------------------------------------
-SEXP VocabCorpus::get_dtm_triplet() {
+S4 VocabCorpus::get_dtm() {
   CharacterVector dummy_doc_names(0);
   CharacterVector terms(this->vocab.size());
   for(auto it:vocab)

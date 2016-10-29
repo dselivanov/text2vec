@@ -74,7 +74,7 @@ public:
     this->sparse_container[make_pair(i, j)] += increment;
   };
 
-  SEXP get_sparse_triplet_matrix(CharacterVector  &rownames, CharacterVector  &colnames);
+  S4 get_sparse_triplet_matrix(CharacterVector  &rownames, CharacterVector  &colnames);
 private:
   // dimensionality of matrix
   uint32_t nrow;
@@ -86,7 +86,7 @@ private:
 };
 
 template<typename T>
-SEXP SparseTripletMatrix<T>::get_sparse_triplet_matrix(CharacterVector  &rownames, CharacterVector  &colnames) {
+S4 SparseTripletMatrix<T>::get_sparse_triplet_matrix(CharacterVector  &rownames, CharacterVector  &colnames) {
   // non-zero values count
   size_t NNZ = this->size();
 

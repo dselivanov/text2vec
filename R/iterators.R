@@ -160,7 +160,6 @@ itoken_iterator_R6 = R6::R6Class(
   inherit = itoken_character_R6,
   public = list(
     iterator = NULL,
-    original_iterator = NULL,
     outer_progress = NULL,
     outer_counter = NULL,
     outer_length = NULL,
@@ -219,7 +218,30 @@ itoken_iterator_R6 = R6::R6Class(
       }
       self$outer_counter >= self$outer_length
     }
-  ))
+  )
+)
+
+itoken_transformer_R6 = R6::R6Class(
+  inherit = itoken_character_R6,
+  public = list(
+    iterator = NULL,
+    transformer = NULL,
+    initialize = function(input_iterator, transformer = identity) {
+      self$iterator = input_iterator
+      self$transformer = list(transformer)
+    },
+    nextElem = function() {
+      res = try(self$iterator$nextElem(), silent = T)
+      if (!inherits(res, 'try-error')) {
+        res$tokens = self$transformer[[1]](res)
+        res
+      }
+      else {
+        stop(StopIteration("StopIteration"))
+      }
+    }
+  )
+)
 
 #------------------------------------------------------------------------------------------
 #' @name ifiles

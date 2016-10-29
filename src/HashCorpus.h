@@ -109,6 +109,7 @@ HashCorpus::HashCorpus(uint32_t size,
   // init dtm with ncol = hash_size
   dtm = SparseTripletMatrix<int>(0, size);
   tcm = SparseTripletMatrix<float>(size, size);
+  word_count.resize(size);
 };
 //-----------------------------------------------------------------
 // int context = 0 means symmetric context for co-occurence - matrix will be symmetric
@@ -125,6 +126,7 @@ void HashCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context
   for(auto term: terms) {
     this->token_count++;
     term_index = murmurhash3_hash(term) % buckets_size;
+    word_count[term_index]++;
     if(grow_dtm) {
       int wcnt = 1;
       if(signed_hash && murmurhash3_sign(term) < 0)
@@ -136,46 +138,41 @@ void HashCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context
     // will check 1 == ngram_min == ngram_max on R side
     // and set window_size = 0 if not
     // will not go into this loop if window_size == 0
-    for (uint32_t j = 1; j <= this->window_size; j++) {
-      // check doc bounds
-      if( i + j < K) {
-        context_term_index = murmurhash3_hash(terms[i + j]) % buckets_size;
-        // calculate cooccurence increment for particular position j of context word
-        increment = weighting_fun(j);
-        // int context = 0 means symmetric context for co-occurence - matrix will be symmetric
-        // So we will keep only right upper-diagonal elements
-        // int context = 1 means right words context only
-        // int context = -1 means left words context only
-        switch(context) {
-        // handle symmetric context
-        case 0:
-          // map stores only elements above diagonal because our matrix is symmetrical
-          if(term_index < context_term_index)
-            this->tcm.add(term_index, context_term_index, increment);
-          else {
-            // also we are not interested in context words equal to main word
-            // diagonal elememts will be zeros
-            // if(term_index != context_term_index)
-            // commented out because experiments showed that it is better to have diagonal elements
-            this->tcm.add(context_term_index, term_index, increment);
-            // since diagonal matrix will be passed 2 times for symmetric matrix
-            // (we do 2 pass in glove for)
-            // worth to think about dividing weights by 2
-            //this->tcm.add(context_term_index, term_index, increment / 2);
-          }
-          break;
-          // handle right context
-        case 1:
+    uint32_t j = 1;
+    while(j <= this->window_size && i + j < K) {
+      context_term_index = murmurhash3_hash(terms[i + j]) % buckets_size;
+      // calculate cooccurence increment for particular position j of context word
+      increment = weighting_fun(j);
+      // int context = 0 means symmetric context for co-occurence - matrix will be symmetric
+      // So we will keep only right upper-diagonal elements
+      // int context = 1 means right words context only
+      // int context = -1 means left words context only
+      switch(context) {
+      // handle symmetric context
+      case 0:
+        // map stores only elements above diagonal because our matrix is symmetrical
+        if(term_index < context_term_index)
           this->tcm.add(term_index, context_term_index, increment);
-          break;
-          // handle left context
-        case -1:
+        else {
+          // also we are not interested in context words equal to main word
+          // diagonal elememts will be zeros
+          // if(term_index != context_term_index)
+          // commented out because experiments showed that it is better to have diagonal elements
           this->tcm.add(context_term_index, term_index, increment);
-          break;
-        default:
-          stop("call to insert_terms with context !in [0,1, -1]");
         }
+        break;
+        // handle right context
+      case 1:
+        this->tcm.add(term_index, context_term_index, increment);
+        break;
+        // handle left context
+      case -1:
+        this->tcm.add(context_term_index, term_index, increment);
+        break;
+      default:
+        stop("call to insert_terms with context !in [0,1, -1]");
       }
+      j++;
     }
     i++;
   }

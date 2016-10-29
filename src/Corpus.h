@@ -61,6 +61,7 @@ protected:
   RCPP_UNORDERED_SET<string> stopwords;
   // documents
   SparseTripletMatrix<int> dtm;
+  std::vector<int> word_count;
 
   //#####Glove related
   uint64_t cooc_tokens_number;
