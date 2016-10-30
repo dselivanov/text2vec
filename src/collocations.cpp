@@ -21,10 +21,6 @@ ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVe
   // std::unordered_set<std::string> collocations;
   Rcpp::XPtr<std::unordered_set<std::string>> collocations(xptr_unordered_set);
   std::unordered_set<std::string>::iterator it_collocations;
-  // create map for lookup phrases
-  // for (auto it:phrases) {
-  //   collocations.insert(as<std::string>(it.get()));
-  // }
   // loop through documents
   for (uint32_t i = 0; i < input_size; i++) {
     checkUserInterrupt();
@@ -32,35 +28,36 @@ ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVe
     CharacterVector terms = docs[i];
     size_t tsize = terms.size();
 
-    std::vector<std::string> new_terms(tsize);
+    std::vector<std::string> out_terms(tsize);
 
-    size_t k = 0;
     std::string collocation_candidate;
     std::string collocation_candidate_2;
-    std::string w0 = "";
+    std::string w0 = sep;
     std::string w2;
+    size_t k = 0;
     // loop through terms
     if(tsize > 0) {
+      // k = 1;
       uint32_t j = 1;
       std::string w1 = as<std::string>(terms[j - 1]);
-      new_terms[k] = w1;
-      while(j <= tsize) {
-        if(j < tsize) {
-          w2 = as<std::string>(terms[j]);
-          collocation_candidate = w1 + sep + w2;
-          it_collocations = collocations->find(collocation_candidate);
-        }
-        if(it_collocations != collocations->end() && j < tsize) {
+      // out_terms[k - 1] = w1;
+      while(j < tsize) {
+        w2 = as<std::string>(terms[j]);
+        collocation_candidate = w1 + sep + w2;
+        it_collocations = collocations->find(collocation_candidate);
+        if(it_collocations != collocations->end()) {
           // found collactaion in our collocations set
           w1 = collocation_candidate;
         } else {
           collocation_candidate_2 = w0 + sep + w1;
           auto it2 = collocations->find(collocation_candidate_2);
+          // can combine previous collocation and current
           if(it2 != collocations->end()) {
-            new_terms[k - 1] = collocation_candidate_2;
+            out_terms[k - 1] = collocation_candidate_2;
           }
           else {
-            new_terms[k] = w1;
+            // writing collocation as next token
+            out_terms[k] = w1;
             w0 = w1;
             k++;
           }
@@ -68,26 +65,27 @@ ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVe
         }
         j++;
       }
+      // we are at last word
+      //---------------------------------------------
+      collocation_candidate_2 = w0 + sep + w1;
+      auto it2 = collocations->find(collocation_candidate_2);
+      // can combine previous collocation and current
+      if(it2 != collocations->end()) {
+        out_terms[k - 1] = collocation_candidate_2;
+      }
+      else {
+        // writing collocation as next token
+        out_terms[k] = w1;
+        k++;
+      }
+      //---------------------------------------------
     }
-    // if we are at last word
-    //-----------------------------------
-    // collocation_candidate_2 = prev_out_word + sep + w1;
-    // auto it2 = collocations.find(collocation_candidate_2);
-    // if(it2 != collocations.end()) {
-    //   new_terms[k - 1] = collocation_candidate_2;
-    // }
-    // else {
-    //   new_terms[k] = w1;
-    //   prev_out_word = w1;
-    //   k++;
-    // }
-    //-----------------------------------
     // create result for current document
-    CharacterVector r_new_terms(k);
+    CharacterVector r_out_terms(k);
     for(size_t j = 0; j < k; j++ )
-      r_new_terms[j] = new_terms[j];
+      r_out_terms[j] = out_terms[j];
     //add to list
-    res[i] = r_new_terms;
+    res[i] = r_out_terms;
   }
   return(res);
 }
