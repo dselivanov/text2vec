@@ -63,7 +63,7 @@ jaccard_sim = function(x, y = NULL, format = "dgCMatrix") {
 #' @export
 dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
                      norm = c("l2", "l1", "none"), verbose = TRUE) {
-  stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix"))
+  stopifnot(inherits(x, "matrix") || inherits(x, "Matrix"))
   stopifnot(inherits(method, "distance_model") || inherits(method, "character"))
 
   FLAG_TWO_MATRICES_INPUT = FALSE
@@ -71,7 +71,7 @@ dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
     FLAG_TWO_MATRICES_INPUT = TRUE
   }
   if (FLAG_TWO_MATRICES_INPUT) {
-    stopifnot(inherits(y, "matrix") || inherits(y, "sparseMatrix"))
+    stopifnot(inherits(y, "matrix") || inherits(y, "Matrix"))
     stopifnot(ncol(x) == ncol(y))
     stopifnot(colnames(x) == colnames(y))
   }
@@ -128,7 +128,8 @@ dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
 #' @export
 pdist2 = function(x, y, method = c("cosine", "euclidean", "jaccard"),
                   norm = c("l2", "l1", "none"), verbose = TRUE) {
-  stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix"))
+  stopifnot(inherits(x, "matrix") || inherits(x, "Matrix"))
+  stopifnot(inherits(y, "matrix") || inherits(y, "Matrix"))
   stopifnot(inherits(method, "distance_model") || inherits(method, "character"))
   stopifnot(ncol(x) == ncol(y))
   stopifnot(nrow(x) == nrow(y))
@@ -183,7 +184,7 @@ sim2 = function(x, y = NULL, method = c("cosine", "jaccard"),
   norm = match.arg(norm)
   method = match.arg(method)
   # check first matrix
-  stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix"))
+  stopifnot(inherits(x, "matrix") || inherits(x, "Matrix"))
 
   FLAG_TWO_MATRICES_INPUT = FALSE
   if (!is.null(y)) {
@@ -191,7 +192,7 @@ sim2 = function(x, y = NULL, method = c("cosine", "jaccard"),
   }
   # check second matrix
   if (FLAG_TWO_MATRICES_INPUT) {
-    stopifnot(inherits(y, "matrix") || inherits(y, "sparseMatrix"))
+    stopifnot(inherits(y, "matrix") || inherits(y, "Matrix"))
     stopifnot(ncol(x) == ncol(y))
     stopifnot(colnames(x) == colnames(y))
   }
@@ -237,7 +238,8 @@ psim2 = function(x, y, method = c("cosine", "jaccard"), norm = c("l2", "none"), 
   method = match.arg(method)
   norm = match.arg(norm)
 
-  stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix"))
+  stopifnot(inherits(x, "matrix") || inherits(x, "Matrix"))
+  stopifnot(inherits(y, "matrix") || inherits(y, "Matrix"))
   stopifnot(ncol(x) == ncol(y))
   stopifnot(nrow(x) == nrow(y))
   stopifnot(colnames(x) == colnames(y))
