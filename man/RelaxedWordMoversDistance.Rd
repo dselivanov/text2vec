@@ -71,9 +71,11 @@ corpus = create_corpus(itoken(tokens), vocab_vectorizer(v, skip_grams_window = 5
 dtm = get_dtm(corpus)
 tcm = get_tcm(corpus)
 glove_model = GloVe$new(word_vectors_size = 50, vocabulary = v, x_max = 10)
-wv = glove_model$fit(tcm, n_iter = 10)
-rwmd_model = RWMD(wv)
-rwmd_dist = dist2(dtm[1:10, ], dtm[1:100, ], method = rwmd_model, norm = 'none')
+glove_model$fit(tcm, n_iter = 10)
+wv = glove_model$get_word_vectors()
+rwmd_model = RWMD$new(wv)
+rwmd_dist = dist2(dtm[1:100, ], dtm[1:10, ], method = rwmd_model, norm = 'none')
+head(rwmd_dist)
 }
 }
 \keyword{datasets}
