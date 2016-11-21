@@ -69,8 +69,8 @@ ids = movie_review$id[1:100]
 it = itoken(txt, tolower, word_tokenizer, chunks_number = 10)
 it = itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
 # Example of stemming tokenizer
-# stem_tokenizer = function(x) {
-#  word_tokenizer(x) \%>\% lapply(SnowballC::wordStem('en'))
+# stem_tokenizer =function(x) {
+#   word_tokenizer(x) \%>\% lapply(SnowballC::wordStem, language="en")
 # }
 }
 \seealso{
