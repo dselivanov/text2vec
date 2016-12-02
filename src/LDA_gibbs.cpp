@@ -238,7 +238,7 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
       if(j > 0) {
         double perpl_improvement =  perpl[j - 1] / perpl[j] - 1;
         if(perpl_improvement < convergence_tol) {
-          Rprintf("Early stopping on %d iteradion. Perplexity improvement for last iteration was %0.2f%%\n",
+          Rprintf("Early stopping on %d iteration. Perplexity improvement for last iteration was %0.2f%%\n",
                   iteration, perpl_improvement * 100);
           break;
         }
