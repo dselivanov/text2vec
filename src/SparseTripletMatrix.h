@@ -17,13 +17,14 @@
 #include <Rcpp.h>
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <sparsepp.h>
 #include "text2vec.h"
 
+using spp::sparse_hash_map;
 using namespace std;
 using namespace Rcpp;
 
-// for unordered_map < <uint32_t, uint32_t>, T >
+// for sparse_hash_map < <uint32_t, uint32_t>, T >
 namespace std {
   template <>
   struct hash<std::pair<uint32_t, uint32_t>>
@@ -38,16 +39,6 @@ namespace std {
     }
   };
 }
-
-
-// template<typename T>
-// NumericMatrix convert2Rmat(vector<vector<T> > &mat, size_t ncol) {
-//   NumericMatrix res(mat.size(), ncol);
-//   for (size_t i = 0; i < mat.size(); i++)
-//     for (size_t j = 0; j < ncol; j++)
-//       res(i, j) = mat[i][j];
-//   return res;
-// }
 
 template<typename T>
 class SparseTripletMatrix {
@@ -82,7 +73,7 @@ private:
   // number of non-zero elements in matrix
   size_t nnz;
   // container for sparse matrix in triplet form
-  unordered_map< pair<uint32_t, uint32_t>, T >  sparse_container;
+  sparse_hash_map< pair<uint32_t, uint32_t>, T >  sparse_container;
 };
 
 template<typename T>

@@ -1,3 +1,10 @@
+# text2vec 0.5.0
+2016-12-30
+
+1. Noticeable speedup (1.5x) and even more noticeable improvement on memory usage (2x less!) for `create_dtm`, `create_tcm` . Now package relies on [sparsepp](https://github.com/dselivanov/sparsepp) library for underlying hash maps.
+1. Collocations -  detection of multi-word phrases using differend heuristics - PMI, gensim, LFMD.
+1. Fixed bug in `as.lda_c()` function
+
 # text2vec 0.4.0
 
 2016-10-03. See [0.4 milestone tags](https://github.com/dselivanov/text2vec/milestone/3).
