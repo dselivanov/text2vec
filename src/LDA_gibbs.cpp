@@ -27,16 +27,45 @@ using namespace Rcpp;
 //   return(res);
 // }
 
+//https://github.com/jacobeisenstein/SAGE/blob/master/3rd-party/lightspeed/util.c#L216
+//R::lgammafn
+double gammaln(double x)
+{
+  #define M_lnSqrt2PI 0.91893853320467274178
+  static double gamma_series[] = {
+    76.18009172947146,
+    -86.50532032941677,
+    24.01409824083091,
+    -1.231739572450155,
+    0.1208650973866179e-2,
+    -0.5395239384953e-5
+  };
+  int i;
+  double denom, x1, series;
+  if(x < 0) return NAN;
+  if(x == 0) return INFINITY;
+  if(!isfinite(x)) return x;
+  /* Lanczos method */
+  denom = x+1;
+  x1 = x + 5.5;
+  series = 1.000000000190015;
+  for(i = 0; i < 6; i++) {
+    series += gamma_series[i] / denom;
+    denom += 1.0;
+  }
+  return( M_lnSqrt2PI + (x+0.5)*log(x1) - x1 + log(series/x) );
+}
+
 double docs_likelihood(IntegerMatrix M, double prior) {
   double ll = 0;
   int n = M.nrow();
   for (uint32_t i_doc = 0; i_doc < M.ncol(); ++i_doc) {
     double sum = prior * n;
     for (int kk = 0; kk < n; ++kk) {
-      ll += R::lgammafn(M[n * i_doc + kk] + prior);
+      ll += gammaln(M[n * i_doc + kk] + prior);
       sum += M[n * i_doc + kk];
     }
-    ll -= R::lgammafn(sum);
+    ll -= gammaln(sum);
   }
   return ll;
 }
@@ -48,10 +77,10 @@ double topics_likelihood(IntegerMatrix M, double prior) {
   for (int kk = 0; kk < n_topics; ++kk) {
     double sum = prior * vocab_size;
     for (int ii = 0; ii < vocab_size; ++ii) {
-      ll += R::lgammafn(M[kk + n_topics * ii] + prior);
+      ll += gammaln(M[kk + n_topics * ii] + prior);
       sum += M[kk + n_topics * ii];
     }
-    ll -= R::lgammafn(sum);
+    ll -= gammaln(sum);
   }
   return ll;
 }
@@ -63,9 +92,9 @@ double total_likelihood(IntegerMatrix topic_distr, IntegerMatrix doc_distr,
   int vocab_size = topic_distr.ncol();
   int n_documents = doc_distr.ncol();
   //log B(\alpha)
-  double doc_prior_ll = (n_topics * R::lgammafn(doc_prior) - R::lgammafn(doc_prior * n_topics)) * n_documents;
+  double doc_prior_ll = (n_topics * gammaln(doc_prior) - gammaln(doc_prior * n_topics)) * n_documents;
   //log B(\eta)
-  double topic_prior_ll = (vocab_size * R::lgammafn(topic_prior) - R::lgammafn(topic_prior * vocab_size)) * n_topics;
+  double topic_prior_ll = (vocab_size * gammaln(topic_prior) - gammaln(topic_prior * vocab_size)) * n_topics;
   double topic_ll = topics_likelihood(topic_distr, topic_prior);
   double doc_ll = docs_likelihood(doc_distr, doc_prior);
   return(doc_ll - doc_prior_ll + topic_ll - topic_prior_ll);
@@ -93,9 +122,9 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
   double topic_ll;
 
   //log B(\alpha)
-  const double const_prior = (n_topics * R::lgammafn(alpha) - R::lgammafn(alpha * n_topics)) * n_documents;
+  const double const_prior = (n_topics * gammaln(alpha) - gammaln(alpha * n_topics)) * n_documents;
   //log B(\eta)
-  const  double const_ll = (vocab_size * R::lgammafn(eta) - R::lgammafn(eta * vocab_size)) * n_topics;
+  const  double const_ll = (vocab_size * gammaln(eta) - gammaln(eta * vocab_size)) * n_topics;
 
 
   uint32_t total_words = 0;
