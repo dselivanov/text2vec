@@ -28,11 +28,11 @@ using namespace std;
 class VocabCorpus: public Corpus {
 public:
   // contructor with window_size for term cooccurence matrix
-  VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, uint32_t window_size,
+  VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max,
               const CharacterVector stopwords_R, const String delim);
-  void insert_terms (vector< string> &terms, int grow_dtm, int context);
-  void insert_document(const CharacterVector doc, int grow_dtm = 1, int context = 0);
-  void insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm = 1, int context = 0);
+  void insert_terms (vector< string> &terms, int grow_dtm, int context, uint32_t window_size = 0);
+  void insert_document(const CharacterVector doc, int grow_dtm = 1, int context = 0, uint32_t window_size = 0);
+  void insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm = 1, int context = 0, uint32_t window_size = 0);
   // total number of tokens in corpus
   int get_token_count() {return this -> token_count;};
   int get_doc_count() { return this -> doc_count; };
@@ -56,10 +56,10 @@ private:
 //-----------------------------------------------------------------
 // VocabCorpus methods implementation
 //-----------------------------------------------------------------
-VocabCorpus::VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, uint32_t window_size,
+VocabCorpus::VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max,
                          const CharacterVector stopwords_R, const String delim) {
   tcm = SparseTripletMatrix<float>(vocab_R.size(), vocab_R.size());
-  this->window_size = window_size;
+  //this->window_size = window_size;
   init(vocab_R, n_min, n_max, stopwords_R, delim);
   word_count.resize(vocab_R.size());
 };
@@ -103,7 +103,7 @@ void VocabCorpus::init(const CharacterVector vocab_R, uint32_t n_min, uint32_t n
 // So we will keep only right upper-diagonal elements
 // int context = 1 means right words context only
 // int context = -1 means left words context only
-void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context) {
+void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context, uint32_t window_size) {
 
   uint32_t term_index, context_term_index;
   size_t K = terms.size();
@@ -139,7 +139,7 @@ void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int contex
 
       // uint32_t j2 = 1;
       uint32_t j = 1;
-      while(j <= this->window_size && i + j < K) {
+      while(j <= window_size && i + j < K) {
         // check doc bounds
         context_term_iterator = this->vocab.find((terms[i + j]) );
         // if context word in vocab
@@ -187,21 +187,21 @@ void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int contex
   }
 }
 //-----------------------------------------------------------------
-void VocabCorpus::insert_document(const CharacterVector doc, int grow_dtm, int context) {
+void VocabCorpus::insert_document(const CharacterVector doc, int grow_dtm, int context, uint32_t window_size) {
   checkUserInterrupt();
   generate_ngrams(doc, this->ngram_min, this->ngram_max,
                   this->stopwords,
                   this->terms_filtered_buffer,
                   this->ngrams_buffer,
                   this->ngram_delim);
-  insert_terms(this->ngrams_buffer, grow_dtm, context);
+  insert_terms(this->ngrams_buffer, grow_dtm, context, window_size);
   this->dtm.increment_nrows();
   this->doc_count++;
 }
 //-----------------------------------------------------------------
-void VocabCorpus::insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm, int context) {
+void VocabCorpus::insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm, int context, uint32_t window_size) {
   for (auto it:docs_batch) {
-    insert_document(it, grow_dtm, context);
+    insert_document(it, grow_dtm, context, window_size);
   }
 }
 

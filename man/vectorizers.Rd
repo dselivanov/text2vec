@@ -6,27 +6,12 @@
 \alias{vocab_vectorizer}
 \title{Vocabulary and hash vectorizers}
 \usage{
-vocab_vectorizer(vocabulary, grow_dtm = TRUE, skip_grams_window = 0L,
-  skip_grams_window_context = c("symmetric", "right", "left"))
+vocab_vectorizer(vocabulary)
 
-hash_vectorizer(hash_size = 2^18, ngram = c(1L, 1L), signed_hash = FALSE,
-  grow_dtm = TRUE, skip_grams_window = 0L,
-  skip_grams_window_context = c("symmetric", "right", "left"))
+hash_vectorizer(hash_size = 2^18, ngram = c(1L, 1L), signed_hash = FALSE)
 }
 \arguments{
 \item{vocabulary}{\code{text2vec_vocabulary} object, see \link{create_vocabulary}.}
-
-\item{grow_dtm}{\code{logical} Should we grow the document-term matrix
-during corpus construction or not.}
-
-\item{skip_grams_window}{\code{integer} window for term-co-occurence matrix
-construction. \code{skip_grams_window} should be > 0 if you plan to use
-\code{vectorizer} in \link{create_tcm} function.
-Value of \code{0L} means to not construct the TCM.}
-
-\item{skip_grams_window_context}{one of \code{c("symmetric", "right", "left")} -
-which context words to use when count co-occurence statistics.
-\code{"symmetric"} by default - take into account \code{skip_grams_window} left and right.}
 
 \item{hash_size}{\code{integer} The number of of hash-buckets for the feature
 hashing trick. The number must be greater than 0, and preferably it will be
@@ -52,8 +37,7 @@ N = 100
 vectorizer = hash_vectorizer(2 ^ 18, c(1L, 2L))
 it = itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer, chunks_number = 10)
-corpus = create_corpus(it, vectorizer)
-hash_dtm = get_dtm(corpus)
+hash_dtm = create_dtm(it, vectorizer)
 
 it = itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer, chunks_number = 10)
@@ -64,10 +48,9 @@ vectorizer = vocab_vectorizer(v)
 it = itoken(movie_review$review[1:N], preprocess_function = tolower,
              tokenizer = word_tokenizer, chunks_number = 10)
 
-corpus = create_corpus(it, vectorizer)
-voacb_dtm = get_dtm(corpus)
+dtm = create_dtm(it, vectorizer)
 }
 \seealso{
-\link{create_dtm} \link{create_tcm} \link{create_vocabulary} \link{create_corpus}
+\link{create_dtm} \link{create_tcm} \link{create_vocabulary}
 }
 

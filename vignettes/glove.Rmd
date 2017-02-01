@@ -84,12 +84,9 @@ Now we have 71,290 terms in the vocabulary and are ready to construct term-co-oc
 
 ```{r}
 # Use our filtered vocabulary
-vectorizer <- vocab_vectorizer(vocab, 
-                               # don't vectorize input
-                               grow_dtm = FALSE, 
-                               # use window of 5 for context words
-                               skip_grams_window = 5L)
-tcm <- create_tcm(it, vectorizer)
+vectorizer <- vocab_vectorizer(vocab)
+# use window of 5 for context words
+tcm <- create_tcm(it, vectorizer, skip_grams_window = 5L)
 ```
 
 Now we have a TCM matrix and can factorize it via the GloVe algorithm.  

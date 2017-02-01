@@ -1,28 +1,27 @@
-#' @name get_dtm
-#' @title Extract document-term matrix
-#' @description This function extracts a document-term matrix from a
-#'   \code{Corpus} object.
-#' @param corpus \code{HashCorpus} or \code{VocabCorpus} object. See
-#'   \link{create_corpus} for details.
-#' @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
-#'   \code{"lda_c"} is Blei's lda-c format (a list of 2 * doc_terms_size); see
-#'   \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
-#' @examples
-#' N = 1000
-#' tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
-#' it = itoken(tokens)
-#' v = create_vocabulary(it)
-#'
-#' #remove very common and uncommon words
-#' pruned_vocab = prune_vocabulary(v, term_count_min = 10,
-#'  doc_proportion_max = 0.8, doc_proportion_min = 0.001,
-#'  max_number_of_terms = 10000)
-#'
-#' vectorizer = vocab_vectorizer(v)
-#' it = itoken(tokens)
-#' corpus = create_corpus(it, vectorizer)
-#' dtm = get_dtm(corpus)
-#' @export
+# @name get_dtm
+# @title Extract document-term matrix
+# @description This function extracts a document-term matrix from a
+#   \code{Corpus} object.
+# @param corpus \code{HashCorpus} or \code{VocabCorpus} object. See
+#    for details.
+# @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
+#   \code{"lda_c"} is Blei's lda-c format (a list of 2 * doc_terms_size); see
+#   \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
+# @examples
+# N = 1000
+# tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
+# it = itoken(tokens)
+# v = create_vocabulary(it)
+# '
+# #remove very common and uncommon words
+# pruned_vocab = prune_vocabulary(v, term_count_min = 10,
+#  doc_proportion_max = 0.8, doc_proportion_min = 0.001,
+#  max_number_of_terms = 10000)
+# '
+# vectorizer = vocab_vectorizer(v)
+# it = itoken(tokens)
+# dtm = create_dtm(it, vectorizer)
+
 get_dtm = function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
   if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
     type = match.arg(type)
@@ -55,7 +54,7 @@ get_dtm = function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' @param ... arguments to the \link{foreach} function which is used to iterate
 #'   over \code{it}.
 #' @return A document-term matrix
-#' @seealso \link{itoken} \link{vectorizers} \link{create_corpus} \link{get_dtm}
+#' @seealso \link{itoken} \link{vectorizers}
 #' @examples
 #' \dontrun{
 #' data("movie_review")
@@ -86,8 +85,6 @@ get_dtm = function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 create_dtm = function(it, vectorizer,
                        type = c("dgCMatrix", "dgTMatrix", "lda_c"),
                        ...) {
-  if(attr(vectorizer, "grow_dtm", TRUE) == FALSE)
-    stop("You should provide vectorizer with grow_dtm = TRUE")
   UseMethod("create_dtm")
 }
 
@@ -96,7 +93,10 @@ create_dtm = function(it, vectorizer,
 create_dtm.itoken = function(it, vectorizer,
                             type = c("dgCMatrix", "dgTMatrix", "lda_c"),
                             ...) {
-  corp = vectorizer(it)
+  # because window_size = 0, put something to skip_grams_window_context: "symmetric"
+  # but it is dummy - just to provide something to vectorizer
+  # skip_grams_window_context = "symmetric", window_size = 0
+  corp = vectorizer(it, grow_dtm = TRUE, skip_grams_window_context = "symmetric", window_size = 0)
   type = match.arg(type)
   # get it in triplet form - fastest and most
   # memory efficient way because internally it
@@ -121,9 +121,9 @@ create_dtm.list = function(it, vectorizer,
   type = match.arg(type)
   combine_fun = function(...) {
     f = switch(type,
-                dgCMatrix = rbind,
-                dgTMatrix = rbind_dgTMatrix,
-                lda_c = function(...) {x = c(...); class(x) = 'lda_c'; x})
+               dgCMatrix = rbind,
+               dgTMatrix = rbind_dgTMatrix,
+               lda_c = function(...) {x = c(...); class(x) = 'lda_c'; x})
     if (verbose)
       print(paste(Sys.time(), "got results from workers, call combine ..."))
     f(...)

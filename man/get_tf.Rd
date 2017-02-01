@@ -21,6 +21,6 @@ This function creates a term-frequency (TF) scaling matrix from
   a document-term matrix.
 }
 \seealso{
-\link{get_idf}, \link{get_dtm}, \link{create_dtm}
+\link{get_idf}, \link{create_dtm}
 }
 

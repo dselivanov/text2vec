@@ -136,9 +136,9 @@ coerce_matrix = function(X, target_class = c("dgCMatrix", "dgTMatrix", "RsparseM
     if (verbose)
       message(paste0('coercing X from ', X_class, ' to ', target_class, '...'))
     if (target_class != 'lda_c')
-      X = try(as(X, target_class))
+      X = try(as(X, target_class), silent = TRUE)
     else
-      X = try(as.lda_c(X))
+      X = try(as.lda_c(X), silent = TRUE)
     if (class(X) == 'try-error')
       stop(paste("cannot coerce input to", target_class))
   }

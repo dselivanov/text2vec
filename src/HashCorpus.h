@@ -55,7 +55,7 @@ public:
   // constructor
   HashCorpus(uint32_t size,
              uint32_t ngram_min, uint32_t ngram_max,
-             uint32_t win_size,
+             //uint32_t win_size,
              int use_signed_hash);
   // total number of tokens in corpus
   int get_token_count() {return this -> token_count;};
@@ -65,11 +65,11 @@ public:
   size_t get_tcm_size() {return this->tcm.size();};
 
   // implements hashing trick
-  void insert_terms (vector< string> &terms, int grow_dtm, int context);
+  void insert_terms (vector< string> &terms, int grow_dtm, int context, uint32_t window_size);
 
-  void insert_document(const CharacterVector doc, int grow_dtm = 1, int context = 0);
+  void insert_document(const CharacterVector doc, int grow_dtm = 1, int context = 0, uint32_t window_size = 0);
   void insert_document_batch(const ListOf<const CharacterVector> docs_batch,
-                             int grow_dtm = 1, int context = 0);
+                             int grow_dtm = 1, int context = 0, uint32_t window_size = 0);
 
   // get term cooccurence matrix
   SEXP get_tcm() {
@@ -95,7 +95,6 @@ private:
 //-----------------------------------------------------------------
 HashCorpus::HashCorpus(uint32_t size,
            uint32_t ngram_min, uint32_t ngram_max,
-           uint32_t win_size,
            int use_signed_hash)
 {
   doc_count = 0;
@@ -104,7 +103,7 @@ HashCorpus::HashCorpus(uint32_t size,
   signed_hash = use_signed_hash;
   this->ngram_min = ngram_min;
   this->ngram_max = ngram_max;
-  this->window_size = win_size;
+  //this->window_size = win_size;
   this->ngram_delim = "_";
   // init dtm with ncol = hash_size
   dtm = SparseTripletMatrix<int>(0, size);
@@ -116,7 +115,7 @@ HashCorpus::HashCorpus(uint32_t size,
 // So we will keep only right upper-diagonal elements
 // int context = 1 means right words context only
 // int context = -1 means left words context only
-void HashCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context) {
+void HashCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context, uint32_t window_size) {
   uint32_t term_index, context_term_index;
 
   size_t K = terms.size();
@@ -139,7 +138,7 @@ void HashCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context
     // and set window_size = 0 if not
     // will not go into this loop if window_size == 0
     uint32_t j = 1;
-    while(j <= this->window_size && i + j < K) {
+    while(j <= window_size && i + j < K) {
       context_term_index = murmurhash3_hash(terms[i + j]) % buckets_size;
       // calculate cooccurence increment for particular position j of context word
       increment = weighting_fun(j);
@@ -178,20 +177,20 @@ void HashCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context
   }
 }
 
-void HashCorpus::insert_document(const CharacterVector doc, int grow_dtm, int context) {
+void HashCorpus::insert_document(const CharacterVector doc, int grow_dtm, int context, uint32_t window_size) {
   checkUserInterrupt();
   generate_ngrams(doc, this->ngram_min, this->ngram_max,
                   this->stopwords,
                   this->terms_filtered_buffer,
                   this->ngrams_buffer,
                   this->ngram_delim);
-  insert_terms(this->ngrams_buffer, grow_dtm, context);
+  insert_terms(this->ngrams_buffer, grow_dtm, context, window_size);
   this->dtm.increment_nrows();
   this->doc_count++;
 }
 
 void HashCorpus::insert_document_batch(const ListOf<const CharacterVector> docs_batch,
-                                       int grow_dtm, int context) {
+                                       int grow_dtm, int context, uint32_t window_size) {
   for (auto it:docs_batch)
-    insert_document(it, grow_dtm, context);
+    insert_document(it, grow_dtm, context, window_size);
 }

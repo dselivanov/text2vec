@@ -27,6 +27,6 @@ This function creates an inverse-document-frequency (IDF)
   appears + 1)}
 }
 \seealso{
-\link{get_tf}, \link{get_dtm}, \link{create_dtm}
+\link{get_tf}, \link{create_dtm}
 }
 

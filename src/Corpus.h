@@ -56,7 +56,7 @@ protected:
   // this is to avoid memory re-allocation
   vector< string> ngrams_buffer;
 
-  uint32_t window_size;
+  // uint32_t window_size;
   // stopwords
   RCPP_UNORDERED_SET<string> stopwords;
   // documents

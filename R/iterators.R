@@ -199,7 +199,7 @@ itoken_iterator_R6 = R6::R6Class(
         #self$progressbar = txtProgressBar(initial = -1L, min = 0, max = self$outer_length, style = 3)
     },
     nextElem = function() {
-      res = try(super$nextElem(), silent = T)
+      res = try(super$nextElem(), silent = TRUE)
       self$counter = self$counter + 1L
       if (!inherits(res, 'try-error')) {
         res
@@ -231,7 +231,7 @@ itoken_transformer_R6 = R6::R6Class(
       self$transformer = list(transformer)
     },
     nextElem = function() {
-      res = try(self$iterator$nextElem(), silent = T)
+      res = try(self$iterator$nextElem(), silent = TRUE)
       if (!inherits(res, 'try-error')) {
         res$tokens = self$transformer[[1]](res)
         res
@@ -279,7 +279,7 @@ idir = function(path, reader = readLines) {
 #' @description This function creates iterators over input objects to
 #'   vocabularies, corpora, or DTM and TCM matrices. This iterator is usually
 #'   used in following functions : \link{create_vocabulary},
-#'   \link{create_corpus}, \link{create_dtm}, \link{vectorizers},
+#'   \link{create_dtm}, \link{vectorizers},
 #'   \link{create_tcm}. See them for details.
 #' @param iterable an object from which to generate an iterator
 #' @param ... arguments passed to other methods (not used at the moment)
@@ -293,7 +293,7 @@ idir = function(path, reader = readLines) {
 #'   read in the files (to \link{idir}) and a function to tokenize it (to
 #'   \link{itoken})}}
 #' @seealso \link{ifiles}, \link{idir}, \link{create_vocabulary},
-#'   \link{create_corpus}, \link{create_dtm}, \link{vectorizers},
+#'   \link{create_dtm}, \link{vectorizers},
 #'   \link{create_tcm}
 #' @examples
 #' data("movie_review")

@@ -19,7 +19,7 @@
 #' @description normalize matrix rows using given norm
 #' @param m \code{matrix} (sparse or dense).
 #' @param norm \code{character} the method used to normalize term vectors
-#' @seealso \link{get_idf}, \link{get_dtm}, \link{create_dtm}
+#' @seealso \link{get_idf}, \link{create_dtm}
 #' @return normalized matrix
 #' @export
 normalize = function(m, norm = c("l1", "l2", "none")) {
@@ -54,7 +54,7 @@ normalize = function(m, norm = c("l1", "l2", "none")) {
 #'   frequencies, as if an extra document was seen containing every term in the
 #'   collection exactly once. This prevents division by zero.
 #' @return \code{ddiMatrix} IDF scaling diagonal sparse matrix.
-#' @seealso \link{get_tf}, \link{get_dtm}, \link{create_dtm}
+#' @seealso \link{get_tf}, \link{create_dtm}
 #' @export
 get_idf = function(dtm, log_scale = log, smooth_idf = TRUE) {# nocov start
   .Deprecated("TfIdf")
@@ -76,7 +76,7 @@ get_idf = function(dtm, log_scale = log, smooth_idf = TRUE) {# nocov start
 #'   \code{dgTMatrix}.
 #' @param norm \code{character} the method used to normalize term vectors.
 #'   \code{"l1"} by default, i.e., scale by the number of words in the document.
-#' @seealso \link{get_idf}, \link{get_dtm}, \link{create_dtm}
+#' @seealso \link{get_idf}, \link{create_dtm}
 #' @return \code{ddiMatrix} TF scaling diagonal sparse matrix.
 #' @export
 get_tf = function(dtm, norm = c("l1", "l2"))

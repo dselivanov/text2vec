@@ -5,6 +5,30 @@
 
 using namespace Rcpp;
 
+// create_xptr_unordered_set
+SEXP create_xptr_unordered_set(CharacterVector x);
+RcppExport SEXP text2vec_create_xptr_unordered_set(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(create_xptr_unordered_set(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// collapse_collocations_cpp
+ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVector>& docs, SEXP xptr_unordered_set, const String r_sep);
+RcppExport SEXP text2vec_collapse_collocations_cpp(SEXP docsSEXP, SEXP xptr_unordered_setSEXP, SEXP r_sepSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const ListOf<const CharacterVector>& >::type docs(docsSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type xptr_unordered_set(xptr_unordered_setSEXP);
+    Rcpp::traits::input_parameter< const String >::type r_sep(r_sepSEXP);
+    rcpp_result_gen = Rcpp::wrap(collapse_collocations_cpp(docs, xptr_unordered_set, r_sep));
+    return rcpp_result_gen;
+END_RCPP
+}
 // hasher
 IntegerVector hasher(CharacterVector x, int hash_size);
 RcppExport SEXP text2vec_hasher(SEXP xSEXP, SEXP hash_sizeSEXP) {
@@ -49,30 +73,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type trace(traceSEXP);
     Rcpp::traits::input_parameter< int >::type freeze_topics(freeze_topicsSEXP);
     rcpp_result_gen = Rcpp::wrap(collapsedGibbsSampler(documents, n_topics, vocab_size, n_iter, alpha, eta, initial, convergence_tol, check_convergence_every_n, trace, freeze_topics));
-    return rcpp_result_gen;
-END_RCPP
-}
-// create_xptr_unordered_set
-SEXP create_xptr_unordered_set(CharacterVector x);
-RcppExport SEXP text2vec_create_xptr_unordered_set(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(create_xptr_unordered_set(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// collapse_collocations_cpp
-ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVector>& docs, SEXP xptr_unordered_set, const String r_sep);
-RcppExport SEXP text2vec_collapse_collocations_cpp(SEXP docsSEXP, SEXP xptr_unordered_setSEXP, SEXP r_sepSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const ListOf<const CharacterVector>& >::type docs(docsSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type xptr_unordered_set(xptr_unordered_setSEXP);
-    Rcpp::traits::input_parameter< const String >::type r_sep(r_sepSEXP);
-    rcpp_result_gen = Rcpp::wrap(collapse_collocations_cpp(docs, xptr_unordered_set, r_sep));
     return rcpp_result_gen;
 END_RCPP
 }

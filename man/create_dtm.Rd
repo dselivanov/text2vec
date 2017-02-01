@@ -72,6 +72,6 @@ dtm = create_dtm(jobs, vectorizer, type = 'dgTMatrix')
 }
 }
 \seealso{
-\link{itoken} \link{vectorizers} \link{create_corpus} \link{get_dtm}
+\link{itoken} \link{vectorizers}
 }
 

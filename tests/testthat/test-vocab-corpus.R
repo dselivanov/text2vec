@@ -49,15 +49,14 @@ test_that("Vocabulary pruning", {
 
   # test for https://github.com/dselivanov/text2vec/issues/46
   vectorizer = vocab_vectorizer(p_vocab)
-  vcorpus = create_corpus(it, vectorizer)
 
-  dtm = get_dtm(vcorpus)
+  dtm = create_dtm(it, vectorizer)
   # check we keep names for input. see #51
   expect_equal(rownames(dtm), ids)
   expect_identical(dim(dtm), c(length(txt), LIMIT))
 
   # check we keep names for input. see #51
-  dtm_lda_c = get_dtm(vcorpus, 'lda_c')
+  dtm_lda_c = as.lda_c(dtm)
   expect_equal(names(dtm_lda_c), ids)
 })
 
@@ -71,12 +70,10 @@ test_that("Vocabulary stopwords", {
 test_that("Unigran Vocabulary Corpus construction", {
   # Vocabulary construction
   vocab = create_vocabulary(it)
-  # VocabCorpus construction
   vectorizer = vocab_vectorizer(vocab)
-  vcorpus = create_corpus(it, vectorizer)
 
   # dtm
-  m = vcorpus$get_dtm()
+  m = create_dtm(it, vectorizer)
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
   expect_equal( length(m@x), 141876L)
@@ -99,12 +96,11 @@ test_that("bi-gram Vocabulary Corpus construction", {
 
   expect_equal(sum(grepl("_", vocab$vocab$terms, fixed = T)), 120070L)
   expect_equal(length(vocab$vocab$terms), 120070L)
-  # VocabCorpus construction
+
   vectorizer = vocab_vectorizer(vocab)
-  vcorpus = create_corpus(it, vectorizer)
 
   # dtm
-  m = vcorpus$get_dtm()
+  m = create_dtm(it, vectorizer)
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
   expect_equal( length(m@x), 223579L)
@@ -116,11 +112,10 @@ test_that("Unigram + Bigram Vocabulary Corpus construction", {
                       ngram = c('ngram_min' = 1L,
                                 'ngram_max' = 2L))
   expect_equal(length(vocab$vocab$terms), 138472L)
-  # VocabCorpus construction
+
   vectorizer = vocab_vectorizer(vocab)
-  vcorpus = create_corpus(it, vectorizer)
   # dtm
-  m = vcorpus$get_dtm()
+  m = create_dtm(it, vectorizer)
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
   expect_equal( length(m@x), 365455L)

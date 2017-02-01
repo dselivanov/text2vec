@@ -188,7 +188,7 @@ Note that the new DTM has many fewer columns than the original DTM. This usually
 Also we need to create DTM for test data with the same vectorizer:
 
 ```{r, prune_vocab_dtm_1_test}
-dtm_test   = create_dtm(it_test, vectorizer)
+dtm_test = create_dtm(it_test, vectorizer)
 dim(dtm_test)
 ```
 

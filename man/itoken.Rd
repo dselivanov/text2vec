@@ -48,7 +48,7 @@ call stemmer inside tokenizer. See examples section.}
 This function creates iterators over input objects to
   vocabularies, corpora, or DTM and TCM matrices. This iterator is usually
   used in following functions : \link{create_vocabulary},
-  \link{create_corpus}, \link{create_dtm}, \link{vectorizers},
+  \link{create_dtm}, \link{vectorizers},
   \link{create_tcm}. See them for details.
 }
 \details{
@@ -75,7 +75,7 @@ it = itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
 }
 \seealso{
 \link{ifiles}, \link{idir}, \link{create_vocabulary},
-  \link{create_corpus}, \link{create_dtm}, \link{vectorizers},
+  \link{create_dtm}, \link{vectorizers},
   \link{create_tcm}
 }
 

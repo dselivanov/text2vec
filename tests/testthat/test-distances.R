@@ -7,8 +7,12 @@ tol = 1e-5
 tokens = movie_review$review[ind] %>% tolower %>% word_tokenizer
 it = itoken(tokens, progressbar = F)
 v = create_vocabulary(it) %>% prune_vocabulary(term_count_min = 3)
+# vv = vocab_vectorizer(v)
+#
+# temp = vv(iterator = it, grow_dtm = T, skip_grams_window_context = "symmetric", window_size = 0)
+
 dtm = create_dtm(it, vectorizer = vocab_vectorizer(v))
-tcm = create_tcm(it, vectorizer = vocab_vectorizer(v, grow_dtm = FALSE, skip_grams_window = 5))
+tcm = create_tcm(it, vectorizer = vocab_vectorizer(v), skip_grams_window = 5)
 i1 = 1:10
 i2 = 1:20
 
