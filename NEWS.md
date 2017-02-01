@@ -1,10 +1,14 @@
 # text2vec 0.5.0
-2016-12-30
 
-1. **API breaking change** - removed `create_corpus` from public API, moved co-occurence related optons to `create_tcm` from vecorizers
-1. Noticeable speedup (1.5x) and even more noticeable improvement on memory usage (2x less!) for `create_dtm`, `create_tcm` . Now package relies on [sparsepp](https://github.com/dselivanov/sparsepp) library for underlying hash maps.
-1. Collocations -  detection of multi-word phrases using differend heuristics - PMI, gensim, LFMD.
-1. Fixed bug in `as.lda_c()` function
+1. 2017-01-02 
+    * **API breaking change** - removed `create_corpus` from public API, moved co-occurence related optons to `create_tcm` from vecorizers
+    * add ability to add custom weights for co-occurence statistics calculations
+1. 2016-12-30 
+    * Noticeable **speedup** (**1.5x**) and even more noticeable improvement on memory usage (**2x** less!) for `create_dtm`, `create_tcm` . Now package relies on [sparsepp](https://github.com/dselivanov/sparsepp) library for underlying hash maps.
+1. 2016-10-30 
+    * Collocations -  detection of multi-word phrases using differend heuristics - *PMI, gensim, LFMD*.
+1. 2016-10-20 
+    * Fixed bug in `as.lda_c()` function
 
 # text2vec 0.4.0
 
