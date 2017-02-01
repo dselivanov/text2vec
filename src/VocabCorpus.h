@@ -30,9 +30,9 @@ public:
   // contructor with window_size for term cooccurence matrix
   VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max,
               const CharacterVector stopwords_R, const String delim);
-  void insert_terms (vector< string> &terms, int grow_dtm, int context, uint32_t window_size = 0);
-  void insert_document(const CharacterVector doc, int grow_dtm = 1, int context = 0, uint32_t window_size = 0);
-  void insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm = 1, int context = 0, uint32_t window_size = 0);
+  void insert_terms (vector< string> &terms, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights);
+  void insert_document(const CharacterVector doc, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights);
+  void insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights);
   // total number of tokens in corpus
   int get_token_count() {return this -> token_count;};
   int get_doc_count() { return this -> doc_count; };
@@ -103,7 +103,7 @@ void VocabCorpus::init(const CharacterVector vocab_R, uint32_t n_min, uint32_t n
 // So we will keep only right upper-diagonal elements
 // int context = 1 means right words context only
 // int context = -1 means left words context only
-void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context, uint32_t window_size) {
+void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights) {
 
   uint32_t term_index, context_term_index;
   size_t K = terms.size();
@@ -147,7 +147,7 @@ void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int contex
           // get context word index from vocab
           context_term_index = context_term_iterator->second;
           // calculate cooccurence increment for particular position j of context word
-          increment = weighting_fun(j);
+          increment = weights[j - 1];
           // increment = weighting_fun(j2);
           // int context = 0 means symmetric context for co-occurence - matrix will be symmetric
           // So we will keep only right upper-diagonal elements
@@ -187,21 +187,23 @@ void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int contex
   }
 }
 //-----------------------------------------------------------------
-void VocabCorpus::insert_document(const CharacterVector doc, int grow_dtm, int context, uint32_t window_size) {
+void VocabCorpus::insert_document(const CharacterVector doc, int grow_dtm, int context,
+                                  uint32_t window_size, const NumericVector& weights) {
   checkUserInterrupt();
   generate_ngrams(doc, this->ngram_min, this->ngram_max,
                   this->stopwords,
                   this->terms_filtered_buffer,
                   this->ngrams_buffer,
                   this->ngram_delim);
-  insert_terms(this->ngrams_buffer, grow_dtm, context, window_size);
+  insert_terms(this->ngrams_buffer, grow_dtm, context, window_size, weights);
   this->dtm.increment_nrows();
   this->doc_count++;
 }
 //-----------------------------------------------------------------
-void VocabCorpus::insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm, int context, uint32_t window_size) {
+void VocabCorpus::insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm,
+                                        int context, uint32_t window_size, const NumericVector& weights) {
   for (auto it:docs_batch) {
-    insert_document(it, grow_dtm, context, window_size);
+    insert_document(it, grow_dtm, context, window_size, weights);
   }
 }
 

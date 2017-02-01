@@ -69,9 +69,9 @@ protected:
   // term cooccurence matrix
   SparseTripletMatrix<float> tcm;
 
-  inline float weighting_fun(uint32_t offset) {
-    return 1.0 / (float)offset;
-  }
+  // inline float weighting_fun(uint32_t offset) {
+  //   return 1.0 / (float)offset;
+  // }
 
   SEXP get_dtm_triplet();
 };

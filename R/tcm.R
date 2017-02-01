@@ -68,6 +68,9 @@ get_tcm = function(corpus) {
 #' Value of \code{0L} means to not construct the TCM.
 #' @param skip_grams_window_context one of \code{c("symmetric", "right", "left")} -
 #' which context words to use when count co-occurence statistics.
+#' @param weights weights for context/distant words during co-occurence statistics calulation.
+#' By default we are setting \code{weight = 1 / distance_from_current_word}.
+#' Should have length equal to skip_grams_window.
 #' \code{"symmetric"} by default - take into account \code{skip_grams_window} left and right.
 #' @param ... arguments to \link{foreach} function which is used to iterate over
 #'   \code{it}.
@@ -99,7 +102,10 @@ get_tcm = function(corpus) {
 #' }
 #' @export
 create_tcm = function(it, vectorizer, skip_grams_window = 5L,
-                      skip_grams_window_context = c("symmetric", "right", "left"), ...) {
+                      skip_grams_window_context = c("symmetric", "right", "left"),
+                      weights = 1 / seq_len(skip_grams_window), ...) {
+  stopifnot(length(weights) == skip_grams_window)
+  stopifnot(class(weights) %in% c("numeric", "integer"))
   # if(attr(vectorizer, "skip_grams_window", TRUE) == 0)
   #   stop("You should provide vectorizer with skip_grams_window > 0")
   UseMethod("create_tcm")
@@ -107,10 +113,12 @@ create_tcm = function(it, vectorizer, skip_grams_window = 5L,
 
 #' @rdname create_tcm
 #' @export
-create_tcm.itoken = function(it, vectorizer, skip_grams_window = 0L,
-                             skip_grams_window_context = c("symmetric", "right", "left"), ...) {
+create_tcm.itoken = function(it, vectorizer, skip_grams_window = 5L,
+                             skip_grams_window_context = c("symmetric", "right", "left"),
+                             weights = 1 / seq_len(skip_grams_window), ...) {
   skip_grams_window_context = match.arg(skip_grams_window_context)
-  corp = vectorizer(it, grow_dtm = FALSE, skip_grams_window_context = skip_grams_window_context, window_size = skip_grams_window)
+  corp = vectorizer(it, grow_dtm = FALSE, skip_grams_window_context = skip_grams_window_context,
+                    window_size = skip_grams_window, weights = weights)
   # get it in triplet form - fastest and most
   # memory efficient way because internally it
   # kept in triplet form
@@ -126,8 +134,9 @@ create_tcm.itoken = function(it, vectorizer, skip_grams_window = 0L,
 #' @param work_dir working directory for intermediate results
 #' @export
 create_tcm.list = function(it, vectorizer,
-                           skip_grams_window = 0L,
+                           skip_grams_window = 5L,
                            skip_grams_window_context = c("symmetric", "right", "left"),
+                           weights = 1 / seq_len(skip_grams_window),
                            verbose = FALSE, work_dir = tempdir(), ...) {
   skip_grams_window_context = match.arg(skip_grams_window_context)
   jobs = Map(function(job_id, it) list(job_id = job_id, it = it), seq_along(it), it)
@@ -143,7 +152,7 @@ create_tcm.list = function(it, vectorizer,
             ...) %dopar%
             {
               tcm = create_tcm(batch$it, vectorizer = vectorizer, skip_grams_window = skip_grams_window,
-                               skip_grams_window_context = skip_grams_window_context, ...)
+                               skip_grams_window_context = skip_grams_window_context, weights = weights, ...)
               file_to_save = tempfile(pattern = paste0("tcm_map_part_", batch$job_id, "_"), tmpdir = work_dir, fileext = '.rds')
               saveRDS(tcm, file_to_save, compress = FALSE)
               file_to_save

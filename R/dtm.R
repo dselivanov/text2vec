@@ -96,7 +96,7 @@ create_dtm.itoken = function(it, vectorizer,
   # because window_size = 0, put something to skip_grams_window_context: "symmetric"
   # but it is dummy - just to provide something to vectorizer
   # skip_grams_window_context = "symmetric", window_size = 0
-  corp = vectorizer(it, grow_dtm = TRUE, skip_grams_window_context = "symmetric", window_size = 0)
+  corp = vectorizer(it, grow_dtm = TRUE, skip_grams_window_context = "symmetric", window_size = 0, weights = numeric(0))
   type = match.arg(type)
   # get it in triplet form - fastest and most
   # memory efficient way because internally it

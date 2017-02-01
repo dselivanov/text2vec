@@ -22,7 +22,7 @@ encode_context = function(context_string_name = c("symmetric", "right", "left"))
          left = -1L)
 }
 
-corpus_insert = function(corpus, iterator, grow_dtm, skip_grams_window_context, window_size) {
+corpus_insert = function(corpus, iterator, grow_dtm, skip_grams_window_context, window_size, weights) {
   skip_grams_window_context_code = force(encode_context(skip_grams_window_context))
   if (inherits(iterator, 'R6'))
     it = iterator$clone(deep = TRUE)
@@ -31,7 +31,7 @@ corpus_insert = function(corpus, iterator, grow_dtm, skip_grams_window_context, 
     it = iterator
   }
   ids = foreach(val = it, .combine = c, .multicombine = TRUE ) %do% {
-    corpus$insert_document_batch(val$tokens, grow_dtm, skip_grams_window_context_code, window_size)
+    corpus$insert_document_batch(val$tokens, grow_dtm, skip_grams_window_context_code, window_size, weights)
     val$ids
   }
   attr(corpus, "ids") = ids
@@ -68,7 +68,7 @@ corpus_insert = function(corpus, iterator, grow_dtm, skip_grams_window_context, 
 #' @param vocabulary \code{text2vec_vocabulary} object, see \link{create_vocabulary}.
 #' @export
 vocab_vectorizer = function(vocabulary) {
-  vectorizer = function(iterator, grow_dtm, skip_grams_window_context, window_size) {
+  vectorizer = function(iterator, grow_dtm, skip_grams_window_context, window_size, weights) {
     vocab_corpus = new(VocabCorpus,
                         vocab = vocabulary$vocab$terms,
                         ngram_min = vocabulary$ngram[["ngram_min"]],
@@ -78,7 +78,7 @@ vocab_vectorizer = function(vocabulary) {
                         delim = vocabulary$sep_ngram)
 
     attr(vocab_corpus, 'ids') = character(0)
-    corpus_insert(vocab_corpus, iterator, grow_dtm, skip_grams_window_context, window_size)
+    corpus_insert(vocab_corpus, iterator, grow_dtm, skip_grams_window_context, window_size, weights)
   }
   vectorizer
 }
@@ -98,14 +98,14 @@ hash_vectorizer = function(hash_size = 2 ^ 18,
                            signed_hash = FALSE) {
   stopifnot(is.numeric(ngram) && length(ngram) == 2 && ngram[[2]] >= ngram[[1]])
 
-  vectorizer = function(iterator, grow_dtm, skip_grams_window_context, window_size) {
+  vectorizer = function(iterator, grow_dtm, skip_grams_window_context, window_size, weights) {
     hash_corpus = new(HashCorpus,
                        hash_size = hash_size,
                        ngram_min = ngram[[1]],
                        ngram_max = ngram[[2]],
                        signed_hash)
     attr(hash_corpus, 'ids') = character(0)
-    corpus_insert(hash_corpus, iterator, grow_dtm, skip_grams_window_context, window_size)
+    corpus_insert(hash_corpus, iterator, grow_dtm, skip_grams_window_context, window_size, weights)
   }
   vectorizer
 }
