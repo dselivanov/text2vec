@@ -1,8 +1,8 @@
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/text2vec)](https://cran.r-project.org/package=text2vec)
 [![Travis-CI Build Status](https://travis-ci.org/dselivanov/text2vec.svg?branch=master)](https://travis-ci.org/dselivanov/text2vec)
 [![codecov](https://codecov.io/gh/dselivanov/text2vec/branch/master/graph/badge.svg)](https://codecov.io/gh/dselivanov/text2vec/branch/master)
-[![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
-[![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/text2vec)](https://cran.r-project.org/package=text2vec)
+[![License](https://img.shields.io/badge/license-GPL%3E%3D2-brightgreen.svg)](http://www.gnu.org/licenses/gpl-2.0.html)
+[![Downloads](http://cranlogs.r-pkg.org/badges/text2vec)](https://cran.r-project.org/package=text2vec)
 [![Follow](https://img.shields.io/twitter/follow/dselivanov_.svg?style=social)](https://twitter.com/intent/follow?screen_name=dselivanov_)
 
 
