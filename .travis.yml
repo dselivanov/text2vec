@@ -14,6 +14,7 @@ addons:
     - gcc-4.9
     - g++-4.9
 before_install:
+  - echo "options(repos = c(CRAN = 'https://cran.rstudio.com'))" > ~/.Rprofile
   - mkdir ~/.R
   - echo "CXX1X=g++-4.9" > ~/.R/Makevars
 after_success:
