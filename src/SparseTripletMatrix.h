@@ -17,8 +17,9 @@
 #include <Rcpp.h>
 #include <string>
 #include <vector>
+
+#define SPP_MIX_HASH
 #include <sparsepp.h>
-#include <spp_utils.h>
 
 #include "text2vec.h"
 
@@ -33,9 +34,7 @@ namespace std {
   {
     inline uint64_t operator()(const std::pair<uint32_t, uint32_t>& k) const
     {
-      size_t seed = (uint64_t) k.first;
-      spp::hash_combine(seed, (uint64_t)k.second);
-      return seed;
+      return (uint64_t) k.first << 32 | k.second;
     }
   };
 }
