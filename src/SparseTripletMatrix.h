@@ -18,6 +18,8 @@
 #include <string>
 #include <vector>
 #include <sparsepp.h>
+#include <spp_utils.h>
+
 #include "text2vec.h"
 
 using spp::sparse_hash_map;
@@ -31,11 +33,9 @@ namespace std {
   {
     inline uint64_t operator()(const std::pair<uint32_t, uint32_t>& k) const
     {
-      //should produce no collisions
-      //http://stackoverflow.com/a/24693169/1069256
-      //return f << (CHAR_BIT * sizeof(size_t) / 2) | s;
-      //http://stackoverflow.com/questions/2768890/how-to-combine-two-32-bit-integers-into-one-64-bit-integer?lq=1
-      return (uint64_t) k.first << 32 | k.second;
+      size_t seed = (uint64_t) k.first;
+      spp::hash_combine(seed, (uint64_t)k.second);
+      return seed;
     }
   };
 }
