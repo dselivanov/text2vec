@@ -53,10 +53,9 @@ Collocations = R6::R6Class(
       else {
         it_internal = it$clone(deep = T)
       }
-      vectorizer = vocab_vectorizer(private$v, grow_dtm = FALSE,
-                                    skip_grams_window = 1L,
-                                    skip_grams_window_context = "right")
-      tcm = create_tcm(it_internal, vectorizer)
+      vectorizer = vocab_vectorizer(private$v)
+      tcm = create_tcm(it_internal, vectorizer, skip_grams_window = 1L,
+                       skip_grams_window_context = "right")
       word_counts = attr(tcm, "word_count", TRUE)
       nword = sum(word_counts)
       ii = tcm@x >= private$min_collocation_count
