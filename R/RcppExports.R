@@ -41,3 +41,7 @@ euclidean_dist <- function(x, y) {
     .Call('text2vec_euclidean_dist', PACKAGE = 'text2vec', x, y)
 }
 
+is_invalid_ptr <- function(sexp_ptr) {
+    .Call('text2vec_is_invalid_ptr', PACKAGE = 'text2vec', sexp_ptr)
+}
+

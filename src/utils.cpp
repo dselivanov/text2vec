@@ -18,6 +18,13 @@
 using namespace Rcpp;
 using namespace std;
 
+// checks if external pointer invalid
+// [[Rcpp::export]]
+int is_invalid_ptr(SEXP sexp_ptr) {
+  Rcpp::XPtr<SEXP> ptr(sexp_ptr);
+  return (ptr.get() == NULL);
+}
+
 // Get current date/time, format is YYYY-MM-DD HH:mm:ss
 const std::string currentDateTime() {
   time_t     now = time(0);

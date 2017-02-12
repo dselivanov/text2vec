@@ -132,3 +132,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// is_invalid_ptr
+int is_invalid_ptr(SEXP sexp_ptr);
+RcppExport SEXP text2vec_is_invalid_ptr(SEXP sexp_ptrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sexp_ptr(sexp_ptrSEXP);
+    rcpp_result_gen = Rcpp::wrap(is_invalid_ptr(sexp_ptr));
+    return rcpp_result_gen;
+END_RCPP
+}

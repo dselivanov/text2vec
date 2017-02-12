@@ -99,8 +99,12 @@ Collocations = R6::R6Class(
       private$phrases_ptr = create_xptr_unordered_set(private$phrases)
     },
     transform = function(it) {
-      collapse_collocations = function(x) collapse_collocations_cpp(x$tokens, private$phrases_ptr, private$sep)
+      # if pointer is invalid - init it
+      if(is_invalid_ptr(private$phrases_ptr))
+        private$phrases_ptr = create_xptr_unordered_set(private$phrases)
+
       it_internal = it$clone(deep = TRUE)
+      collapse_collocations = function(x) collapse_collocations_cpp(x$tokens, private$phrases_ptr, private$sep)
       itoken_transformer_R6$new(it_internal, collapse_collocations)
     }
   )
