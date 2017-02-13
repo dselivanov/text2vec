@@ -17,8 +17,13 @@
 // Code below is based on code from R lda package: https://github.com/slycoder/R-lda-deprecated
 // All credits should go to Jonathan Chang - https://github.com/slycoder
 // Original code is under LGPL license
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 #include "text2vec.h"
 using namespace Rcpp;
+
+
 
 // IntegerMatrix subtract_matrices(IntegerMatrix m1, IntegerMatrix m2) {
 //   IntegerMatrix res(m1.nrow(), m1.ncol());
@@ -214,6 +219,9 @@ List collapsedGibbsSampler(ListOf<IntegerMatrix> documents,
             p_sum += p[kk];
           }
         } else {
+          #ifdef _OPENMP
+          #pragma omp simd
+          #endif
           for (kk = 0; kk < n_topics; ++kk) {
             p[kk] = (document_topic_distr[n_topics * i_doc + kk] + alpha);
             p[kk] *= (topics_word_distr[kk + n_topics * word] + eta);

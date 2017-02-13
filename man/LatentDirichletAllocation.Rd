@@ -46,6 +46,7 @@ lda$get_word_vectors()
   \item{\code{$transform(x, n_iter = 100, convergence_tol = 0.005,
                check_convergence_every_n = 1)}}{ transforms new documents to topic space}
   \item{\code{$get_word_vectors()}}{get word-topic distribution}
+  \item{\code{$dump()}}{dumps model parameters}
   \item{\code{$plot(...)}}{plot LDA model using \url{https://cran.r-project.org/package=LDAvis} package.
                \code{...} will be passed to \code{LDAvis::createJSON} and \code{LDAvis::serVis} functions}
 }
