@@ -25,11 +25,13 @@ such that ngram_min <= n <= ngram_max will be used.}
 hash-function to reduce collisions when hashing.}
 }
 \value{
-A vectorizer \code{function}
+A vectorizer \code{object} (closure).
 }
 \description{
-This function creates a text vectorizer function
-which is used in constructing a dtm/tcm.
+This function creates an object (closure) which defines on how to
+transform list of tokens into vector space - i.e. how to map words to indices.
+It supposed to be used only as argument to \link{create_dtm}, \link{create_tcm},
+\link{create_vocabulary}.
 }
 \examples{
 data("movie_review")

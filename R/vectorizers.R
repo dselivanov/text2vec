@@ -40,9 +40,11 @@ corpus_insert = function(corpus, iterator, grow_dtm, skip_grams_window_context, 
 
 #' @name vectorizers
 #' @title Vocabulary and hash vectorizers
-#' @description This function creates a text vectorizer function
-#' which is used in constructing a dtm/tcm.
-#' @return A vectorizer \code{function}
+#' @description This function creates an object (closure) which defines on how to
+#' transform list of tokens into vector space - i.e. how to map words to indices.
+#' It supposed to be used only as argument to \link{create_dtm}, \link{create_tcm},
+#' \link{create_vocabulary}.
+#' @return A vectorizer \code{object} (closure).
 #' @seealso \link{create_dtm} \link{create_tcm} \link{create_vocabulary}
 #' @examples
 #' data("movie_review")
