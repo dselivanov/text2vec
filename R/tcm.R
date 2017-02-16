@@ -20,7 +20,6 @@
 #  \code{Corpus} object.
 # @param corpus \code{HashCorpus} or \code{VocabCorpus} object. See
 #  \link{vectorizers} for details.
-# @seealso \link{create_corpus}
 # @examples
 # \dontrun{
 # txt = movie_review[['review']][1:1000]

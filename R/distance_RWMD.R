@@ -73,9 +73,10 @@ text2vec_dist = R6::R6Class(
 #'   word_tokenizer
 #' v = create_vocabulary(itoken(tokens)) %>%
 #'   prune_vocabulary(term_count_min = 5, doc_proportion_max = 0.5)
-#' corpus = create_corpus(itoken(tokens), vocab_vectorizer(v, skip_grams_window = 5))
-#' dtm = get_dtm(corpus)
-#' tcm = get_tcm(corpus)
+#' it = itoken(tokens)
+#' vectorizer = vocab_vectorizer(v)
+#' dtm = create_dtm(it, vectorizer)
+#' tcm = create_tcm(it, vectorizer, skip_grams_window = 5)
 #' glove_model = GloVe$new(word_vectors_size = 50, vocabulary = v, x_max = 10)
 #' glove_model$fit(tcm, n_iter = 10)
 #' wv = glove_model$get_word_vectors()

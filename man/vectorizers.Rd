@@ -29,7 +29,7 @@ A vectorizer \code{function}
 }
 \description{
 This function creates a text vectorizer function
-which is used in constructing a dtm/tcm/corpus.
+which is used in constructing a dtm/tcm.
 }
 \examples{
 data("movie_review")

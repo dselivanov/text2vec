@@ -41,7 +41,7 @@ corpus_insert = function(corpus, iterator, grow_dtm, skip_grams_window_context, 
 #' @name vectorizers
 #' @title Vocabulary and hash vectorizers
 #' @description This function creates a text vectorizer function
-#' which is used in constructing a dtm/tcm/corpus.
+#' which is used in constructing a dtm/tcm.
 #' @return A vectorizer \code{function}
 #' @seealso \link{create_dtm} \link{create_tcm} \link{create_vocabulary}
 #' @examples
