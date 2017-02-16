@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Dmitriy Selivanov" />
+
+<meta name="date" content="2016-11-01" />
+
+<title>Documents similarity</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #0000ff; } /* Keyword */
+code > span.ch { color: #008080; } /* Char */
+code > span.st { color: #008080; } /* String */
+code > span.co { color: #008000; } /* Comment */
+code > span.ot { color: #ff4000; } /* Other */
+code > span.al { color: #ff0000; } /* Alert */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #008000; font-weight: bold; } /* Warning */
+code > span.cn { } /* Constant */
+code > span.sc { color: #008080; } /* SpecialChar */
+code > span.vs { color: #008080; } /* VerbatimString */
+code > span.ss { color: #008080; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { } /* Variable */
+code > span.cf { color: #0000ff; } /* ControlFlow */
+code > span.op { } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #ff4000; } /* Preprocessor */
+code > span.do { color: #008000; } /* Documentation */
+code > span.an { color: #008000; } /* Annotation */
+code > span.cv { color: #008000; } /* CommentVar */
+code > span.at { } /* Attribute */
+code > span.in { color: #008000; } /* Information */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.9em;
+  padding-left: 5px;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+  padding-left: 10px;
+}
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">text2vec</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="vectorization.html">Vectorization</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    GloVe
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="glove.html">GloVe</a>
+    </li>
+    <li>
+      <a href="glove-cli.html">GloVe-CLI</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="topic_modeling.html">Topic modeling</a>
+</li>
+<li>
+  <a href="similarity.html">Similarity</a>
+</li>
+<li>
+  <a href="api.html">API</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dselivanov/text2vec">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://stackoverflow.com/questions/tagged/text2vec">
+    <span class="fa fa-stack-overflow"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Documents similarity</h1>
+<h4 class="author"><em>Dmitriy Selivanov</em></h4>
+<h4 class="date"><em>2016-11-01</em></h4>
+
+</div>
+
+
+<div id="documents-similarity" class="section level1">
+<h1>Documents similarity</h1>
+<p>Document similarity (or distance between documents) is a one of the central themes in Information Retrieval. How humans usually define how similar are documents? Usually documents treated as similar if they are semantically close and describe similar concepts. On other hand “similarity” can be used in context of duplicate detection. We will review several common approaches.</p>
+<div id="api" class="section level2">
+<h2>API</h2>
+<p>text2vec package provides 2 set of functions for measuring various distances/similarity in a unified way. All methods are written with special attention to computational performance and memory efficiency.</p>
+<ol style="list-style-type: decimal">
+<li><code>sim2(x, y, method)</code> - calculates similarity between <strong>each row</strong> of matrix <code>x</code> and <strong>each row</strong> of matrix <code>y</code> using given <code>method</code>.</li>
+<li><code>psim2(x, y, method)</code> - calculates <strong>p</strong>arallel similarity between rows of matrix <code>x</code> and <strong>corresponding</strong> rows of matrix <code>y</code> using given <code>method.</code></li>
+<li><code>dist2(x, y, method)</code> - calculates distance/dissimilarity between <strong>each row</strong> of matrix <code>x</code> and <strong>each row</strong> of matrix <code>y</code> using given <code>method</code>.</li>
+<li><code>pdist2(x, y, method)</code> - calculates <strong>p</strong>arallel distance/dissimilarity between rows of matrix <code>x</code> and <strong>corresponding</strong> rows of matrix <code>y</code> using given <code>method.</code></li>
+</ol>
+<p>Methods have siffix <code>2</code> in their names because in contrast to base <code>dist()</code> function they work with two matrces instead of one.</p>
+<p>Following methods are implemented at the moment:</p>
+<ol style="list-style-type: decimal">
+<li><em>Jaccard distance</em></li>
+<li><em>Cosine distance</em></li>
+<li><em>Euclidean distance</em></li>
+<li><em>Relaxed Word Mover’s Distance</em></li>
+</ol>
+</div>
+</div>
+<div id="practical-examples" class="section level1">
+<h1>Practical examples</h1>
+<p>As usual we will use built-in <code>text2vec::moview_review</code> dataset. Let’s clean it a little bit:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(stringr)
+<span class="kw">library</span>(text2vec)
+<span class="kw">data</span>(<span class="st">&quot;movie_review&quot;</span>)
+<span class="co"># select 500 rows for faster running times</span>
+movie_review =<span class="st"> </span>movie_review[<span class="dv">1</span>:<span class="dv">500</span>, ]
+prep_fun =<span class="st"> </span>function(x) {
+  x %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="co"># make text lower case</span>
+<span class="st">    </span>str_to_lower %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="co"># remove non-alphanumeric symbols</span>
+<span class="st">    </span><span class="kw">str_replace_all</span>(<span class="st">&quot;[^[:alnum:]]&quot;</span>, <span class="st">&quot; &quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="co"># collapse multiple spaces</span>
+<span class="st">    </span><span class="kw">str_replace_all</span>(<span class="st">&quot;</span><span class="ch">\\</span><span class="st">s+&quot;</span>, <span class="st">&quot; &quot;</span>)
+}
+movie_review$review_clean =<span class="st"> </span><span class="kw">prep_fun</span>(movie_review$review)</code></pre></div>
+<p>Now let’s define two sets of documents on which we will evaluate our distance models:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc_set_1 =<span class="st"> </span>movie_review[<span class="dv">1</span>:<span class="dv">300</span>, ]
+it1 =<span class="st"> </span><span class="kw">itoken</span>(doc_set_1$review_clean, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+
+<span class="co"># specially take different number of docs in second set</span>
+doc_set_2 =<span class="st"> </span>movie_review[<span class="dv">301</span>:<span class="dv">500</span>, ]
+it2 =<span class="st"> </span><span class="kw">itoken</span>(doc_set_2$review_clean, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<p>We will compare documents in a vector space. So we need to define common space and project documents to it. We will use vocabulary-based vectorization vectorization for better interpretability:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">it =<span class="st"> </span><span class="kw">itoken</span>(movie_review$review_clean, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it) %&gt;%<span class="st"> </span><span class="kw">prune_vocabulary</span>(<span class="dt">doc_proportion_max =</span> <span class="fl">0.1</span>, <span class="dt">term_count_min =</span> <span class="dv">5</span>)
+vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(v)</code></pre></div>
+<div id="jaccard-similarity" class="section level2">
+<h2>Jaccard similarity</h2>
+<p><em>Jaccard similarity</em> is a simple but intuitive measure of similarity between two sets.</p>
+<p><span class="math display">\[J(doc_1, doc_2) = \frac{doc_1 \cap doc_2}{doc_1 \cup doc_2}\]</span> For documents we measure it as proportion of number of common words to number of unique words in both documets. In the field of NLP <em>jaccard similarity</em> can be particularly useful for duplicates detection. <em>text2vec</em> however provides generic efficient realization which can be used in many other applications.</p>
+<p>For calculation of <em>jaccard similarity</em> between 2 sets of documents user have to provide DTM for each them (DTMs should be in the same vector space!):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># they will be in the same space because we use same vectorizer</span>
+<span class="co"># hash_vectorizer will also work fine</span>
+dtm1 =<span class="st"> </span><span class="kw">create_dtm</span>(it1, vectorizer)
+<span class="kw">dim</span>(dtm1)</code></pre></div>
+<pre><code>## [1]  300 2339</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dtm2 =<span class="st"> </span><span class="kw">create_dtm</span>(it2, vectorizer)
+<span class="kw">dim</span>(dtm2)</code></pre></div>
+<pre><code>## [1]  200 2339</code></pre>
+<p>Once we have representation of documents in vector space we are almost done. One thing remains - call <code>sim2()</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_jac_sim =<span class="st"> </span><span class="kw">sim2</span>(dtm1, dtm2, <span class="dt">method =</span> <span class="st">&quot;jaccard&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;none&quot;</span>)</code></pre></div>
+<p>Check result:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(d1_d2_jac_sim)</code></pre></div>
+<pre><code>## [1] 300 200</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_jac_sim[<span class="dv">1</span>:<span class="dv">2</span>, <span class="dv">1</span>:<span class="dv">5</span>]</code></pre></div>
+<pre><code>## 2 x 5 sparse Matrix of class &quot;dgCMatrix&quot;
+##            1 2          3           4          5
+## 1 0.02142857 . 0.02362205 0.007575758 0.02597403
+## 2 0.01204819 . 0.02898551 0.013698630 0.02061856</code></pre>
+<p>Also we can comptute <em>“parallel”</em> similarity - similarity between corresponding rows of matrices (matrices should have identical shapes):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dtm1_2 =<span class="st"> </span>dtm1[<span class="dv">1</span>:<span class="dv">200</span>, ]
+dtm2_2 =<span class="st"> </span>dtm2[<span class="dv">1</span>:<span class="dv">200</span>, ]
+d1_d2_jac_psim =<span class="st"> </span><span class="kw">psim2</span>(dtm1_2, dtm2_2, <span class="dt">method =</span> <span class="st">&quot;jaccard&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;none&quot;</span>)
+<span class="kw">str</span>(d1_d2_jac_psim)</code></pre></div>
+<pre><code>##  Named num [1:200] 0.02143 0 0.00735 0 0.03311 ...
+##  - attr(*, &quot;names&quot;)= chr [1:200] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...</code></pre>
+<p>We define <em>Jaccard distance</em> or <em>Jaccard dissimilarity</em> as <span class="math inline">\(1 - similarity(doc_1, doc_2)\)</span>. <code>sim2()</code> and <code>psim2()</code> have corresponding companion functions <code>dist2()</code>, <code>pdist2()</code> which computes dissimilarity. Note however that in many cases similarity between documents is 0. <code>sim2</code> function exploit this advantage - result matrix will be sparse. Use <code>dist2()</code> on large sparse matrices carefully.</p>
+</div>
+<div id="cosine-similarity" class="section level2">
+<h2>Cosine similarity</h2>
+<p>Classical approach from computational linguistics is to measure similarity based on the content overlap between documents. For this we will represent documents as bag-of-words, so each document will be a sparse vector. And define measure of overlap as angle between vectors: <span class="math display">\[similarity(doc_1, doc_2) = cos(\theta) = \frac{doc_1  doc_2}{\lvert doc_1\rvert \lvert doc_2\rvert}\]</span> By <em>cosine distance/dissimilarity</em> we assume following: <span class="math display">\[distance(doc_1, doc_2) = 1 - similarity(doc_1, doc_2)\]</span> It is important to note, however, that this is not a proper distance metric in a mathematical sense as it does not have the triangle inequality property and it violates the coincidence axiom.</p>
+<p>Calculation of cosine similarity is similar to jaccard similarity:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_cos_sim =<span class="st"> </span><span class="kw">sim2</span>(dtm1, dtm2, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)</code></pre></div>
+<p>Check result:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(d1_d2_cos_sim)</code></pre></div>
+<pre><code>## [1] 300 200</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_cos_sim[<span class="dv">1</span>:<span class="dv">2</span>, <span class="dv">1</span>:<span class="dv">5</span>]</code></pre></div>
+<pre><code>## 2 x 5 sparse Matrix of class &quot;dgCMatrix&quot;
+##            1 2          3           4          5
+## 1 0.02703999 . 0.05063299 0.009500143 0.02753954
+## 2 0.02440658 . 0.06528840 0.034299717 0.03977196</code></pre>
+<div id="cosine-similarity-with-tf-idf" class="section level3">
+<h3>Cosine similarity with Tf-Idf</h3>
+<p>It can be useful to measure similarity not on vanilla bag-of-words matrix, but on transformed one. One choice is to apply tf-idf transformation. First let’t create tf-idf model:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer)
+tfidf =<span class="st"> </span>TfIdf$<span class="kw">new</span>()
+dtm_tfidf =<span class="st"> </span><span class="kw">fit_transform</span>(dtm, tfidf)</code></pre></div>
+<p>Calculate similarities between all rows of <code>dtm_tfidf</code> matrix:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_tfidf_cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> dtm_tfidf, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
+d1_d2_tfidf_cos_sim[<span class="dv">1</span>:<span class="dv">2</span>, <span class="dv">1</span>:<span class="dv">5</span>]</code></pre></div>
+<pre><code>## 2 x 5 sparse Matrix of class &quot;dgCMatrix&quot;
+##             1           2          3          4          5
+## 1 1.000000000 0.007850872 0.02380155 0.02864296 0.01510648
+## 2 0.007850872 1.000000000 0.01115547 .          .</code></pre>
+</div>
+<div id="cosine-similarity-with-lsa" class="section level3">
+<h3>Cosine similarity with LSA</h3>
+<p>Usually tf-idf/bag-of-words matrices contain a lot of noise. Applying LSA model can help with this problem, so you can achieve better quality similarities:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lsa =<span class="st"> </span>LSA$<span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">100</span>)
+dtm_tfidf_lsa =<span class="st"> </span><span class="kw">fit_transform</span>(dtm_tfidf, lsa)</code></pre></div>
+<p>Calculate similarities between all rows of <code>dtm_tfidf_lsa</code> matrix:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_tfidf_cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> dtm_tfidf_lsa, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
+d1_d2_tfidf_cos_sim[<span class="dv">1</span>:<span class="dv">2</span>, <span class="dv">1</span>:<span class="dv">5</span>]</code></pre></div>
+<pre><code>##           1         2         3          4          5
+## 1 1.0000000 0.1699775 0.3688870 0.32099498 0.40136087
+## 2 0.1699775 1.0000000 0.2255526 0.03386678 0.05704895</code></pre>
+<p>And “parallel” similarities:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">1</span>:<span class="dv">250</span>, ]
+y =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">251</span>:<span class="dv">500</span>, ]
+<span class="kw">head</span>(<span class="kw">psim2</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>))</code></pre></div>
+<pre><code>##          1          2          3          4          5          6 
+## 0.21685062 0.19825576 0.30503467 0.10040947 0.29249774 0.03675728</code></pre>
+</div>
+</div>
+<div id="euclidean-distance" class="section level2">
+<h2>Euclidean distance</h2>
+<p>Euclidean <strong>distance</strong> is not so useful in NLP field as Jaccard or Cosine similarities. But it always worth to try different measures. In text2vec it can by computed only on dense matrices, here is example:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">1</span>:<span class="dv">300</span>, ]
+y =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">1</span>:<span class="dv">200</span>, ]
+m1 =<span class="st"> </span><span class="kw">dist2</span>(x, y, <span class="dt">method =</span> <span class="st">&quot;euclidean&quot;</span>)</code></pre></div>
+<p>Also we can apply different row normalization techniques (by default was <code>&quot;l2&quot;</code> in example above):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m2 =<span class="st"> </span><span class="kw">dist2</span>(x, y, <span class="dt">method =</span> <span class="st">&quot;euclidean&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l1&quot;</span>)
+m3 =<span class="st"> </span><span class="kw">dist2</span>(x, y, <span class="dt">method =</span> <span class="st">&quot;euclidean&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;none&quot;</span>)</code></pre></div>
+</div>
+</div>
+
+
+
+
+
+<footer class="footer">
+  <div class="text-muted"><strong>text2vec</strong> is created by <a href="http://www.dsnotes.com">Dmitry Selivanov</a> and contributors. &copy;  2016.</div>
+  <div class="text-muted"> If you have found any BUGS please report them <a href="https://github.com/dselivanov/text2vec/issues">here</a>.</div>
+</footer>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+
+  ga('create', 'UA-56994099-2', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

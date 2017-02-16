@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Dmitriy Selivanov" />
+
+<meta name="date" content="2016-11-01" />
+
+<title>Vectorization</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #0000ff; } /* Keyword */
+code > span.ch { color: #008080; } /* Char */
+code > span.st { color: #008080; } /* String */
+code > span.co { color: #008000; } /* Comment */
+code > span.ot { color: #ff4000; } /* Other */
+code > span.al { color: #ff0000; } /* Alert */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #008000; font-weight: bold; } /* Warning */
+code > span.cn { } /* Constant */
+code > span.sc { color: #008080; } /* SpecialChar */
+code > span.vs { color: #008080; } /* VerbatimString */
+code > span.ss { color: #008080; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { } /* Variable */
+code > span.cf { color: #0000ff; } /* ControlFlow */
+code > span.op { } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #ff4000; } /* Preprocessor */
+code > span.do { color: #008000; } /* Documentation */
+code > span.an { color: #008000; } /* Annotation */
+code > span.cv { color: #008000; } /* CommentVar */
+code > span.at { } /* Attribute */
+code > span.in { color: #008000; } /* Information */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.9em;
+  padding-left: 5px;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+  padding-left: 10px;
+}
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">text2vec</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="vectorization.html">Vectorization</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    GloVe
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="glove.html">GloVe</a>
+    </li>
+    <li>
+      <a href="glove-cli.html">GloVe-CLI</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="topic_modeling.html">Topic modeling</a>
+</li>
+<li>
+  <a href="similarity.html">Similarity</a>
+</li>
+<li>
+  <a href="api.html">API</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dselivanov/text2vec">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://stackoverflow.com/questions/tagged/text2vec">
+    <span class="fa fa-stack-overflow"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Vectorization</h1>
+<h4 class="author"><em>Dmitriy Selivanov</em></h4>
+<h4 class="date"><em>2016-11-01</em></h4>
+
+</div>
+
+
+<div id="text-analysis-pipeline" class="section level1">
+<h1>Text analysis pipeline</h1>
+<p>Most text mining and NLP modeling use <a href="https://en.wikipedia.org/wiki/Bag-of-words_model">bag of words</a> or <a href="https://en.wikipedia.org/wiki/N-gram">bag of n-grams</a> methods. Despite their simplicity, these models usually demonstrate good performance on text categorization and classification tasks. But in contrast to their theoretical simplicity and practical efficiency building bag-of-words models involves technical challenges. This is especially the case in R because of its copy-on-modify semantics.</p>
+<p>Let’s briefly review some of the steps in a typical text analysis pipeline:</p>
+<ol style="list-style-type: decimal">
+<li>The researcher usually begins by constructing a <a href="https://en.wikipedia.org/wiki/Document-term_matrix">document-term matrix</a> (DTM) or term-co-occurrence matrix (TCM) from input documents. In other words, the first step is to vectorize text by creating a map from words or n-grams to a <a href="https://en.wikipedia.org/wiki/Vector_space_model">vector space</a>.</li>
+<li>The researcher fits a model to that DTM. These models might include text classification, topic modeling, similarity search, etc. Fitting the model will include tuning and validating the model.</li>
+<li>Finally the researcher applies the model to new data.</li>
+</ol>
+<p>In this vignette we will primarily discuss the first step. Texts themselves can take up a lot of memory, but vectorized texts usually do not, because they are stored as sparse matrices. Because of R’s copy-on-modify semantics, it is not easy to iteratively grow a DTM. Thus constructing a DTM, even for a small collections of documents, can be a serious bottleneck for analysts and researchers. It involves reading the whole collection of text documents into RAM and processing it as single vector, which can easily increase memory use by a factor of 2 to 4. The <em>text2vec</em> package solves this problem by providing a better way of constructing a document-term matrix.</p>
+<p>Let’s demonstrate package core functionality by applying it to a real case problem - sentiment analysis.</p>
+<p><em>text2vec</em> package provides the <code>movie_review</code> dataset. It consists of 5000 movie reviews, each of which is marked as positive or negative. We will also use the <a href="https://cran.r-project.org/package=data.table">data.table</a> package for data wrangling.</p>
+<p>First of all let’s split out dataset into two parts - <em>train</em> and <em>test</em>. We will show how to perform data manipulations on <em>train</em> set and then apply exactly the same manipulations on the <em>test</em> set:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(text2vec)
+<span class="kw">library</span>(data.table)
+<span class="kw">data</span>(<span class="st">&quot;movie_review&quot;</span>)
+<span class="kw">setDT</span>(movie_review)
+<span class="kw">setkey</span>(movie_review, id)
+<span class="kw">set.seed</span>(2016L)
+all_ids =<span class="st"> </span>movie_review$id
+train_ids =<span class="st"> </span><span class="kw">sample</span>(all_ids, <span class="dv">4000</span>)
+test_ids =<span class="st"> </span><span class="kw">setdiff</span>(all_ids, train_ids)
+train =<span class="st"> </span>movie_review[<span class="kw">J</span>(train_ids)]
+test =<span class="st"> </span>movie_review[<span class="kw">J</span>(test_ids)]</code></pre></div>
+</div>
+<div id="vectorization" class="section level1">
+<h1>Vectorization</h1>
+<p>To represent documents in vector space, we first have to create mappings from terms to term IDS. We call them <em>terms</em> instead of <em>words</em> because they can be arbitrary n-grams not just single words. We represent a set of documents as a sparse matrix, where each row corresponds to a document and each column corresponds to a term. This can be done in 2 ways: using the vocabulary itself or by <a href="https://en.wikipedia.org/wiki/Feature_hashing">feature hashing</a>.</p>
+<div id="vocabulary-based-vectorization" class="section level2">
+<h2>Vocabulary-based vectorization</h2>
+<p>Let’s first create a vocabulary-based DTM. Here we collect unique terms from all documents and mark each of them with a unique ID using the <code>create_vocabulary()</code> function. We use an iterator to create the vocabulary.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># define preprocessing function and tokenization fucntion</span>
+prep_fun =<span class="st"> </span>tolower
+tok_fun =<span class="st"> </span>word_tokenizer
+
+it_train =<span class="st"> </span><span class="kw">itoken</span>(train$review, 
+             <span class="dt">preprocessor =</span> prep_fun, 
+             <span class="dt">tokenizer =</span> tok_fun, 
+             <span class="dt">ids =</span> train$id, 
+             <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_train)</code></pre></div>
+<p>What was done here?</p>
+<ol style="list-style-type: decimal">
+<li>We created an iterator over tokens with the <code>itoken()</code> function. All functions prefixed with <code>create_</code> work with these iterators. R users might find this idiom unusual, but the iterator abstraction allows us to hide most of details about input and to process data in memory-friendly chunks.</li>
+<li>We built the vocabulary with the <code>create_vocabulary()</code> function.</li>
+</ol>
+<p>Alternatively, we could create list of tokens and reuse it in further steps. Each element of the list should represent a document, and each element should be a character vector of tokens.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">train_tokens =<span class="st"> </span>train$review %&gt;%<span class="st"> </span>
+<span class="st">  </span>prep_fun %&gt;%<span class="st"> </span>
+<span class="st">  </span>tok_fun
+it_train =<span class="st"> </span><span class="kw">itoken</span>(train_tokens, 
+                  <span class="dt">ids =</span> train$id,
+                  <span class="co"># turn off progressbar because it won&#39;t look nice in rmd</span>
+                  <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+
+vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_train)
+vocab</code></pre></div>
+<pre><code>## Number of docs: 4000 
+## 0 stopwords:  ... 
+## ngram_min = 1; ngram_max = 1 
+## Vocabulary: 
+##                 terms terms_counts doc_counts
+##     1:     overturned            1          1
+##     2: disintegration            1          1
+##     3:         vachon            1          1
+##     4:     interfered            1          1
+##     5:      michonoku            1          1
+##    ---                                       
+## 35592:        penises            2          2
+## 35593:        arabian            1          1
+## 35594:       personal          102         94
+## 35595:            end          921        743
+## 35596:        address           10         10</code></pre>
+<p>Note that <em>text2vec</em> provides a few tokenizer functions (see <code>?tokenizers</code>). These are just simple wrappers for the <code>base::gsub()</code> function and are not very fast or flexible. If you need something smarter or faster you can use the <a href="https://cran.r-project.org/package=tokenizers">tokenizers</a> package which will cover most use cases, or write your own tokenizer using the <a href="https://cran.r-project.org/package=stringi">stringi</a> package.</p>
+<p>Now that we have a vocabulary, we can construct a document-term matrix.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(vocab)
+t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
+dtm_train =<span class="st"> </span><span class="kw">create_dtm</span>(it_train, vectorizer)
+<span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
+<pre><code>## Time difference of 0.593056 secs</code></pre>
+<p>Now we have a DTM and can check its dimensions.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(dtm_train)</code></pre></div>
+<pre><code>## [1]  4000 35596</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">identical</span>(<span class="kw">rownames</span>(dtm_train), train$id)</code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>As you can see, the DTM has rows, equal to the number of documents, and columns, equal to the number of unique terms.</p>
+<p>Now we are ready to fit our first model. Here we will use the <a href="https://cran.r-project.org/package=glmnet">glmnet</a> package to fit a logistic regression model with an L1 penalty and 4 fold cross-validation.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(glmnet)
+NFOLDS =<span class="st"> </span><span class="dv">4</span>
+t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
+glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]], 
+                              <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>, 
+                              <span class="co"># L1 penalty</span>
+                              <span class="dt">alpha =</span> <span class="dv">1</span>,
+                              <span class="co"># interested in the area under ROC curve</span>
+                              <span class="dt">type.measure =</span> <span class="st">&quot;auc&quot;</span>,
+                              <span class="co"># 5-fold cross-validation</span>
+                              <span class="dt">nfolds =</span> NFOLDS,
+                              <span class="co"># high value is less accurate, but has faster training</span>
+                              <span class="dt">thresh =</span> <span class="fl">1e-3</span>,
+                              <span class="co"># again lower number of iterations for faster training</span>
+                              <span class="dt">maxit =</span> <span class="fl">1e3</span>)
+<span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
+<pre><code>## Time difference of 3.569187 secs</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(glmnet_classifier)</code></pre></div>
+<p><img src="vectorization_files/figure-html/fit_1-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">paste</span>(<span class="st">&quot;max AUC =&quot;</span>, <span class="kw">round</span>(<span class="kw">max</span>(glmnet_classifier$cvm), <span class="dv">4</span>)))</code></pre></div>
+<pre><code>## [1] &quot;max AUC = 0.923&quot;</code></pre>
+<p>We have successfully fit a model to our DTM. Now we can check the model’s performance on test data. Note that we use exactly the same functions from prepossessing and tokenization. Also we reuse/use the same <code>vectorizer</code> - function which maps terms to indices.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Note that most text2vec functions are pipe friendly!</span>
+it_test =<span class="st"> </span>test$review %&gt;%<span class="st"> </span>
+<span class="st">  </span>prep_fun %&gt;%<span class="st"> </span>
+<span class="st">  </span>tok_fun %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">itoken</span>(<span class="dt">ids =</span> test$id, 
+         <span class="co"># turn off progressbar because it won&#39;t look nice in rmd</span>
+         <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+
+dtm_test =<span class="st"> </span><span class="kw">create_dtm</span>(it_test, vectorizer)
+
+preds =<span class="st"> </span><span class="kw">predict</span>(glmnet_classifier, dtm_test, <span class="dt">type =</span> <span class="st">&#39;response&#39;</span>)[,<span class="dv">1</span>]
+glmnet:::<span class="kw">auc</span>(test$sentiment, preds)</code></pre></div>
+<pre><code>## [1] 0.916697</code></pre>
+<p>As we can see, performance on the test data is roughly the same as we expect from cross-validation.</p>
+<div id="pruning-vocabulary" class="section level3">
+<h3>Pruning vocabulary</h3>
+<p>We can note, however, that the training time for our model was quite high. We can reduce it and also significantly improve accuracy by pruning the vocabulary.</p>
+<p>For example, we can find words <em>“a”, “the”, “in”, “I”, “you”, “on”</em>, etc in almost all documents, but they do not provide much useful information. Usually such words are called <a href="https://en.wikipedia.org/wiki/Stop_words">stop words</a>. On the other hand, the corpus also contains very uncommon terms, which are contained in only a few documents. These terms are also useless, because we don’t have sufficient statistics for them. Here we will remove pre-defined stopwords, very common and very unusual terms.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stop_words =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;i&quot;</span>, <span class="st">&quot;me&quot;</span>, <span class="st">&quot;my&quot;</span>, <span class="st">&quot;myself&quot;</span>, <span class="st">&quot;we&quot;</span>, <span class="st">&quot;our&quot;</span>, <span class="st">&quot;ours&quot;</span>, <span class="st">&quot;ourselves&quot;</span>, <span class="st">&quot;you&quot;</span>, <span class="st">&quot;your&quot;</span>, <span class="st">&quot;yours&quot;</span>)
+t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
+vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_train, <span class="dt">stopwords =</span> stop_words)
+<span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
+<pre><code>## Time difference of 0.4054861 secs</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pruned_vocab =<span class="st"> </span><span class="kw">prune_vocabulary</span>(vocab, 
+                                 <span class="dt">term_count_min =</span> <span class="dv">10</span>, 
+                                 <span class="dt">doc_proportion_max =</span> <span class="fl">0.5</span>,
+                                 <span class="dt">doc_proportion_min =</span> <span class="fl">0.001</span>)
+vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(pruned_vocab)
+<span class="co"># create dtm_train with new pruned vocabulary vectorizer</span>
+t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
+dtm_train  =<span class="st"> </span><span class="kw">create_dtm</span>(it_train, vectorizer)
+<span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
+<pre><code>## Time difference of 0.5097289 secs</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(dtm_train)</code></pre></div>
+<pre><code>## [1] 4000 6585</code></pre>
+<p>Note that the new DTM has many fewer columns than the original DTM. This usually leads to both accuracy improvement (because we removed “noise”) and reduction of the training time.</p>
+<p>Also we need to create DTM for test data with the same vectorizer:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dtm_test   =<span class="st"> </span><span class="kw">create_dtm</span>(it_test, vectorizer)
+<span class="kw">dim</span>(dtm_test)</code></pre></div>
+<pre><code>## [1] 1000 6585</code></pre>
+</div>
+</div>
+<div id="n-grams" class="section level2">
+<h2>N-grams</h2>
+<p>Can we improve the model? Definitely - we can use n-grams instead of words. Here we will use up to 2-grams:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
+vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_train, <span class="dt">ngram =</span> <span class="kw">c</span>(1L, 2L))
+<span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
+<pre><code>## Time difference of 1.600132 secs</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vocab =<span class="st"> </span>vocab %&gt;%<span class="st"> </span><span class="kw">prune_vocabulary</span>(<span class="dt">term_count_min =</span> <span class="dv">10</span>, 
+                   <span class="dt">doc_proportion_max =</span> <span class="fl">0.5</span>)
+
+bigram_vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(vocab)
+
+dtm_train =<span class="st"> </span><span class="kw">create_dtm</span>(it_train, bigram_vectorizer)
+
+t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
+glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]], 
+                 <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>, 
+                 <span class="dt">alpha =</span> <span class="dv">1</span>,
+                 <span class="dt">type.measure =</span> <span class="st">&quot;auc&quot;</span>,
+                 <span class="dt">nfolds =</span> NFOLDS,
+                 <span class="dt">thresh =</span> <span class="fl">1e-3</span>,
+                 <span class="dt">maxit =</span> <span class="fl">1e3</span>)
+<span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
+<pre><code>## Time difference of 2.909883 secs</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(glmnet_classifier)</code></pre></div>
+<p><img src="vectorization_files/figure-html/ngram_dtm_1-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">paste</span>(<span class="st">&quot;max AUC =&quot;</span>, <span class="kw">round</span>(<span class="kw">max</span>(glmnet_classifier$cvm), <span class="dv">4</span>)))</code></pre></div>
+<pre><code>## [1] &quot;max AUC = 0.9217&quot;</code></pre>
+<p>Seems that usage of n-grams improved our model a little bit more. Let’s check performance on test dataset:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># apply vectorizer</span>
+dtm_test =<span class="st"> </span><span class="kw">create_dtm</span>(it_test, bigram_vectorizer)
+preds =<span class="st"> </span><span class="kw">predict</span>(glmnet_classifier, dtm_test, <span class="dt">type =</span> <span class="st">&#39;response&#39;</span>)[,<span class="dv">1</span>]
+glmnet:::<span class="kw">auc</span>(test$sentiment, preds)</code></pre></div>
+<pre><code>## [1] 0.9268974</code></pre>
+<p>Further tuning is left up to the reader.</p>
+</div>
+<div id="feature-hashing" class="section level2">
+<h2>Feature hashing</h2>
+<p>If you are not familiar with feature hashing (the so-called “hashing trick”) I recommend you start with the <a href="https://en.wikipedia.org/wiki/Feature_hashing">Wikipedia article</a>, then read the <a href="http://alex.smola.org/papers/2009/Weinbergeretal09.pdf">original paper</a> by a Yahoo! research team. This technique is very fast because we don’t have to perform a lookup over an associative array. Another benefit is that it leads to a very low memory footprint, since we can map an arbitrary number of features into much more compact space. This method was popularized by Yahoo! and is widely used in <a href="https://github.com/JohnLangford/vowpal_wabbit/">Vowpal Wabbit</a>.</p>
+<p>Here is how to use feature hashing in <em>text2vec</em>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">h_vectorizer =<span class="st"> </span><span class="kw">hash_vectorizer</span>(<span class="dt">hash_size =</span> <span class="dv">2</span> ^<span class="st"> </span><span class="dv">14</span>, <span class="dt">ngram =</span> <span class="kw">c</span>(1L, 2L))
+
+t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
+dtm_train =<span class="st"> </span><span class="kw">create_dtm</span>(it_train, h_vectorizer)
+<span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
+<pre><code>## Time difference of 1.172304 secs</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
+glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]], 
+                             <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>, 
+                             <span class="dt">alpha =</span> <span class="dv">1</span>,
+                             <span class="dt">type.measure =</span> <span class="st">&quot;auc&quot;</span>,
+                             <span class="dt">nfolds =</span> <span class="dv">5</span>,
+                             <span class="dt">thresh =</span> <span class="fl">1e-3</span>,
+                             <span class="dt">maxit =</span> <span class="fl">1e3</span>)
+<span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
+<pre><code>## Time difference of 4.589972 secs</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(glmnet_classifier)</code></pre></div>
+<p><img src="vectorization_files/figure-html/hash_dtm-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">paste</span>(<span class="st">&quot;max AUC =&quot;</span>, <span class="kw">round</span>(<span class="kw">max</span>(glmnet_classifier$cvm), <span class="dv">4</span>)))</code></pre></div>
+<pre><code>## [1] &quot;max AUC = 0.8937&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dtm_test =<span class="st"> </span><span class="kw">create_dtm</span>(it_test, h_vectorizer)
+
+preds =<span class="st"> </span><span class="kw">predict</span>(glmnet_classifier, dtm_test , <span class="dt">type =</span> <span class="st">&#39;response&#39;</span>)[, <span class="dv">1</span>]
+glmnet:::<span class="kw">auc</span>(test$sentiment, preds)</code></pre></div>
+<pre><code>## [1] 0.9036685</code></pre>
+<p>As you can see our AUC is a bit worse but DTM construction time is considerably lower. On large collections of documents this can be a significant advantage.</p>
+</div>
+</div>
+<div id="basic-transformations" class="section level1">
+<h1>Basic transformations</h1>
+<p>Before doing analysis it usually can be useful to <em>transform</em> DTM. For example lengths of the documents in collection can significantly vary. In this case it can be useful to apply normalization.</p>
+<div id="normalization" class="section level2">
+<h2>Normalization</h2>
+<p>By “normalization” we assume <em>transformation</em> of the <em>rows</em> of DTM so we adjust values measured on different scales to a notionally common scale. For the case when length of the documents vary we can apply “L1” normalization. It means we will transform rows in a way that <code>sum</code> of the row values will be equal to <code>1</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dtm_train_l1_norm =<span class="st"> </span><span class="kw">normalize</span>(dtm_train, <span class="st">&quot;l1&quot;</span>)</code></pre></div>
+<p>By this transformation we should improve the quality of data preparation.</p>
+</div>
+<div id="tf-idf" class="section level2">
+<h2>TF-IDF</h2>
+<p>Another popular technique is <a href="https://en.wikipedia.org/wiki/Tf%E2%80%93idf">TF-IDF</a> transformation. We can (and usually should) apply it to our DTM. It will not only normalize DTM, but also increase the weight of terms which are specific to a single document or handful of documents and decrease the weight for terms used in most documents:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_train)
+vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(vocab)
+dtm_train =<span class="st"> </span><span class="kw">create_dtm</span>(it_train, vectorizer)
+
+<span class="co"># define tfidf model</span>
+tfidf =<span class="st"> </span>TfIdf$<span class="kw">new</span>()
+<span class="co"># fit model to train data and transform train data with fitted model</span>
+dtm_train_tfidf =<span class="st"> </span><span class="kw">fit_transform</span>(dtm_train, tfidf)
+<span class="co"># tfidf modified by fit_transform() call!</span>
+<span class="co"># apply pre-trained tf-idf transformation to test data</span>
+dtm_test_tfidf  =<span class="st"> </span><span class="kw">create_dtm</span>(it_test, vectorizer) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">transform</span>(tfidf)</code></pre></div>
+<p>Note that here we first time touched <em>model</em> object in <em>text2vec</em>. At this moment the user should remember several important things about <em>text2vec</em> models:</p>
+<ol style="list-style-type: decimal">
+<li>Models can be fitted on a given data (train) and applied to unseen data (test)</li>
+<li><strong>Models are mutable</strong> - once you will pass model to <code>fit()</code> or <code>fit_transform()</code> function, model will be modifed by it.</li>
+<li>After model is fitted, it can be applied to a new data with <code>transform(new_data, fitted_model)</code> method.</li>
+</ol>
+<p>More detailed overview of models and models API will be available soon in a separate vignette.</p>
+<p>Once we have tf-idf reweighted DTM we can fit our linear classifier again:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
+glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train_tfidf, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]], 
+                              <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>, 
+                              <span class="dt">alpha =</span> <span class="dv">1</span>,
+                              <span class="dt">type.measure =</span> <span class="st">&quot;auc&quot;</span>,
+                              <span class="dt">nfolds =</span> NFOLDS,
+                              <span class="dt">thresh =</span> <span class="fl">1e-3</span>,
+                              <span class="dt">maxit =</span> <span class="fl">1e3</span>)
+<span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
+<pre><code>## Time difference of 3.194087 secs</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(glmnet_classifier)</code></pre></div>
+<p><img src="vectorization_files/figure-html/fit_2-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">paste</span>(<span class="st">&quot;max AUC =&quot;</span>, <span class="kw">round</span>(<span class="kw">max</span>(glmnet_classifier$cvm), <span class="dv">4</span>)))</code></pre></div>
+<pre><code>## [1] &quot;max AUC = 0.9146&quot;</code></pre>
+<p>Let’s check the model performance on the test dataset:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">preds =<span class="st"> </span><span class="kw">predict</span>(glmnet_classifier, dtm_test_tfidf, <span class="dt">type =</span> <span class="st">&#39;response&#39;</span>)[,<span class="dv">1</span>]
+glmnet:::<span class="kw">auc</span>(test$sentiment, preds)</code></pre></div>
+<pre><code>## [1] 0.9053246</code></pre>
+<p>Usually <em>tf-idf</em> transformation <strong>significantly</strong> improve performance on most of the dowstream tasks.</p>
+</div>
+</div>
+
+
+
+
+
+<footer class="footer">
+  <div class="text-muted"><strong>text2vec</strong> is created by <a href="http://www.dsnotes.com">Dmitry Selivanov</a> and contributors. &copy;  2016.</div>
+  <div class="text-muted"> If you have found any BUGS please report them <a href="https://github.com/dselivanov/text2vec/issues">here</a>.</div>
+</footer>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+
+  ga('create', 'UA-56994099-2', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

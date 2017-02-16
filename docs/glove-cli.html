@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Dmitriy Selivanov" />
+
+<meta name="date" content="2016-11-08" />
+
+<title>GloVe Command Line Interface</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #0000ff; } /* Keyword */
+code > span.ch { color: #008080; } /* Char */
+code > span.st { color: #008080; } /* String */
+code > span.co { color: #008000; } /* Comment */
+code > span.ot { color: #ff4000; } /* Other */
+code > span.al { color: #ff0000; } /* Alert */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #008000; font-weight: bold; } /* Warning */
+code > span.cn { } /* Constant */
+code > span.sc { color: #008080; } /* SpecialChar */
+code > span.vs { color: #008080; } /* VerbatimString */
+code > span.ss { color: #008080; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { } /* Variable */
+code > span.cf { color: #0000ff; } /* ControlFlow */
+code > span.op { } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #ff4000; } /* Preprocessor */
+code > span.do { color: #008000; } /* Documentation */
+code > span.an { color: #008000; } /* Annotation */
+code > span.cv { color: #008000; } /* CommentVar */
+code > span.at { } /* Attribute */
+code > span.in { color: #008000; } /* Information */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.9em;
+  padding-left: 5px;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+  padding-left: 10px;
+}
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">text2vec</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="vectorization.html">Vectorization</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    GloVe
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="glove.html">GloVe</a>
+    </li>
+    <li>
+      <a href="glove-cli.html">GloVe-CLI</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="topic_modeling.html">Topic modeling</a>
+</li>
+<li>
+  <a href="similarity.html">Similarity</a>
+</li>
+<li>
+  <a href="api.html">API</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dselivanov/text2vec">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://stackoverflow.com/questions/tagged/text2vec">
+    <span class="fa fa-stack-overflow"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">GloVe Command Line Interface</h1>
+<h4 class="author"><em>Dmitriy Selivanov</em></h4>
+<h4 class="date"><em>2016-11-08</em></h4>
+
+</div>
+
+
+<p>For non-R users we provide CLI (command line interface) to GloVe algorithm. See separate repository - <a href="https://github.com/dselivanov/text2vec-cli">text2vec-cli</a>.</p>
+<p>Here is copy of README from <code>text2vec-cli</code>:</p>
+<p><code>text2vec-cli</code> made for those people who don’t know R, but want to try alternative implementation of the GloVe algorithm. Compared to <a href="https://github.com/stanfordnlp/GloVe">original</a> implemetation <code>text2vec</code> usually ~2 times faster. It is also can fit word embeddings model with <code>L1</code> regularization, which can be very useful for small datasets - algorithm can generalize much better than vanilla GloVe.</p>
+<p>One possible limitation of <code>text2vec</code> is that it calculates co-occurence statistics in RAM. This <strong>can be a problem for very large corpuses with very large vocabularies</strong>. For example you can process english wikipedia dump with vocabulary consisting of 400000 unique terms and window=10 on machine with 32gb of RAM.</p>
+<div id="installation" class="section level1">
+<h1>Installation</h1>
+<div id="r" class="section level2">
+<h2>R</h2>
+<p>You need R 3.2+ be installed - check <a href="https://cran.r-project.org/">CRAN</a> for instructions (should be very straightforward).</p>
+<p>For main linux distribultions it should be even simpler:</p>
+<div id="ubuntu" class="section level3">
+<h3>Ubuntu</h3>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="co"># change following line accordingly to your system:</span>
+<span class="co"># https://cran.r-project.org/bin/linux/ubuntu/</span>
+<span class="co"># here is string for ubuntu 14.04</span>
+<span class="kw">echo</span> <span class="st">&#39;deb https://cloud.r-project.org/bin/linux/ubuntu trusty/&#39;</span> <span class="kw">|</span> <span class="kw">sudo</span> tee --append /etc/apt/sources.list
+<span class="kw">sudo</span> apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+<span class="kw">sudo</span> apt-key update
+<span class="co"># install dependencies</span>
+<span class="kw">sudo</span> apt-get install -y libssl-dev libcurl4-openssl-dev git
+<span class="co"># isntall R</span>
+<span class="kw">sudo</span> apt-get install -y r-base r-base-dev</code></pre></div>
+</div>
+<div id="centosfedorarhel" class="section level3">
+<h3>Centos/Fedora/RHEL</h3>
+<p>Need something similar to instructions above. See how to install fresh R (3.2+) <a href="https://cran.r-project.org/bin/linux/redhat/README">here</a>.</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">sudo</span> yum install openssl-devel libcurl-openssl-devel R</code></pre></div>
+</div>
+</div>
+<div id="text2vec" class="section level2">
+<h2>text2vec</h2>
+<p>After R is installed clone this repo and make main scripts executable:</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/dselivanov/text2vec-cli.git
+<span class="kw">cd</span> text2vec-cli
+<span class="co"># make scripts executable</span>
+<span class="kw">chmod</span> +x install.R vocabulary.R cooccurence.R glove.R analogy.R</code></pre></div>
+<p>And install text2vec with dependencies:</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">./install.R</span></code></pre></div>
+</div>
+</div>
+<div id="usage" class="section level1">
+<h1>Usage</h1>
+<div id="shut-up-and-show-me-the-code" class="section level3">
+<h3>Shut up and show me the code</h3>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">wget</span> http://mattmahoney.net/dc/text8.zip
+<span class="kw">./vocabulary.R</span> files=text8.zip vocab_file=vocab.rds
+<span class="kw">./cooccurence.R</span> files=text8.zip vocab_file=vocab.rds vocab_min_count=5 window_size=5 cooccurences_file=tcm.rds
+<span class="kw">./glove.R</span> cooccurences_file=tcm.rds word_vectors_size=50 iter=10 x_max=10 convergence_tol=0.01
+<span class="kw">./analogy.R</span></code></pre></div>
+</div>
+<div id="notes" class="section level2">
+<h2>Notes</h2>
+<p><code>text2vec-cli</code> is made for <strong>non-R</strong> users. We also assume that they are fluent in some another programming language and can preprocess input data using their favourite tools.</p>
+<p>Also in contrast to text2vec R packge which can use all cores for vocabulary creation and calculation of the co-occurence statistics, <code>text2vec-cli</code> is single threaded (but GloVe training uses all available threads).</p>
+</div>
+<div id="input-data" class="section level2">
+<h2>Input data</h2>
+<p>text2vec process data file by file. It <strong>read each file into RAM</strong>, process it and goes to next file. So if you text collection is in one large file (several gigs) we recommend to split it to chunks using standart unix <code>split</code> tool.</p>
+<p>Example: your data is in single <code>BIG_FILE.gz</code>. In the following line we are:</p>
+<ul>
+<li>unzipping it to stream and pass to pipe</li>
+<li>split stream by lines with a constraint that each chunk should not be more than 100mb</li>
+<li>pass each chunk to pipe, compress it back and save to disk</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">gunzip</span> -c BIG_FILE.gz <span class="kw">|</span> <span class="kw">split</span> --line-bytes=100m --filter=<span class="st">&#39;gzip --fast &gt; ./chunk_$FILE.gz&#39;</span></code></pre></div>
+<p>For OS X install <code>coreutils</code>: <code>brew install coreutils</code> and use <code>gsplit</code> instead of split.</p>
+<p>We assume:</p>
+<ol style="list-style-type: decimal">
+<li>documents already preprocessed (lowercase, stemming, collocations, etc. - whatever user wan’t).</li>
+<li>each line in input files = sentence/document</li>
+<li>words/tokens are space separated</li>
+<li>Files ending in .gz, .bz2, .xz, or .zip will be automatically uncompressed. Files starting with <a href="http://" class="uri">http://</a>, <a href="https://" class="uri">https://</a>, <a href="ftp://" class="uri">ftp://</a>, or ftps:// will be automatically downloaded. Remote gz files can also be automatically downloaded &amp; decompressed.</li>
+</ol>
+</div>
+<div id="training" class="section level2">
+<h2>Training</h2>
+<p>To fit GloVe model user need to go through following steps.</p>
+<div id="create-vocabulary" class="section level3">
+<h3>create vocabulary</h3>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">./vocabulary.R</span> files=text8.zip vocab_file=vocab.rds</code></pre></div>
+<p>Arguments:</p>
+<ol style="list-style-type: decimal">
+<li><code>files</code> - filenames of input files.multiple input files can be provided to <code>files</code> argument - use comma <code>,</code> to concatenate names: <code>files=file1,file2</code>.</li>
+<li><code>dir</code>. Also can pass <code>dir</code> argument- all files from dir will be used.</li>
+<li><code>vocab_file</code> - name of the output file</li>
+</ol>
+</div>
+<div id="create-co-occurence-statistics" class="section level3">
+<h3>create co-occurence statistics</h3>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">./cooccurence.R</span> files=text8.zip vocab_file=vocab.rds vocab_min_count=5 window_size=5 cooccurences_file=tcm.rds</code></pre></div>
+<p>Arguments:</p>
+<ol style="list-style-type: decimal">
+<li><code>files</code> - filenames of input files.multiple input files can be provided to <code>files</code> argument - use comma <code>,</code> to concatenate names: <code>files=file1,file2</code>.</li>
+<li><code>dir</code>. Also can pass <code>dir</code> argument- all files from dir will be used.</li>
+<li><code>vocab_file</code> - name of the vocabulary file</li>
+<li><code>vocab_min_count</code> - prune vocanulary and use words thar appeared at least <code>vocab_min_count</code> times.</li>
+<li><code>window_size</code> - how many neighbor words use for calculation of the co-occurence statistics</li>
+<li><code>cooccurences_file</code> - name of the output file</li>
+</ol>
+</div>
+<div id="train-glove-model" class="section level3">
+<h3>train GloVe model</h3>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">./glove.R</span> cooccurences_file=tcm.rds word_vectors_size=50 iter=10 x_max=10 convergence_tol=0.01</code></pre></div>
+<p>Arguments:</p>
+<ol style="list-style-type: decimal">
+<li><code>cooccurences_file</code> - name of the file with co-occurence statistics</li>
+<li><code>word_vectors_size</code> - dimension of word embeddings</li>
+<li><code>iter</code> - maximum number of iterations of optimization algorithm</li>
+<li><code>x_max</code> - maximum value of co-occurence value. Corresponds to <code>X_MAX</code> in original implementation.</li>
+<li><code>convergence_tol</code> - <code>0.01</code> by default. Stop training if improvement between epochs less than convergence_tol.</li>
+<li><code>lambda</code> - L1 regularization coefficient. Ususally values from 1e-4 to 1e-5 are useful.</li>
+<li><code>learning_rate</code> - <code>0.2</code> by default. Initial rate for AdaGrad. Not recommended to change.</li>
+<li><code>clip_gradients</code> - <code>10</code> by default. Clip gradients with this value for numerical stability. Not recommended to change.</li>
+<li><code>alpha</code> - <code>0.75</code> by default.</li>
+</ol>
+</div>
+</div>
+<div id="check-accuracy-on-word-analogy-task" class="section level2">
+<h2>check accuracy on word-analogy task</h2>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">./analogy.R</span></code></pre></div>
+</div>
+</div>
+
+
+
+
+
+<footer class="footer">
+  <div class="text-muted"><strong>text2vec</strong> is created by <a href="http://www.dsnotes.com">Dmitry Selivanov</a> and contributors. &copy;  2016.</div>
+  <div class="text-muted"> If you have found any BUGS please report them <a href="https://github.com/dselivanov/text2vec/issues">here</a>.</div>
+</footer>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+
+  ga('create', 'UA-56994099-2', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

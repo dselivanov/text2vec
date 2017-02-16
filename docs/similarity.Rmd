@@ -1,0 +1,172 @@
+---
+title: "Documents similarity"
+author: "Dmitriy Selivanov"
+date: "`r Sys.Date()`"
+---
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE)
+```
+
+# Documents similarity
+
+Document similarity (or distance between documents) is a one of the central themes in Information Retrieval. 
+How humans usually define how similar are documents? Usually documents treated as similar if they are semantically close and describe similar concepts. On other hand "similarity" can be used in context of duplicate detection. We will review several common approaches.
+
+## API
+
+text2vec package provides 2 set of functions for measuring various distances/similarity in a unified way. All methods are written with special attention to computational performance and memory efficiency.
+
+1. `sim2(x, y, method)` - calculates similarity between **each row** of matrix `x` and **each row** of matrix `y` using given `method`.
+1. `psim2(x, y, method)` - calculates **p**arallel similarity between rows of matrix `x` and **corresponding** rows of matrix `y` using given `method.` 
+1. `dist2(x, y, method)` - calculates distance/dissimilarity between **each row** of matrix `x` and **each row** of matrix `y` using given `method`.
+1. `pdist2(x, y, method)` - calculates **p**arallel distance/dissimilarity between rows of matrix `x` and **corresponding** rows of matrix `y` using given `method.` 
+
+Methods have siffix `2` in their names because in contrast to base `dist()` function they work with two matrces instead of one.
+
+Following methods are implemented at the moment:
+
+1. *Jaccard distance*
+1. *Cosine distance*
+1. *Euclidean distance*
+1. *Relaxed Word Mover's Distance* 
+
+# Practical examples
+
+As usual we will use built-in `text2vec::moview_review` dataset. Let's clean it a little bit:
+```{r}
+library(stringr)
+library(text2vec)
+data("movie_review")
+# select 500 rows for faster running times
+movie_review = movie_review[1:500, ]
+prep_fun = function(x) {
+  x %>% 
+    # make text lower case
+    str_to_lower %>% 
+    # remove non-alphanumeric symbols
+    str_replace_all("[^[:alnum:]]", " ") %>% 
+    # collapse multiple spaces
+    str_replace_all("\\s+", " ")
+}
+movie_review$review_clean = prep_fun(movie_review$review)
+```
+
+Now let's define two sets of documents on which we will evaluate our distance models:
+```{r}
+doc_set_1 = movie_review[1:300, ]
+it1 = itoken(doc_set_1$review_clean, progressbar = FALSE)
+
+# specially take different number of docs in second set
+doc_set_2 = movie_review[301:500, ]
+it2 = itoken(doc_set_2$review_clean, progressbar = FALSE)
+```
+
+We will compare documents in a vector space. So we need to define common space and project documents to it. We will use vocabulary-based vectorization vectorization for better interpretability:
+```{r}
+it = itoken(movie_review$review_clean, progressbar = FALSE)
+v = create_vocabulary(it) %>% prune_vocabulary(doc_proportion_max = 0.1, term_count_min = 5)
+vectorizer = vocab_vectorizer(v)
+```
+
+## Jaccard similarity
+
+*Jaccard similarity* is a simple but intuitive measure of similarity between two sets.
+
+$$J(doc_1, doc_2) = \frac{doc_1 \cap doc_2}{doc_1 \cup doc_2}$$
+For documents we measure it as proportion of number of common words to number of unique words in both documets.
+In the field of NLP *jaccard similarity* can be particularly useful for duplicates detection. *text2vec* however provides generic efficient realization which can be used in many other applications.
+
+For calculation of *jaccard similarity* between 2 sets of documents user have to provide DTM for each them (DTMs should be in the same vector space!):
+```{r}
+# they will be in the same space because we use same vectorizer
+# hash_vectorizer will also work fine
+dtm1 = create_dtm(it1, vectorizer)
+dim(dtm1)
+dtm2 = create_dtm(it2, vectorizer)
+dim(dtm2)
+```
+Once we have representation of documents in vector space we are almost done. One thing remains - call `sim2()`:
+```{r}
+d1_d2_jac_sim = sim2(dtm1, dtm2, method = "jaccard", norm = "none")
+```
+Check result:
+```{r}
+dim(d1_d2_jac_sim)
+d1_d2_jac_sim[1:2, 1:5]
+```
+Also we can comptute *"parallel"* similarity - similarity between corresponding rows of matrices (matrices should have identical shapes):
+```{r}
+dtm1_2 = dtm1[1:200, ]
+dtm2_2 = dtm2[1:200, ]
+d1_d2_jac_psim = psim2(dtm1_2, dtm2_2, method = "jaccard", norm = "none")
+str(d1_d2_jac_psim)
+```
+We define *Jaccard distance* or *Jaccard dissimilarity*  as $1 - similarity(doc_1, doc_2)$. `sim2()` and `psim2()` have corresponding companion functions `dist2()`, `pdist2()` which computes dissimilarity. Note however that in many cases similarity between documents is 0. `sim2` function exploit this advantage - result matrix will be sparse. Use `dist2()` on large sparse matrices carefully.
+
+## Cosine similarity
+
+Classical approach from computational linguistics is to measure similarity based on the content overlap between documents. For this we will represent documents as bag-of-words, so each document will be a sparse vector. And define measure of overlap as angle between vectors:
+$$similarity(doc_1, doc_2) = cos(\theta) = \frac{doc_1  doc_2}{\lvert doc_1\rvert \lvert doc_2\rvert}$$
+By *cosine distance/dissimilarity* we assume following:
+$$distance(doc_1, doc_2) = 1 - similarity(doc_1, doc_2)$$
+It is important to note, however, that this is not a proper distance metric in a mathematical sense as it does not have the triangle inequality property and it violates the coincidence axiom.
+
+Calculation of cosine similarity is similar to jaccard similarity:
+
+```{r}
+d1_d2_cos_sim = sim2(dtm1, dtm2, method = "cosine", norm = "l2")
+```
+Check result:
+```{r}
+dim(d1_d2_cos_sim)
+d1_d2_cos_sim[1:2, 1:5]
+```
+
+### Cosine similarity with Tf-Idf
+
+It can be useful to measure similarity not on vanilla bag-of-words matrix, but on transformed one. One choice is to apply tf-idf transformation. First let't create tf-idf model:
+```{r}
+dtm = create_dtm(it, vectorizer)
+tfidf = TfIdf$new()
+dtm_tfidf = fit_transform(dtm, tfidf)
+```
+Calculate similarities between all rows of `dtm_tfidf` matrix:
+```{r}
+d1_d2_tfidf_cos_sim = sim2(x = dtm_tfidf, method = "cosine", norm = "l2")
+d1_d2_tfidf_cos_sim[1:2, 1:5]
+```
+
+### Cosine similarity with LSA
+
+Usually tf-idf/bag-of-words matrices contain a lot of noise. Applying LSA model can help with this problem, so you can achieve better quality similarities:
+
+```{r}
+lsa = LSA$new(n_topics = 100)
+dtm_tfidf_lsa = fit_transform(dtm_tfidf, lsa)
+```
+Calculate similarities between all rows of `dtm_tfidf_lsa` matrix:
+```{r}
+d1_d2_tfidf_cos_sim = sim2(x = dtm_tfidf_lsa, method = "cosine", norm = "l2")
+d1_d2_tfidf_cos_sim[1:2, 1:5]
+```
+And "parallel" similarities:
+```{r}
+x = dtm_tfidf_lsa[1:250, ]
+y = dtm_tfidf_lsa[251:500, ]
+head(psim2(x = x, y = y, method = "cosine", norm = "l2"))
+```
+
+## Euclidean distance
+Euclidean **distance** is not so useful in NLP field as Jaccard or Cosine similarities. But it always worth to try different measures. In text2vec it can by computed only on dense matrices, here is example:
+
+```{r}
+x = dtm_tfidf_lsa[1:300, ]
+y = dtm_tfidf_lsa[1:200, ]
+m1 = dist2(x, y, method = "euclidean")
+```
+
+Also we can apply different row normalization techniques (by default was `"l2"` in example above):
+```{r}
+m2 = dist2(x, y, method = "euclidean", norm = "l1")
+m3 = dist2(x, y, method = "euclidean", norm = "none")
+```

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Dmitriy Selivanov" />
+
+<meta name="date" content="2016-11-01" />
+
+<title>GloVe Word Embeddings</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #0000ff; } /* Keyword */
+code > span.ch { color: #008080; } /* Char */
+code > span.st { color: #008080; } /* String */
+code > span.co { color: #008000; } /* Comment */
+code > span.ot { color: #ff4000; } /* Other */
+code > span.al { color: #ff0000; } /* Alert */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #008000; font-weight: bold; } /* Warning */
+code > span.cn { } /* Constant */
+code > span.sc { color: #008080; } /* SpecialChar */
+code > span.vs { color: #008080; } /* VerbatimString */
+code > span.ss { color: #008080; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { } /* Variable */
+code > span.cf { color: #0000ff; } /* ControlFlow */
+code > span.op { } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #ff4000; } /* Preprocessor */
+code > span.do { color: #008000; } /* Documentation */
+code > span.an { color: #008000; } /* Annotation */
+code > span.cv { color: #008000; } /* CommentVar */
+code > span.at { } /* Attribute */
+code > span.in { color: #008000; } /* Information */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.9em;
+  padding-left: 5px;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+  padding-left: 10px;
+}
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">text2vec</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="vectorization.html">Vectorization</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    GloVe
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="glove.html">GloVe</a>
+    </li>
+    <li>
+      <a href="glove-cli.html">GloVe-CLI</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="topic_modeling.html">Topic modeling</a>
+</li>
+<li>
+  <a href="similarity.html">Similarity</a>
+</li>
+<li>
+  <a href="api.html">API</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dselivanov/text2vec">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://stackoverflow.com/questions/tagged/text2vec">
+    <span class="fa fa-stack-overflow"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">GloVe Word Embeddings</h1>
+<h4 class="author"><em>Dmitriy Selivanov</em></h4>
+<h4 class="date"><em>2016-11-01</em></h4>
+
+</div>
+
+
+<div id="word-embeddings" class="section level1">
+<h1>Word embeddings</h1>
+<p>After Tomas Mikolov et al. released the <a href="https://code.google.com/p/word2vec/">word2vec</a> tool, there was a boom of articles about word vector representations. One of the best of these articles is Stanford’s <a href="http://nlp.stanford.edu/projects/glove/">GloVe: Global Vectors for Word Representation</a>, which explained why such algorithms work and reformulated word2vec optimizations as a special kind of factoriazation for word co-occurence matrices.</p>
+<p>Here I will briefly introduce the GloVe algorithm and show how to use its text2vec implementation.</p>
+</div>
+<div id="glove-algorithm" class="section level1">
+<h1>GloVe algorithm</h1>
+<p>THe GloVe algorithm consists of following steps:</p>
+<ol style="list-style-type: decimal">
+<li><p>Collect word cooccurence statistics in a form of word co-ocurrence matrix <span class="math inline">\(X\)</span>. Each element <span class="math inline">\(X_{ij}\)</span> of such matrix represents how often word <em>i</em> appears in context of word <em>j</em>. Usually we scan our corpus in the following manner: for each term we look for context terms within some area defined by a <em>window_size</em> before the term and a <em>window_size</em> after the term. Also we give less weight for more distant words, usually using this formula: <span class="math display">\[decay = 1/offset\]</span></p></li>
+<li><p>Define soft constraints for each word pair: <span class="math display">\[w_i^Tw_j + b_i + b_j = log(X_{ij})\]</span> Here <span class="math inline">\(w_i\)</span> - vector for the main word, <span class="math inline">\(w_j\)</span> - vector for the context word, <span class="math inline">\(b_i\)</span>, <span class="math inline">\(b_j\)</span> are scalar biases for the main and context words.</p></li>
+<li><p>Define a cost function <span class="math display">\[J = \sum_{i=1}^V \sum_{j=1}^V \; f(X_{ij}) ( w_i^T w_j + b_i + b_j - \log X_{ij})^2\]</span> Here <span class="math inline">\(f\)</span> is a weighting function which help us to prevent learning only from extremely common word pairs. The GloVe authors choose the following function:</p></li>
+</ol>
+<p><span class="math display">\[
+f(X_{ij}) = 
+\begin{cases}
+(\frac{X_{ij}}{x_{max}})^\alpha &amp; \text{if } X_{ij} &lt; XMAX \\
+1 &amp; \text{otherwise}
+\end{cases}
+\]</span></p>
+</div>
+<div id="linguistic-regularities" class="section level1">
+<h1>Linguistic regularities</h1>
+<p>Now let’s examine how GloVe embeddings works. As commonly known, word2vec word vectors capture many linguistic regularities. To give the canonical example, if we take word vectors for the words “paris,” “france,” and “germany” and perform the following operation:</p>
+<p><span class="math display">\[vector(&quot;paris&quot;) - vector(&quot;france&quot;) + vector(&quot;germany&quot;)\]</span></p>
+<p>the resulting vector will be close to the vector for “rome.”</p>
+<p>Let’s download the same Wikipedia data used as a demo by word2vec:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(text2vec)
+text8_file =<span class="st"> &quot;~/text8&quot;</span>
+if (!<span class="kw">file.exists</span>(text8_file)) {
+  <span class="kw">download.file</span>(<span class="st">&quot;http://mattmahoney.net/dc/text8.zip&quot;</span>, <span class="st">&quot;~/text8.zip&quot;</span>)
+  <span class="kw">unzip</span> (<span class="st">&quot;~/text8.zip&quot;</span>, <span class="dt">files =</span> <span class="st">&quot;text8&quot;</span>, <span class="dt">exdir =</span> <span class="st">&quot;~/&quot;</span>)
+}
+wiki =<span class="st"> </span><span class="kw">readLines</span>(text8_file, <span class="dt">n =</span> <span class="dv">1</span>, <span class="dt">warn =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<p>In the next step we will create a vocabulary, a set of words for which we want to learn word vectors. Note, that all of text2vec’s functions which operate on raw text data (<code>create_vocabulary</code>, <code>create_corpus</code>, <code>create_dtm</code>, <code>create_tcm</code>) have a streaming API and you should iterate over tokens as the first argument for these functions.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Create iterator over tokens</span>
+tokens &lt;-<span class="st"> </span><span class="kw">space_tokenizer</span>(wiki)
+<span class="co"># Create vocabulary. Terms will be unigrams (simple words).</span>
+it =<span class="st"> </span><span class="kw">itoken</span>(tokens, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+vocab &lt;-<span class="st"> </span><span class="kw">create_vocabulary</span>(it)</code></pre></div>
+<p>These words should not be too uncommon. Fot example we cannot calculate a meaningful word vector for a word which we saw only once in the entire corpus. Here we will take only words which appear at least five times. text2vec provides additional options to filter vocabulary (see <code>?prune_vocabulary</code>).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vocab &lt;-<span class="st"> </span><span class="kw">prune_vocabulary</span>(vocab, <span class="dt">term_count_min =</span> 5L)</code></pre></div>
+<p>Now we have 71,290 terms in the vocabulary and are ready to construct term-co-occurence matrix (TCM).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Use our filtered vocabulary</span>
+vectorizer &lt;-<span class="st"> </span><span class="kw">vocab_vectorizer</span>(vocab, 
+                               <span class="co"># don&#39;t vectorize input</span>
+                               <span class="dt">grow_dtm =</span> <span class="ot">FALSE</span>, 
+                               <span class="co"># use window of 5 for context words</span>
+                               <span class="dt">skip_grams_window =</span> 5L)
+tcm &lt;-<span class="st"> </span><span class="kw">create_tcm</span>(it, vectorizer)</code></pre></div>
+<p>Now we have a TCM matrix and can factorize it via the GloVe algorithm.<br />
+text2vec uses a parallel stochastic gradient descent algorithm. By default it will use all cores on your machine, but you can specify the number of cores if you wish. For example, to use 4 threads call <code>RcppParallel::setThreadOptions(numThreads = 4)</code>.</p>
+<p>Let’s fit our model. (It can take several minutes to fit!)</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">glove =<span class="st"> </span>GlobalVectors$<span class="kw">new</span>(<span class="dt">word_vectors_size =</span> <span class="dv">50</span>, <span class="dt">vocabulary =</span> vocab, <span class="dt">x_max =</span> <span class="dv">10</span>)
+glove$<span class="kw">fit</span>(tcm, <span class="dt">n_iter =</span> <span class="dv">20</span>)
+<span class="co"># 2016-10-03 10:09:14 - epoch 1, expected cost 0.0893</span>
+<span class="co"># 2016-10-03 10:09:17 - epoch 2, expected cost 0.0608</span>
+<span class="co"># 2016-10-03 10:09:19 - epoch 3, expected cost 0.0537</span>
+<span class="co"># 2016-10-03 10:09:22 - epoch 4, expected cost 0.0499</span>
+<span class="co"># 2016-10-03 10:09:25 - epoch 5, expected cost 0.0475</span>
+<span class="co"># 2016-10-03 10:09:28 - epoch 6, expected cost 0.0457</span>
+<span class="co"># 2016-10-03 10:09:30 - epoch 7, expected cost 0.0443</span>
+<span class="co"># 2016-10-03 10:09:33 - epoch 8, expected cost 0.0431</span>
+<span class="co"># 2016-10-03 10:09:36 - epoch 9, expected cost 0.0423</span>
+<span class="co"># 2016-10-03 10:09:39 - epoch 10, expected cost 0.0415</span>
+<span class="co"># 2016-10-03 10:09:42 - epoch 11, expected cost 0.0408</span>
+<span class="co"># 2016-10-03 10:09:44 - epoch 12, expected cost 0.0403</span>
+<span class="co"># 2016-10-03 10:09:47 - epoch 13, expected cost 0.0400</span>
+<span class="co"># 2016-10-03 10:09:50 - epoch 14, expected cost 0.0395</span>
+<span class="co"># 2016-10-03 10:09:53 - epoch 15, expected cost 0.0391</span>
+<span class="co"># 2016-10-03 10:09:56 - epoch 16, expected cost 0.0388</span>
+<span class="co"># 2016-10-03 10:09:59 - epoch 17, expected cost 0.0385</span>
+<span class="co"># 2016-10-03 10:10:02 - epoch 18, expected cost 0.0383</span>
+<span class="co"># 2016-10-03 10:10:05 - epoch 19, expected cost 0.0380</span>
+<span class="co"># 2016-10-03 10:10:08 - epoch 20, expected cost 0.0378</span></code></pre></div>
+<p>Alternatively we can train model with R’s <code>S3</code> interface (but keep in mind that all text2vec models are R6 classes and they are mutable! So <code>fit</code>, <code>fit_transform</code> methods modify models!):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">glove =<span class="st"> </span>GlobalVectors$<span class="kw">new</span>(<span class="dt">word_vectors_size =</span> <span class="dv">50</span>, <span class="dt">vocabulary =</span> vocab, <span class="dt">x_max =</span> <span class="dv">10</span>)
+<span class="co"># `glove` object will be modified by `fit()` call !</span>
+<span class="kw">fit</span>(tcm, glove, <span class="dt">n_iter =</span> <span class="dv">20</span>)</code></pre></div>
+<p>And now we get the word vectors:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">word_vectors &lt;-<span class="st"> </span>glove$<span class="kw">get_word_vectors</span>()</code></pre></div>
+<p>We can find the closest word vectors for our <em>paris - france + germany</em> example:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">berlin &lt;-<span class="st"> </span>word_vectors[<span class="st">&quot;paris&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] -<span class="st"> </span>
+<span class="st">  </span>word_vectors[<span class="st">&quot;france&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] +<span class="st"> </span>
+<span class="st">  </span>word_vectors[<span class="st">&quot;germany&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>]
+cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> word_vectors, <span class="dt">y =</span> berlin, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
+<span class="kw">head</span>(<span class="kw">sort</span>(cos_sim[,<span class="dv">1</span>], <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), <span class="dv">5</span>)
+<span class="co"># berlin     paris    munich    leipzig   germany </span>
+<span class="co"># 0.8015347 0.7623165 0.7013252 0.6616945 0.6540700 </span></code></pre></div>
+<p>You can achieve much better results by experimenting with <code>skip_grams_window</code> and the parameters of the <code>GloVe</code> class (including word vectors size and the number of iterations). For more details and large-scale experiments on wikipedia data see this <a href="http://dsnotes.com/blog/text2vec/2015/12/01/glove-enwiki/">old post</a> on my blog.</p>
+</div>
+
+
+
+
+
+<footer class="footer">
+  <div class="text-muted"><strong>text2vec</strong> is created by <a href="http://www.dsnotes.com">Dmitry Selivanov</a> and contributors. &copy;  2016.</div>
+  <div class="text-muted"> If you have found any BUGS please report them <a href="https://github.com/dselivanov/text2vec/issues">here</a>.</div>
+</footer>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+
+  ga('create', 'UA-56994099-2', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

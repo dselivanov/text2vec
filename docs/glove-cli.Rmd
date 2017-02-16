@@ -1,0 +1,155 @@
+---
+title: "GloVe Command Line Interface"
+author: "Dmitriy Selivanov"
+date: "`r Sys.Date()`"
+---
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE)
+```
+
+For non-R users we provide CLI (command line interface) to GloVe algorithm. See separate repository - [text2vec-cli](https://github.com/dselivanov/text2vec-cli).
+
+Here is copy of README from `text2vec-cli`:
+
+`text2vec-cli` made for those people who don't know R, but want to try alternative implementation of the GloVe algorithm. Compared to [original](https://github.com/stanfordnlp/GloVe) implemetation `text2vec` usually ~2 times faster. It is also can fit word embeddings model with `L1` regularization, which can be very useful for small datasets - algorithm can generalize much better than vanilla GloVe. 
+
+One possible limitation of `text2vec` is that it calculates co-occurence statistics in RAM. This **can be a problem for very large corpuses with very large vocabularies**. For example you can process english wikipedia dump with vocabulary consisting of 400000 unique terms and window=10 on machine with 32gb of RAM.
+
+# Installation
+
+## R
+You need R 3.2+ be installed - check [CRAN](https://cran.r-project.org/) for instructions (should be very straightforward).
+
+For main linux distribultions it should be even simpler:
+
+### Ubuntu
+
+```sh
+# change following line accordingly to your system:
+# https://cran.r-project.org/bin/linux/ubuntu/
+# here is string for ubuntu 14.04
+echo 'deb https://cloud.r-project.org/bin/linux/ubuntu trusty/' | sudo tee --append /etc/apt/sources.list
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+sudo apt-key update
+# install dependencies
+sudo apt-get install -y libssl-dev libcurl4-openssl-dev git
+# isntall R
+sudo apt-get install -y r-base r-base-dev
+```
+
+### Centos/Fedora/RHEL
+
+Need something similar to instructions above. See how to install fresh R (3.2+) [here](https://cran.r-project.org/bin/linux/redhat/README).
+```sh
+sudo yum install openssl-devel libcurl-openssl-devel R
+```
+
+## text2vec
+
+After R is installed clone this repo and make main scripts executable:
+
+```sh
+git clone https://github.com/dselivanov/text2vec-cli.git
+cd text2vec-cli
+# make scripts executable
+chmod +x install.R vocabulary.R cooccurence.R glove.R analogy.R
+```
+
+And install text2vec with dependencies:
+```sh
+./install.R
+```
+
+# Usage
+
+### Shut up and show me the code
+
+```sh
+wget http://mattmahoney.net/dc/text8.zip
+./vocabulary.R files=text8.zip vocab_file=vocab.rds
+./cooccurence.R files=text8.zip vocab_file=vocab.rds vocab_min_count=5 window_size=5 cooccurences_file=tcm.rds
+./glove.R cooccurences_file=tcm.rds word_vectors_size=50 iter=10 x_max=10 convergence_tol=0.01
+./analogy.R
+```
+
+## Notes
+
+`text2vec-cli` is made for **non-R** users. We also assume that they are fluent in some another programming language and can preprocess input data using their favourite tools. 
+
+Also in contrast to text2vec R packge which can use all cores for vocabulary creation and calculation of the  co-occurence statistics, `text2vec-cli` is single threaded (but GloVe training uses all available threads).
+
+## Input data
+
+text2vec process data file by file. It **read each file into RAM**, process it and goes to next file. So if you text collection is in one large file (several gigs) we recommend to split it to chunks using standart unix `split` tool.
+
+Example: your data is in single `BIG_FILE.gz`. In the following line we are:
+
+- unzipping it to stream and pass to pipe
+- split stream by lines with a constraint that each chunk should not be more than 100mb
+- pass each chunk to pipe, compress it back and save to disk
+
+```sh
+gunzip -c BIG_FILE.gz | split --line-bytes=100m --filter='gzip --fast > ./chunk_$FILE.gz'
+```
+
+For OS X install `coreutils`: `brew install coreutils` and use `gsplit` instead of split.
+
+We assume:
+
+1. documents already preprocessed (lowercase, stemming, collocations, etc. - whatever user wan't). 
+1. each line in input files = sentence/document
+1. words/tokens are space separated
+1. Files ending in .gz, .bz2, .xz, or .zip will be automatically uncompressed. Files starting with http://, https://, ftp://, or ftps:// will be automatically downloaded. Remote gz files can also be automatically downloaded & decompressed.
+
+## Training
+To fit GloVe model user need to go through following steps.
+
+### create vocabulary
+
+```sh
+./vocabulary.R files=text8.zip vocab_file=vocab.rds
+```
+Arguments: 
+
+1. `files` - filenames of input files.multiple input files can be provided to `files` argument - use comma `,` to concatenate names: `files=file1,file2`. 
+1. `dir`. Also can pass `dir` argument- all files from dir will be used.
+1. `vocab_file` - name of the output file
+
+### create co-occurence statistics
+
+```sh
+./cooccurence.R files=text8.zip vocab_file=vocab.rds vocab_min_count=5 window_size=5 cooccurences_file=tcm.rds
+```
+
+Arguments: 
+
+1. `files` - filenames of input files.multiple input files can be provided to `files` argument - use comma `,` to concatenate names: `files=file1,file2`. 
+1. `dir`. Also can pass `dir` argument- all files from dir will be used.
+1. `vocab_file` - name of the vocabulary file
+1. `vocab_min_count` - prune vocanulary and use words thar appeared at least `vocab_min_count` times.
+1. `window_size` - how many neighbor words use for calculation of the co-occurence statistics
+1. `cooccurences_file` - name of the output file
+
+### train GloVe model
+
+```sh
+./glove.R cooccurences_file=tcm.rds word_vectors_size=50 iter=10 x_max=10 convergence_tol=0.01
+```
+
+Arguments: 
+
+1. `cooccurences_file` - name of the file with co-occurence statistics
+1. `word_vectors_size` - dimension of word embeddings
+1. `iter` - maximum number of iterations of optimization algorithm
+1. `x_max` - maximum value of co-occurence value. Corresponds to `X_MAX` in original implementation.
+1. `convergence_tol` - `0.01` by default. Stop training if improvement between epochs less than convergence_tol.
+1. `lambda` - L1 regularization coefficient. Ususally values from 1e-4 to 1e-5 are useful.
+1. `learning_rate` - `0.2` by default. Initial rate for AdaGrad. Not recommended to change.
+1. `clip_gradients` - `10` by default. Clip gradients with this value for numerical stability. Not recommended to change.
+1. `alpha` - `0.75` by default. 
+
+## check accuracy on word-analogy task
+
+```sh
+./analogy.R
+```

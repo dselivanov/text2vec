@@ -1,0 +1,73 @@
+---
+title: "text2vec"
+author: "Dmitriy Selivanov"
+---
+# API
+
+Goals which we aimed to achieve as a result of development of `text2vec`:
+
+* **Concise** - expose as few functions as possible;
+* **Consistent** - expose unified interfaces, no need to explore new interface for each task;
+* **Flexible** - allow to easily solve complex tasks;
+* **Fast** - maximize efficiency per single thread, transparently scale to multiple threads on multicore machines;
+* **Memory efficient** - use streams and iterators, not keep data in RAM if possible.
+
+Conceptually we can divide API into several pieces:
+
+## Vectorization
+
+See [Vectorization](vectorization.html) section for details.
+
+`create_*` family functions, `vocab_vectorizer()`  and `hash_vectorizer()` are made to create vocabularies, Document-Term matrices and Term co-occurence matrices. Simply this family of functions is in charge of converting text into numeric form. Main functions are:
+
+* `create_vocabulary()`;
+* `create_dtm()`;
+* `create_tcm()`;
+* `vocab_vectorizer()`, `hash_vectorizer()`.
+    
+## I/O handling. 
+All functions from `create_*` family work with **iterators** over tokens as input. Good examples for creation of such iterators are: 
+
+* `itoken()` for creation iterator over tokens;
+* `ifiles()` for creation iterator over files. Note that text2vec doesn't handle I/O, users should provide their own reader function (`data.table::fread()` and functions from `readr` package usually are good choices).
+
+Once user needs some custom source (for example data stream from some RDBMS), he/she just needs to create correct iterator over tokens.
+
+##  Models 
+
+text2vec provides unified interface for models, which is inspired by `scikit-learn` interface. Models in text2vec are mostly *transformers* - they transform Document-Term matrix. Models include:
+
+* Tf-idf reweighting. See [Tf-idf in vectorization](vectorization.html#tf-idf) section;
+* Global Vectors (**GloVe**) word embeddings. See [Word Embeddings](glove.html) section;
+* Latent Semantic Analysis (**LSA**). See [LSA](topic_modeling.html#latent_semantic_analysis) section;
+* Latent Dirichlet Allocation (**LDA**). See [LDA](topic_modeling.html#latent_dirichlet_allocation) section.
+
+**All text2vec models are mutable! This means that `fit()` and `fit_transform()` methods change model which was provided as argument.**
+
+### Important verbs
+
+All models have unified interface. User should only remember few verbs for models manipulation:
+
+* `model$new(...)` - create model object, set up initial parameters for model. This is model-specific. For example for LDA it can be number of topics $K$, alpha($\alpha$) and eta($\eta$) priors;
+* `model$fit(x, ...)` - fits model to data;
+* `model$fit_transform(x, ...)` - fits model to data and then transforms data with fitted model;
+* `model$transform(x_new, ...)` - transforms new data with pretrained model.
+
+## Distances 
+
+See [Distances](distances.html) section for details.
+
+text2vec package provides 2 set of functions for measuring various distances/similarity in a unified way. All methods are written with special attention to computational performance and memory efficiency.
+
+1. `sim2(x, y, method)` - calculates similarity between **each row** of matrix `x` and **each row** of matrix `y` using given `method`.
+1. `psim2(x, y, method)` - calculates **p**arallel similarity between rows of matrix `x` and **corresponding** rows of matrix `y` using given `method.` 
+1. `dist2(x, y, method)` - calculates distance/dissimilarity between **each row** of matrix `x` and **each row** of matrix `y` using given `method`.
+1. `pdist2(x, y, method)` - calculates **p**arallel distance/dissimilarity between rows of matrix `x` and **corresponding** rows of matrix `y` using given `method.` 
+
+
+Distances/similarities implemented at the moment:
+
+* Cosine 
+* Jaccard
+* Euclidean 
+* Relaxed Word Mover's Distance

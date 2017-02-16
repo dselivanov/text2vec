@@ -1,0 +1,33 @@
+---
+title: "text2vec"
+author: "Dmitriy Selivanov"
+output:
+  html_document:
+    toc: false
+    toc_float: false
+---
+You've just discovered **[text2vec](https://github.com/dselivanov/text2vec)**!
+
+**text2vec** is an R package which provides an efficient framework with a concise API for text analysis and natural language processing (NLP). 
+
+Goals which we aimed to achieve as a result of development of `text2vec`:
+
+* **Concise** - expose as few functions as possible
+* **Consistent** - expose unified interfaces, no need to explore new interface for each task
+* **Flexible** - allow to easily solve complex tasks
+* **Fast** - maximize efficiency per single thread, transparently scale to multiple threads on multicore machines
+* **Memory efficient** - use streams and iterators, not keep data in RAM if possible
+
+See [API](api.html) section for details.
+
+# Performance
+
+![htop](https://raw.githubusercontent.com/dselivanov/text2vec/gh-pages/images/htop.png)
+*Author of the package is a little bit obsessed about efficiency.*
+
+This package is efficient because it is carefully written in C++, which also means that text2vec is memory friendly. Some parts (such as GloVe) are fully parallelized using the excellent [RcppParallel](http://rcppcore.github.io/RcppParallel/) package. This means that the word embeddings are computed in parallel on OS X, Linux, Windows, and even Solaris (x86) without any additional tuning or tricks.
+
+Other emrassingly parallel tasks (such as vectorization) can use any parallel backend which supports [foreach](https://cran.r-project.org/package=foreach) package. They can achieve near-linear scalability with number of available cores. 
+
+Finally, a streaming API means that  users do not have to load all the data into RAM. 
+

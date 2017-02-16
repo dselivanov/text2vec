@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Dmitriy Selivanov" />
+
+<meta name="date" content="2016-11-01" />
+
+<title>Topic modeling</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #0000ff; } /* Keyword */
+code > span.ch { color: #008080; } /* Char */
+code > span.st { color: #008080; } /* String */
+code > span.co { color: #008000; } /* Comment */
+code > span.ot { color: #ff4000; } /* Other */
+code > span.al { color: #ff0000; } /* Alert */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #008000; font-weight: bold; } /* Warning */
+code > span.cn { } /* Constant */
+code > span.sc { color: #008080; } /* SpecialChar */
+code > span.vs { color: #008080; } /* VerbatimString */
+code > span.ss { color: #008080; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { } /* Variable */
+code > span.cf { color: #0000ff; } /* ControlFlow */
+code > span.op { } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #ff4000; } /* Preprocessor */
+code > span.do { color: #008000; } /* Documentation */
+code > span.an { color: #008000; } /* Annotation */
+code > span.cv { color: #008000; } /* CommentVar */
+code > span.at { } /* Attribute */
+code > span.in { color: #008000; } /* Information */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.9em;
+  padding-left: 5px;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+  padding-left: 10px;
+}
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">text2vec</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="vectorization.html">Vectorization</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    GloVe
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="glove.html">GloVe</a>
+    </li>
+    <li>
+      <a href="glove-cli.html">GloVe-CLI</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="topic_modeling.html">Topic modeling</a>
+</li>
+<li>
+  <a href="similarity.html">Similarity</a>
+</li>
+<li>
+  <a href="api.html">API</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dselivanov/text2vec">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://stackoverflow.com/questions/tagged/text2vec">
+    <span class="fa fa-stack-overflow"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Topic modeling</h1>
+<h4 class="author"><em>Dmitriy Selivanov</em></h4>
+<h4 class="date"><em>2016-11-01</em></h4>
+
+</div>
+
+
+<div id="latent-semantic-analysis" class="section level1">
+<h1>Latent Semantic Analysis</h1>
+<p>TODO</p>
+<p>As usual we will use built-in <code>text2vec::moview_review</code> dataset. Let’s clean it a little bit and create DTM:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(stringr)
+<span class="kw">library</span>(text2vec)
+<span class="kw">data</span>(<span class="st">&quot;movie_review&quot;</span>)
+<span class="co"># select 500 rows for faster running times</span>
+movie_review_test =<span class="st"> </span>movie_review[<span class="dv">501</span>:<span class="dv">1000</span>, ]
+movie_review_train =<span class="st"> </span>movie_review[<span class="dv">1</span>:<span class="dv">500</span>, ]
+prep_fun =<span class="st"> </span>function(x) {
+  x %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="co"># make text lower case</span>
+<span class="st">    </span>str_to_lower %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="co"># remove non-alphanumeric symbols</span>
+<span class="st">    </span><span class="kw">str_replace_all</span>(<span class="st">&quot;[^[:alnum:]]&quot;</span>, <span class="st">&quot; &quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="co"># collapse multiple spaces</span>
+<span class="st">    </span><span class="kw">str_replace_all</span>(<span class="st">&quot;</span><span class="ch">\\</span><span class="st">s+&quot;</span>, <span class="st">&quot; &quot;</span>)
+}
+movie_review_train$review =<span class="st"> </span><span class="kw">prep_fun</span>(movie_review_train$review)
+it =<span class="st"> </span><span class="kw">itoken</span>(movie_review_train$review, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">prune_vocabulary</span>(<span class="dt">doc_proportion_max =</span> <span class="fl">0.1</span>, <span class="dt">term_count_min =</span> <span class="dv">5</span>)
+vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(v)
+dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer)</code></pre></div>
+<p>Now we will perform tf-idf scaling and the fit and apply LSA model:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tfidf =<span class="st"> </span>TfIdf$<span class="kw">new</span>()
+lsa =<span class="st"> </span>LSA$<span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">10</span>)
+
+<span class="co"># pipe friendly transformation</span>
+dtm_tfidf_lsa =<span class="st"> </span>dtm %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">fit_transform</span>(tfidf) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">fit_transform</span>(lsa)</code></pre></div>
+<p>And we can elegantly apply exactly the same transformation to new data. Elegantly with “not-a-pipe” <code>%&gt;%</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">new_data =<span class="st"> </span>movie_review_test
+new_data_dtm_tfidf_lsa =<span class="st"> </span>
+<span class="st">  </span>new_data$review %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">itoken</span>(<span class="dt">preprocessor =</span> prep_fun, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">create_dtm</span>(vectorizer) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">transform</span>(tfidf) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">transform</span>(lsa)
+<span class="kw">head</span>(new_data_dtm_tfidf_lsa)</code></pre></div>
+<pre><code>##           [,1]       [,2]         [,3]         [,4]         [,5]
+## 1 0.0010757498 0.07883588 -0.012792492  0.001803077 -0.016498829
+## 2 0.0010309045 0.07827933 -0.002480813  0.007431587 -0.013045284
+## 3 0.0008995570 0.09534925 -0.004880675 -0.007976679 -0.033347235
+## 4 0.0009023917 0.09403420  0.012338197  0.007145261 -0.007353982
+## 5 0.0010801880 0.07638067 -0.010959332  0.011642504 -0.017630506
+## 6 0.0009748510 0.08042964 -0.008732528  0.007173264 -0.014004544
+##            [,6]        [,7]          [,8]         [,9]        [,10]
+## 1  0.0103262362 0.009852323 -0.0064973268  0.002294977  0.003113058
+## 2 -0.0001511818 0.007605538 -0.0076489837  0.005333738  0.003353584
+## 3 -0.0028268780 0.016753258 -0.0423168721 -0.521265026  0.038670324
+## 4  0.0171269927 0.005365014 -0.0002391057 -0.007158379  0.012387447
+## 5 -0.0034931519 0.005086364  0.0020006889 -0.001887502 -0.003574490
+## 6 -0.0124146267 0.003978910 -0.0209399126  0.008284681  0.011476810</code></pre>
+</div>
+<div id="latent-dirichlet-allocation" class="section level1">
+<h1>Latent Dirichlet Allocation</h1>
+<p>TODO</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tokens =<span class="st"> </span>movie_review$review %&gt;%<span class="st"> </span>
+<span class="st">  </span>tolower %&gt;%<span class="st"> </span>
+<span class="st">  </span>word_tokenizer
+<span class="co"># turn off progressbar because it won&#39;t look nice in rmd</span>
+it =<span class="st"> </span><span class="kw">itoken</span>(tokens, <span class="dt">ids =</span> movie_review$id, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">prune_vocabulary</span>(<span class="dt">term_count_min =</span> <span class="dv">10</span>, <span class="dt">doc_proportion_max =</span> <span class="fl">0.2</span>)
+vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(v)
+dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer, <span class="dt">type =</span> <span class="st">&quot;lda_c&quot;</span>)
+
+lda_model =<span class="st"> </span>
+<span class="st">  </span>LDA$<span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">10</span>, <span class="dt">vocabulary =</span> v, 
+          <span class="dt">doc_topic_prior =</span> <span class="fl">0.1</span>, <span class="dt">topic_word_prior =</span> <span class="fl">0.01</span>)
+doc_topic_distr =<span class="st"> </span>
+<span class="st">  </span>lda_model$<span class="kw">fit_transform</span>(dtm, <span class="dt">n_iter =</span> <span class="dv">1000</span>, <span class="dt">convergence_tol =</span> <span class="fl">0.01</span>, 
+                          <span class="dt">check_convergence_every_n =</span> <span class="dv">10</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lda_model$<span class="kw">plot</span>()</code></pre></div>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>
+LDAvis
+</title>
+<script src="topic_modeling_files/ldavis/d3.v3.js"></script>
+<script src="topic_modeling_files/ldavis/ldavis.js"></script>
+<link rel="stylesheet" type="text/css" href="topic_modeling_files/ldavis/lda.css">
+</head>
+<body>
+<div id="lda">
+
+</div>
+<script>
+    var vis = new LDAvis("#lda", "topic_modeling_files/ldavis/lda.json");
+  </script>
+</body>
+</div>
+
+
+
+
+
+<footer class="footer">
+  <div class="text-muted"><strong>text2vec</strong> is created by <a href="http://www.dsnotes.com">Dmitry Selivanov</a> and contributors. &copy;  2016.</div>
+  <div class="text-muted"> If you have found any BUGS please report them <a href="https://github.com/dselivanov/text2vec/issues">here</a>.</div>
+</footer>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+
+  ga('create', 'UA-56994099-2', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
