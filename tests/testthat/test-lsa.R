@@ -19,7 +19,7 @@ test_that("LSA", {
   model$fit(dtm)
   documents = model$transform(dtm)
   expect_equal(rownames(documents), ids)
-
+  expect_equal(dim(model$get_word_vectors()), c(ncol(dtm), n_topics))
 
   # check cosine angle between original vectors and vectors is latent factor space
   # i1 = 1; i2 = 2;

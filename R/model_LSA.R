@@ -111,7 +111,7 @@ LatentSemanticAnalysis = R6::R6Class(
         stop("Fit the model first!")
     },
     get_word_vectors = function() {
-      diag(x = private$singular_values) %*% private$lsa_factor_matrix
+       private$lsa_factor_matrix %*% diag(x = private$singular_values)
     }
   ),
   private = list(

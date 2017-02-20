@@ -37,6 +37,7 @@ NULL
 #' @importFrom RcppParallel RcppParallelLibs
 #' @importFrom magrittr %>%
 #' @importFrom utils txtProgressBar setTxtProgressBar
+#' @importFrom methods as
 #' @useDynLib text2vec
 NULL
 
