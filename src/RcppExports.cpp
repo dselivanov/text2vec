@@ -143,3 +143,75 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// warplda_create
+SEXP warplda_create(int n_topics, double doc_topic_prior, double topic_word_prior);
+RcppExport SEXP text2vec_warplda_create(SEXP n_topicsSEXP, SEXP doc_topic_priorSEXP, SEXP topic_word_priorSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n_topics(n_topicsSEXP);
+    Rcpp::traits::input_parameter< double >::type doc_topic_prior(doc_topic_priorSEXP);
+    Rcpp::traits::input_parameter< double >::type topic_word_prior(topic_word_priorSEXP);
+    rcpp_result_gen = Rcpp::wrap(warplda_create(n_topics, doc_topic_prior, topic_word_prior));
+    return rcpp_result_gen;
+END_RCPP
+}
+// warplda_init_dtm
+void warplda_init_dtm(SEXP ptr, const S4& m, const IntegerVector& z_old, const IntegerVector& z_new);
+RcppExport SEXP text2vec_warplda_init_dtm(SEXP ptrSEXP, SEXP mSEXP, SEXP z_oldSEXP, SEXP z_newSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< const S4& >::type m(mSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type z_old(z_oldSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type z_new(z_newSEXP);
+    warplda_init_dtm(ptr, m, z_old, z_new);
+    return R_NilValue;
+END_RCPP
+}
+// warplda_set_topic_word_count
+void warplda_set_topic_word_count(SEXP ptr, const Rcpp::IntegerMatrix& topic_word_count);
+RcppExport SEXP text2vec_warplda_set_topic_word_count(SEXP ptrSEXP, SEXP topic_word_countSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix& >::type topic_word_count(topic_word_countSEXP);
+    warplda_set_topic_word_count(ptr, topic_word_count);
+    return R_NilValue;
+END_RCPP
+}
+// run_one_iter
+double run_one_iter(SEXP ptr, bool update_topics, bool calc_ll);
+RcppExport SEXP text2vec_run_one_iter(SEXP ptrSEXP, SEXP update_topicsSEXP, SEXP calc_llSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< bool >::type update_topics(update_topicsSEXP);
+    Rcpp::traits::input_parameter< bool >::type calc_ll(calc_llSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_one_iter(ptr, update_topics, calc_ll));
+    return rcpp_result_gen;
+END_RCPP
+}
+// warplda_get_doc_topic_count
+IntegerMatrix warplda_get_doc_topic_count(SEXP ptr);
+RcppExport SEXP text2vec_warplda_get_doc_topic_count(SEXP ptrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    rcpp_result_gen = Rcpp::wrap(warplda_get_doc_topic_count(ptr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// warplda_get_topic_word_count
+IntegerMatrix warplda_get_topic_word_count(SEXP ptr);
+RcppExport SEXP text2vec_warplda_get_topic_word_count(SEXP ptrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    rcpp_result_gen = Rcpp::wrap(warplda_get_topic_word_count(ptr));
+    return rcpp_result_gen;
+END_RCPP
+}

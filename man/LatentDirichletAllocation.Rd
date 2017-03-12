@@ -13,40 +13,62 @@ LDA
 }
 \description{
 Creates Latent Dirichlet Allocation model.
+ At the moment only 'WarpLDA' is implemented.
+ WarpLDA, an LDA sampler which achieves both the best O(1) time
+ complexity per token and the best O(K) scope of random access.
+ Our empirical results in a wide range of testing conditions demonstrate that
+ WarpLDA is consistently 5-15x faster than the state-of-the-art Metropolis-Hastings
+ based LightLDA, and is comparable or faster than the sparsity aware F+LDA.
 }
 \section{Fields}{
 
 \describe{
-\item{\code{verbose}}{\code{logical = TRUE} whether to display training inforamtion}
+\item{\code{verbose}}{\code{logical = FALSE} whether to display more information about internal routines.}
+
+\item{\code{topic_word_distribution}}{distribution of words for each topic. Available after model fitting with
+\code{model$fit()} or \code{model$fit_transform()} methods.}
+
+\item{\code{doc_topic_distribution}}{distribution of topics for each document. Available after model fitting with
+\code{model$fit()} or \code{model$fit_transform()} methods.}
+
+\item{\code{components}}{word counts for each topic-word entry. Available after model fitting with
+\code{model$fit()} or \code{model$fit_transform()} methods.}
 }}
 \section{Usage}{
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
 \preformatted{
-lda = LatentDirichletAllocation$new(n_topics, vocabulary,
-              doc_topic_prior = 1 / n_topics, topic_word_prior = 1 / n_topics)
-lda$fit(x, n_iter, convergence_tol = -1, check_convergence_every_n = 0)
-lda$fit_transform(x, n_iter, convergence_tol = -1, check_convergence_every_n = 0)
-lda$get_word_vectors()
+lda = LDA$new(n_topics = 10L, doc_topic_prior = 50 / n_topics, topic_word_prior = 1 / n_topics, verbose = FALSE)
+lda$fit_transform(X, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10, progress = interactive())
+lda$transform(X, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5, progress = FALSE)
+lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
 }
 }
 
 \section{Methods}{
 
 \describe{
-  \item{\code{$new(n_topics, vocabulary,
-              doc_topic_prior = 1 / n_topics, # alpha
-              topic_word_prior = 1 / n_topics)}}{Constructor for LDA vectors model.
-                    For description of arguments see \bold{Arguments} section.}
-  \item{\code{$fit(x, n_iter, convergence_tol = -1,
-               check_convergence_every_n = 0)}}{fit LDA model to input matrix \code{x}}
-  \item{\code{$fit_transform(x, n_iter, convergence_tol = -1,
-               check_convergence_every_n = 0)}}{fit LDA model to input matrix \code{x}
-               and transforms input documents to topic space}
-  \item{\code{$transform(x, n_iter = 100, convergence_tol = 0.005,
-               check_convergence_every_n = 1)}}{ transforms new documents to topic space}
-  \item{\code{$get_word_vectors()}}{get word-topic distribution}
-  \item{\code{$dump()}}{dumps model parameters}
+  \item{\code{$new(n_topics,
+              doc_topic_prior = 50 / n_topics, # alpha
+              topic_word_prior = 1 / n_topics, # beta
+              verbose = FALSE, method = "WarpLDA")}}{Constructor for LDA model.
+              For description of arguments see \bold{Arguments} section.}
+  \item{\code{$fit(X, n_iter, convergence_tol = -1,
+               n_check_convergence = 10)}}{fit LDA model to input matrix \code{X}. Not that useful -
+               \code{fit_transform} is used under the hood. Implemented just to follow API.}
+  \item{\code{$fit_transform(X, n_iter, convergence_tol = -1,
+               n_check_convergence = 0, progress = interactive())}}{fit LDA model to input matrix
+               \code{X} and transforms input documents to topic space -
+               model input matrix as a distribution over topic space}
+  \item{\code{$transform(X, n_iter, convergence_tol = -1,
+               n_check_convergence = 0, progress = FALSE)}}{ transforms new documents to topic space -
+               model input matrix as a distribution over topic space}
+  \item{\code{$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)}}{returns "top words"
+               for a given topic (or several topics). Words for each topic can be
+               sorted by probability of chance to observe word in a given topic (\code{lambda = 1}) and by
+               "relevance" wich also takes into account frequency of word in corpus (\code{lambda < 1}).
+               From our experience in most cases setting \code{ 0.2 < lambda < 0.4} works well.
+               See \url{http://nlp.stanford.edu/events/illvi2014/papers/sievert-illvi2014.pdf} for details.}
   \item{\code{$plot(...)}}{plot LDA model using \url{https://cran.r-project.org/package=LDAvis} package.
                \code{...} will be passed to \code{LDAvis::createJSON} and \code{LDAvis::serVis} functions}
 }
@@ -56,21 +78,18 @@ lda$get_word_vectors()
 
 \describe{
  \item{lda}{A \code{LDA} object}
- \item{x}{An input document-term matrix.}
+ \item{X}{An input document-term matrix. \bold{CSR \code{RsparseMatrix} used internally}}.
+ Should have column names.
  \item{n_topics}{\code{integer} desired number of latent topics. Also knows as \bold{K}}
- \item{vocabulary}{vocabulary in a form of \code{character} or \code{text2vec_vocab} }
  \item{doc_topic_prior}{\code{numeric} prior for document-topic multinomial distribution.
    Also knows as \bold{alpha}}
  \item{topic_word_prior}{\code{numeric} prior for topic-word multinomial distribution.
    Also knows as \bold{eta}}
- \item{n_iter}{\code{integer} number of Gibbs iterations}
+ \item{n_iter}{\code{integer} number of sampling iterations}
+ \item{n_check_convergence}{ defines how often calculate score to check convergence }
  \item{convergence_tol}{{\code{numeric = -1} defines early stopping strategy. We stop fitting
     when one of two following conditions will be satisfied: (a) we have used
-    all iterations, or (b) \code{perplexity_previous_iter / perplexity_current_iter - 1 <
-    convergence_tol}. By default perform all iterations.}}
- \item{check_convergence_every_n}{\code{integer} Defines frequency of perplexity calculation.
-   In some cases perplexity calculation during LDA fitting can take noticable amount of time.
-   It make sense to do not calculate it at each iteration.}
+    all iterations, or (b) \code{score_previous_check / score_current < 1 + convergence_tol}}}
 }
 }
 \examples{
@@ -81,13 +100,11 @@ tokens = movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
 it = itoken(tokens, ids = movie_review$id[1:N])
 v = create_vocabulary(it) \%>\%
   prune_vocabulary(term_count_min = 5, doc_proportion_max = 0.2)
-dtm = create_dtm(it, vocab_vectorizer(v), 'lda_c')
-lda_model = LatentDirichletAllocation$new(n_topics = 10, vocabulary = v,
- doc_topic_prior = 0.1,
- topic_word_prior = 0.1)
- doc_topic_distr = lda_model$fit_transform(dtm, n_iter =20, check_convergence_every_n = 5)
- # run LDAvis visualisation if needed (make sure LDAvis package installed)
- # lda_model$plot()
+dtm = create_dtm(it, vocab_vectorizer(v))
+lda_model = LDA$new(n_topics = 10)
+doc_topic_distr = lda_model$fit_transform(dtm, n_iter = 20)
+# run LDAvis visualisation if needed (make sure LDAvis package installed)
+# lda_model$plot()
 }
 \keyword{datasets}
 

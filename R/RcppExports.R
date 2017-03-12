@@ -45,3 +45,27 @@ is_invalid_ptr <- function(sexp_ptr) {
     .Call('text2vec_is_invalid_ptr', PACKAGE = 'text2vec', sexp_ptr)
 }
 
+warplda_create <- function(n_topics, doc_topic_prior, topic_word_prior) {
+    .Call('text2vec_warplda_create', PACKAGE = 'text2vec', n_topics, doc_topic_prior, topic_word_prior)
+}
+
+warplda_init_dtm <- function(ptr, m, z_old, z_new) {
+    invisible(.Call('text2vec_warplda_init_dtm', PACKAGE = 'text2vec', ptr, m, z_old, z_new))
+}
+
+warplda_set_topic_word_count <- function(ptr, topic_word_count) {
+    invisible(.Call('text2vec_warplda_set_topic_word_count', PACKAGE = 'text2vec', ptr, topic_word_count))
+}
+
+run_one_iter <- function(ptr, update_topics = TRUE, calc_ll = TRUE) {
+    .Call('text2vec_run_one_iter', PACKAGE = 'text2vec', ptr, update_topics, calc_ll)
+}
+
+warplda_get_doc_topic_count <- function(ptr) {
+    .Call('text2vec_warplda_get_doc_topic_count', PACKAGE = 'text2vec', ptr)
+}
+
+warplda_get_topic_word_count <- function(ptr) {
+    .Call('text2vec_warplda_get_topic_word_count', PACKAGE = 'text2vec', ptr)
+}
+
