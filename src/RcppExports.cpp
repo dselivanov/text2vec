@@ -17,41 +17,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// total_likelihood
-double total_likelihood(IntegerMatrix topic_distr, IntegerMatrix doc_distr, double topic_prior, double doc_prior);
-RcppExport SEXP text2vec_total_likelihood(SEXP topic_distrSEXP, SEXP doc_distrSEXP, SEXP topic_priorSEXP, SEXP doc_priorSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerMatrix >::type topic_distr(topic_distrSEXP);
-    Rcpp::traits::input_parameter< IntegerMatrix >::type doc_distr(doc_distrSEXP);
-    Rcpp::traits::input_parameter< double >::type topic_prior(topic_priorSEXP);
-    Rcpp::traits::input_parameter< double >::type doc_prior(doc_priorSEXP);
-    rcpp_result_gen = Rcpp::wrap(total_likelihood(topic_distr, doc_distr, topic_prior, doc_prior));
-    return rcpp_result_gen;
-END_RCPP
-}
-// collapsedGibbsSampler
-List collapsedGibbsSampler(ListOf<IntegerMatrix> documents, int n_topics, int vocab_size, int n_iter, double alpha, double eta, List initial, double convergence_tol, int check_convergence_every_n, int trace, int freeze_topics);
-RcppExport SEXP text2vec_collapsedGibbsSampler(SEXP documentsSEXP, SEXP n_topicsSEXP, SEXP vocab_sizeSEXP, SEXP n_iterSEXP, SEXP alphaSEXP, SEXP etaSEXP, SEXP initialSEXP, SEXP convergence_tolSEXP, SEXP check_convergence_every_nSEXP, SEXP traceSEXP, SEXP freeze_topicsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< ListOf<IntegerMatrix> >::type documents(documentsSEXP);
-    Rcpp::traits::input_parameter< int >::type n_topics(n_topicsSEXP);
-    Rcpp::traits::input_parameter< int >::type vocab_size(vocab_sizeSEXP);
-    Rcpp::traits::input_parameter< int >::type n_iter(n_iterSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< double >::type eta(etaSEXP);
-    Rcpp::traits::input_parameter< List >::type initial(initialSEXP);
-    Rcpp::traits::input_parameter< double >::type convergence_tol(convergence_tolSEXP);
-    Rcpp::traits::input_parameter< int >::type check_convergence_every_n(check_convergence_every_nSEXP);
-    Rcpp::traits::input_parameter< int >::type trace(traceSEXP);
-    Rcpp::traits::input_parameter< int >::type freeze_topics(freeze_topicsSEXP);
-    rcpp_result_gen = Rcpp::wrap(collapsedGibbsSampler(documents, n_topics, vocab_size, n_iter, alpha, eta, initial, convergence_tol, check_convergence_every_n, trace, freeze_topics));
-    return rcpp_result_gen;
-END_RCPP
-}
 // create_xptr_unordered_set
 SEXP create_xptr_unordered_set(CharacterVector x);
 RcppExport SEXP text2vec_create_xptr_unordered_set(SEXP xSEXP) {

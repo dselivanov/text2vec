@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <iostream>
+#include <functional>
+
 using std::vector;
 
 template<typename T,

@@ -5,14 +5,6 @@ hasher <- function(x, hash_size) {
     .Call('text2vec_hasher', PACKAGE = 'text2vec', x, hash_size)
 }
 
-total_likelihood <- function(topic_distr, doc_distr, topic_prior, doc_prior) {
-    .Call('text2vec_total_likelihood', PACKAGE = 'text2vec', topic_distr, doc_distr, topic_prior, doc_prior)
-}
-
-collapsedGibbsSampler <- function(documents, n_topics, vocab_size, n_iter, alpha, eta, initial, convergence_tol = 0.005, check_convergence_every_n = 0L, trace = 2L, freeze_topics = 0L) {
-    .Call('text2vec_collapsedGibbsSampler', PACKAGE = 'text2vec', documents, n_topics, vocab_size, n_iter, alpha, eta, initial, convergence_tol, check_convergence_every_n, trace, freeze_topics)
-}
-
 create_xptr_unordered_set <- function(x) {
     .Call('text2vec_create_xptr_unordered_set', PACKAGE = 'text2vec', x)
 }
