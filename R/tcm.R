@@ -35,17 +35,18 @@
 # dim(tcm)
 # }
 
-get_tcm = function(corpus) {
-  if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
-    tcm = corpus$get_tcm()
-    if (length(tcm@x) == 0)
-      warning("Something goes wrong, tcm has 0 rows...")
-    dim_names = colnames(tcm)
-    tcm@Dimnames = list(dim_names, dim_names)
-    tcm
-  }
-  else
-    stop("corpus should be Rcpp_HashCorpus class or Rcpp_VocabCorpus class")
+get_tcm = function(corpus_ptr) {
+  stopifnot(inherits(corpus_ptr, 'VocabCorpus') || inherits(corpus_ptr, 'HashCorpus'))
+  if(class(corpus_ptr) == "HashCorpus")
+    tcm = cpp_hash_corpus_get_tcm(corpus_ptr)
+  if(class(corpus_ptr) == "VocabCorpus")
+    tcm = cpp_vocabulary_corpus_get_tcm(corpus_ptr)
+
+  if (length(tcm@x) == 0)
+    warning("Something goes wrong, tcm has 0 rows...")
+  dim_names = colnames(tcm)
+  tcm@Dimnames = list(dim_names, dim_names)
+  tcm
 }
 
 #' @name create_tcm

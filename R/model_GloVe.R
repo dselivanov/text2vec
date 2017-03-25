@@ -189,7 +189,7 @@ GlobalVectors = R6::R6Class(
              initial = initial)
       #--------------------------------------------------------
       # init C++ class which actually perform fitting
-      private$glove_fitter = new(GloveFitter, glove_params)
+      private$glove_fitter = cpp_glove_create(glove_params)
       private$cost_history = numeric(0)
       # number of non-zero elements in cooccurence matrix
       n_nnz = length(x@i)
@@ -214,10 +214,10 @@ GlobalVectors = R6::R6Class(
         if ( self$shuffle )
           iter_order = sample.int( n_nnz, replace = F )
 
-        cost = private$glove_fitter$partial_fit(x@i, x@j, x@x, iter_order)
+        cost = cpp_glove_partial_fit(private$glove_fitter, x@i, x@j, x@x, iter_order)
         if(IS_TRIANGULAR)
           #if matrix is triangular fit another iterations on transposed one
-          cost = cost + private$glove_fitter$partial_fit(x@j, x@i, x@x, iter_order)
+          cost = cost + cpp_glove_partial_fit(private$glove_fitter, x@j, x@i, x@x, iter_order)
 
         # check whether SGD is numerically correct - no NaN at C++ level
         if (is.nan(cost))
@@ -231,12 +231,12 @@ GlobalVectors = R6::R6Class(
           msg = sprintf("%s - epoch %d, expected cost %.4f", as.character(Sys.time()),
                          i, private$cost_history[[i]])
           if (private$lambda > 0)
-            msg = paste0(msg, sprintf(", sparsity %.4f", private$glove_fitter$get_sparsity_level()))
+            msg = paste0(msg, sprintf(", sparsity %.4f", cpp_glove_get_sparsity_level(private$glove_fitter)))
           message(msg)
         }
 
         # reset cost for next iteration
-        private$glove_fitter$set_cost_zero()
+        cpp_glove_set_cost_zero(private$glove_fitter)
 
         # check convergence
         if ( i > 1 && (private$cost_history[[i - 1]] / private$cost_history[[i]] - 1) < convergence_tol) {
@@ -248,14 +248,14 @@ GlobalVectors = R6::R6Class(
         if (self$dump_every_n > 0L) {
           if ( i %% self$dump_every_n == 0) {
             iter_name = paste0("iter_", i)
-            private$word_vectors_history[[iter_name]] = private$glove_fitter$get_word_vectors()
+            private$word_vectors_history[[iter_name]] = cpp_glove_get_word_vectors(private$glove_fitter)
           }
         }
         i = i + 1
       }
       private$fitted = TRUE
       # update w_i, w_j, b_i, b_j by values from fitted model
-      res = private$glove_fitter$dump_model()
+      res = cpp_glove_dump_model(private$glove_fitter)
       private$w_i = res$w_i
       private$w_j = res$w_j
       private$b_i = res$b_i
@@ -362,7 +362,7 @@ glove = function(tcm,
   if ( !inherits(tcm, 'dgTMatrix') )
     tcm = as(tcm, 'dgTMatrix')
   #init
-  glove_model = GlobalVectors$new(word_vectors_size = word_vectors_size,
+  glove_model_ptr = GlobalVectors$new(word_vectors_size = word_vectors_size,
                        vocabulary = rownames(tcm),
                        x_max = x_max,
                        learning_rate = learning_rate,

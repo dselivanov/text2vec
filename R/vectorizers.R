@@ -22,20 +22,33 @@ encode_context = function(context_string_name = c("symmetric", "right", "left"))
          left = -1L)
 }
 
-corpus_insert = function(corpus, iterator, grow_dtm, skip_grams_window_context, window_size, weights) {
+corpus_insert_generic = function(corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights) {
+  if(inherits(corpus_ptr, "HashCorpus")) {
+    cpp_hash_corpus_insert_document_batch(corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights)
+    return(TRUE)
+  }
+  if(inherits(corpus_ptr, "VocabCorpus")) {
+    cpp_vocabulary_corpus_insert_document_batch(corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights)
+    return(TRUE)
+  }
+  stop("can't recognize corpus - neither HashCorpus or VocabCorpus")
+}
+
+corpus_insert = function(corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights) {
   skip_grams_window_context_code = force(encode_context(skip_grams_window_context))
-  if (inherits(iterator, 'R6'))
+  if (inherits(iterator, "R6"))
     it = iterator$clone(deep = TRUE)
   else {
     warning("Can't clone input iterator. It will be modified by current function call", immediate. = T)
     it = iterator
   }
   ids = foreach(val = it, .combine = c, .multicombine = TRUE ) %do% {
-    corpus$insert_document_batch(val$tokens, grow_dtm, skip_grams_window_context_code, window_size, weights)
+    res = corpus_insert_generic(corpus_ptr, val$tokens, grow_dtm, skip_grams_window_context_code, window_size, weights)
+    if(!res) stop("something went wrong during insert into corpus")
     val$ids
   }
-  attr(corpus, "ids") = ids
-  corpus
+  attr(corpus_ptr, "ids") = ids
+  corpus_ptr
 }
 
 #' @name vectorizers
@@ -71,16 +84,14 @@ corpus_insert = function(corpus, iterator, grow_dtm, skip_grams_window_context, 
 #' @export
 vocab_vectorizer = function(vocabulary) {
   vectorizer = function(iterator, grow_dtm, skip_grams_window_context, window_size, weights) {
-    vocab_corpus = new(VocabCorpus,
-                        vocab = vocabulary$vocab$terms,
-                        ngram_min = vocabulary$ngram[["ngram_min"]],
-                        ngram_max = vocabulary$ngram[["ngram_max"]],
-                        # window_size = skip_grams_window,
-                        stopwords = vocabulary$stopwords,
-                        delim = vocabulary$sep_ngram)
-
-    attr(vocab_corpus, 'ids') = character(0)
-    corpus_insert(vocab_corpus, iterator, grow_dtm, skip_grams_window_context, window_size, weights)
+    vocab_corpus_ptr = cpp_vocabulary_corpus_create(vocabulary$vocab$terms,
+                                                    vocabulary$ngram[["ngram_min"]],
+                                                    vocabulary$ngram[["ngram_max"]],
+                                                    vocabulary$stopwords,
+                                                    vocabulary$sep_ngram)
+    attr(vocab_corpus_ptr, "ids") = character(0)
+    class(vocab_corpus_ptr) = "VocabCorpus"
+    corpus_insert(vocab_corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights)
   }
   vectorizer
 }
@@ -101,13 +112,10 @@ hash_vectorizer = function(hash_size = 2 ^ 18,
   stopifnot(is.numeric(ngram) && length(ngram) == 2 && ngram[[2]] >= ngram[[1]])
 
   vectorizer = function(iterator, grow_dtm, skip_grams_window_context, window_size, weights) {
-    hash_corpus = new(HashCorpus,
-                       hash_size = hash_size,
-                       ngram_min = ngram[[1]],
-                       ngram_max = ngram[[2]],
-                       signed_hash)
-    attr(hash_corpus, 'ids') = character(0)
-    corpus_insert(hash_corpus, iterator, grow_dtm, skip_grams_window_context, window_size, weights)
+    hash_corpus_ptr = cpp_hash_corpus_create(hash_size, ngram[[1]], ngram[[2]], signed_hash)
+    attr(hash_corpus_ptr, "ids") = character(0)
+    class(hash_corpus_ptr) = "HashCorpus"
+    corpus_insert(hash_corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights)
   }
   vectorizer
 }

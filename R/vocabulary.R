@@ -106,17 +106,21 @@ create_vocabulary.itoken = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' 
 
   ngram_min = as.integer( ngram[[1]] )
   ngram_max = as.integer( ngram[[2]] )
-  vocab_module = new(VocabularyBuilder, ngram_min, ngram_max, stopwords, sep_ngram)
+  # vocab_module = new(VocabularyBuilder, ngram_min, ngram_max, stopwords, sep_ngram)
+  vocab_ptr = cpp_vocab_create(ngram_min, ngram_max, stopwords, sep_ngram)
 
   foreach(tokens = it) %do% {
-    vocab_module$insert_document_batch(tokens$tokens)
+    cpp_vocabulary_insert_document_batch(vocab_ptr, tokens$tokens)
+    # vocab_module$insert_document_batch(tokens$tokens)
   }
-  vocab = setDT(vocab_module$get_vocab_statistics())
+  # vocab = setDT(vocab_module$get_vocab_statistics())
+  vocab = setDT(cpp_get_vocab_statistics(vocab_ptr))
 
   res = list(
     vocab = vocab,
     ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
-    document_count = vocab_module$get_document_count(),
+    # document_count = vocab_module$get_document_count(),
+    document_count = cpp_get_document_count(vocab_ptr),
     stopwords = stopwords,
     sep_ngram = sep_ngram
   )

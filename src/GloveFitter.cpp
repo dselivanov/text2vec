@@ -113,7 +113,7 @@ AdaGradIter::AdaGradIter(const AdaGradIter& AdaGradIter, Split):
 class GloveFitter {
 public:
   //------------------------------------------------
-  GloveFitter(List params):
+  GloveFitter(const List &params):
     GRAIN_SIZE(as<uint32_t>(params["grain_size"])),
     gloveFit(as<size_t>(params["vocab_size"]),
              as<size_t>(params["word_vec_size"]),
@@ -157,13 +157,54 @@ private:
   AdaGradIter adaGradIter;
 };
 
-RCPP_MODULE(GloveFitter) {
-  class_< GloveFitter >( "GloveFitter" )
-  .constructor<List>()
-  .method( "get_word_vectors", &GloveFitter::get_word_vectors, "returns word vectors")
-  .method( "set_cost_zero", &GloveFitter::set_cost_zero, "sets cost to zero")
-  .method( "partial_fit", &GloveFitter::partial_fit, "process TCM data chunk")
-  .method( "get_sparsity_level", &GloveFitter::get_word_vectors_sparsity_ratio, "return current sparsity level")
-  .method( "dump_model", &GloveFitter::dump_model, "return model parameters")
-  ;
+// RCPP_MODULE(GloveFitter) {
+//   class_< GloveFitter >( "GloveFitter" )
+//   .constructor<List>()
+//   .method( "get_word_vectors", &GloveFitter::get_word_vectors, "returns word vectors")
+//   .method( "set_cost_zero", &GloveFitter::set_cost_zero, "sets cost to zero")
+//   .method( "partial_fit", &GloveFitter::partial_fit, "process TCM data chunk")
+//   .method( "get_sparsity_level", &GloveFitter::get_word_vectors_sparsity_ratio, "return current sparsity level")
+//   .method( "dump_model", &GloveFitter::dump_model, "return model parameters")
+//   ;
+// }
+
+
+// [[Rcpp::export]]
+SEXP cpp_glove_create(const List &params) {
+  GloveFitter *glove = new GloveFitter(params);
+  XPtr<GloveFitter> ptr(glove, true);
+  return ptr;
+}
+
+// [[Rcpp::export]]
+NumericMatrix cpp_glove_get_word_vectors(SEXP ptr) {
+  Rcpp::XPtr<GloveFitter> glove(ptr);
+  return glove->get_word_vectors();
+}
+
+// [[Rcpp::export]]
+void cpp_glove_set_cost_zero(SEXP ptr) {
+  Rcpp::XPtr<GloveFitter> glove(ptr);
+  glove->set_cost_zero();
+}
+
+// [[Rcpp::export]]
+double cpp_glove_partial_fit(SEXP ptr,
+                           const IntegerVector x_irow,
+                           const IntegerVector  x_icol,
+                           const NumericVector x_val,
+                           const IntegerVector iter_order) {
+  Rcpp::XPtr<GloveFitter> glove(ptr);
+  return glove->partial_fit(x_irow, x_icol, x_val, iter_order);
+}
+// [[Rcpp::export]]
+double cpp_glove_get_sparsity_level(SEXP ptr) {
+  Rcpp::XPtr<GloveFitter> glove(ptr);
+  return glove->get_word_vectors_sparsity_ratio();
+}
+
+// [[Rcpp::export]]
+List cpp_glove_dump_model(SEXP ptr) {
+  Rcpp::XPtr<GloveFitter> glove(ptr);
+  return glove->dump_model();
 }

@@ -20,16 +20,16 @@
 # it = itoken(tokens)
 # dtm = create_dtm(it, vectorizer)
 
-get_dtm = function(corpus) {
-  if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
-    dtm = corpus$get_dtm()
-    if (length(dtm@x) == 0)
-      warning("dtm has 0 rows. Empty iterator?", immediate. = TRUE)
-    dtm@Dimnames[[1]] = attr(corpus, 'ids')
-    dtm
-  }
-  else
-    stop("corpus should be instance of Rcpp_HashCorpus or Rcpp_VocabCorpus classes")
+get_dtm = function(corpus_ptr) {
+  if(class(corpus_ptr) == "HashCorpus")
+    dtm = cpp_hash_corpus_get_dtm(corpus_ptr)
+  if(class(corpus_ptr) == "VocabCorpus")
+    dtm = cpp_vocabulary_corpus_get_dtm(corpus_ptr)
+
+  if (length(dtm@x) == 0)
+    warning("dtm has 0 rows. Empty iterator?", immediate. = TRUE)
+  dtm@Dimnames[[1]] = attr(corpus_ptr, 'ids')
+  dtm
 }
 
 #' @name create_dtm

@@ -15,12 +15,31 @@
 // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Vocabulary.h"
-RCPP_MODULE(VocabularyBuilder) {
-  class_< Vocabulary >( "VocabularyBuilder" )
-  .constructor<uint32_t, uint32_t, const CharacterVector, const String>()
-  .method( "insert_document", &Vocabulary::insert_document, "inserts document into corpus" )
-  .method( "insert_document_batch", &Vocabulary::insert_document_batch, "inserts multiple documents into corpus" )
-  .method( "get_vocab_statistics", &Vocabulary::get_vocab_statistics, "returns vocabulary stat data.frame")
-  .method( "get_document_count", &Vocabulary::get_document_count, "returns number of documents vocabulary was built" )
-  ;
+
+// [[Rcpp::export]]
+SEXP cpp_vocab_create(uint32_t ngram_min,
+                  uint32_t ngram_max,
+                  const CharacterVector stopwords_R,
+                  const String delim) {
+  Vocabulary *v = new Vocabulary(ngram_min, ngram_max, stopwords_R, delim);
+  XPtr< Vocabulary> ptr(v, true);
+  return ptr;
+}
+
+// [[Rcpp::export]]
+void cpp_vocabulary_insert_document_batch(SEXP ptr, const ListOf<const CharacterVector> document_batch) {
+  Rcpp::XPtr<Vocabulary> v(ptr);
+  v->insert_document_batch(document_batch);
+}
+
+// [[Rcpp::export]]
+DataFrame cpp_get_vocab_statistics(SEXP ptr) {
+  Rcpp::XPtr<Vocabulary> v(ptr);
+  return v->get_vocab_statistics();
+}
+
+// [[Rcpp::export]]
+int cpp_get_document_count(SEXP ptr) {
+  Rcpp::XPtr<Vocabulary> v(ptr);
+  return v->get_document_count();
 }

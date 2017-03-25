@@ -9,6 +9,46 @@ collapse_collocations_cpp <- function(docs, xptr_unordered_set, r_sep) {
     .Call('text2vec_collapse_collocations_cpp', PACKAGE = 'text2vec', docs, xptr_unordered_set, r_sep)
 }
 
+cpp_glove_create <- function(params) {
+    .Call('text2vec_cpp_glove_create', PACKAGE = 'text2vec', params)
+}
+
+cpp_glove_get_word_vectors <- function(ptr) {
+    .Call('text2vec_cpp_glove_get_word_vectors', PACKAGE = 'text2vec', ptr)
+}
+
+cpp_glove_set_cost_zero <- function(ptr) {
+    invisible(.Call('text2vec_cpp_glove_set_cost_zero', PACKAGE = 'text2vec', ptr))
+}
+
+cpp_glove_partial_fit <- function(ptr, x_irow, x_icol, x_val, iter_order) {
+    .Call('text2vec_cpp_glove_partial_fit', PACKAGE = 'text2vec', ptr, x_irow, x_icol, x_val, iter_order)
+}
+
+cpp_glove_get_sparsity_level <- function(ptr) {
+    .Call('text2vec_cpp_glove_get_sparsity_level', PACKAGE = 'text2vec', ptr)
+}
+
+cpp_glove_dump_model <- function(ptr) {
+    .Call('text2vec_cpp_glove_dump_model', PACKAGE = 'text2vec', ptr)
+}
+
+cpp_hash_corpus_create <- function(size, n_min, n_max, use_signed_hash) {
+    .Call('text2vec_cpp_hash_corpus_create', PACKAGE = 'text2vec', size, n_min, n_max, use_signed_hash)
+}
+
+cpp_hash_corpus_insert_document_batch <- function(ptr, docs_batch, grow_dtm, context, window_size, weights) {
+    invisible(.Call('text2vec_cpp_hash_corpus_insert_document_batch', PACKAGE = 'text2vec', ptr, docs_batch, grow_dtm, context, window_size, weights))
+}
+
+cpp_hash_corpus_get_tcm <- function(ptr) {
+    .Call('text2vec_cpp_hash_corpus_get_tcm', PACKAGE = 'text2vec', ptr)
+}
+
+cpp_hash_corpus_get_dtm <- function(ptr) {
+    .Call('text2vec_cpp_hash_corpus_get_dtm', PACKAGE = 'text2vec', ptr)
+}
+
 hasher <- function(x, hash_size) {
     .Call('text2vec_hasher', PACKAGE = 'text2vec', x, hash_size)
 }
@@ -35,6 +75,38 @@ euclidean_dist <- function(x, y) {
 
 is_invalid_ptr <- function(sexp_ptr) {
     .Call('text2vec_is_invalid_ptr', PACKAGE = 'text2vec', sexp_ptr)
+}
+
+cpp_vocabulary_corpus_create <- function(vocab_R, n_min, n_max, stopwords_R, delim) {
+    .Call('text2vec_cpp_vocabulary_corpus_create', PACKAGE = 'text2vec', vocab_R, n_min, n_max, stopwords_R, delim)
+}
+
+cpp_vocabulary_corpus_insert_document_batch <- function(ptr, docs_batch, grow_dtm, context, window_size, weights) {
+    invisible(.Call('text2vec_cpp_vocabulary_corpus_insert_document_batch', PACKAGE = 'text2vec', ptr, docs_batch, grow_dtm, context, window_size, weights))
+}
+
+cpp_vocabulary_corpus_get_tcm <- function(ptr) {
+    .Call('text2vec_cpp_vocabulary_corpus_get_tcm', PACKAGE = 'text2vec', ptr)
+}
+
+cpp_vocabulary_corpus_get_dtm <- function(ptr) {
+    .Call('text2vec_cpp_vocabulary_corpus_get_dtm', PACKAGE = 'text2vec', ptr)
+}
+
+cpp_vocab_create <- function(ngram_min, ngram_max, stopwords_R, delim) {
+    .Call('text2vec_cpp_vocab_create', PACKAGE = 'text2vec', ngram_min, ngram_max, stopwords_R, delim)
+}
+
+cpp_vocabulary_insert_document_batch <- function(ptr, document_batch) {
+    invisible(.Call('text2vec_cpp_vocabulary_insert_document_batch', PACKAGE = 'text2vec', ptr, document_batch))
+}
+
+cpp_get_vocab_statistics <- function(ptr) {
+    .Call('text2vec_cpp_get_vocab_statistics', PACKAGE = 'text2vec', ptr)
+}
+
+cpp_get_document_count <- function(ptr) {
+    .Call('text2vec_cpp_get_document_count', PACKAGE = 'text2vec', ptr)
 }
 
 warplda_create <- function(n_topics, doc_topic_prior, topic_word_prior) {
