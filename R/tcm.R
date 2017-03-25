@@ -91,12 +91,13 @@ get_tcm = function(corpus) {
 #'
 #' # set to number of cores on your machine
 #' N_WORKERS = 1
+#' if(require(doParallel)) registerDoParallel(N_WORKERS)
 #' splits = split_into(movie_review$review, N_WORKERS)
 #' jobs = lapply(splits, itoken, tolower, word_tokenizer)
 #' v = create_vocabulary(jobs)
 #' vectorizer = vocab_vectorizer(v)
 #' jobs = lapply(splits, itoken, tolower, word_tokenizer)
-#' doParallel::registerDoParallel(N_WORKERS)
+#'
 #' tcm = create_tcm(jobs, vectorizer, skip_grams_window = 3L, skip_grams_window_context = "symmetric")
 #' }
 #' @export

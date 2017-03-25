@@ -5,27 +5,45 @@
 \alias{itoken.character}
 \alias{itoken.iterator}
 \alias{itoken.list}
-\title{Iterators over input objects}
+\alias{itoken_parallel}
+\alias{itoken_parallel.character}
+\alias{itoken_parallel.ifiles_parallel}
+\title{Iterators (and parallel iterators) over input objects}
 \usage{
 itoken(iterable, ...)
 
-\method{itoken}{list}(iterable, chunks_number = 10,
-  progressbar = interactive(), ids = NULL, ...)
+\method{itoken}{list}(iterable, n_chunks = 10, progressbar = interactive(),
+  ids = NULL, ...)
 
 \method{itoken}{character}(iterable, preprocessor = identity,
-  tokenizer = space_tokenizer, chunks_number = 10,
-  progressbar = interactive(), ids = NULL, ...)
+  tokenizer = space_tokenizer, n_chunks = 10, progressbar = interactive(),
+  ids = NULL, ...)
 
 \method{itoken}{iterator}(iterable, preprocessor = identity,
-  tokenizer = space_tokenizer, progressbar = interactive(), ...)
+  tokenizer = space_tokenizer, n_chunks = 1L, progressbar = interactive(),
+  ...)
+
+itoken_parallel(iterable, ...)
+
+\method{itoken_parallel}{character}(iterable, preprocessor = identity,
+  tokenizer = space_tokenizer, n_chunks = foreach::getDoParWorkers(),
+  ids = NULL, ...)
+
+\method{itoken_parallel}{ifiles_parallel}(iterable, preprocessor = identity,
+  tokenizer = space_tokenizer, n_chunks = 1L, ...)
 }
 \arguments{
 \item{iterable}{an object from which to generate an iterator}
 
-\item{...}{arguments passed to other methods (not used at the moment)}
+\item{...}{arguments passed to other methods}
 
-\item{chunks_number}{\code{integer}, the number of pieces that object should
-be divided into.}
+\item{n_chunks}{\code{integer}, the number of pieces that object should
+be divided into. Then each chunk is processed independently (and in case \code{itoken_parallel}
+\bold{in parallel if some parallel backend is registered}).
+Usually there is tradeoff: larger number of chunks means lower memory footprint, but slower (if
+\code{preprocessor, tokenizer} functions are efficiently vectorized). And small number
+of chunks means larger memory footprint but faster execution (again if user
+supplied \code{preprocessor, tokenizer} functions are efficiently vectorized).}
 
 \item{progressbar}{\code{logical} indicates whether to show progress bar.}
 
@@ -45,33 +63,46 @@ of \code{character} vectors. If you need to perform stemming -
 call stemmer inside tokenizer. See examples section.}
 }
 \description{
-This function creates iterators over input objects to
-  vocabularies, corpora, or DTM and TCM matrices. This iterator is usually
-  used in following functions : \link{create_vocabulary},
-  \link{create_dtm}, \link{vectorizers},
-  \link{create_tcm}. See them for details.
+This family of function creates iterators over input objects
+in order to create vocabularies, or DTM and TCM matrices.
+iterators usually used in following functions : \link{create_vocabulary},
+\link{create_dtm}, \link{vectorizers},
+\link{create_tcm}. See them for details.
 }
 \details{
 S3 methods for creating an itoken iterator from list of tokens
-  \itemize{ \item{\code{list}: all elements of the input list should be
-  character vectors containing tokens} \item{\code{character}: raw text
-  source: the user must provide a tokenizer function} \item{\code{ifiles}:
-  from files, a user must provide a function to read in the file (to
-  \link{ifiles}) and a function to tokenize it (to \link{itoken})}
+  \itemize{
+  \item{\code{list}: all elements of the input list should be
+    character vectors containing tokens}
+  \item{\code{character}: raw text
+  source: the user must provide a tokenizer function}
+  \item{\code{ifiles}: from files, a user must provide a function to read in the file
+    (to \link{ifiles}) and a function to tokenize it (to \link{itoken})}
   \item{\code{idir}: from a directory, the user must provide a function to
-  read in the files (to \link{idir}) and a function to tokenize it (to
-  \link{itoken})}}
+    read in the files (to \link{idir}) and a function to tokenize it (to \link{itoken})}
+  \item{\code{ifiles_parallel}: from files in parallel}
+  }
 }
 \examples{
 data("movie_review")
 txt = movie_review$review[1:100]
 ids = movie_review$id[1:100]
-it = itoken(txt, tolower, word_tokenizer, chunks_number = 10)
-it = itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
+it = itoken(txt, tolower, word_tokenizer, n_chunks = 10)
+it = itoken(txt, tolower, word_tokenizer, n_chunks = 10, ids = ids)
 # Example of stemming tokenizer
 # stem_tokenizer =function(x) {
 #   word_tokenizer(x) \%>\% lapply(SnowballC::wordStem, language="en")
 # }
+#------------------------------------------------
+# PARALLEL iterators
+#------------------------------------------------
+library(text2vec)
+
+N_WORKERS = 1 # change 1 to number of cores in parallel backend
+if(require(doParallel)) registerDoParallel(N_WORKERS)
+data("movie_review")
+it = itoken_parallel(movie_review$review[1:100], n_chunks = N_WORKERS)
+system.time(dtm <- create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix'))
 }
 \seealso{
 \link{ifiles}, \link{idir}, \link{create_vocabulary},

@@ -66,10 +66,10 @@ LatentSemanticAnalysis = R6::R6Class(
     initialize = function(n_topics) {
       private$n_topics = n_topics
       private$fitted = FALSE
-      private$internal_matrix_format = 'dgCMatrix'
+      private$internal_matrix_format = 'CsparseMatrix'
     },
     fit = function(x, ...) {
-      x_internal = coerce_matrix(x, private$internal_matrix_format, verbose = self$verbose)
+      x_internal = as(x, private$internal_matrix_format)
       # old RSpectra version
       # svd_fit = RSpectra::svds(x_internal, k = private$n_topics, nv = private$n_topics, nu = 0)
 
@@ -86,7 +86,7 @@ LatentSemanticAnalysis = R6::R6Class(
       invisible(self)
     },
     fit_transform = function(x, ...) {
-      x_internal = coerce_matrix(x, private$internal_matrix_format, verbose = self$verbose)
+      x_internal = as(x, private$internal_matrix_format)
       # old RSpectra version
       # svd_fit = RSpectra::svds(x_internal, k = private$n_topics, nv = private$n_topics, nu = private$n_topics)
 

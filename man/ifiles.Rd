@@ -3,30 +3,45 @@
 \name{ifiles}
 \alias{idir}
 \alias{ifiles}
+\alias{ifiles_parallel}
 \title{Creates iterator over text files from the disk}
 \usage{
 ifiles(file_paths, reader = readLines)
 
 idir(path, reader = readLines)
+
+ifiles_parallel(file_paths, reader = readLines,
+  n_chunks = foreach::getDoParWorkers())
 }
 \arguments{
 \item{file_paths}{\code{character} paths of input files}
 
 \item{reader}{\code{function} which will perform reading of text
 files from disk, which should take a path as its first argument. \code{reader()} function should
-return \bold{named} character vector: elements of vector = documents,
-names of the elements = document ids which will be used in DTM construction.
+return \bold{named character vector: elements of vector = documents,
+names of the elements = document ids which will be used in DTM construction}.
 If user doesn't provied names character vector, document ids will be generated as
 file_name + line_number (assuming that each line is a document).}
 
 \item{path}{\code{character} path of directory. All files in the directory will be read.}
+
+\item{n_chunks}{\code{integer}, defines in how many chunks files will be processed.
+For example if you have 32 files, and \code{n_chunks = 8}, then for each 4 files will be
+created a job (for example document-term matrix construction).
+In case some parallel backend registered, each job will be evaluated in a separated thread (process) in parallel.
+So each such group of files will be processed in parallel and at the end all 8 results from will be combined.}
 }
 \description{
 The result of this function usually used in an \link{itoken} function.
 }
 \examples{
+\dontrun{
 current_dir_files = list.files(path = ".", full.names = TRUE)
 files_iterator = ifiles(current_dir_files)
+parallel_files_iterator = ifiles_parallel(current_dir_files, n_chunks = 4)
+it = itoken_parallel(parallel_files_iterator)
+dtm = create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix')
+}
 dir_files_iterator = idir(path = ".")
 }
 \seealso{

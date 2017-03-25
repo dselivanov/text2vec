@@ -34,6 +34,7 @@ LinkingTo:
     sparsepp
 Suggests:
     stringr (>= 1.1.0),
+    doParallel,
     testthat,
     covr,
     knitr,

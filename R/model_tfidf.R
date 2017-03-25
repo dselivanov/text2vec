@@ -70,7 +70,7 @@ TfIdf = R6::R6Class(
       private$sublinear_tf = sublinear_tf
       private$smooth_idf = smooth_idf
       private$norm = match.arg(norm)
-      private$internal_matrix_format = 'dgCMatrix'
+      private$internal_matrix_format = 'CsparseMatrix'
     },
     fit = function(x, ...) {
       x_internal = private$prepare_x(x)
@@ -96,7 +96,7 @@ TfIdf = R6::R6Class(
     sublinear_tf = FALSE,
     smooth_idf = TRUE,
     prepare_x = function(x) {
-      x_internal = coerce_matrix(x, private$internal_matrix_format, verbose = self$verbose)
+      x_internal = as(x, private$internal_matrix_format)
       if(private$sublinear_tf)
         x_internal@x = 1 + log(x_internal@x)
       normalize(x_internal, private$norm)

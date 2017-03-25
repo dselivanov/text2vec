@@ -4,6 +4,7 @@
 \alias{create_vocabulary}
 \alias{create_vocabulary.character}
 \alias{create_vocabulary.itoken}
+\alias{create_vocabulary.itoken_parallel}
 \alias{create_vocabulary.list}
 \alias{vocabulary}
 \title{Creates a vocabulary of unique terms}
@@ -22,6 +23,9 @@ vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
 
 \method{create_vocabulary}{list}(it, ngram = c(ngram_min = 1L, ngram_max =
   1L), stopwords = character(0), sep_ngram = "_", ...)
+
+\method{create_vocabulary}{itoken_parallel}(it, ngram = c(ngram_min = 1L,
+  ngram_max = 1L), stopwords = character(0), sep_ngram = "_", ...)
 }
 \arguments{
 \item{it}{iterator over a \code{list} of \code{character} vectors,
@@ -71,11 +75,15 @@ character vector. Terms will be inserted \bold{as is}, without any checks
 \item \code{list}: collects unique terms and corresponding
 statistics from list of itoken iterators. If parallel backend is
 registered, it will build vocabulary in parallel using \link{foreach}.
+
+\item \code{itoken_parallel}: collects unique terms and corresponding
+statistics from iterator. If parallel backend is
+registered, it will build vocabulary in parallel using \link{foreach}.
 }}
 \examples{
 data("movie_review")
 txt = movie_review[['review']][1:100]
-it = itoken(txt, tolower, word_tokenizer, chunks_number = 10)
+it = itoken(txt, tolower, word_tokenizer, n_chunks = 10)
 vocab = create_vocabulary(it)
 pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)

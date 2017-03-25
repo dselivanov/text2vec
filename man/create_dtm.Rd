@@ -3,16 +3,20 @@
 \name{create_dtm}
 \alias{create_dtm}
 \alias{create_dtm.itoken}
+\alias{create_dtm.itoken_parallel}
 \alias{create_dtm.list}
 \title{Document-term matrix construction}
 \usage{
-create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix", "lda_c"), ...)
+create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix"), ...)
 
-\method{create_dtm}{itoken}(it, vectorizer, type = c("dgCMatrix", "dgTMatrix",
-  "lda_c"), ...)
+\method{create_dtm}{itoken}(it, vectorizer, type = c("dgCMatrix",
+  "dgTMatrix"), ...)
 
-\method{create_dtm}{list}(it, vectorizer, type = c("dgCMatrix", "dgTMatrix",
-  "lda_c"), verbose = FALSE, ...)
+\method{create_dtm}{list}(it, vectorizer, type = c("dgCMatrix", "dgTMatrix"),
+  verbose = FALSE, ...)
+
+\method{create_dtm}{itoken_parallel}(it, vectorizer, type = c("dgCMatrix",
+  "dgTMatrix"), verbose = FALSE, ...)
 }
 \arguments{
 \item{it}{\link{itoken} iterator or \code{list} of \code{itoken} iterators.}
@@ -20,10 +24,7 @@ create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix", "lda_c"), ...)
 \item{vectorizer}{\code{function} vectorizer function; see
 \link{vectorizers}.}
 
-\item{type}{\code{character}, one of \code{c("dgCMatrix", "dgTMatrix",
-"lda_c")}. \code{"lda_c"} is Blei's lda-c format (a list of 2 *
-doc_terms_size); see
-\url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}}
+\item{type}{\code{character}, one of \code{c("dgCMatrix", "dgTMatrix")}.}
 
 \item{...}{arguments to the \link{foreach} function which is used to iterate
 over \code{it}.}
@@ -64,9 +65,9 @@ dtm_tfidf = transformer_tfidf(dtm)
 ## Example of parallel mode
 # set to number of cores on your machine
 N_WORKERS = 1
-doParallel::registerDoParallel(N_WORKERS)
+if(require(doParallel)) registerDoParallel(N_WORKERS)
 splits = split_into(movie_review$review, N_WORKERS)
-jobs = lapply(splits, itoken, tolower, word_tokenizer, chunks_number = 1)
+jobs = lapply(splits, itoken, tolower, word_tokenizer, n_chunks = 1)
 vectorizer = hash_vectorizer()
 dtm = create_dtm(jobs, vectorizer, type = 'dgTMatrix')
 }

@@ -46,7 +46,7 @@
 #' @examples
 #' data("movie_review")
 #' txt = movie_review[['review']][1:100]
-#' it = itoken(txt, tolower, word_tokenizer, chunks_number = 10)
+#' it = itoken(txt, tolower, word_tokenizer, n_chunks = 10)
 #' vocab = create_vocabulary(it)
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
@@ -128,13 +128,16 @@ create_vocabulary.itoken = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' 
   res
 }
 
+#------------------------------------------------------------------------------
+# TO REMOVE IN text2vec 0.6
+#------------------------------------------------------------------------------
 #' @describeIn create_vocabulary collects unique terms and corresponding
 #'   statistics from list of itoken iterators. If parallel backend is
 #'   registered, it will build vocabulary in parallel using \link{foreach}.
-#' @param ... additional arguments to \link{foreach} function.
 #' @export
 create_vocabulary.list = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                             stopwords = character(0), sep_ngram = "_", ...) {
+  .Deprecated("create_vocabulary.itoken_parallel()")
   stopifnot( all( vapply(X = it, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
   res =
     foreach(it = it,
@@ -145,6 +148,30 @@ create_vocabulary.list = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 
           {
             create_vocabulary(it, ngram, stopwords)
           }
+  res[['stopwords']] = stopwords
+  res[['sep_ngram']] = sep_ngram
+  # res$vocab$ngram_n = detect_ngrams(res)
+  res
+}
+#------------------------------------------------------------------------------
+
+#' @describeIn create_vocabulary collects unique terms and corresponding
+#'   statistics from iterator. If parallel backend is
+#'   registered, it will build vocabulary in parallel using \link{foreach}.
+#' @param ... additional arguments to \link{foreach} function.
+#' @export
+create_vocabulary.itoken_parallel = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+                                  stopwords = character(0), sep_ngram = "_", ...) {
+  stopifnot( all( vapply(X = it, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
+  res =
+    foreach(it = it,
+            .combine = combine_vocabulary,
+            .inorder = FALSE,
+            .multicombine = TRUE,
+            ...) %dopar%
+            {
+              create_vocabulary(it, ngram, stopwords)
+            }
   res[['stopwords']] = stopwords
   res[['sep_ngram']] = sep_ngram
   # res$vocab$ngram_n = detect_ngrams(res)

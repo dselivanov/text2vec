@@ -52,7 +52,7 @@ test_that("split_into ", {
 test_that("rbind_dgTMatrix ", {
   it1 = itoken(movie_review$review[1:10], ids = movie_review$id[1:10], progressbar = F)
   dtm1 = create_dtm(it1, hash_vectorizer(2**8), "dgTMatrix")
-  it2 = itoken(movie_review$review[11:20], ids = movie_review$id[11:21], progressbar = F)
+  it2 = itoken(movie_review$review[11:20], ids = movie_review$id[11:20], progressbar = F)
   dtm2 = create_dtm(it2, hash_vectorizer(2**8), "dgTMatrix")
   expect_equal(Matrix::uniqTsparse(text2vec:::rbind_dgTMatrix(dtm1, dtm2)),
                Matrix::uniqTsparse(dtm))
@@ -75,5 +75,4 @@ test_that("as.lda_c ", {
   expect_equal(names(dtm_lda_c), movie_review$id[1:K])
   expect_equal(rs, vapply(dtm_lda_c, ncol, 0L))
   expect_equal(Matrix::rowSums(dtm), vapply(dtm_lda_c, function(x) sum(x[2, ]), 0L))
-  expect_equal(text2vec:::coerce_matrix(dtm, "lda_c"), dtm_lda_c)
 })

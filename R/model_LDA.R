@@ -133,7 +133,7 @@ LatentDirichletAllocation = R6::R6Class(
       # init
       private$vocabulary = colnames(X)
 
-      doc_topic_count =
+      private$doc_topic_count =
         private$fit_transform_internal(private$ptr, n_iter = n_iter,
                                        convergence_tol = convergence_tol,
                                        n_check_convergence = n_check_convergence,
@@ -142,12 +142,9 @@ LatentDirichletAllocation = R6::R6Class(
       # got topic word count distribution
       private$components_ = private$get_topic_word_count()
 
-      # save it for reuse
-      private$doc_topic_count = doc_topic_count
-
       # doc_topic_distr = self$get_doc_topic_distribution()
       doc_topic_distr = self$doc_topic_distribution
-      attributes(doc_topic_distr) = attributes(doc_topic_count)
+      attributes(doc_topic_distr) = attributes(private$doc_topic_count)
       doc_topic_distr
     },
     #---------------------------------------------------------------------------------------------
@@ -198,7 +195,7 @@ LatentDirichletAllocation = R6::R6Class(
         (1 - lambda) * log(t(t(topic_word_distribution) /  (colSums(self$components) / sum(self$components)) ))
 
       lapply(topic_number, function(tn) {
-        word_by_freq = sort(topic_word_freq[tn, ], decreasing = T, method = "radix")
+        word_by_freq = sort(topic_word_freq[tn, ], decreasing = TRUE, method = "radix")
         names(word_by_freq)[seq_len(n)]
       }) %>% do.call(cbind, .)
     },

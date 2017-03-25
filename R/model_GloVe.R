@@ -120,7 +120,7 @@ GlobalVectors = R6::R6Class(
                           ) {
       self$verbose = TRUE
       self$shuffle = shuffle
-      private$internal_matrix_format = 'dgTMatrix'
+      private$internal_matrix_format = 'TsparseMatrix'
 
       stopifnot(class(vocabulary) == 'character' || class(vocabulary) == 'text2vec_vocabulary')
       private$vocab_terms =
@@ -172,7 +172,7 @@ GlobalVectors = R6::R6Class(
     # fit method will work only with sparse matrices coercible to "dgTMatrix"
     fit = function(x, n_iter, convergence_tol = -1, ...) {
       # convert to internal native format
-      x = coerce_matrix(x, private$internal_matrix_format, verbose = self$verbose)
+      x = as(x, private$internal_matrix_format)
       IS_TRIANGULAR = isTriangular(x)
       # params in a specific format to pass to C++ backend
       initial = list(w_i = private$w_i, w_j = private$w_j,

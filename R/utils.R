@@ -128,23 +128,3 @@ split_into = function(vec, n) {
                         rep( (n2 + 1):n,  each = chunk_len))
   split(vec, split_factors)
 }
-
-coerce_matrix = function(X, target_class = c("dgCMatrix", "dgTMatrix", "RsparseMatrix", "lda_c"), verbose = FALSE) {
-  target_class = match.arg(target_class)
-  X_class = class(X)
-  if (X_class != target_class ) {
-    if (verbose)
-      message(paste0('coercing X from ', X_class, ' to ', target_class, '...'))
-    if (target_class != 'lda_c')
-      X = try(as(X, target_class), silent = TRUE)
-    else
-      X = try(as.lda_c(X), silent = TRUE)
-    if (class(X) == 'try-error')
-      stop(paste("cannot coerce input to", target_class))
-  }
-  X
-}
-
-# coerce_dgTMatrix = function(X, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
-#   coerce_matrix(X, type)
-# }

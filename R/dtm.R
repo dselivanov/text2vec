@@ -4,9 +4,7 @@
 #   \code{Corpus} object.
 # @param corpus \code{HashCorpus} or \code{VocabCorpus} object. See
 #    for details.
-# @param type character, one of \code{c("dgCMatrix", "dgTMatrix", "lda_c")}.
-#   \code{"lda_c"} is Blei's lda-c format (a list of 2 * doc_terms_size); see
-#   \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
+# @param type character, one of \code{c("dgCMatrix", "dgTMatrix")}.
 # @examples
 # N = 1000
 # tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
@@ -22,14 +20,13 @@
 # it = itoken(tokens)
 # dtm = create_dtm(it, vectorizer)
 
-get_dtm = function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
+get_dtm = function(corpus) {
   if (inherits(corpus, 'Rcpp_VocabCorpus') || inherits(corpus, 'Rcpp_HashCorpus')) {
-    type = match.arg(type)
     dtm = corpus$get_dtm()
     if (length(dtm@x) == 0)
-      warning("dtm has 0 rows. Empty iterator?", immediate. = T)
+      warning("dtm has 0 rows. Empty iterator?", immediate. = TRUE)
     dtm@Dimnames[[1]] = attr(corpus, 'ids')
-    coerce_matrix(dtm, type)
+    dtm
   }
   else
     stop("corpus should be instance of Rcpp_HashCorpus or Rcpp_VocabCorpus classes")
@@ -47,10 +44,7 @@ get_dtm = function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' @param it \link{itoken} iterator or \code{list} of \code{itoken} iterators.
 #' @param vectorizer \code{function} vectorizer function; see
 #'   \link{vectorizers}.
-#' @param type \code{character}, one of \code{c("dgCMatrix", "dgTMatrix",
-#'   "lda_c")}. \code{"lda_c"} is Blei's lda-c format (a list of 2 *
-#'   doc_terms_size); see
-#'   \url{https://www.cs.princeton.edu/~blei/lda-c/readme.txt}
+#' @param type \code{character}, one of \code{c("dgCMatrix", "dgTMatrix")}.
 #' @param ... arguments to the \link{foreach} function which is used to iterate
 #'   over \code{it}.
 #' @return A document-term matrix
@@ -75,15 +69,15 @@ get_dtm = function(corpus, type = c("dgCMatrix", "dgTMatrix", "lda_c")) {
 #' ## Example of parallel mode
 #' # set to number of cores on your machine
 #' N_WORKERS = 1
-#' doParallel::registerDoParallel(N_WORKERS)
+#' if(require(doParallel)) registerDoParallel(N_WORKERS)
 #' splits = split_into(movie_review$review, N_WORKERS)
-#' jobs = lapply(splits, itoken, tolower, word_tokenizer, chunks_number = 1)
+#' jobs = lapply(splits, itoken, tolower, word_tokenizer, n_chunks = 1)
 #' vectorizer = hash_vectorizer()
 #' dtm = create_dtm(jobs, vectorizer, type = 'dgTMatrix')
 #' }
 #' @export
 create_dtm = function(it, vectorizer,
-                       type = c("dgCMatrix", "dgTMatrix", "lda_c"),
+                       type = c("dgCMatrix", "dgTMatrix"),
                        ...) {
   UseMethod("create_dtm")
 }
@@ -91,7 +85,7 @@ create_dtm = function(it, vectorizer,
 #' @rdname create_dtm
 #' @export
 create_dtm.itoken = function(it, vectorizer,
-                            type = c("dgCMatrix", "dgTMatrix", "lda_c"),
+                            type = c("dgCMatrix", "dgTMatrix"),
                             ...) {
   # because window_size = 0, put something to skip_grams_window_context: "symmetric"
   # but it is dummy - just to provide something to vectorizer
@@ -101,42 +95,70 @@ create_dtm.itoken = function(it, vectorizer,
   # get it in triplet form - fastest and most
   # memory efficient way because internally it
   # kept in triplet form
-  dtm = get_dtm(corp, 'dgTMatrix')
+  dtm = get_dtm(corp)
   rm(corp);
   # remove corpus and trigger gc()!
   # this will release a lot of memory
   # gc();
-  coerce_matrix(dtm, type)
+  as(dtm, type)
 }
+
+#------------------------------------------------------------------------------
+# TO REMOVE IN text2vec 0.6
+#------------------------------------------------------------------------------
+#' @rdname create_dtm
+#' @export
+create_dtm.list = function(it, vectorizer,
+                       type = c("dgCMatrix", "dgTMatrix"),
+                       verbose = FALSE,
+                       ...) {
+  .Deprecated("create_dtm.itoken_parallel()")
+  check_itoken = sapply(it, inherits, 'itoken', USE.NAMES = FALSE)
+  stopifnot(all( check_itoken ))
+  type = match.arg(type)
+  combine_fun = function(...) {
+    if (verbose)
+      print(paste(Sys.time(), "got results from workers, call combine ..."))
+    rbind_dgTMatrix(...)
+  }
+
+  res = foreach(batch = it, .combine = combine_fun,
+                .multicombine = TRUE,
+                # user already made split for jobs
+                # preschedule = FALSE is much more memory efficient
+                .options.multicore = list(preschedule = FALSE),
+                ...) %dopar%
+        {
+          create_dtm(batch, vectorizer, "dgTMatrix")
+        }
+  as(res, type)
+}
+#------------------------------------------------------------------------------
 
 #' @rdname create_dtm
 #' @param verbose \code{logical} print status messages
 #' @export
-create_dtm.list = function(it, vectorizer,
-                       type = c("dgCMatrix", "dgTMatrix", "lda_c"),
-                       verbose = FALSE,
-                       ...) {
-  check_itoken = sapply(it, inherits, 'itoken', USE.NAMES = F)
+create_dtm.itoken_parallel = function(it, vectorizer,
+                           type = c("dgCMatrix", "dgTMatrix"),
+                           verbose = FALSE,
+                           ...) {
+  check_itoken = sapply(it, inherits, 'itoken', USE.NAMES = FALSE)
   stopifnot(all( check_itoken ))
   type = match.arg(type)
   combine_fun = function(...) {
-    f = switch(type,
-               dgCMatrix = rbind,
-               dgTMatrix = rbind_dgTMatrix,
-               lda_c = function(...) {x = c(...); class(x) = 'lda_c'; x})
     if (verbose)
       print(paste(Sys.time(), "got results from workers, call combine ..."))
-    f(...)
+    rbind_dgTMatrix(...)
   }
 
-  foreach(batch = it,
-        .combine = combine_fun,
-        .multicombine = TRUE,
-        # user already made split for jobs
-        # preschedule = FALSE is much more memory efficient
-        .options.multicore = list(preschedule = FALSE),
-        ...) %dopar%
-        {
-          create_dtm(batch, vectorizer, type)
-        }
+  res = foreach(batch = it, .combine = combine_fun,
+                .multicombine = TRUE,
+                # user already made split for jobs
+                # preschedule = FALSE is much more memory efficient
+                .options.multicore = list(preschedule = FALSE),
+                ...) %dopar%
+                {
+                  create_dtm(batch, vectorizer, "dgTMatrix")
+                }
+  as(res, type)
 }

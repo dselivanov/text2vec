@@ -1,5 +1,9 @@
 # text2vec 0.5.0
 
+1. 2017-03-25
+    * **API breaking change** - removed `lda_c` from formats in DTM construction
+    * added `ifiles_parallel`, `itoken_parallel` high-level functions for parallel computing
+    * **API breaking change**  `chunks_numer` parameter renamed to `n_chunks`
 1. 2017-01-02 
     * **API breaking change** - removed `create_corpus` from public API, moved co-occurence related optons to `create_tcm` from vecorizers
     * add ability to add custom weights for co-occurence statistics calculations

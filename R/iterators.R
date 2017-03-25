@@ -72,7 +72,7 @@ itoken_character_R6 = R6::R6Class(
     #------------------------
     initialize = function(iterable,
                           ids = NULL,
-                          chunks_number = 10,
+                          n_chunks = 10,
                           progress_ = interactive(),
                           preprocessor_ = identity,
                           tokenizer_ = identity) {
@@ -88,9 +88,12 @@ itoken_character_R6 = R6::R6Class(
         if (is.null(self$ids))
           self$ids = as.character(seq_len(self$length))
       }
-      else
+      else {
+        stopifnot(length(ids) == length(iterable))
         self$ids = as.character(ids)
-      self$chunk_size = ceiling(self$length / chunks_number)
+      }
+
+      self$chunk_size = ceiling(self$length / n_chunks)
 
       if (self$progress)
         self$progressbar = txtProgressBar(initial = -1L, min = 0, max = self$length, style = 3)
@@ -116,8 +119,8 @@ itoken_character_R6 = R6::R6Class(
   )
 )
 
-# it = itoken_character_R6$new(movie_review$review[1:10], ids = movie_review$id[1:10], chunks_number = 3L, preprocessor = tolower, tokenizer = text2vec::word_tokenizer)
-# it = itoken_character_R6$new(movie_review$review[1:10], chunks_number = 3L, preprocessor = tolower, tokenizer = text2vec::word_tokenizer)
+# it = itoken_character_R6$new(movie_review$review[1:10], ids = movie_review$id[1:10], n_chunks = 3L, preprocessor = tolower, tokenizer = text2vec::word_tokenizer)
+# it = itoken_character_R6$new(movie_review$review[1:10], n_chunks = 3L, preprocessor = tolower, tokenizer = text2vec::word_tokenizer)
 # while(T) temp = it$nextElem()
 
 ifiles_R6 = R6::R6Class(
@@ -126,6 +129,7 @@ ifiles_R6 = R6::R6Class(
   public = list(
     reader_function = list(),
     initialize = function(iterable,  reader = readLines) {
+      stopifnot(is.character(iterable))
       stopifnot(is.function(reader))
       self$iterable = iterable
       self$reader_function = list(reader)
@@ -163,9 +167,9 @@ itoken_iterator_R6 = R6::R6Class(
     outer_progress = NULL,
     outer_counter = NULL,
     outer_length = NULL,
-    chunks_number = NULL,
+    n_chunks = NULL,
     initialize = function(input_iterator,
-                          chunks_number = 1,
+                          n_chunks = 1,
                           progress = interactive(),
                           preprocessor_ = identity,
                           tokenizer_ = identity) {
@@ -174,7 +178,7 @@ itoken_iterator_R6 = R6::R6Class(
       self$progress = FALSE
       self$preprocessor = list(preprocessor_)
       self$tokenizer = list(tokenizer_)
-      self$chunks_number = chunks_number
+      self$n_chunks = n_chunks
       if (!is.null(self$iterator$length))
         self$outer_progress = progress
       else
@@ -189,7 +193,7 @@ itoken_iterator_R6 = R6::R6Class(
       }
       self$iterable = self$iterator$nextElem()
       self$outer_counter = self$outer_counter + 1L
-      self$chunk_size = ceiling(self$length / self$chunks_number)
+      self$chunk_size = ceiling(self$length / self$n_chunks)
       self$ids = names(self$iterable)
       if (is.null(self$ids))
         self$ids = as.character(seq_len(self$length))
@@ -250,14 +254,20 @@ itoken_transformer_R6 = R6::R6Class(
 #' @param file_paths \code{character} paths of input files
 #' @param reader \code{function} which will perform reading of text
 #' files from disk, which should take a path as its first argument. \code{reader()} function should
-#' return \bold{named} character vector: elements of vector = documents,
-#' names of the elements = document ids which will be used in DTM construction.
+#' return \bold{named character vector: elements of vector = documents,
+#' names of the elements = document ids which will be used in DTM construction}.
 #' If user doesn't provied names character vector, document ids will be generated as
 #' file_name + line_number (assuming that each line is a document).
 #' @seealso \link{itoken}
 #' @examples
+#' \dontrun{
 #' current_dir_files = list.files(path = ".", full.names = TRUE)
 #' files_iterator = ifiles(current_dir_files)
+#' parallel_files_iterator = ifiles_parallel(current_dir_files, n_chunks = 4)
+#' it = itoken_parallel(parallel_files_iterator)
+#' dtm = create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix')
+#' }
+
 #' @export
 ifiles = function(file_paths, reader = readLines) {
   stopifnot(length(file_paths) > 0)
@@ -273,25 +283,47 @@ idir = function(path, reader = readLines) {
   fls = list.files(path, full.names = T)
   return( ifiles(fls, reader = reader) )
 }
+
+#------------------------------------------------------------------------------------------
+#' @rdname ifiles
+#' @param n_chunks \code{integer}, defines in how many chunks files will be processed.
+#' For example if you have 32 files, and \code{n_chunks = 8}, then for each 4 files will be
+#' created a job (for example document-term matrix construction).
+#' In case some parallel backend registered, each job will be evaluated in a separated thread (process) in parallel.
+#' So each such group of files will be processed in parallel and at the end all 8 results from will be combined.
+#' @export
+ifiles_parallel = function(file_paths, reader = readLines,
+                           n_chunks = foreach::getDoParWorkers()) {
+  stopifnot(length(file_paths) > 0)
+  chunk_indices = split_into(seq_along(file_paths), n_chunks)
+  iter_list = lapply(chunk_indices, function(i) {
+    ifiles_R6$new(file_paths[i], reader = reader)
+  })
+  class(iter_list) = 'ifiles_parallel'
+  iter_list
+}
 #------------------------------------------------------------------------------------------
 #' @name itoken
-#' @title Iterators over input objects
-#' @description This function creates iterators over input objects to
-#'   vocabularies, corpora, or DTM and TCM matrices. This iterator is usually
-#'   used in following functions : \link{create_vocabulary},
-#'   \link{create_dtm}, \link{vectorizers},
-#'   \link{create_tcm}. See them for details.
+#' @title Iterators (and parallel iterators) over input objects
+#' @description This family of function creates iterators over input objects
+#' in order to create vocabularies, or DTM and TCM matrices.
+#' iterators usually used in following functions : \link{create_vocabulary},
+#' \link{create_dtm}, \link{vectorizers},
+#' \link{create_tcm}. See them for details.
 #' @param iterable an object from which to generate an iterator
-#' @param ... arguments passed to other methods (not used at the moment)
+#' @param ... arguments passed to other methods
 #' @details S3 methods for creating an itoken iterator from list of tokens
-#'   \itemize{ \item{\code{list}: all elements of the input list should be
-#'   character vectors containing tokens} \item{\code{character}: raw text
-#'   source: the user must provide a tokenizer function} \item{\code{ifiles}:
-#'   from files, a user must provide a function to read in the file (to
-#'   \link{ifiles}) and a function to tokenize it (to \link{itoken})}
+#'   \itemize{
+#'   \item{\code{list}: all elements of the input list should be
+#'     character vectors containing tokens}
+#'   \item{\code{character}: raw text
+#'   source: the user must provide a tokenizer function}
+#'   \item{\code{ifiles}: from files, a user must provide a function to read in the file
+#'     (to \link{ifiles}) and a function to tokenize it (to \link{itoken})}
 #'   \item{\code{idir}: from a directory, the user must provide a function to
-#'   read in the files (to \link{idir}) and a function to tokenize it (to
-#'   \link{itoken})}}
+#'     read in the files (to \link{idir}) and a function to tokenize it (to \link{itoken})}
+#'   \item{\code{ifiles_parallel}: from files in parallel}
+#'   }
 #' @seealso \link{ifiles}, \link{idir}, \link{create_vocabulary},
 #'   \link{create_dtm}, \link{vectorizers},
 #'   \link{create_tcm}
@@ -299,12 +331,22 @@ idir = function(path, reader = readLines) {
 #' data("movie_review")
 #' txt = movie_review$review[1:100]
 #' ids = movie_review$id[1:100]
-#' it = itoken(txt, tolower, word_tokenizer, chunks_number = 10)
-#' it = itoken(txt, tolower, word_tokenizer, chunks_number = 10, ids = ids)
+#' it = itoken(txt, tolower, word_tokenizer, n_chunks = 10)
+#' it = itoken(txt, tolower, word_tokenizer, n_chunks = 10, ids = ids)
 #' # Example of stemming tokenizer
 #' # stem_tokenizer =function(x) {
 #' #   word_tokenizer(x) %>% lapply(SnowballC::wordStem, language="en")
 #' # }
+#' #------------------------------------------------
+#' # PARALLEL iterators
+#' #------------------------------------------------
+#' library(text2vec)
+#'
+#' N_WORKERS = 1 # change 1 to number of cores in parallel backend
+#' if(require(doParallel)) registerDoParallel(N_WORKERS)
+#' data("movie_review")
+#' it = itoken_parallel(movie_review$review[1:100], n_chunks = N_WORKERS)
+#' system.time(dtm <- create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix'))
 #' @export
 itoken = function(iterable, ...) {
   UseMethod("itoken")
@@ -316,12 +358,12 @@ itoken = function(iterable, ...) {
 #'   incremental ids will be assigned.
 #' @export
 itoken.list = function(iterable,
-                        chunks_number = 10,
+                        n_chunks = 10,
                         progressbar = interactive(),
                         ids = NULL, ...) {
 
   stopifnot( all( vapply(X = iterable, FUN = inherits, FUN.VALUE = FALSE, "character") ) )
-  itoken_character_R6$new(iterable, chunks_number = chunks_number, progress = progressbar, ids = ids,
+  itoken_character_R6$new(iterable, n_chunks = n_chunks, progress = progressbar, ids = ids,
                           preprocessor_ = identity, tokenizer_ = identity)
 }
 
@@ -335,40 +377,85 @@ itoken.list = function(iterable,
 #'   \code{preprocessor}, split it into tokens and returns a \code{list}
 #'   of \code{character} vectors. If you need to perform stemming -
 #'   call stemmer inside tokenizer. See examples section.
-#' @param chunks_number \code{integer}, the number of pieces that object should
-#'   be divided into.
+#' @param n_chunks \code{integer}, the number of pieces that object should
+#'   be divided into. Then each chunk is processed independently (and in case \code{itoken_parallel}
+#'   \bold{in parallel if some parallel backend is registered}).
+#'   Usually there is tradeoff: larger number of chunks means lower memory footprint, but slower (if
+#'   \code{preprocessor, tokenizer} functions are efficiently vectorized). And small number
+#'   of chunks means larger memory footprint but faster execution (again if user
+#'   supplied \code{preprocessor, tokenizer} functions are efficiently vectorized).
 #' @param progressbar \code{logical} indicates whether to show progress bar.
 #' @export
 itoken.character = function(iterable,
                              preprocessor = identity,
                              tokenizer = space_tokenizer,
-                             chunks_number = 10,
+                             n_chunks = 10,
                              progressbar = interactive(),
                              ids = NULL, ...) {
-  # preprocessor2 = function(...) preprocessor(...)
-  # tokenizer2 = function(...) tokenizer(...)
-  itoken_character_R6$new(iterable, chunks_number = chunks_number, progress = progressbar, ids = ids,
+  itoken_character_R6$new(iterable, n_chunks = n_chunks, progress = progressbar, ids = ids,
                           preprocessor_ = preprocessor, tokenizer_ = tokenizer)
 }
 
 #' @rdname itoken
 #' @export
 itoken.iterator = function(iterable,
-                            preprocessor = identity,
-                            tokenizer = space_tokenizer,
-                            progressbar = interactive(), ...) {
+                           preprocessor = identity,
+                           tokenizer = space_tokenizer,
+                           n_chunks = 1L,
+                           progressbar = interactive(), ...) {
   if (inherits(iterable, 'R6'))
     it = iterable$clone()
   else {
-    warning("Can't clone input iterator. It will be modified by current function call", immediate. = T)
+    warning("Can't clone input iterator. It will be modified in place by `itoken` call", immediate. = TRUE)
     it = iterable
   }
 
   itoken_iterator_R6$new(it,
+                         n_chunks = n_chunks,
                          progress = progressbar,
                          preprocessor_ = preprocessor,
-                         tokenizer_ = tokenizer)
+                         tokenizer_ = tokenizer
+                         )
 }
+
+#' @name itoken_parallel
+#' @rdname itoken
+#' @export
+itoken_parallel = function(iterable, ...) {
+  UseMethod("itoken_parallel")
+}
+
+#' @rdname itoken
+#' @export
+itoken_parallel.character = function(iterable,
+                                     preprocessor = identity,
+                                     tokenizer = space_tokenizer,
+                                     n_chunks = foreach::getDoParWorkers(),
+                                     ids = NULL, ...) {
+  chunk_indices = split_into(seq_along(iterable), n_chunks)
+  iter_list = lapply(chunk_indices, function(i) {
+    ids_chunk = if(is.null(ids)) NULL else(ids[i])
+    itoken(iterable[i], preprocessor, tokenizer, n_chunks, ids = ids_chunk)
+  })
+  class(iter_list) = 'itoken_parallel'
+  iter_list
+}
+
+#' @rdname itoken
+#' @export
+itoken_parallel.ifiles_parallel = function(iterable,
+                                           preprocessor = identity,
+                                           tokenizer = space_tokenizer,
+                                           n_chunks = 1L,
+                                           ...) {
+  iter_list = lapply(iterable, function(it_files) {
+    itoken(it_files, preprocessor = preprocessor, tokenizer = tokenizer, n_chunks = n_chunks, ...)
+  })
+  class(iter_list) = 'itoken_parallel'
+  iter_list
+}
+
+
 
 # #' @name ilines
 # #' @title Creates iterator over the lines of a connection or file
