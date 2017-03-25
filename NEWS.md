@@ -1,6 +1,7 @@
 # text2vec 0.5.0
 
 1. 2017-03-25
+    * No more rely on RcppModules
     * **API breaking change** - removed `lda_c` from formats in DTM construction
     * added `ifiles_parallel`, `itoken_parallel` high-level functions for parallel computing
     * **API breaking change**  `chunks_numer` parameter renamed to `n_chunks`
