@@ -30,6 +30,7 @@ public:
     C_doc.resize(corpus.nrow(), n_topic);
     C_word.resize(corpus.ncol(), n_topic);
     C_all.resize(n_topic);
+    C_all_local.resize(n_topic, 0);
     size_t j = 0;
     corpus.apply([&](Z& z, doc_index_t d, word_index_t w) {
       z.old_z = z_old[j];
@@ -41,6 +42,7 @@ public:
     corpus.apply([&](Z& z, doc_index_t d, word_index_t w) {
       C_doc.at(d, z.old_z) ++;
       C_all[z.old_z] ++;
+      // C_all_local[z.old_z] ++;
     });
     // Update C_word
     C_word.clear();
@@ -110,17 +112,23 @@ public:
     return doc_topic_count;
   }
 
-  // IntegerVector get_c_all_new() {
-  //   return wrap(C_all_new);
-  // }
-  //
-  // IntegerVector get_c_all() {
-  //   return wrap(C_all);
-  // }
-  //
-  // void set_c_all(const IntegerVector &r_c_all) {
-  //   C_all = as<vector<int>>(r_c_all);
-  // }
+  IntegerVector get_c_all_local() {
+    return wrap(C_all_local);
+  }
+
+  IntegerVector get_c_all() {
+    return wrap(C_all);
+  }
+
+  void set_c_all(const IntegerVector &r_c_all) {
+    for(int i = 0; i < r_c_all.size(); i++)
+      C_all[i] = r_c_all[i];
+  }
+
+  void reset_c_all_local() {
+    for(int i = 0; i < C_all_local.size(); i++)
+      C_all_local[i] = 0;
+  }
 };
 
 //----------------------------------------------------------------------------------------
@@ -173,20 +181,26 @@ IntegerMatrix warplda_get_topic_word_count(SEXP ptr) {
   return lda_model->get_topic_word_count();
 }
 
-// // [[Rcpp::export]]
-// IntegerVector warplda_get_c_all_new(SEXP ptr) {
-//   Rcpp::XPtr<R_LDA> lda_model(ptr);
-//   return lda_model->get_c_all_new();
-// }
-//
-// // [[Rcpp::export]]
-// void warplda_set_c_all(SEXP ptr,const IntegerVector &c_all) {
-//   Rcpp::XPtr<R_LDA> lda_model(ptr);
-//   lda_model->set_c_all(c_all);
-// }
-//
-// // [[Rcpp::export]]
-// IntegerVector warplda_get_c_all(SEXP ptr) {
-//   Rcpp::XPtr<R_LDA> lda_model(ptr);
-//   return lda_model->get_c_all();
-// }
+// [[Rcpp::export]]
+IntegerVector warplda_get_c_all_local(SEXP ptr) {
+  Rcpp::XPtr<R_LDA> lda_model(ptr);
+  return lda_model->get_c_all_local();
+}
+
+// [[Rcpp::export]]
+IntegerVector warplda_get_c_all(SEXP ptr) {
+  Rcpp::XPtr<R_LDA> lda_model(ptr);
+  return lda_model->get_c_all();
+}
+
+// [[Rcpp::export]]
+void warplda_set_c_all(SEXP ptr, const IntegerVector &c_all) {
+  Rcpp::XPtr<R_LDA> lda_model(ptr);
+  lda_model->set_c_all(c_all);
+}
+
+// [[Rcpp::export]]
+void warplda_reset_c_all_local(SEXP ptr) {
+  Rcpp::XPtr<R_LDA> lda_model(ptr);
+  lda_model->reset_c_all_local();
+}

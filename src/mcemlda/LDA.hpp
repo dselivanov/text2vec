@@ -41,7 +41,7 @@ public:
 	DenseMat<int> C_doc;
 	DenseMat<int> C_word;
 	vector<int> C_all; // C_all[k] = #token in topic k
-	// vector<int> C_all_new; // C_all_new[k] = #token in topic k
+	vector<int> C_all_local; // C_all_local[k] = #token in topic k
 	SparseMat<Z,token_index_t,doc_index_t,word_index_t> corpus;
 
 	qlib::XOR128PLUS rng;
@@ -68,6 +68,7 @@ public:
 		C_doc.resize(corpus.nrow(), n_topic);
 		C_word.resize(corpus.ncol(), n_topic);
 		C_all.resize(n_topic);
+		C_all_local.resize(n_topic);
 		// Fill z randomly
 		corpus.apply([&](Z& z, doc_index_t d, word_index_t w) {
 			z.old_z = rng.sample() % n_topic;
@@ -114,6 +115,9 @@ public:
 				    C_word.at(w, z.old_z) --;
 				    C_all[z.new_z] ++;
 				    C_all[z.old_z] --;
+
+				    C_all_local[z.new_z] ++;
+				    C_all_local[z.old_z] --;
 				  }
 					z.old_z = z.new_z;
 				}
@@ -158,6 +162,10 @@ public:
 				  if(update_topics) {
 				    C_all[z.new_z] ++;
 				    C_all[z.old_z] --;
+
+				    C_all_local[z.new_z] ++;
+				    C_all_local[z.old_z] --;
+
 				  }
 					z.old_z = z.new_z;
 				}
@@ -176,9 +184,9 @@ public:
 		}
 	}
 
-  // void set_c_all_new(const int * new_val) {
+  // void set_C_all_local(const int * new_val) {
   //   for(int i = 0; i < n_topic; i++)
-  //     C_all_new[i] = new_val[i];
+  //     C_all_local[i] = new_val[i];
   // }
 
 	double pseudo_loglikelihood() { // indeed const
