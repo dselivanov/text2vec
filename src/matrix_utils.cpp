@@ -70,3 +70,32 @@ NumericMatrix euclidean_dist(const NumericMatrix x, const NumericMatrix y) {
   }
   return res;
 }
+
+NumericMatrix convert2Rmat(vector<vector<float> > &mat, size_t ncol) {
+  NumericMatrix res(mat.size(), ncol);
+  for (size_t i = 0; i < mat.size(); i++)
+    for (size_t j = 0; j < ncol; j++)
+      res(i, j) = mat[i][j];
+  return res;
+}
+
+void fill_mat_val(vector<vector<float> > &mat, size_t ncol, float val) {
+  for (size_t i = 0; i < mat.size(); i++)
+    for (size_t j = 0; j < ncol; j++)
+      mat[i][j] = val;
+}
+void fill_mat_rand(vector<vector<float> > &mat, size_t ncol, float runif_min, float runif_max) {
+  for (size_t i = 0; i < mat.size(); i++)
+    for (size_t j = 0; j < ncol; j++)
+      mat[i][j] = R::runif(runif_min, runif_max); //(double)rand() / (double)RAND_MAX - 0.5;
+}
+
+void fill_vec_rand(vector<float>  &vec, float runif_min, float runif_max) {
+  for (size_t i = 0; i < vec.size(); i++)
+    vec[i] = R::runif(runif_min, runif_max); //(double)rand() / (double)RAND_MAX - 0.5;
+}
+
+void fill_vec_val(vector<float>  &vec, float val) {
+  for (size_t i = 0; i < vec.size(); i++)
+    vec[i] = val;
+}
