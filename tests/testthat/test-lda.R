@@ -35,9 +35,9 @@ test_that("LDA, perplexity", {
   perpl_10 = perplexity(dtm, topic_word_distr_10, doc_topic_distr_10)
 
   expect_equal(dim(doc_topic_distr_10), c(nrow(dtm), n_topic))
-  expect_equal(rowSums(doc_topic_distr_10), rep(1, nrow(dtm)))
+  expect_equivalent(rowSums(doc_topic_distr_10), rep(1, nrow(dtm)))
   expect_equal(dim(model$components), c(n_topic, ncol(dtm)))
-  expect_equal(rowSums(topic_word_distr_10), rep(1, n_topic))
+  expect_equivalent(rowSums(topic_word_distr_10), rep(1, n_topic))
 
   set.seed(1)
   n_iter = 20
@@ -66,5 +66,5 @@ test_that("LDA, perplexity", {
   dtm_test = dtm
   dtm_predict = model$transform(dtm_test, n_iter = 1)
   expect_equal(dim(dtm_predict), c(nrow(dtm_test), n_topic))
-  expect_equal(rowSums(dtm_predict), rep(1, nrow(dtm_test)))
+  expect_equivalent(rowSums(dtm_predict), rep(1, nrow(dtm_test)))
 })

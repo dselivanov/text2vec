@@ -59,49 +59,56 @@
 #' all.equal(d1, d2)
 #' # the same, but wrapped with S3 methods
 #' all.equal(fit_transform(dtm, lsa_2), fit_transform(dtm, lsa_1))
+#'
+
 LatentSemanticAnalysis = R6::R6Class(
-  "LSA",
-  inherit = text2vec_topic_model,
+  "LatentSemanticAnalysis",
+  inherit = mlDecomposition,
   public = list(
-    initialize = function(n_topics) {
+    #----------------------------------------------------------------------------
+    # members
+    verbose = NULL,
+    #----------------------------------------------------------------------------
+    # methods
+    # constructor
+    initialize = function(n_topics, verbose = FALSE) {
+      self$verbose  = verbose
       private$n_topics = n_topics
       private$fitted = FALSE
-      private$internal_matrix_format = 'CsparseMatrix'
+      private$set_internal_matrix_formats(sparse = "CsparseMatrix")
     },
     fit = function(x, ...) {
-      x_internal = as(x, private$internal_matrix_format)
-      # old RSpectra version
-      # svd_fit = RSpectra::svds(x_internal, k = private$n_topics, nv = private$n_topics, nu = 0)
-
+      x = check_convert_input(x, private$internal_matrix_formats, self$verbose)
       # http://stackoverflow.com/questions/7028385/can-i-remove-an-element-in-dot-dot-dot-and-pass-it-on
       # remove "y" from S3 call
       fit_svd = function(..., y)
-        irlba::irlba(x_internal, nv = private$n_topics, nu = 0, verbose = self$verbose, ...)
+        irlba::irlba(x, nv = private$n_topics, nu = 0, verbose = self$verbose, ...)
       svd_fit = fit_svd(...)
       private$lsa_factor_matrix = svd_fit$v;
-      rownames(private$lsa_factor_matrix) = colnames(x_internal)
+      rownames(private$lsa_factor_matrix) = colnames(x)
 
       private$singular_values = svd_fit$d; rm(svd_fit)
       private$fitted = TRUE
+      private$components_ = private$lsa_factor_matrix %*% diag(x = private$singular_values)
+
       invisible(self)
     },
     fit_transform = function(x, ...) {
-      x_internal = as(x, private$internal_matrix_format)
-      # old RSpectra version
-      # svd_fit = RSpectra::svds(x_internal, k = private$n_topics, nv = private$n_topics, nu = private$n_topics)
-
+      x = check_convert_input(x, private$internal_matrix_formats, self$verbose)
       # http://stackoverflow.com/questions/7028385/can-i-remove-an-element-in-dot-dot-dot-and-pass-it-on
       # remove "y" from S3 call
       fit_svd = function(..., y)
-        irlba::irlba(x_internal, nv = private$n_topics, nu = private$n_topics, verbose = self$verbose, ...)
+        irlba::irlba(x, nv = private$n_topics, nu = private$n_topics, verbose = self$verbose, ...)
       svd_fit = fit_svd(...)
       # save parameters
       private$singular_values = svd_fit$d
       private$lsa_factor_matrix = svd_fit$v
-      rownames(private$lsa_factor_matrix) = colnames(x_internal)
+      rownames(private$lsa_factor_matrix) = colnames(x)
+
       documents = svd_fit$u %*% diag(x = private$singular_values)
       rownames(documents) = rownames(x)
       private$fitted = TRUE
+      private$components_ = private$lsa_factor_matrix %*% diag(x = private$singular_values)
       documents
     },
     transform = function(x, ...) {
@@ -110,15 +117,91 @@ LatentSemanticAnalysis = R6::R6Class(
       else
         stop("Fit the model first!")
     },
+    active = list(
+      # make components read only via active bindings
+      components = function(value) {
+        if (!missing(value)) stop("Sorry this is a read-only field")
+        else {
+          if(is.null(private$components_)) stop("model was not fitted yet!")
+          else private$components_
+        }
+      }
+    ),
     get_word_vectors = function() {
-       private$lsa_factor_matrix %*% diag(x = private$singular_values)
+      .Deprecated("model$components")
     }
   ),
   private = list(
+    n_topics = NULL,
+    components_ = NULL,
+    fitted = FALSE,
     singular_values = NULL,
     lsa_factor_matrix = NULL
   )
 )
+
+
+
+# LatentSemanticAnalysis = R6::R6Class(
+#   "LatentSemanticAnalysis",
+#   inherit = text2vec_topic_model,
+#   public = list(
+#     initialize = function(n_topics) {
+#       private$n_topics = n_topics
+#       private$fitted = FALSE
+#       private$internal_matrix_format = 'CsparseMatrix'
+#     },
+#     fit = function(x, ...) {
+#       x_internal = as(x, private$internal_matrix_format)
+#       # old RSpectra version
+#       # svd_fit = RSpectra::svds(x_internal, k = private$n_topics, nv = private$n_topics, nu = 0)
+#
+#       # http://stackoverflow.com/questions/7028385/can-i-remove-an-element-in-dot-dot-dot-and-pass-it-on
+#       # remove "y" from S3 call
+#       fit_svd = function(..., y)
+#         irlba::irlba(x_internal, nv = private$n_topics, nu = 0, verbose = self$verbose, ...)
+#       svd_fit = fit_svd(...)
+#       private$lsa_factor_matrix = svd_fit$v;
+#       rownames(private$lsa_factor_matrix) = colnames(x_internal)
+#
+#       private$singular_values = svd_fit$d; rm(svd_fit)
+#       private$fitted = TRUE
+#       invisible(self)
+#     },
+#     fit_transform = function(x, ...) {
+#       x_internal = as(x, private$internal_matrix_format)
+#       # old RSpectra version
+#       # svd_fit = RSpectra::svds(x_internal, k = private$n_topics, nv = private$n_topics, nu = private$n_topics)
+#
+#       # http://stackoverflow.com/questions/7028385/can-i-remove-an-element-in-dot-dot-dot-and-pass-it-on
+#       # remove "y" from S3 call
+#       fit_svd = function(..., y)
+#         irlba::irlba(x_internal, nv = private$n_topics, nu = private$n_topics, verbose = self$verbose, ...)
+#       svd_fit = fit_svd(...)
+#       # save parameters
+#       private$singular_values = svd_fit$d
+#       private$lsa_factor_matrix = svd_fit$v
+#       rownames(private$lsa_factor_matrix) = colnames(x_internal)
+#       documents = svd_fit$u %*% diag(x = private$singular_values)
+#       rownames(documents) = rownames(x)
+#       private$fitted = TRUE
+#       documents
+#     },
+#     transform = function(x, ...) {
+#       if (private$fitted)
+#         as.matrix(x %*% private$lsa_factor_matrix)
+#       else
+#         stop("Fit the model first!")
+#     },
+#     get_word_vectors = function() {
+#        private$lsa_factor_matrix %*% diag(x = private$singular_values)
+#     }
+#   ),
+#   private = list(
+#     singular_values = NULL,
+#     lsa_factor_matrix = NULL
+#   )
+# )
 
 #' @rdname LatentSemanticAnalysis
 #' @export

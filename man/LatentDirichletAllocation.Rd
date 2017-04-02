@@ -39,8 +39,8 @@ Creates Latent Dirichlet Allocation model.
 For usage details see \bold{Methods, Arguments and Examples} sections.
 \preformatted{
 lda = LDA$new(n_topics = 10L, doc_topic_prior = 50 / n_topics, topic_word_prior = 1 / n_topics, verbose = FALSE)
-lda$fit_transform(X, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10, progress = interactive())
-lda$transform(X, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5, progress = FALSE)
+lda$fit_transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10, progress = interactive())
+lda$transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5, progress = FALSE)
 lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
 }
 }
@@ -53,14 +53,14 @@ lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
               topic_word_prior = 1 / n_topics, # beta
               verbose = FALSE, method = "WarpLDA")}}{Constructor for LDA model.
               For description of arguments see \bold{Arguments} section.}
-  \item{\code{$fit(X, n_iter, convergence_tol = -1,
-               n_check_convergence = 10)}}{fit LDA model to input matrix \code{X}. Not that useful -
+  \item{\code{$fit(x, n_iter, convergence_tol = -1,
+               n_check_convergence = 10)}}{fit LDA model to input matrix \code{x}. Not that useful -
                \code{fit_transform} is used under the hood. Implemented just to follow API.}
-  \item{\code{$fit_transform(X, n_iter, convergence_tol = -1,
+  \item{\code{$fit_transform(x, n_iter, convergence_tol = -1,
                n_check_convergence = 0, progress = interactive())}}{fit LDA model to input matrix
-               \code{X} and transforms input documents to topic space -
+               \code{x} and transforms input documents to topic space -
                model input matrix as a distribution over topic space}
-  \item{\code{$transform(X, n_iter, convergence_tol = -1,
+  \item{\code{$transform(x, n_iter, convergence_tol = -1,
                n_check_convergence = 0, progress = FALSE)}}{ transforms new documents to topic space -
                model input matrix as a distribution over topic space}
   \item{\code{$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)}}{returns "top words"
@@ -78,7 +78,7 @@ lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
 
 \describe{
  \item{lda}{A \code{LDA} object}
- \item{X}{An input document-term matrix. \bold{CSR \code{RsparseMatrix} used internally}}.
+ \item{x}{An input document-term matrix. \bold{CSR \code{RsparseMatrix} used internally}}.
  Should have column names.
  \item{n_topics}{\code{integer} desired number of latent topics. Also knows as \bold{K}}
  \item{doc_topic_prior}{\code{numeric} prior for document-topic multinomial distribution.

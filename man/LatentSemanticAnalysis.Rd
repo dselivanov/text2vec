@@ -65,6 +65,7 @@ d2 = lsa_2$fit_transform(dtm)
 all.equal(d1, d2)
 # the same, but wrapped with S3 methods
 all.equal(fit_transform(dtm, lsa_2), fit_transform(dtm, lsa_1))
+
 }
 \keyword{datasets}
 

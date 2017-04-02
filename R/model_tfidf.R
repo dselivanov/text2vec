@@ -61,27 +61,34 @@
 #' dtm_2 = model_tfidf$fit_transform(dtm)
 #' identical(dtm_1, dtm_2)
 TfIdf = R6::R6Class(
-  "tf_idf",
-  inherit = text2vec_transformer,
+  classname = c("TfIdf"),
+  inherit = mlTransformer,
   public = list(
+    #----------------------------------------------------------------------------
+    # members
+    verbose = NULL,
+    #----------------------------------------------------------------------------
+    # methods
+
+    # constructor
     initialize = function(smooth_idf = TRUE,
-                          norm = c('l1', 'l2', 'none'),
+                          norm = c("l1", "l2", "none"),
                           sublinear_tf = FALSE) {
+
+      private$set_internal_matrix_formats(sparse = "CsparseMatrix")
+
       private$sublinear_tf = sublinear_tf
       private$smooth_idf = smooth_idf
       private$norm = match.arg(norm)
-      private$internal_matrix_format = 'CsparseMatrix'
     },
     fit = function(x, ...) {
-      x_internal = private$prepare_x(x)
-      private$idf = private$get_idf(x_internal)
+      private$idf = private$get_idf(private$prepare_x(x))
       private$fitted = TRUE
       invisible(self)
     },
     fit_transform = function(x, ...) {
-      x_internal = private$prepare_x(x)
-      self$fit(x)
-      x_internal %*% private$idf
+      self$fit(x, ...)
+      self$transform(x, ...)
     },
     transform = function(x, ...) {
       if (private$fitted)
@@ -95,8 +102,9 @@ TfIdf = R6::R6Class(
     norm = NULL,
     sublinear_tf = FALSE,
     smooth_idf = TRUE,
+    fitted = FALSE,
     prepare_x = function(x) {
-      x_internal = as(x, private$internal_matrix_format)
+      x_internal = check_convert_input(x, private$internal_matrix_formats)
       if(private$sublinear_tf)
         x_internal@x = 1 + log(x_internal@x)
       normalize(x_internal, private$norm)

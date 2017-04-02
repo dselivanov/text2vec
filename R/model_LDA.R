@@ -27,8 +27,8 @@
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
 #' lda = LDA$new(n_topics = 10L, doc_topic_prior = 50 / n_topics, topic_word_prior = 1 / n_topics, verbose = FALSE)
-#' lda$fit_transform(X, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10, progress = interactive())
-#' lda$transform(X, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5, progress = FALSE)
+#' lda$fit_transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10, progress = interactive())
+#' lda$transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5, progress = FALSE)
 #' lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
 #' }
 #' @field verbose \code{logical = FALSE} whether to display more information about internal routines.
@@ -45,14 +45,14 @@
 #'               topic_word_prior = 1 / n_topics, # beta
 #'               verbose = FALSE, method = "WarpLDA")}}{Constructor for LDA model.
 #'               For description of arguments see \bold{Arguments} section.}
-#'   \item{\code{$fit(X, n_iter, convergence_tol = -1,
-#'                n_check_convergence = 10)}}{fit LDA model to input matrix \code{X}. Not that useful -
+#'   \item{\code{$fit(x, n_iter, convergence_tol = -1,
+#'                n_check_convergence = 10)}}{fit LDA model to input matrix \code{x}. Not that useful -
 #'                \code{fit_transform} is used under the hood. Implemented just to follow API.}
-#'   \item{\code{$fit_transform(X, n_iter, convergence_tol = -1,
+#'   \item{\code{$fit_transform(x, n_iter, convergence_tol = -1,
 #'                n_check_convergence = 0, progress = interactive())}}{fit LDA model to input matrix
-#'                \code{X} and transforms input documents to topic space -
+#'                \code{x} and transforms input documents to topic space -
 #'                model input matrix as a distribution over topic space}
-#'   \item{\code{$transform(X, n_iter, convergence_tol = -1,
+#'   \item{\code{$transform(x, n_iter, convergence_tol = -1,
 #'                n_check_convergence = 0, progress = FALSE)}}{ transforms new documents to topic space -
 #'                model input matrix as a distribution over topic space}
 #'   \item{\code{$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)}}{returns "top words"
@@ -67,7 +67,7 @@
 #' @section Arguments:
 #' \describe{
 #'  \item{lda}{A \code{LDA} object}
-#'  \item{X}{An input document-term matrix. \bold{CSR \code{RsparseMatrix} used internally}}.
+#'  \item{x}{An input document-term matrix. \bold{CSR \code{RsparseMatrix} used internally}}.
 #'  Should have column names.
 #'  \item{n_topics}{\code{integer} desired number of latent topics. Also knows as \bold{K}}
 #'  \item{doc_topic_prior}{\code{numeric} prior for document-topic multinomial distribution.
@@ -118,10 +118,15 @@ LatentDirichletAllocation = R6::R6Class(
       private$n_topics = n_topics
       private$doc_topic_prior = doc_topic_prior
       private$topic_word_prior = topic_word_prior
+
+      private$ptr = warplda_create(n = private$n_topics,
+                                   doc_topic_prior = private$doc_topic_prior,
+                                   topic_word_prior = private$topic_word_prior)
+
     },
     #---------------------------------------------------------------------------------------------
-    fit_transform = function(X, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10,
-                             progress = interactive()) {
+    fit_transform = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10,
+                             progress = interactive(), ...) {
       stopifnot(is.logical(progress))
 
       private$ptr = warplda_create(n = private$n_topics,
@@ -129,9 +134,9 @@ LatentDirichletAllocation = R6::R6Class(
                                    topic_word_prior = private$topic_word_prior)
 
       # init internal C++ data structures for document-term matrix
-      private$init_model_dtm(private$ptr, X)
+      private$init_model_dtm(private$ptr, x)
       # init
-      private$vocabulary = colnames(X)
+      private$vocabulary = colnames(x)
 
       private$doc_topic_count =
         private$fit_transform_internal(private$ptr, n_iter = n_iter,
@@ -145,26 +150,27 @@ LatentDirichletAllocation = R6::R6Class(
       # doc_topic_distr = self$get_doc_topic_distribution()
       doc_topic_distr = self$doc_topic_distribution
       attributes(doc_topic_distr) = attributes(private$doc_topic_count)
+      rownames(doc_topic_distr) = rownames(x)
       doc_topic_distr
     },
     #---------------------------------------------------------------------------------------------
     # not that useful - just to follow API
-    fit = function(X, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10,
-                   progress = interactive()) {
-      invisible(self$fit_transform(X = X, n_iter = n_iter, convergence_tol = convergence_tol,
+    fit = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10,
+                   progress = interactive(), ...) {
+      invisible(self$fit_transform(x = x, n_iter = n_iter, convergence_tol = convergence_tol,
                                    n_check_convergence = n_check_convergence, progress = progress))
     },
     #---------------------------------------------------------------------------------------------
-    transform = function(X, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5,
-                         progress = FALSE) {
+    transform = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5,
+                         progress = FALSE, ...) {
       # create model for inferenct (we have to init internal C++ data structures for document-term matrix)
       inference_model_ptr = warplda_create(n = private$n_topics,
                                            doc_topic_prior = private$doc_topic_prior,
                                            topic_word_prior = private$topic_word_prior)
 
-      private$init_model_dtm(inference_model_ptr, X)
+      private$init_model_dtm(inference_model_ptr, x)
 
-      stopifnot(all.equal(colnames(X), private$vocabulary))
+      stopifnot(all.equal(colnames(x), private$vocabulary))
 
       warplda_set_topic_word_count(inference_model_ptr, self$components);
 
@@ -176,6 +182,7 @@ LatentDirichletAllocation = R6::R6Class(
       # add priors and normalize to get distribution
       doc_topic_distr = (doc_topic_count + private$doc_topic_prior) %>% text2vec::normalize("l1")
       attributes(doc_topic_distr) = attributes(doc_topic_count)
+      rownames(doc_topic_distr) = rownames(x)
       doc_topic_distr
     },
     # FIXME - depreciated
@@ -216,18 +223,27 @@ LatentDirichletAllocation = R6::R6Class(
         }
       } else
         stop("To use visualisation, please install 'LDAvis' package first.")
-    }
+    },
     #---------------------------------------------------------------------------------------------
-    # set_c_all = function(x) {
-    #   warplda_set_c_all(private$ptr, x);
-    # },
-    #
-    # get_c_all_new = function() {
-    #   warplda_get_c_all_new(private$ptr);
-    # },
-    # get_c_all = function() {
-    #   warplda_get_c_all(private$ptr);
-    # }
+    init_model_dtm2 = function(x) {
+      private$init_model_dtm(private$ptr, x)
+    },
+    set_c_all = function(x) {
+      warplda_set_c_all(private$ptr, x);
+    },
+
+    get_c_all_local = function() {
+      warplda_get_c_all_local(private$ptr);
+    },
+    get_c_all = function() {
+      warplda_get_c_all(private$ptr);
+    },
+    reset_c_local = function() {
+      warplda_reset_c_all_local(private$ptr);
+    },
+    run_iter = function(check_conv_this_iter = T) {
+      run_one_iter(ptr = private$ptr, update_topics = T,  calc_ll = check_conv_this_iter)
+    }
   ),
   active = list(
     # make components read only via active bindings
@@ -308,20 +324,20 @@ LatentDirichletAllocation = R6::R6Class(
       res
     },
     #--------------------------------------------------------------
-    init_model_dtm = function(ptr, X) {
-      X = check_convert_input(X, private$internal_matrix_formats, private$verbose)
+    init_model_dtm = function(ptr, x) {
+      x = check_convert_input(x, private$internal_matrix_formats, private$verbose)
       # Document-term matrix should have column names - vocabulary
-      stopifnot(!is.null(colnames(X)))
+      stopifnot(!is.null(colnames(x)))
 
       if(self$verbose)
         message(sprintf("%s converting DTM to internal C++ structure", Sys.time()))
 
       # random topic assignements for each word
-      nnz = sum(X@x)
+      nnz = sum(x@x)
       # -1L because topics enumerated from 0 in c++ side
       z_old = sample.int(n = private$n_topics, size = nnz, replace = TRUE) - 1L
       z_new = sample.int(n = private$n_topics, size = nnz, replace = TRUE) - 1L
-      warplda_init_dtm(ptr, X, z_old, z_new)
+      warplda_init_dtm(ptr, x, z_old, z_new)
     },
     #---------------------------------------------------------------------------------------------
     get_topic_word_count = function() {
