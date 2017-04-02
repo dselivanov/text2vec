@@ -5,6 +5,30 @@
 
 using namespace Rcpp;
 
+// create_xptr_unordered_set
+SEXP create_xptr_unordered_set(CharacterVector x);
+RcppExport SEXP text2vec_create_xptr_unordered_set(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(create_xptr_unordered_set(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// collapse_collocations_cpp
+ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVector>& docs, SEXP xptr_unordered_set, const String r_sep);
+RcppExport SEXP text2vec_collapse_collocations_cpp(SEXP docsSEXP, SEXP xptr_unordered_setSEXP, SEXP r_sepSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const ListOf<const CharacterVector>& >::type docs(docsSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type xptr_unordered_set(xptr_unordered_setSEXP);
+    Rcpp::traits::input_parameter< const String >::type r_sep(r_sepSEXP);
+    rcpp_result_gen = Rcpp::wrap(collapse_collocations_cpp(docs, xptr_unordered_set, r_sep));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_glove_create
 SEXP cpp_glove_create(const List& params);
 RcppExport SEXP text2vec_cpp_glove_create(SEXP paramsSEXP) {
@@ -137,6 +161,73 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// colMins
+NumericVector colMins(const NumericMatrix x);
+RcppExport SEXP text2vec_colMins(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(colMins(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// colMaxs
+NumericVector colMaxs(const NumericMatrix x);
+RcppExport SEXP text2vec_colMaxs(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(colMaxs(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rowMins
+NumericVector rowMins(const NumericMatrix x);
+RcppExport SEXP text2vec_rowMins(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rowMins(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rowMaxs
+NumericVector rowMaxs(const NumericMatrix x);
+RcppExport SEXP text2vec_rowMaxs(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rowMaxs(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// euclidean_dist
+NumericMatrix euclidean_dist(const NumericMatrix x, const NumericMatrix y);
+RcppExport SEXP text2vec_euclidean_dist(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(euclidean_dist(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// is_invalid_ptr
+int is_invalid_ptr(SEXP sexp_ptr);
+RcppExport SEXP text2vec_is_invalid_ptr(SEXP sexp_ptrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sexp_ptr(sexp_ptrSEXP);
+    rcpp_result_gen = Rcpp::wrap(is_invalid_ptr(sexp_ptr));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_vocabulary_corpus_create
 SEXP cpp_vocabulary_corpus_create(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, const CharacterVector stopwords_R, const String delim);
 RcppExport SEXP text2vec_cpp_vocabulary_corpus_create(SEXP vocab_RSEXP, SEXP n_minSEXP, SEXP n_maxSEXP, SEXP stopwords_RSEXP, SEXP delimSEXP) {
@@ -233,97 +324,6 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_get_document_count(ptr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// create_xptr_unordered_set
-SEXP create_xptr_unordered_set(CharacterVector x);
-RcppExport SEXP text2vec_create_xptr_unordered_set(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(create_xptr_unordered_set(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// collapse_collocations_cpp
-ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVector>& docs, SEXP xptr_unordered_set, const String r_sep);
-RcppExport SEXP text2vec_collapse_collocations_cpp(SEXP docsSEXP, SEXP xptr_unordered_setSEXP, SEXP r_sepSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const ListOf<const CharacterVector>& >::type docs(docsSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type xptr_unordered_set(xptr_unordered_setSEXP);
-    Rcpp::traits::input_parameter< const String >::type r_sep(r_sepSEXP);
-    rcpp_result_gen = Rcpp::wrap(collapse_collocations_cpp(docs, xptr_unordered_set, r_sep));
-    return rcpp_result_gen;
-END_RCPP
-}
-// colMins
-NumericVector colMins(const NumericMatrix x);
-RcppExport SEXP text2vec_colMins(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(colMins(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// colMaxs
-NumericVector colMaxs(const NumericMatrix x);
-RcppExport SEXP text2vec_colMaxs(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(colMaxs(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rowMins
-NumericVector rowMins(const NumericMatrix x);
-RcppExport SEXP text2vec_rowMins(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(rowMins(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rowMaxs
-NumericVector rowMaxs(const NumericMatrix x);
-RcppExport SEXP text2vec_rowMaxs(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(rowMaxs(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// euclidean_dist
-NumericMatrix euclidean_dist(const NumericMatrix x, const NumericMatrix y);
-RcppExport SEXP text2vec_euclidean_dist(SEXP xSEXP, SEXP ySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(euclidean_dist(x, y));
-    return rcpp_result_gen;
-END_RCPP
-}
-// is_invalid_ptr
-int is_invalid_ptr(SEXP sexp_ptr);
-RcppExport SEXP text2vec_is_invalid_ptr(SEXP sexp_ptrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type sexp_ptr(sexp_ptrSEXP);
-    rcpp_result_gen = Rcpp::wrap(is_invalid_ptr(sexp_ptr));
     return rcpp_result_gen;
 END_RCPP
 }

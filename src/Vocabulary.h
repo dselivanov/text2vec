@@ -15,8 +15,11 @@
 // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "text2vec.h"
+#include <sparsepp.h>
+
 using namespace Rcpp;
 using namespace std;
+using spp::sparse_hash_map;
 
 class TermStat {
 public:
@@ -71,7 +74,7 @@ public:
                              _["stringsAsFactors"] = false );
   }
   void insert_terms (vector< string> &terms) {
-    typename unordered_map < string, uint32_t > :: iterator term_iterator;
+    typename sparse_hash_map < string, uint32_t > :: iterator term_iterator;
     int term_id;
     for (auto it:terms) {
       this->temp_document_word_set.insert(it);
@@ -101,7 +104,7 @@ public:
                     this->ngram_delim);
     insert_terms(this->ngrams_buffer);
 
-    typename unordered_map < string, uint32_t > :: iterator term_iterator;
+    typename sparse_hash_map < string, uint32_t > :: iterator term_iterator;
     for ( auto it: this->temp_document_word_set) {
       term_iterator = vocab.find(it);
       if(term_iterator != vocab.end())
@@ -118,7 +121,7 @@ public:
   void increase_token_count() {token_count++;};
 private:
   vector< TermStat > vocab_statistics;
-  unordered_map< string, uint32_t > vocab;
+  sparse_hash_map< string, uint32_t > vocab;
   uint32_t ngram_min;
   uint32_t ngram_max;
   string ngram_delim;
@@ -126,8 +129,8 @@ private:
   uint32_t token_count;
   // used for count word-document statistsics in vocab_statistics.
   // keep words set for document which is currently we processing
-  RCPP_UNORDERED_SET< string > temp_document_word_set;
-  RCPP_UNORDERED_SET< string > stopwords;
+  unordered_set< string > temp_document_word_set;
+  unordered_set< string > stopwords;
   // buffer for filtering out stopwords. This is to avoid memory re-allocation
   vector<string> terms_filtered_buffer;
   // buffer for ngrans. This is to avoid memory re-allocation
@@ -184,7 +187,7 @@ private:
 //                   this->ngram_delim);
 //   insert_terms(this->ngrams_buffer);
 //
-//   typename unordered_map < string, uint32_t > :: iterator term_iterator;
+//   typename sparse_hash_map < string, uint32_t > :: iterator term_iterator;
 //   for ( auto it: this->temp_document_word_set) {
 //     term_iterator = vocab.find(it);
 //     if(term_iterator != vocab.end())
@@ -193,7 +196,7 @@ private:
 // }
 //-----------------------------------------------------------------
 // void Vocabulary::insert_terms (vector< string> &terms) {
-//   typename unordered_map < string, uint32_t > :: iterator term_iterator;
+//   typename sparse_hash_map < string, uint32_t > :: iterator term_iterator;
 //   int term_id;
 //   for (auto it:terms) {
 //     this->temp_document_word_set.insert(it);
