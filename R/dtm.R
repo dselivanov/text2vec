@@ -129,7 +129,7 @@ create_dtm.list = function(it, vectorizer,
                 .options.multicore = list(preschedule = FALSE),
                 ...) %dopar%
         {
-          create_dtm(batch, vectorizer, "dgTMatrix")
+          create_dtm(batch, vectorizer, "dgTMatrix", ...)
         }
   as(res, type)
 }

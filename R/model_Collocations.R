@@ -4,7 +4,7 @@
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
-#' colloc = Collocations$new(vocabulary)
+#' colloc = Collocations$new(vocabulary, min_collocation_count = 50, sep = "_")
 #' colloc$fit(it)
 #' colloc$transform(it)
 #' colloc$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf)
@@ -12,7 +12,7 @@
 #' @format \code{\link{R6Class}} object.
 #' @section Methods:
 #' \describe{
-#'   \item{\code{$new(vocabulary)}}{Constructor for Collocations model.For description of arguments see \bold{Arguments} section.}
+#'   \item{\code{$new(vocabulary, min_collocation_count = 50, sep = "_")}}{Constructor for Collocations model.For description of arguments see \bold{Arguments} section.}
 #'   \item{\code{$fit(it)}}{fit Collocations model to input iterator \code{it}}
 #'   \item{\code{$transform(it)}}{transform input iterator using learned collocations
 #'   and produce iterator with collapsed phraeses}
@@ -39,7 +39,7 @@ Collocations = R6::R6Class(
   ),
   public = list(
     collocation_stat = NULL,
-    initialize = function(vocab, min_collocation_count = 50, sep = "_") {
+    initialize = function(vocab = NULL, min_collocation_count = 50, sep = "_") {
       private$v = copy(vocab)
       private$sep = sep
       private$min_collocation_count = min_collocation_count
@@ -51,7 +51,7 @@ Collocations = R6::R6Class(
         it_internal = self$transform(it)
       }
       else {
-        it_internal = it$clone(deep = T)
+        it_internal = it$clone(deep = TRUE)
       }
       vectorizer = vocab_vectorizer(private$v)
       tcm = create_tcm(it_internal, vectorizer, skip_grams_window = 1L,
