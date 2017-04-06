@@ -26,11 +26,11 @@ public:
   void init(const IntegerVector &z_old, const IntegerVector &z_new) {
 
     rng.seed((uint64_t)R::runif(1, pow(2.0, 32)), (uint64_t)R::runif(1, pow(2.0, 32)) );
-
-    C_doc.resize(corpus.nrow(), n_topic);
-    C_word.resize(corpus.ncol(), n_topic);
+    C_doc.resize(corpus.n_row_expected, n_topic);
+    C_word.resize(corpus.n_col_expected, n_topic);
     C_all.resize(n_topic);
-    C_all_local.resize(n_topic, 0);
+    C_local.resize(n_topic, 0);
+    C_local_diff.resize(n_topic, 0);
     size_t j = 0;
     corpus.apply([&](Z& z, doc_index_t d, word_index_t w) {
       z.old_z = z_old[j];
@@ -42,7 +42,7 @@ public:
     corpus.apply([&](Z& z, doc_index_t d, word_index_t w) {
       C_doc.at(d, z.old_z) ++;
       C_all[z.old_z] ++;
-      // C_all_local[z.old_z] ++;
+      C_local[z.old_z] ++;
     });
     // Update C_word
     C_word.clear();
@@ -66,6 +66,7 @@ public:
   void r_read_corpus(const S4 &m_csr) {
     IntegerVector dims = m_csr.slot("Dim");
     int nr = dims[0];
+    int nc = dims[1];
 
     IntegerVector PP = m_csr.slot("p");
     int *P = PP.begin();
@@ -74,18 +75,27 @@ public:
     NumericVector XX = m_csr.slot("x");
     double *X = XX.begin();
 
-    for(int r=0; r < nr; r++) {
+    // append csr
+    for(int r = 0; r < nr; r++) {
       size_t p1 = P[r];
       size_t p2 = P[r + 1];
-      for(int j=p1; j < p2; j++) {
+      for(int j = p1; j < p2; j++) {
         unsigned idx = J[j];
         unsigned cnt = X[j];
-        for(int k=0; k<cnt; k++)
-          corpus.append(r,idx,0,0);
+        for(int k = 0; k < cnt; k++)
+          corpus.append(r, idx, 0, 0);
       }
     }
-    corpus.build_CSC_from_CSR();
+    corpus.build_CSC_from_CSR(nr, nc);
   }
+  // List get_corpus_representation() {
+  //   return List::create(_["csc_index_"] = wrap(corpus.csc_index_),
+  //                _["csc_row_index_"] = wrap(corpus.csc_row_index_),
+  //                _["csc_val_index_"] = wrap(corpus.csc_val_index_),
+  //                _["csr_col_index_"] = wrap(corpus.csr_col_index_),
+  //                _["csr_index_"] = wrap(corpus.csr_index_)
+  //                );
+  // }
   IntegerMatrix get_topic_word_count() {
     // size(C_word)  =  n_words * n_topics
     // we need n_topics * n_words
@@ -112,22 +122,22 @@ public:
     return doc_topic_count;
   }
 
-  IntegerVector get_c_all_local() {
-    return wrap(C_all_local);
+  IntegerVector get_local_diff() {
+    return wrap(C_local_diff);
   }
 
-  IntegerVector get_c_all() {
+  IntegerVector get_c_global() {
     return wrap(C_all);
   }
 
-  void set_c_all(const IntegerVector &r_c_all) {
+  void set_c_global(const IntegerVector &r_c_all) {
     for(int i = 0; i < r_c_all.size(); i++)
       C_all[i] = r_c_all[i];
   }
 
-  void reset_c_all_local() {
-    for(int i = 0; i < C_all_local.size(); i++)
-      C_all_local[i] = 0;
+  void reset_local_diff() {
+    for(int i = 0; i < C_local_diff.size(); i++)
+      C_local_diff[i] = 0;
   }
 };
 
@@ -158,16 +168,32 @@ void warplda_set_topic_word_count(SEXP ptr, const Rcpp::IntegerMatrix  &topic_wo
   lda_model->set_topic_word_count(topic_word_count);
 }
 
+// // [[Rcpp::export]]
+// void run_one_iter(SEXP ptr, bool update_topics = true) {
+//   Rcpp::XPtr<R_LDA> lda_model(ptr);
+//   lda_model->sample_by_doc(update_topics);
+//   lda_model->sample_by_word(update_topics);
+// }
+
 // [[Rcpp::export]]
-double run_one_iter(SEXP ptr, bool update_topics = true, bool calc_ll = true) {
+void run_one_iter_doc(SEXP ptr, bool update_topics = true) {
   Rcpp::XPtr<R_LDA> lda_model(ptr);
   lda_model->sample_by_doc(update_topics);
-  lda_model->sample_by_word(update_topics);
-  if(calc_ll)
-    return lda_model->pseudo_loglikelihood();
-  else
-    return 0.0;
 }
+
+
+// [[Rcpp::export]]
+void run_one_iter_word(SEXP ptr, bool update_topics = true) {
+  Rcpp::XPtr<R_LDA> lda_model(ptr);
+  lda_model->sample_by_word(update_topics);
+}
+
+// [[Rcpp::export]]
+double warplda_pseudo_loglikelihood(SEXP ptr) {
+  Rcpp::XPtr<R_LDA> lda_model(ptr);
+  return lda_model->pseudo_loglikelihood();
+}
+
 
 // [[Rcpp::export]]
 IntegerMatrix warplda_get_doc_topic_count(SEXP ptr) {
@@ -182,25 +208,32 @@ IntegerMatrix warplda_get_topic_word_count(SEXP ptr) {
 }
 
 // [[Rcpp::export]]
-IntegerVector warplda_get_c_all_local(SEXP ptr) {
+IntegerVector warplda_get_local_diff(SEXP ptr) {
   Rcpp::XPtr<R_LDA> lda_model(ptr);
-  return lda_model->get_c_all_local();
+  return lda_model->get_local_diff();
 }
 
 // [[Rcpp::export]]
-IntegerVector warplda_get_c_all(SEXP ptr) {
+IntegerVector warplda_get_c_global(SEXP ptr) {
   Rcpp::XPtr<R_LDA> lda_model(ptr);
-  return lda_model->get_c_all();
+  return lda_model->get_c_global();
 }
 
 // [[Rcpp::export]]
-void warplda_set_c_all(SEXP ptr, const IntegerVector &c_all) {
+void warplda_set_c_global(SEXP ptr, const IntegerVector &c_all) {
   Rcpp::XPtr<R_LDA> lda_model(ptr);
-  lda_model->set_c_all(c_all);
+  lda_model->set_c_global(c_all);
 }
 
 // [[Rcpp::export]]
-void warplda_reset_c_all_local(SEXP ptr) {
+void warplda_reset_local_diff(SEXP ptr) {
   Rcpp::XPtr<R_LDA> lda_model(ptr);
-  lda_model->reset_c_all_local();
+  lda_model->reset_local_diff();
 }
+
+// // [[Rcpp::export]]
+// List warplda_get_corpus_representation(SEXP ptr) {
+//   Rcpp::XPtr<R_LDA> lda_model(ptr);
+//   return lda_model->get_corpus_representation();
+// }
+

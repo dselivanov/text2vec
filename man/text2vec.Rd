@@ -13,4 +13,3 @@ To learn more about text2vec visit project website: \url{text2vec.org}
 Or start with the vignettes:
 \code{browseVignettes(package = "text2vec")}
 }
-

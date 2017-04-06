@@ -24,4 +24,3 @@ This function removes very common and very uncommon words from a
 \link{prune_vocabulary}, \link{transform_tf},
   \link{transform_tfidf}, \link{transform_binary}
 }
-

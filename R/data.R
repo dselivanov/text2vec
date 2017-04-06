@@ -14,4 +14,4 @@
 #'   \item{review}{Text of the review (UTF-8) }}
 #' @source \url{http://ai.stanford.edu/~amaas/data/sentiment/}
 #' @keywords datasets
-"movie_review"
+NULL

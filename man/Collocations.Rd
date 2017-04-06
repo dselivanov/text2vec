@@ -17,6 +17,7 @@ Creates Collocations model which can be used for phrase extraction.
 \item{\code{collocation_stat}}{\code{data.table} with collocations(phrases) statistics.
 Useful for filtering non-relevant phrases}
 }}
+
 \section{Usage}{
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
@@ -49,5 +50,5 @@ colloc$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf)
  \item{vocabulary}{\code{text2vec_vocabulary} - will look for collactions only for words in vocabulary}
 }
 }
-\keyword{datasets}
 
+\keyword{datasets}

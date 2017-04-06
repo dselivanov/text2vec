@@ -2,9 +2,9 @@
 % Please edit documentation in R/iterators.R
 \name{itoken}
 \alias{itoken}
+\alias{itoken.list}
 \alias{itoken.character}
 \alias{itoken.iterator}
-\alias{itoken.list}
 \alias{itoken_parallel}
 \alias{itoken_parallel.character}
 \alias{itoken_parallel.ifiles_parallel}
@@ -109,4 +109,3 @@ system.time(dtm <- create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix'))
   \link{create_dtm}, \link{vectorizers},
   \link{create_tcm}
 }
-

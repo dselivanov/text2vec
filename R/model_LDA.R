@@ -134,7 +134,7 @@ LatentDirichletAllocation = R6::R6Class(
                                    topic_word_prior = private$topic_word_prior)
 
       # init internal C++ data structures for document-term matrix
-      private$init_model_dtm(private$ptr, x)
+      private$init_model_dtm(x, private$ptr)
       # init
       private$vocabulary = colnames(x)
 
@@ -168,7 +168,7 @@ LatentDirichletAllocation = R6::R6Class(
                                            doc_topic_prior = private$doc_topic_prior,
                                            topic_word_prior = private$topic_word_prior)
 
-      private$init_model_dtm(inference_model_ptr, x)
+      private$init_model_dtm(x, inference_model_ptr)
 
       stopifnot(all.equal(colnames(x), private$vocabulary))
 
@@ -223,26 +223,6 @@ LatentDirichletAllocation = R6::R6Class(
         }
       } else
         stop("To use visualisation, please install 'LDAvis' package first.")
-    },
-    #---------------------------------------------------------------------------------------------
-    init_model_dtm2 = function(x) {
-      private$init_model_dtm(private$ptr, x)
-    },
-    set_c_all = function(x) {
-      warplda_set_c_all(private$ptr, x);
-    },
-
-    get_c_all_local = function() {
-      warplda_get_c_all_local(private$ptr);
-    },
-    get_c_all = function() {
-      warplda_get_c_all(private$ptr);
-    },
-    reset_c_local = function() {
-      warplda_reset_c_all_local(private$ptr);
-    },
-    run_iter = function(check_conv_this_iter = T) {
-      run_one_iter(ptr = private$ptr, update_topics = T,  calc_ll = check_conv_this_iter)
     }
   ),
   active = list(
@@ -294,11 +274,13 @@ LatentDirichletAllocation = R6::R6Class(
       j = 1L
 
       for(i in seq_len(n_iter)) {
-        check_conv_this_iter = (i %% n_check_convergence == 0)
+        private$run_iter_doc(update_topics)
+        private$run_iter_word(update_topics)
 
-        loglik = run_one_iter(ptr = model_ptr, update_topics = update_topics,  calc_ll = check_conv_this_iter)
         # check convergence
-        if(check_conv_this_iter) {
+        if(i %% n_check_convergence == 0) {
+          loglik = private$calc_pseudo_loglikelihood()
+
           if(self$verbose)
             message(sprintf("%s iter %d current loglikelihood %.4f", Sys.time(), i, loglik))
 
@@ -324,7 +306,7 @@ LatentDirichletAllocation = R6::R6Class(
       res
     },
     #--------------------------------------------------------------
-    init_model_dtm = function(ptr, x) {
+    init_model_dtm = function(x, ptr = private$ptr) {
       x = check_convert_input(x, private$internal_matrix_formats, private$verbose)
       # Document-term matrix should have column names - vocabulary
       stopifnot(!is.null(colnames(x)))
@@ -344,6 +326,41 @@ LatentDirichletAllocation = R6::R6Class(
       res = warplda_get_topic_word_count(private$ptr);
       colnames(res) = private$vocabulary
       res
+    },
+    #---------------------------------------------------------------------------------------------
+    # helpers for distributed LDA
+    #---------------------------------------------------------------------------------------------
+    # init_model_dtm2 = function(x) {
+    #   private$init_model_dtm(x, private$ptr)
+    # },
+    set_c_all = function(x) {
+      warplda_set_c_global(private$ptr, x);
+    },
+
+    get_c_all_local = function() {
+      warplda_get_local_diff(private$ptr);
+    },
+    get_c_all = function() {
+      warplda_get_c_global(private$ptr);
+    },
+    reset_c_local = function() {
+      warplda_reset_local_diff(private$ptr);
+    },
+
+    # run_iter = function(calc_ll = T) {
+    #   run_one_iter(ptr = private$ptr, update_topics = T,  calc_ll = calc_ll)
+    # },
+
+    run_iter_doc = function(update_topics = TRUE) {
+      run_one_iter_doc(ptr = private$ptr, update_topics = update_topics)
+    },
+
+    run_iter_word = function(update_topics = TRUE) {
+      run_one_iter_word(ptr = private$ptr, update_topics = update_topics)
+    },
+
+    calc_pseudo_loglikelihood = function() {
+      warplda_pseudo_loglikelihood(ptr = private$ptr)
     }
   )
 )
@@ -351,3 +368,122 @@ LatentDirichletAllocation = R6::R6Class(
 #' @rdname LatentDirichletAllocation
 #' @export
 LDA = LatentDirichletAllocation
+
+#' @export
+LatentDirichletAllocationDistributed = R6::R6Class(
+  classname = c("WarpLDA", "LDA"),
+  inherit = LatentDirichletAllocation,
+  public = list(
+    initialize = function(n_topics = 10L,
+                          doc_topic_prior = 50 / n_topics,
+                          topic_word_prior = 1 / n_topics,
+                          cl = NULL,
+                          verbose = FALSE) {
+
+      foreach(seq_len(foreach::getDoParWorkers())) %dopar% {
+        text2vec.environment <<- new.env(parent = emptyenv())
+        text2vec.environment$lda = LatentDirichletAllocation$new(n_topics, doc_topic_prior, topic_word_prior, FALSE)
+        TRUE
+      }
+      #   parallel::clusterMap(cl, function(x) {
+      #     text2vec.environment <<- new.env(parent = emptyenv())
+      #     text2vec.environment$lda = LatentDirichletAllocation$new(n_topics, doc_topic_priortopic_word_prior, FALSE)
+      #     TRUE
+      # })
+    },
+    fit_transform = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10,
+                             progress = interactive(), ...) {
+      stopifnot(inherits(x, "RowDistributedMatrix"))
+      stopifnot(is.logical(progress))
+      # sun_counts = function(...) do.call(`+`, ...)
+      # ii = parallel::splitIndices(nrow(x), foreach::getDoParWorkers())
+      global_counts =
+        foreach(x_ref = x,
+                .combine = list, .inorder = FALSE, .multicombine = TRUE) %dopar% {
+                  lda = text2vec.environment$lda
+                  lda$.__enclos_env__$private$init_model_dtm(get(x_ref$env)[[x_ref$key]])
+                  lda$.__enclos_env__$private$get_c_all()
+        }
+      global_counts = Reduce(`+`, global_counts)
+      # stat = foreach(x_ref = x,
+      #         .combine = c, .inorder = FALSE, .multicombine = TRUE) %dopar% {
+      #           nnz = sprintf("pid %d sum_nnz %d nnz %d", Sys.getpid(), sum(get(x_ref$env)[[x_ref$key]]@x),
+      #                         length(get(x_ref$env)[[x_ref$key]]@x))
+      #           nnz
+      #         }
+      # lapply(stat, message)
+      for(i in seq_len(n_iter)) {
+
+        iter_data =
+          foreach(seq_len(foreach::getDoParWorkers()), .combine = list,
+                  .inorder = FALSE, .multicombine = TRUE) %dopar% {
+
+                    # extract
+                    # lda = text2vec.environment$lda
+                    t0 = Sys.time()
+                    # sync
+                    text2vec.environment$lda$.__enclos_env__$private$set_c_all(global_counts)
+
+                    # sampling
+                    text2vec.environment$lda$.__enclos_env__$private$run_iter_doc(TRUE)
+                    text2vec.environment$lda$.__enclos_env__$private$run_iter_word(TRUE)
+
+                    local_counts = text2vec.environment$lda$.__enclos_env__$private$get_c_all_local()
+
+                    text2vec.environment$lda$.__enclos_env__$private$reset_c_local()
+                    ll = text2vec.environment$lda$.__enclos_env__$private$calc_pseudo_loglikelihood()
+                    stat = sprintf("pid %d %.3f", Sys.getpid(), difftime( Sys.time(), t0, units = "sec"))
+                    list(ll = ll, local_counts = local_counts, stat = stat)
+                  }
+        lapply(iter_data, function(x) message(x[['stat']]))
+        global_counts = lapply(iter_data, function(x) x[['local_counts']]) %>%
+          Reduce(`+`,  ., init = global_counts)
+
+        ll = lapply(iter_data, function(x) x[['ll']]) %>%
+          do.call(sum, .)
+        message(sprintf("%s %d loglik = %.3f", Sys.time(), i, ll))
+
+        # iter_doc =
+        #   foreach(seq_len(foreach::getDoParWorkers()), .combine = list,
+        #           .inorder = FALSE, .multicombine = TRUE) %dopar% {
+        #             lda = text2vec.environment$lda
+        #
+        #             lda$.__enclos_env__$private$set_c_all(global_counts)
+        #
+        #             lda$.__enclos_env__$private$run_iter_doc(TRUE)
+        #
+        #             local_counts = lda$.__enclos_env__$private$get_c_all_local()
+        #
+        #             lda$.__enclos_env__$private$reset_c_local()
+        #             local_counts
+        #           }
+        #
+        # global_counts =  Reduce(`+`, iter_doc , init = global_counts)
+        #
+        # iter_word =
+        #   foreach(seq_len(foreach::getDoParWorkers()), .combine = list,
+        #           .inorder = FALSE, .multicombine = TRUE) %dopar% {
+        #             lda = text2vec.environment$lda
+        #
+        #             lda$.__enclos_env__$private$set_c_all(global_counts)
+        #
+        #             lda$.__enclos_env__$private$run_iter_word(TRUE)
+        #
+        #             local_counts = lda$.__enclos_env__$private$get_c_all_local()
+        #
+        #             lda$.__enclos_env__$private$reset_c_local()
+        #             local_counts
+        #           }
+        # global_counts =  Reduce(`+`, iter_word , init = global_counts)
+
+        # calculate loglikelyhood
+        # ll =
+        #   foreach(seq_len(foreach::getDoParWorkers()), .combine = sum,
+        #           .inorder = FALSE, .multicombine = TRUE) %dopar% {
+        #             text2vec.environment$lda$.__enclos_env__$private$calc_pseudo_loglikelihood()
+        #           }
+        # message(sprintf("%s %d loglik = %.3f", Sys.time(), i, ll))
+      }
+    }
+  )
+)

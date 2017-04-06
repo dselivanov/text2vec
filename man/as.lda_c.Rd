@@ -12,4 +12,3 @@ as.lda_c(X)
 \description{
 Converts 'dgCMatrix' (or coercible to 'dgCMatrix') to 'lda_c' format
 }
-

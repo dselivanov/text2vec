@@ -89,4 +89,3 @@ tcm = create_tcm(jobs, vectorizer, skip_grams_window = 3L, skip_grams_window_con
 \seealso{
 \link{itoken} \link{create_dtm}
 }
-

@@ -2,8 +2,8 @@
 % Please edit documentation in R/model_LSA.R
 \docType{data}
 \name{LatentSemanticAnalysis}
-\alias{LSA}
 \alias{LatentSemanticAnalysis}
+\alias{LSA}
 \title{Latent Semantic Analysis model}
 \format{\code{\link{R6Class}} object.}
 \usage{
@@ -20,6 +20,7 @@ See \url{https://en.wikipedia.org/wiki/Latent_semantic_analysis} for details.
 \describe{
 \item{\code{verbose}}{\code{logical = TRUE} whether to display training inforamtion}
 }}
+
 \section{Usage}{
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
@@ -51,6 +52,7 @@ lsa$get_word_vectors()
  these arguments will be passed to \link{irlba} function which is used as backend for SVD.}
 }
 }
+
 \examples{
 data("movie_review")
 N = 100
@@ -68,4 +70,3 @@ all.equal(fit_transform(dtm, lsa_2), fit_transform(dtm, lsa_1))
 
 }
 \keyword{datasets}
-

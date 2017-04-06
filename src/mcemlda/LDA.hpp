@@ -41,7 +41,8 @@ public:
 	DenseMat<int> C_doc;
 	DenseMat<int> C_word;
 	vector<int> C_all; // C_all[k] = #token in topic k
-	vector<int> C_all_local; // C_all_local[k] = #token in topic k
+	vector<int> C_local; // C_all[k] = #token in topic k
+	vector<int> C_local_diff; // C_local_diff[k] = #token in topic k
 	SparseMat<Z,token_index_t,doc_index_t,word_index_t> corpus;
 
 	qlib::XOR128PLUS rng;
@@ -65,10 +66,10 @@ public:
 
 	// Methods
 	void init() {
-		C_doc.resize(corpus.nrow(), n_topic);
-		C_word.resize(corpus.ncol(), n_topic);
+	  C_doc.resize(corpus.n_row_expected, n_topic);
+	  C_word.resize(corpus.n_col_expected, n_topic);
 		C_all.resize(n_topic);
-		C_all_local.resize(n_topic);
+		C_local_diff.resize(n_topic);
 		// Fill z randomly
 		corpus.apply([&](Z& z, doc_index_t d, word_index_t w) {
 			z.old_z = rng.sample() % n_topic;
@@ -113,11 +114,15 @@ public:
 				  if(update_topics) {
 				    C_word.at(w, z.new_z) ++;
 				    C_word.at(w, z.old_z) --;
+
 				    C_all[z.new_z] ++;
 				    C_all[z.old_z] --;
 
-				    C_all_local[z.new_z] ++;
-				    C_all_local[z.old_z] --;
+				    C_local_diff[z.new_z] ++;
+				    C_local_diff[z.old_z] --;
+
+				    C_local[z.new_z] ++;
+				    C_local[z.old_z] --;
 				  }
 					z.old_z = z.new_z;
 				}
@@ -160,12 +165,15 @@ public:
 					(C_all[z.old_z] + beta_bar)/(C_all[z.new_z] + beta_bar);
 				if(rng.drand() < accept_prob) {
 				  if(update_topics) {
+
 				    C_all[z.new_z] ++;
 				    C_all[z.old_z] --;
 
-				    C_all_local[z.new_z] ++;
-				    C_all_local[z.old_z] --;
+				    C_local_diff[z.new_z] ++;
+				    C_local_diff[z.old_z] --;
 
+				    C_local[z.new_z] ++;
+				    C_local[z.old_z] --;
 				  }
 					z.old_z = z.new_z;
 				}
@@ -184,19 +192,14 @@ public:
 		}
 	}
 
-  // void set_C_all_local(const int * new_val) {
-  //   for(int i = 0; i < n_topic; i++)
-  //     C_all_local[i] = new_val[i];
-  // }
-
 	double pseudo_loglikelihood() { // indeed const
 		double res = 0;
 		corpus.apply<true>([&](Z& z, doc_index_t d, word_index_t w) {
 			// Todo: This could be optimized with a HashMap
 			res += log(C_word.at(w, z.old_z) + beta);
 		});
-		for(topic_index_t k=0; k<n_topic; k++)
-			res -= C_all[k]*log(C_all[k] + beta_bar);
+		for(topic_index_t k = 0; k<n_topic; k++)
+			res -= C_local[k] * log(C_local[k] + beta_bar);
 		return res;
 	}
 };

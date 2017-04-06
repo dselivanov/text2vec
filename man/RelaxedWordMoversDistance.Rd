@@ -2,8 +2,8 @@
 % Please edit documentation in R/distance_RWMD.R
 \docType{data}
 \name{RelaxedWordMoversDistance}
-\alias{RWMD}
 \alias{RelaxedWordMoversDistance}
+\alias{RWMD}
 \title{Creates model which can be used for calculation of "relaxed word movers distance".}
 \format{\code{\link{R6Class}} object.}
 \usage{
@@ -22,6 +22,7 @@ and vice versa. For more detail see original article: \url{http://mkusner.github
 \item{\code{verbose}}{\code{logical = TRUE} whether to display
 additional inforamtion during calculations.}
 }}
+
 \section{Usage}{
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
@@ -59,6 +60,7 @@ rwmd$pdist2(x, y)
                This means \code{distance = 1 - cosine_angle_betwen_wv}}
 }
 }
+
 \examples{
 \dontrun{
 data("movie_review")
@@ -80,4 +82,3 @@ head(rwmd_dist)
 }
 }
 \keyword{datasets}
-

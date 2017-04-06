@@ -20,4 +20,3 @@ normalize matrix rows using given norm
 \seealso{
 \link{get_idf}, \link{create_dtm}
 }
-

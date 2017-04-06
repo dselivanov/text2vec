@@ -31,4 +31,3 @@ Transformed version of \code{x}
 This is generic function to fit transformers (class = "transformer")
 and then apply fitted model to input.
 }
-

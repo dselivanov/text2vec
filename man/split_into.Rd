@@ -20,4 +20,3 @@ This function splits a vector into \code{n} parts of roughly
   \code{n} should be equal to the number of jobs you want to run, which
   should be the number of cores you want to use.
 }
-

@@ -2,8 +2,8 @@
 % Please edit documentation in R/model_GloVe.R
 \docType{data}
 \name{GlobalVectors}
-\alias{GloVe}
 \alias{GlobalVectors}
+\alias{GloVe}
 \title{Creates Global Vectors word-embeddings model.}
 \format{\code{\link{R6Class}} object.}
 \usage{
@@ -31,6 +31,7 @@ grain_size for \code{RcppParallel::parallelReduce}. For details, see
 
 \item{\code{verbose}}{\code{logical = TRUE} whether to display training inforamtion}
 }}
+
 \section{Usage}{
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
@@ -91,6 +92,7 @@ glove$dump_model()
     on smaller task-specific dataset}
 }
 }
+
 \examples{
 \dontrun{
 temp = tempfile()
@@ -112,4 +114,3 @@ wv = glove_model$get_word_vectors()
 \url{http://nlp.stanford.edu/projects/glove/}
 }
 \keyword{datasets}
-

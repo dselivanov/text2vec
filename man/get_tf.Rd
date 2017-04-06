@@ -23,4 +23,3 @@ This function creates a term-frequency (TF) scaling matrix from
 \seealso{
 \link{get_idf}, \link{create_dtm}
 }
-

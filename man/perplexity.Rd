@@ -44,4 +44,3 @@ doc_topic_distr  =
 topic_word_distr_10 = model$topic_word_distribution
 perplexity(dtm, topic_word_distr_10, doc_topic_distr)
 }
-

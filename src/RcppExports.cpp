@@ -364,16 +364,36 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// run_one_iter
-double run_one_iter(SEXP ptr, bool update_topics, bool calc_ll);
-RcppExport SEXP text2vec_run_one_iter(SEXP ptrSEXP, SEXP update_topicsSEXP, SEXP calc_llSEXP) {
+// run_one_iter_doc
+void run_one_iter_doc(SEXP ptr, bool update_topics);
+RcppExport SEXP text2vec_run_one_iter_doc(SEXP ptrSEXP, SEXP update_topicsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< bool >::type update_topics(update_topicsSEXP);
+    run_one_iter_doc(ptr, update_topics);
+    return R_NilValue;
+END_RCPP
+}
+// run_one_iter_word
+void run_one_iter_word(SEXP ptr, bool update_topics);
+RcppExport SEXP text2vec_run_one_iter_word(SEXP ptrSEXP, SEXP update_topicsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< bool >::type update_topics(update_topicsSEXP);
+    run_one_iter_word(ptr, update_topics);
+    return R_NilValue;
+END_RCPP
+}
+// warplda_pseudo_loglikelihood
+double warplda_pseudo_loglikelihood(SEXP ptr);
+RcppExport SEXP text2vec_warplda_pseudo_loglikelihood(SEXP ptrSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    Rcpp::traits::input_parameter< bool >::type update_topics(update_topicsSEXP);
-    Rcpp::traits::input_parameter< bool >::type calc_ll(calc_llSEXP);
-    rcpp_result_gen = Rcpp::wrap(run_one_iter(ptr, update_topics, calc_ll));
+    rcpp_result_gen = Rcpp::wrap(warplda_pseudo_loglikelihood(ptr));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -399,46 +419,46 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// warplda_get_c_all_local
-IntegerVector warplda_get_c_all_local(SEXP ptr);
-RcppExport SEXP text2vec_warplda_get_c_all_local(SEXP ptrSEXP) {
+// warplda_get_local_diff
+IntegerVector warplda_get_local_diff(SEXP ptr);
+RcppExport SEXP text2vec_warplda_get_local_diff(SEXP ptrSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    rcpp_result_gen = Rcpp::wrap(warplda_get_c_all_local(ptr));
+    rcpp_result_gen = Rcpp::wrap(warplda_get_local_diff(ptr));
     return rcpp_result_gen;
 END_RCPP
 }
-// warplda_get_c_all
-IntegerVector warplda_get_c_all(SEXP ptr);
-RcppExport SEXP text2vec_warplda_get_c_all(SEXP ptrSEXP) {
+// warplda_get_c_global
+IntegerVector warplda_get_c_global(SEXP ptr);
+RcppExport SEXP text2vec_warplda_get_c_global(SEXP ptrSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    rcpp_result_gen = Rcpp::wrap(warplda_get_c_all(ptr));
+    rcpp_result_gen = Rcpp::wrap(warplda_get_c_global(ptr));
     return rcpp_result_gen;
 END_RCPP
 }
-// warplda_set_c_all
-void warplda_set_c_all(SEXP ptr, const IntegerVector& c_all);
-RcppExport SEXP text2vec_warplda_set_c_all(SEXP ptrSEXP, SEXP c_allSEXP) {
+// warplda_set_c_global
+void warplda_set_c_global(SEXP ptr, const IntegerVector& c_all);
+RcppExport SEXP text2vec_warplda_set_c_global(SEXP ptrSEXP, SEXP c_allSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type c_all(c_allSEXP);
-    warplda_set_c_all(ptr, c_all);
+    warplda_set_c_global(ptr, c_all);
     return R_NilValue;
 END_RCPP
 }
-// warplda_reset_c_all_local
-void warplda_reset_c_all_local(SEXP ptr);
-RcppExport SEXP text2vec_warplda_reset_c_all_local(SEXP ptrSEXP) {
+// warplda_reset_local_diff
+void warplda_reset_local_diff(SEXP ptr);
+RcppExport SEXP text2vec_warplda_reset_local_diff(SEXP ptrSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    warplda_reset_c_all_local(ptr);
+    warplda_reset_local_diff(ptr);
     return R_NilValue;
 END_RCPP
 }

@@ -21,4 +21,3 @@ This function prepares a list of questions from a
 \seealso{
 \link{check_analogy_accuracy}, \link{GloVe}
 }
-

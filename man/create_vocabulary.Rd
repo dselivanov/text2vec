@@ -2,11 +2,11 @@
 % Please edit documentation in R/vocabulary.R
 \name{create_vocabulary}
 \alias{create_vocabulary}
+\alias{vocabulary}
 \alias{create_vocabulary.character}
 \alias{create_vocabulary.itoken}
-\alias{create_vocabulary.itoken_parallel}
 \alias{create_vocabulary.list}
-\alias{vocabulary}
+\alias{create_vocabulary.itoken_parallel}
 \title{Creates a vocabulary of unique terms}
 \usage{
 create_vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
@@ -80,6 +80,7 @@ registered, it will build vocabulary in parallel using \link{foreach}.
 statistics from iterator. If parallel backend is
 registered, it will build vocabulary in parallel using \link{foreach}.
 }}
+
 \examples{
 data("movie_review")
 txt = movie_review[['review']][1:100]
@@ -88,4 +89,3 @@ vocab = create_vocabulary(it)
 pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
 }
-

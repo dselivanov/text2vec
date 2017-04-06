@@ -130,8 +130,8 @@ N_SPLITS = 4
 jobs = files %>% 
   split_into(N_SPLITS) %>% 
   lapply(ifiles, reader = reader) %>% 
-  # Worth to set chunks_number to 1 because we already splitted input
-  lapply(itoken, chunks_number = 1, preprocess_function = tolower, 
+  # Worth to set n_chunks to 1 because we already splitted input
+  lapply(itoken, n_chunks = 1, preprocess_function = tolower, 
          tokenizer = word_tokenizer, progessbar = FALSE)
 
 # Alternatively when data is in memory we can perform splite in the following way:
@@ -141,7 +141,7 @@ jobs = files %>%
 #
 # jobs = Map(function(doc, ids) {
 #  itoken(iterable = doc, ids = ids, preprocess_function = tolower, 
-#         tokenizer = word_tokenizer, chunks_number = 1, progessbar = FALSE) 
+#         tokenizer = word_tokenizer, n_chunks = 1, progessbar = FALSE) 
 # }, review_chunks, review_ids)
 
 # Now all below function calls will benefit from multicore machines

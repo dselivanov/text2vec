@@ -2,7 +2,7 @@
 # data("movie_review")
 #
 # it <- itoken(movie_review[['review']], preprocess_function = tolower,
-#              tokenizer = word_tokenizer, chunks_number = 10, progessbar = F)
+#              tokenizer = word_tokenizer, n_chunks = 10, progessbar = F)
 # # using unigrams here
 # t1 <- Sys.time()
 # vocab <- vocabulary(src = it, ngram = c(1L, 1L))
@@ -12,7 +12,7 @@
 #                                  doc_proportion_max = 0.5, doc_proportion_min = 0.001)
 #
 # it <- itoken(movie_review[['review']], preprocess_function = tolower,
-#              tokenizer = word_tokenizer, chunks_number = 10, progessbar = F)
+#              tokenizer = word_tokenizer, n_chunks = 10, progessbar = F)
 #
 # corpus <- create_vocab_corpus(it, vocabulary = pruned_vocab, grow_dtm = T,
 #                               skip_grams_window = 5,

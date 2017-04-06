@@ -33,4 +33,3 @@ This function filters the input vocabulary and throws out very
 \seealso{
 \link{vocabulary}
 }
-

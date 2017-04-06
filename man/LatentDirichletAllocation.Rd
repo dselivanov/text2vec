@@ -2,8 +2,8 @@
 % Please edit documentation in R/model_LDA.R
 \docType{data}
 \name{LatentDirichletAllocation}
-\alias{LDA}
 \alias{LatentDirichletAllocation}
+\alias{LDA}
 \title{Creates Latent Dirichlet Allocation model.}
 \format{\code{\link{R6Class}} object.}
 \usage{
@@ -34,6 +34,7 @@ Creates Latent Dirichlet Allocation model.
 \item{\code{components}}{word counts for each topic-word entry. Available after model fitting with
 \code{model$fit()} or \code{model$fit_transform()} methods.}
 }}
+
 \section{Usage}{
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
@@ -92,6 +93,7 @@ lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
     all iterations, or (b) \code{score_previous_check / score_current < 1 + convergence_tol}}}
 }
 }
+
 \examples{
 library(text2vec)
 data("movie_review")
@@ -107,4 +109,3 @@ doc_topic_distr = lda_model$fit_transform(dtm, n_iter = 20)
 # lda_model$plot()
 }
 \keyword{datasets}
-

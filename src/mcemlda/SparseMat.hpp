@@ -29,6 +29,10 @@ public:
 	// Sizes
 	ssize_t nrow() const { return static_cast<ssize_t>(csr_index_.size())-1; }
 	ssize_t ncol() const { return static_cast<ssize_t>(csc_index_.size())-1; }
+  // desired dimensions - in case empty last columns or rows it will
+  // be different from corpus.nrow(), corpus.ncol()
+  ssize_t n_col_expected, n_row_expected;
+
 	size_t nnz() const { return val_.size(); }
 
 	// Const reference
@@ -93,7 +97,12 @@ public:
 
 	// Based on csr_index_ and csr_col_index_
 	// Update csc_index_ and csc_row_index_
-	void build_CSC_from_CSR() {
+	void build_CSC_from_CSR(int n_row, int n_col) {
+	  // desired dimensions - in case empty last columns or rows it will
+	  // be different from corpus.nrow(), corpus.ncol()
+	  this->n_col_expected = n_col;
+	  this->n_row_expected = n_row;
+
 		// Go through csr_col_index twice.
 		// See http://crd-legacy.lbl.gov/~yunhe/cs267/final/source/utils/convert/matrix_io.c
 		csc_index_.clear();

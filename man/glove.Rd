@@ -61,4 +61,3 @@ x_max; else (x/x_max)^alpha}}
 \bold{DEPRECIATED}.This function trains a GloVe word-embeddings model via fully
   asynchronous and parallel AdaGrad.
 }
-

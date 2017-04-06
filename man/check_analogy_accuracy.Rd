@@ -25,4 +25,3 @@ This function checks how well the GloVe word embeddings do on
 \seealso{
 \link{prepare_analogy_questions}, \link{glove}
 }
-

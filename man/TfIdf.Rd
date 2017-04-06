@@ -21,6 +21,7 @@ Term Frequency Inverse Document Frequency
 \describe{
 \item{\code{verbose}}{\code{logical = TRUE} whether to display training inforamtion}
 }}
+
 \section{Usage}{
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
@@ -57,6 +58,7 @@ tfidf$transform(x)
  replace the term frequency with \code{1 + log(TF)}}
 }
 }
+
 \examples{
 data("movie_review")
 N = 100
@@ -69,4 +71,3 @@ dtm_2 = model_tfidf$fit_transform(dtm)
 identical(dtm_1, dtm_2)
 }
 \keyword{datasets}
-

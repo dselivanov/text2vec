@@ -22,4 +22,3 @@ implements method \code{$transform(x, ...)}}
 \description{
 Transforms Matrix-like object using \code{model}
 }
-

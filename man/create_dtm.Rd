@@ -3,8 +3,8 @@
 \name{create_dtm}
 \alias{create_dtm}
 \alias{create_dtm.itoken}
-\alias{create_dtm.itoken_parallel}
 \alias{create_dtm.list}
+\alias{create_dtm.itoken_parallel}
 \title{Document-term matrix construction}
 \usage{
 create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix"), ...)
@@ -16,7 +16,7 @@ create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix"), ...)
   verbose = FALSE, ...)
 
 \method{create_dtm}{itoken_parallel}(it, vectorizer, type = c("dgCMatrix",
-  "dgTMatrix"), verbose = FALSE, ...)
+  "dgTMatrix"), distributed = FALSE, ...)
 }
 \arguments{
 \item{it}{\link{itoken} iterator or \code{list} of \code{itoken} iterators.}
@@ -28,8 +28,6 @@ create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix"), ...)
 
 \item{...}{arguments to the \link{foreach} function which is used to iterate
 over \code{it}.}
-
-\item{verbose}{\code{logical} print status messages}
 }
 \value{
 A document-term matrix
@@ -75,4 +73,3 @@ dtm = create_dtm(jobs, vectorizer, type = 'dgTMatrix')
 \seealso{
 \link{itoken} \link{vectorizers}
 }
-

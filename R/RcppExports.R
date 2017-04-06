@@ -121,8 +121,16 @@ warplda_set_topic_word_count <- function(ptr, topic_word_count) {
     invisible(.Call('text2vec_warplda_set_topic_word_count', PACKAGE = 'text2vec', ptr, topic_word_count))
 }
 
-run_one_iter <- function(ptr, update_topics = TRUE, calc_ll = TRUE) {
-    .Call('text2vec_run_one_iter', PACKAGE = 'text2vec', ptr, update_topics, calc_ll)
+run_one_iter_doc <- function(ptr, update_topics = TRUE) {
+    invisible(.Call('text2vec_run_one_iter_doc', PACKAGE = 'text2vec', ptr, update_topics))
+}
+
+run_one_iter_word <- function(ptr, update_topics = TRUE) {
+    invisible(.Call('text2vec_run_one_iter_word', PACKAGE = 'text2vec', ptr, update_topics))
+}
+
+warplda_pseudo_loglikelihood <- function(ptr) {
+    .Call('text2vec_warplda_pseudo_loglikelihood', PACKAGE = 'text2vec', ptr)
 }
 
 warplda_get_doc_topic_count <- function(ptr) {
@@ -133,19 +141,19 @@ warplda_get_topic_word_count <- function(ptr) {
     .Call('text2vec_warplda_get_topic_word_count', PACKAGE = 'text2vec', ptr)
 }
 
-warplda_get_c_all_local <- function(ptr) {
-    .Call('text2vec_warplda_get_c_all_local', PACKAGE = 'text2vec', ptr)
+warplda_get_local_diff <- function(ptr) {
+    .Call('text2vec_warplda_get_local_diff', PACKAGE = 'text2vec', ptr)
 }
 
-warplda_get_c_all <- function(ptr) {
-    .Call('text2vec_warplda_get_c_all', PACKAGE = 'text2vec', ptr)
+warplda_get_c_global <- function(ptr) {
+    .Call('text2vec_warplda_get_c_global', PACKAGE = 'text2vec', ptr)
 }
 
-warplda_set_c_all <- function(ptr, c_all) {
-    invisible(.Call('text2vec_warplda_set_c_all', PACKAGE = 'text2vec', ptr, c_all))
+warplda_set_c_global <- function(ptr, c_all) {
+    invisible(.Call('text2vec_warplda_set_c_global', PACKAGE = 'text2vec', ptr, c_all))
 }
 
-warplda_reset_c_all_local <- function(ptr) {
-    invisible(.Call('text2vec_warplda_reset_c_all_local', PACKAGE = 'text2vec', ptr))
+warplda_reset_local_diff <- function(ptr) {
+    invisible(.Call('text2vec_warplda_reset_local_diff', PACKAGE = 'text2vec', ptr))
 }
 

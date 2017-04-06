@@ -29,4 +29,3 @@ This function creates an inverse-document-frequency (IDF)
 \seealso{
 \link{get_tf}, \link{create_dtm}
 }
-

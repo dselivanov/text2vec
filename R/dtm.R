@@ -136,29 +136,71 @@ create_dtm.list = function(it, vectorizer,
 #------------------------------------------------------------------------------
 
 #' @rdname create_dtm
-#' @param verbose \code{logical} print status messages
 #' @export
 create_dtm.itoken_parallel = function(it, vectorizer,
                            type = c("dgCMatrix", "dgTMatrix"),
-                           verbose = FALSE,
+                           distributed = FALSE,
                            ...) {
-  check_itoken = sapply(it, inherits, 'itoken', USE.NAMES = FALSE)
-  stopifnot(all( check_itoken ))
-  type = match.arg(type)
-  combine_fun = function(...) {
-    if (verbose)
-      print(paste(Sys.time(), "got results from workers, call combine ..."))
-    rbind_dgTMatrix(...)
+  # check_itoken = sapply(it, inherits, 'itoken', USE.NAMES = FALSE)
+  # stopifnot(all( check_itoken ))
+
+  if(distributed) {
+    if(foreach::getDoParName() == "doParallelMC")
+      stop("Please register cluster explicitly. At the moment didtributed mode can be used only with 'snow' clusters.")
   }
 
-  res = foreach(batch = it, .combine = combine_fun,
-                .multicombine = TRUE,
-                # user already made split for jobs
-                # preschedule = FALSE is much more memory efficient
-                .options.multicore = list(preschedule = FALSE),
-                ...) %dopar%
-                {
-                  create_dtm(batch, vectorizer, "dgTMatrix")
-                }
-  as(res, type)
+  type = match.arg(type)
+  combine_fun = function(...) {
+    if(distributed) {
+      list(...)
+    }
+    else {
+      rbind_dgTMatrix(...)
+    }
+  }
+
+  res =
+    foreach(batch = it,
+            .combine = combine_fun,
+            .multicombine = TRUE,
+            # user already made split for jobs
+            # preschedule = FALSE is much more memory efficient
+            .options.multicore = list(preschedule = FALSE),
+            ...) %dopar% {
+              dtm_local = create_dtm(batch, vectorizer, "dgTMatrix")
+              if(distributed) {
+                text2vec_distributed_environment <<- new.env(parent = emptyenv())
+                key = uuid::UUIDgenerate()
+                text2vec_distributed_environment[[key]] = as(dtm_local, type)
+                reference = list(key = key, env = "text2vec_distributed_environment")
+              } else {
+                dtm_local
+              }
+            }
+  if(distributed) {
+    setattr(res, "class", "RowDistributedMatrix")
+    setattr(res, "subclass", type)
+  }
+  else
+    as(res, type)
+}
+
+#' @export
+collect = function(x, ...) {
+  UseMethod("collect")
+}
+
+#' @export
+collect.RowDistributedMatrix = function(x, ...) {
+  combine_fun = function(...) {
+    subclass = attributes(x)[["subclass"]]
+    switch (subclass,
+            dgTMatrix = rbind_dgTMatrix(...),
+            dgCMatrix = rbind(...),
+            stop(sprintf("don't know how to collect '%s'", subclass))
+    )
+  }
+  foreach(x_remote = x, .combine = combine_fun, .multicombine = TRUE) %dopar% {
+    get(x_remote$env)[[x_remote$key]]
+  }
 }

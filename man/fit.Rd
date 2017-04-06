@@ -30,4 +30,3 @@ for corresponding models.}
 \description{
 Generic function to fit models - inherited from \code{estimator}
 }
-
