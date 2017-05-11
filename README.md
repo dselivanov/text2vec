@@ -39,7 +39,7 @@ The core functionality at the moment includes
   - Euclidean
 
 # Performance
-![htop](docs/images/htop.png)
+![htop](https://raw.githubusercontent.com/dselivanov/text2vec/master/docs/images/htop.png)
 *Author of the package is a little bit obsessed about efficiency.*
 
 This package is efficient because it is carefully written in C++, which also means that text2vec is memory friendly. Some parts (such as GloVe) are fully parallelized using the excellent [RcppParallel](http://rcppcore.github.io/RcppParallel/) package. This means that the word embeddings are computed in parallel on OS X, Linux, Windows, and even Solaris (x86) without any additional tuning or tricks.

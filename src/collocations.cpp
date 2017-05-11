@@ -1,4 +1,5 @@
 #include <Rcpp.h>
+#include <unordered_set>
 using namespace Rcpp;
 
 // [[Rcpp::export]]

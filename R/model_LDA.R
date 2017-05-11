@@ -369,6 +369,7 @@ LatentDirichletAllocation = R6::R6Class(
 #' @export
 LDA = LatentDirichletAllocation
 
+#' @rdname LatentDirichletAllocation
 #' @export
 LatentDirichletAllocationDistributed = R6::R6Class(
   classname = c("WarpLDA", "LDA"),

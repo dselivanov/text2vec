@@ -26,7 +26,8 @@ Imports:
     data.table(>= 1.9.6),
     magrittr (>= 1.5),
     irlba (>= 2.1.2),
-    R6 (>= 2.1.2)
+    R6 (>= 2.1.2), 
+    uuid
 LinkingTo: Rcpp,
     RcppParallel,
     digest,

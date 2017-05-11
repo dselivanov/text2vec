@@ -38,7 +38,7 @@ NULL
 #' @importFrom magrittr %>%
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' @importFrom methods as
-#' @useDynLib text2vec
+#' @useDynLib "text2vec", .registration=TRUE
 NULL
 
 #' @export
@@ -46,7 +46,7 @@ magrittr::`%>%`
 
 if (getRversion() >= "2.15.1") {
   trick_pass_r_cmd_check =
-    c(".", "doc_counts", "it", "pair", "terms", "terms_counts", "tokens", "val", "batch")
+    c(".", "doc_counts", "it", "pair", "terms", "terms_counts", "tokens", "val", "batch", "x_remote")
   utils::globalVariables(trick_pass_r_cmd_check)
 }
 

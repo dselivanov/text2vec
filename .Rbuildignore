@@ -3,7 +3,6 @@
 ^\.Rproj\.user$
 ^cran-comments\.md$
 R/drafts/*
-src/drafts/*
-vignettes/drafts/*
-docs/*
-inst/*
+^src/drafts/*
+^vignettes/drafts/*
+^docs/*

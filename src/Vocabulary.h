@@ -15,8 +15,6 @@
 // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "text2vec.h"
-#include <sparsepp.h>
-
 using namespace Rcpp;
 using namespace std;
 using spp::sparse_hash_map;

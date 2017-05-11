@@ -110,15 +110,13 @@ create_dtm.itoken = function(it, vectorizer,
 #' @export
 create_dtm.list = function(it, vectorizer,
                        type = c("dgCMatrix", "dgTMatrix"),
-                       verbose = FALSE,
                        ...) {
   .Deprecated("create_dtm.itoken_parallel()")
   check_itoken = sapply(it, inherits, 'itoken', USE.NAMES = FALSE)
   stopifnot(all( check_itoken ))
   type = match.arg(type)
   combine_fun = function(...) {
-    if (verbose)
-      print(paste(Sys.time(), "got results from workers, call combine ..."))
+    # message(paste(Sys.time(), "got results from workers, call combine ..."))
     rbind_dgTMatrix(...)
   }
 
@@ -136,6 +134,8 @@ create_dtm.list = function(it, vectorizer,
 #------------------------------------------------------------------------------
 
 #' @rdname create_dtm
+#' @param distributed whether to keep matrix row-distributed.
+#' Row-distributed matrices can be used in distributed LDA.
 #' @export
 create_dtm.itoken_parallel = function(it, vectorizer,
                            type = c("dgCMatrix", "dgTMatrix"),
@@ -186,11 +186,17 @@ create_dtm.itoken_parallel = function(it, vectorizer,
 }
 
 #' @export
+#' @name collect
+#' @title Collects distributed data structure to master process
+#' @description Collects distributed data structure to master process
+#' @param x pointer to distributed data structure (only row-distributed matrices at the moment)
+#' @param ... other options (not used at the moment)
 collect = function(x, ...) {
   UseMethod("collect")
 }
 
 #' @export
+#' @rdname collect
 collect.RowDistributedMatrix = function(x, ...) {
   combine_fun = function(...) {
     subclass = attributes(x)[["subclass"]]

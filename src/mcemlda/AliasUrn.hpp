@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <stdexcept>
 #include "include/qrand.hpp"
 
 using std::vector;

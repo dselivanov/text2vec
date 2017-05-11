@@ -48,7 +48,7 @@ const std::string currentDateTime() {
 void generate_ngrams(CharacterVector terms_raw,
                                const uint32_t ngram_min,
                                const uint32_t ngram_max,
-                               RCPP_UNORDERED_SET<string> &stopwords,
+                               unordered_set<string> &stopwords,
                                // pass buffer by reference to avoid memory allocation
                                // on each iteration
                                vector<string> &terms_filtered_buffer,

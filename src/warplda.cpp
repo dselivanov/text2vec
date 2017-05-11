@@ -76,13 +76,13 @@ public:
     double *X = XX.begin();
 
     // append csr
-    for(int r = 0; r < nr; r++) {
+    for(auto r = 0; r < nr; r++) {
       size_t p1 = P[r];
       size_t p2 = P[r + 1];
-      for(int j = p1; j < p2; j++) {
-        unsigned idx = J[j];
-        unsigned cnt = X[j];
-        for(int k = 0; k < cnt; k++)
+      for(auto j = p1; j < p2; j++) {
+        int idx = J[j];
+        int cnt = X[j];
+        for(auto k = 0; k < cnt; k++)
           corpus.append(r, idx, 0, 0);
       }
     }
@@ -99,8 +99,8 @@ public:
   IntegerMatrix get_topic_word_count() {
     // size(C_word)  =  n_words * n_topics
     // we need n_topics * n_words
-    int n_words = C_word.nrow();
-    int n_topics = C_word.ncol();
+    size_t n_words = C_word.nrow();
+    size_t n_topics = C_word.ncol();
     IntegerMatrix topic_word_count(n_topics, n_words);
 
     for(word_index_t w = 0; w < n_words; w++)
@@ -131,12 +131,12 @@ public:
   }
 
   void set_c_global(const IntegerVector &r_c_all) {
-    for(int i = 0; i < r_c_all.size(); i++)
+    for(auto i = 0; i < r_c_all.size(); i++)
       C_all[i] = r_c_all[i];
   }
 
   void reset_local_diff() {
-    for(int i = 0; i < C_local_diff.size(); i++)
+    for(auto i = 0; i < C_local_diff.size(); i++)
       C_local_diff[i] = 0;
   }
 };

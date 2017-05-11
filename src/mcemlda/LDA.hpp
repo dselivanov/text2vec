@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <string>
 #include <assert.h>
+#include <math.h>
 
 using std::vector;
 

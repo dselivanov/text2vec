@@ -58,7 +58,7 @@ protected:
 
   // uint32_t window_size;
   // stopwords
-  RCPP_UNORDERED_SET<string> stopwords;
+  unordered_set<string> stopwords;
   // documents
   SparseTripletMatrix<int> dtm;
   std::vector<int> word_count;

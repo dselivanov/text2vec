@@ -21,7 +21,9 @@
 #include <vector>
 #include <functional>
 #include <unordered_map>
+#include <unordered_set>
 #include <RcppParallel.h>
+#include <sparsepp.h>
 
 using namespace std;
 using namespace Rcpp;
@@ -43,7 +45,7 @@ void fill_vec_val(vector<float>  &vec, float val);
 void generate_ngrams(CharacterVector terms_raw,
                      const uint32_t ngram_min,
                      const uint32_t ngram_max,
-                     RCPP_UNORDERED_SET<string> &stopwords,
+                     unordered_set<string> &stopwords,
                      // pass buffer by reference to avoid memory allocation
                      // on each iteration
                      vector<string> &terms_filtered_buffer,

@@ -20,7 +20,7 @@ using namespace std;
 // [[Rcpp::export]]
 NumericVector colMins(const NumericMatrix x) {
   NumericVector res(x.ncol());
-  for(uint32_t i = 0; i < x.ncol(); i++) {
+  for(int i = 0; i < x.ncol(); i++) {
     res[i] = Rcpp::min(x(_, i));
   }
   return res;
@@ -28,7 +28,7 @@ NumericVector colMins(const NumericMatrix x) {
 // [[Rcpp::export]]
 NumericVector colMaxs(const NumericMatrix x) {
   NumericVector res(x.ncol());
-  for(uint32_t i = 0; i < x.ncol(); i++) {
+  for(int i = 0; i < x.ncol(); i++) {
     res[i] = Rcpp::max(x(_, i));
   }
   return res;
@@ -36,7 +36,7 @@ NumericVector colMaxs(const NumericMatrix x) {
 // [[Rcpp::export]]
 NumericVector rowMins(const NumericMatrix x) {
   NumericVector res(x.nrow());
-  for(uint32_t i = 0; i < x.nrow(); i++) {
+  for(int i = 0; i < x.nrow(); i++) {
     res[i] = Rcpp::min(x(i, _));
   }
   return res;
@@ -44,7 +44,7 @@ NumericVector rowMins(const NumericMatrix x) {
 // [[Rcpp::export]]
 NumericVector rowMaxs(const NumericMatrix x) {
   NumericVector res(x.nrow());
-  for(uint32_t i = 0; i < x.nrow(); i++) {
+  for(int i = 0; i < x.nrow(); i++) {
     res[i] = Rcpp::max(x(i, _));
   }
   return res;
@@ -57,11 +57,11 @@ NumericMatrix euclidean_dist(const NumericMatrix x, const NumericMatrix y) {
   NumericMatrix res(x.ncol(), y.ncol());
   double tmp = 0.0;
   double diff;
-  uint32_t inner_dim = x.nrow();
-  for(uint32_t i = 0; i < x.ncol(); i++) {
-    for(uint32_t j = 0; j < y.ncol(); j++) {
+  int inner_dim = x.nrow();
+  for(int i = 0; i < x.ncol(); i++) {
+    for(int j = 0; j < y.ncol(); j++) {
       tmp = 0.0;
-      for(uint32_t k = 0; k < inner_dim; k++) {
+      for(int k = 0; k < inner_dim; k++) {
         diff = x(k, i) - y(k, j);
         tmp += diff * diff;
       }
