@@ -1,5 +1,7 @@
 # text2vec 0.5.0
 
+1. 2017-05-17
+    * **API breaking change** - vocabulary format change - now plain `data.frame` with attributes which describe stopwords, ngram, number of docs, etc.
 1. 2017-03-25
     * No more rely on RcppModules
     * **API breaking change** - removed `lda_c` from formats in DTM construction

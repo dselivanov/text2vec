@@ -28,20 +28,19 @@
 #'  such that ngram_min <= n <= ngram_max will be used.
 #'@param stopwords \code{character} vector of stopwords to filter out
 #'@param sep_ngram \code{character} a character string to concatenate words in ngrams
-#'@return \code{text2vec_vocabulary} object, which is actually a \code{list}
-#'  with following fields:
-#'
-#'  1. \code{vocab}: a \code{data.frame} which contains columns \itemize{
+#'@return \code{text2vec_vocabulary} object, which is actually a \code{data.frame}
+#'  with following columns:
 #'  \item{\code{terms}       }{ \code{character} vector of unique terms}
 #'  \item{\code{terms_counts} }{ \code{integer} vector of term counts across all
 #'  documents} \item{\code{doc_counts}  }{ \code{integer} vector of document
 #'  counts that contain corresponding term} }
-#'
-#'  2. \code{ngram}: \code{integer} vector, the lower and upper boundary of the
+#' Also it contains metainformation in attributes:
+#'  \code{ngram}: \code{integer} vector, the lower and upper boundary of the
 #'  range of n-gram-values.
-#'
-#'  3. \code{document_count}: \code{integer} number of documents vocabulary was
+#'  \code{document_count}: \code{integer} number of documents vocabulary was
 #'  built.
+#'  \code{stopwords}: \code{character} vector of stopwords
+#'  \code{sep_ngram}: \code{character} separator for ngrams
 #'
 #' @examples
 #' data("movie_review")
@@ -75,21 +74,16 @@ create_vocabulary.character = function(it, ngram = c('ngram_min' = 1L, 'ngram_ma
   ngram_max = as.integer( ngram[[2]] )
   vocab_length = length(it)
 
-  res = list(
-    # keep structure similar to `create_vocabulary.itoken` object. not used at the moment,
-    # but we should keep same structure (keep in mind prune_vocabulary)
-    vocab = data.table('terms' = setdiff(it, stopwords),
-                       'terms_counts' = rep(NA_integer_, vocab_length),
-                       'doc_counts' = rep(NA_integer_, vocab_length)
-                       ),
-    ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
-    document_count = NA_integer_,
-    stopwords = stopwords,
-    sep_ngram = sep_ngram
-  )
+  res = data.frame('terms' = setdiff(it, stopwords),
+                   'terms_counts' = rep(NA_integer_, vocab_length),
+                   'doc_counts' = rep(NA_integer_, vocab_length))
+  res = res[order(res$terms_counts), ]
 
-  class(res) = c('text2vec_vocabulary')
-  # res$vocab$ngram_n = detect_ngrams(res)
+  setattr(res, "ngram", c('ngram_min' = ngram_min, 'ngram_max' = ngram_max))
+  setattr(res, "document_count", NA_integer_)
+  setattr(res, "stopwords", stopwords)
+  setattr(res, "sep_ngram", sep_ngram)
+  setattr(res, "class", c("text2vec_vocabulary", class(res)))
   res
 }
 
@@ -114,21 +108,16 @@ create_vocabulary.itoken = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' 
     # vocab_module$insert_document_batch(tokens$tokens)
   }
   # vocab = setDT(vocab_module$get_vocab_statistics())
-  vocab = setDT(cpp_get_vocab_statistics(vocab_ptr))
 
-  res = list(
-    vocab = vocab,
-    ngram = c('ngram_min' = ngram_min, 'ngram_max' = ngram_max),
-    # document_count = vocab_module$get_document_count(),
-    document_count = cpp_get_document_count(vocab_ptr),
-    stopwords = stopwords,
-    sep_ngram = sep_ngram
-  )
-  if (nrow(res$vocab) == 0)
-    warning("vocabulary has no elements. Empty iterator?", immediate. = T)
+  res = cpp_get_vocab_statistics(vocab_ptr)
+  res = res[order(res$terms_counts), ]
 
-  class(res) = c('text2vec_vocabulary')
-  # res$vocab$ngram_n = detect_ngrams(res)
+  setattr(res, "ngram", c('ngram_min' = ngram_min, 'ngram_max' = ngram_max))
+  setattr(res, "document_count", cpp_get_document_count(vocab_ptr))
+  setattr(res, "stopwords", stopwords)
+  setattr(res, "sep_ngram", sep_ngram)
+  setattr(res, "class", c("text2vec_vocabulary", class(res)))
+  if (nrow(res) == 0) warning("vocabulary has no elements. Empty iterator?", immediate. = TRUE)
   res
 }
 
@@ -139,7 +128,7 @@ create_vocabulary.itoken = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' 
 #'   statistics from list of itoken iterators. If parallel backend is
 #'   registered, it will build vocabulary in parallel using \link{foreach}.
 #' @export
-create_vocabulary.list = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary.list = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
                             stopwords = character(0), sep_ngram = "_", ...) {
   .Deprecated("create_vocabulary.itoken_parallel()")
   stopifnot( all( vapply(X = it, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
@@ -152,9 +141,8 @@ create_vocabulary.list = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 
           {
             create_vocabulary(it, ngram, stopwords)
           }
-  res[['stopwords']] = stopwords
-  res[['sep_ngram']] = sep_ngram
-  # res$vocab$ngram_n = detect_ngrams(res)
+  setattr(res, "stopwords", stopwords)
+  setattr(res, "sep_ngram", sep_ngram)
   res
 }
 #------------------------------------------------------------------------------
@@ -176,37 +164,35 @@ create_vocabulary.itoken_parallel = function(it, ngram = c('ngram_min' = 1L, 'ng
             {
               create_vocabulary(it, ngram, stopwords)
             }
-  res[['stopwords']] = stopwords
-  res[['sep_ngram']] = sep_ngram
-  # res$vocab$ngram_n = detect_ngrams(res)
+  setattr(res, "stopwords", stopwords)
+  setattr(res, "sep_ngram", sep_ngram)
   res
 }
 
 combine_vocabulary = function(...) {
-  vocab_list = list(...)
-  ngram = vocab_list[[1]][['ngram']]
+  vocab_list = list(...) %>% lapply(setDT)
+  ngram = attr(vocab_list[[1]], "ngram", exact = TRUE)
   # extract vocabulary stats data.frame and rbind them
-  combined_vocab = vocab_list %>%
-    lapply(function(x) x$vocab[, .(terms_counts, doc_counts, terms)]) %>%
+  res = vocab_list %>%
+    lapply(function(x) x[, .(terms_counts, doc_counts, terms)]) %>%
     rbindlist
 
   # reduce by terms
-  combined_vocab = combined_vocab[, .('terms_counts' = sum(terms_counts),
-                                       'doc_counts' = sum(doc_counts)),
+  res = res[, .("terms_counts" = sum(terms_counts),
+                                       "doc_counts" = sum(doc_counts)),
                                    by = terms]
-  setcolorder(combined_vocab, c('terms', 'terms_counts', 'doc_counts'))
+  setcolorder(res, c("terms", "terms_counts", "doc_counts"))
 
-  combined_document_count = sum(vapply(vocab_list, function(x) x[['document_count']], FUN.VALUE = NA_integer_))
+  combined_document_count = 0
+  for(v in vocab_list)
+    combined_document_count = combined_document_count + attr(v, "document_count", TRUE)
 
-  res = list(
-    vocab = combined_vocab,
-    ngram = ngram,
-    document_count = combined_document_count,
-    # init with empty values
-    stopwords = character(0),
-    sep_ngram = character(0)
-  )
-  class(res) = c('text2vec_vocabulary')
+  setDF(res)
+  setattr(res, "ngram", ngram)
+  setattr(res, "document_count", combined_document_count)
+  setattr(res, "stopwords", character(0))
+  setattr(res, "sep_ngram", character(0))
+  setattr(res, "class", c("text2vec_vocabulary", class(res)))
   res
 }
 
@@ -234,60 +220,56 @@ prune_vocabulary = function(vocabulary,
                   doc_proportion_max = 1.0,
                   max_number_of_terms = Inf) {
 
-  if (!inherits(vocabulary, 'text2vec_vocabulary'))
-    stop('vocabulary should be an object of class text2vec_vocabulary')
+  if (!inherits(vocabulary, "text2vec_vocabulary"))
+    stop("vocabulary should be an object of class text2vec_vocabulary")
 
-  vocab_df = vocabulary$vocab
-  vocab_size = nrow(vocab_df)
+  vocab_size = nrow(vocabulary)
 
-  douments_count = vocabulary[['document_count']]
+  douments_count = attr(vocabulary, "document_count", TRUE)
 
   ind = rep(TRUE, vocab_size)
 
   doc_proportion = NULL
 
   if (term_count_min > 1L)
-    ind = ind & (vocab_df[['terms_counts']] >= term_count_min)
+    ind = ind & (vocabulary[["terms_counts"]] >= term_count_min)
   if (is.finite(term_count_max))
-    ind = ind & (vocab_df[['terms_counts']] <= term_count_max)
+    ind = ind & (vocabulary[["terms_counts"]] <= term_count_max)
 
   if (doc_proportion_min > 0) {
-    doc_proportion = vocab_df[['doc_counts']] / douments_count
+    doc_proportion = vocabulary[["doc_counts"]] / douments_count
     ind = ind & (doc_proportion >= doc_proportion_min)
   }
 
   if (doc_proportion_max < 1.0) {
     # not calculated in prev ster
     if (is.null(doc_proportion))
-      doc_proportion = vocab_df[['doc_counts']] / douments_count
+      doc_proportion = vocabulary[["doc_counts"]] / douments_count
 
     ind = ind & (doc_proportion <= doc_proportion_max)
   }
 
-  pruned_vocabulary = vocab_df[ind, ]
+  res = vocabulary[ind, ]
 
   # restrict to max number if asked
   if (is.finite(max_number_of_terms)) {
-    pruned_vocabulary = pruned_vocabulary[order(pruned_vocabulary$terms_counts, decreasing = T),]
-    max_number_of_terms = min(max_number_of_terms, nrow(pruned_vocabulary))
-    pruned_vocabulary = pruned_vocabulary[1:max_number_of_terms, ]
+    res = res[order(res$terms_counts, decreasing = TRUE),]
+    max_number_of_terms = min(max_number_of_terms, nrow(res))
+    res = res[1:max_number_of_terms, ]
   }
 
-  pruned_vocabulary = list('vocab' = pruned_vocabulary,
-                            'ngram' = vocabulary[['ngram']],
-                            'document_count' = vocabulary[['document_count']],
-                            'stopwords' = vocabulary[['stopwords']],
-                            'sep_ngram' = vocabulary[['sep_ngram']]
-                            )
-
-  class(pruned_vocabulary) = 'text2vec_vocabulary'
-
-  pruned_vocabulary
+  setDF(res)
+  setattr(res, "ngram", attr(vocabulary, "ngram", TRUE))
+  setattr(res, "document_count", attr(vocabulary, "document_count", TRUE))
+  setattr(res, "stopwords", attr(vocabulary, "stopwords", TRUE))
+  setattr(res, "sep_ngram", attr(vocabulary, "sep_ngram", TRUE))
+  # setattr(res, "class", c("text2vec_vocabulary", class(res)))
+  res
 }
 
 detect_ngrams = function(vocab, ...) {
-  stopifnot(class(vocab) == 'text2vec_vocabulary')
-  strsplit(vocab$vocab$terms, vocab$sep_ngram, fixed = T, ...) %>%
+  stopifnot(inherits(vocab, "text2vec_vocabulary"))
+  strsplit(vocab$terms, attr(vocab, "sep_ngram", TRUE), fixed = TRUE, ...) %>%
     vapply(length, 0L)
 }
 
@@ -295,12 +277,12 @@ detect_ngrams = function(vocab, ...) {
 #' @export
 #' @method print text2vec_vocabulary
 print.text2vec_vocabulary = function(x, ...) {
-  m1 = paste("Number of docs:", x$document_count)
-  m2 = paste(length(x$stopwords), "stopwords:", paste(head(x$stopwords), collapse = ', '), '...', collapse = ', ')
-  m3 = paste(names(x$ngram), x$ngram, sep = ' = ', collapse = '; ')
+  m1 = paste("Number of docs:", attr(x, "document_count", TRUE))
+  m2 = paste(length(attr(x, "stopwords", TRUE)), "stopwords:", paste(head(attr(x, "stopwords", TRUE)), collapse = ", "), "...", collapse = ", ")
+  m3 = paste(names(attr(x, "ngram", TRUE)), attr(x, "stopwords", TRUE), sep = ' = ', collapse = '; ')
   cat(m1, "\n")
   cat(m2, "\n")
   cat(m3, "\n")
   cat("Vocabulary:", "\n")
-  print(x$vocab)
+  print(as.data.table(x))
 }

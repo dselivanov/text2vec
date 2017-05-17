@@ -120,12 +120,12 @@ GlobalVectors = R6::R6Class(
                           ) {
       self$verbose = TRUE
       self$shuffle = shuffle
-      private$internal_matrix_format = 'TsparseMatrix'
+      private$internal_matrix_format = "TsparseMatrix"
 
-      stopifnot(class(vocabulary) == 'character' || class(vocabulary) == 'text2vec_vocabulary')
+      stopifnot(inherits(vocabulary, "character") || inherits(vocabulary, "text2vec_vocabulary"))
       private$vocab_terms =
-        if (class(vocabulary) == 'character') vocabulary
-        else vocabulary$vocab$terms
+        if (inherits(vocabulary, "character")) vocabulary
+        else vocabulary$terms
 
       private$word_vectors_size = word_vectors_size
       private$learning_rate = learning_rate

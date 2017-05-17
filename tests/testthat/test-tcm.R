@@ -11,7 +11,9 @@ it = itoken(tokens, progressbar = FALSE, ids = ids)
 test_that("tcm", {
   v = create_vocabulary(it, c(1L, 1L) )
   v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.5)
-  v$vocab = v$vocab[order(-terms)]
+  v = as.data.frame(v)
+  v = v[rev(order(v$terms)), ]
+  # attributes(v) = v_attr
   vectorizer = vocab_vectorizer(v)
   tcm = create_tcm(it, vectorizer, skip_grams_window = 1L,
                    skip_grams_window_context = "symmetric")

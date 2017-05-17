@@ -85,13 +85,13 @@ corpus_insert = function(corpus_ptr, iterator, grow_dtm, skip_grams_window_conte
 vocab_vectorizer = function(vocabulary) {
   force(vocabulary)
   vectorizer = function(iterator, grow_dtm, skip_grams_window_context, window_size, weights) {
-    vocab_corpus_ptr = cpp_vocabulary_corpus_create(vocabulary$vocab$terms,
-                                                    vocabulary$ngram[["ngram_min"]],
-                                                    vocabulary$ngram[["ngram_max"]],
-                                                    vocabulary$stopwords,
-                                                    vocabulary$sep_ngram)
-    attr(vocab_corpus_ptr, "ids") = character(0)
-    class(vocab_corpus_ptr) = "VocabCorpus"
+    vocab_corpus_ptr = cpp_vocabulary_corpus_create(vocabulary$terms,
+                                                    attr(vocabulary, "ngram")[[1]],
+                                                    attr(vocabulary, "ngram")[[2]],
+                                                    attr(vocabulary, "stopwords"),
+                                                    attr(vocabulary, "sep_ngram"))
+    setattr(vocab_corpus_ptr, "ids", character(0))
+    setattr(vocab_corpus_ptr, "class", "VocabCorpus")
     corpus_insert(vocab_corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights)
   }
   vectorizer

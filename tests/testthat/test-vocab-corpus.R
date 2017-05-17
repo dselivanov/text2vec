@@ -14,10 +14,10 @@ it = itoken(tokens, progressbar = F, ids = ids)
 test_that("Vocabulary pruning", {
   vocab = create_vocabulary(it)
   # Vocabulary stats
-  expect_equal(length(vocab$vocab$terms), 18402)
-  expect_equal( vocab$vocab$terms[ which.max(vocab$vocab$doc_counts) ], 'the')
-  expect_equal( max(vocab$vocab$doc_counts), 992)
-  expect_equal( max(vocab$vocab$terms_counts), 13252)
+  expect_equal(length(vocab$terms), 18402)
+  expect_equal( vocab$terms[ which.max(vocab$doc_counts) ], 'the')
+  expect_equal( max(vocab$doc_counts), 992)
+  expect_equal( max(vocab$terms_counts), 13252)
 
   COUNT_MAX = 5000L
   COUNT_MIN = 20L
@@ -36,7 +36,7 @@ test_that("Vocabulary pruning", {
   # same ngrams
   expect_identical(p_vocab$ngram, p_vocab$ngram)
   # number of terms in prunned vocab
-  expect_equal(nrow(p_vocab$vocab), 429L)
+  expect_equal(nrow(p_vocab), 429L)
 
   PROP_MAX = 0.05
   LIMIT = 20L
@@ -44,8 +44,8 @@ test_that("Vocabulary pruning", {
                               doc_proportion_max = PROP_MAX,
                               max_number_of_terms = LIMIT)
 
-  expect_equal( nrow(p_vocab$vocab), LIMIT)
-  expect_true( all(p_vocab$vocab$doc_proportions <= PROP_MAX))
+  expect_equal( nrow(p_vocab), LIMIT)
+  expect_true( all(p_vocab$doc_proportions <= PROP_MAX))
 
   # test for https://github.com/dselivanov/text2vec/issues/46
   vectorizer = vocab_vectorizer(p_vocab)
@@ -62,7 +62,7 @@ test_that("Vocabulary pruning", {
 
 test_that("Vocabulary stopwords", {
   STOP_WORDS = c('is', 'in', 'it')
-  vocab = create_vocabulary(it)
+  vocab = create_vocabulary(it, stopwords = STOP_WORDS)
   # check removed stop words
   expect_false(any(STOP_WORDS %in% vocab$terms))
 })
@@ -75,7 +75,7 @@ test_that("Unigran Vocabulary Corpus construction", {
   # dtm
   m = create_dtm(it, vectorizer)
   expect_equal( dim(m)[[1]], length(train_ind))
-  expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
+  expect_equal( dim(m)[[2]], length(vocab$terms))
   expect_equal( length(m@x), 141876L)
 
   # check classification accuracy
@@ -94,15 +94,15 @@ test_that("bi-gram Vocabulary Corpus construction", {
                       ngram = c('ngram_min' = 2L,
                                 'ngram_max' = 2L))
 
-  expect_equal(sum(grepl("_", vocab$vocab$terms, fixed = T)), 120070L)
-  expect_equal(length(vocab$vocab$terms), 120070L)
+  expect_equal(sum(grepl("_", vocab$terms, fixed = T)), 120070L)
+  expect_equal(length(vocab$terms), 120070L)
 
   vectorizer = vocab_vectorizer(vocab)
 
   # dtm
   m = create_dtm(it, vectorizer)
   expect_equal( dim(m)[[1]], length(train_ind))
-  expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
+  expect_equal( dim(m)[[2]], length(vocab$terms))
   expect_equal( length(m@x), 223579L)
 })
 
@@ -111,13 +111,13 @@ test_that("Unigram + Bigram Vocabulary Corpus construction", {
   vocab = create_vocabulary(it,
                       ngram = c('ngram_min' = 1L,
                                 'ngram_max' = 2L))
-  expect_equal(length(vocab$vocab$terms), 138472L)
+  expect_equal(length(vocab$terms), 138472L)
 
   vectorizer = vocab_vectorizer(vocab)
   # dtm
   m = create_dtm(it, vectorizer)
   expect_equal( dim(m)[[1]], length(train_ind))
-  expect_equal( dim(m)[[2]], length(vocab$vocab$terms))
+  expect_equal( dim(m)[[2]], length(vocab$terms))
   expect_equal( length(m@x), 365455L)
 })
 

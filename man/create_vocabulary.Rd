@@ -44,22 +44,6 @@ such that ngram_min <= n <= ngram_max will be used.}
 
 \item{...}{additional arguments to \link{foreach} function.}
 }
-\value{
-\code{text2vec_vocabulary} object, which is actually a \code{list}
- with following fields:
-
- 1. \code{vocab}: a \code{data.frame} which contains columns \itemize{
- \item{\code{terms}       }{ \code{character} vector of unique terms}
- \item{\code{terms_counts} }{ \code{integer} vector of term counts across all
- documents} \item{\code{doc_counts}  }{ \code{integer} vector of document
- counts that contain corresponding term} }
-
- 2. \code{ngram}: \code{integer} vector, the lower and upper boundary of the
- range of n-gram-values.
-
- 3. \code{document_count}: \code{integer} number of documents vocabulary was
- built.
-}
 \description{
 This function collects unique terms and corresponding statistics.
  See the below for details.
