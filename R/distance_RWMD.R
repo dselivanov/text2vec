@@ -126,15 +126,15 @@ RelaxedWordMoversDistance = R6::R6Class(
         m_j1 = wv_internal[, j1, drop = F]
         x1 = x_csr@x[i1]
 
+        dist_matrix = dist_internal(m_j1, wv_internal, private$method)
         for (i in 2L:(length(y_csr@p))) {
           # document offsets
           i2 = (y_csr@p[[i - 1L]] + 1L):y_csr@p[[i]]
           # word indices
           j2 = y_csr@j[i2] + 1L
-          m_j2 = wv_internal[, j2, drop = F]
           # nbow values
           x2 = y_csr@x[i2]
-          res[j - 1L, i - 1L] = private$rwmd(m_j1, m_j2, x1, x2)
+          res[j - 1L, i - 1L] = private$rwmd_cache(dist_matrix[, j2, drop = FALSE], x1, x2)
         }
       }
       res
@@ -184,6 +184,11 @@ RelaxedWordMoversDistance = R6::R6Class(
       dist_matrix = dist_internal(m_i, m_j, private$method)
       d1 = sum( text2vec:::rowMins(dist_matrix) * weight_i)
       d2 = sum( text2vec:::colMins(dist_matrix) * weight_j)
+      max(d1, d2)
+    },
+    rwmd_cache = function(dist_matrix, weight_i, weight_j) {
+      d1 = sum( rowMins(dist_matrix) * weight_i)
+      d2 = sum( colMins(dist_matrix) * weight_j)
       max(d1, d2)
     }
   )
