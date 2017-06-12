@@ -16,22 +16,10 @@ test_that("LSA", {
 
   model = LatentSemanticAnalysis$new(n_topics)
   set.seed(1L)
-  model$fit(dtm)
-  documents = model$transform(dtm)
-  expect_equal(rownames(documents), ids)
-  expect_equal(dim(model$components), c(ncol(dtm), n_topics))
-
-  # check cosine angle between original vectors and vectors is latent factor space
-  # i1 = 1; i2 = 2;
-  #
-  # cos_lsa = sum(documents[i1, ] * documents[i2, ]) /
-  #   sqrt(sum(documents[i1, ] ^ 2)) /
-  #   sqrt(sum(documents[i2, ] ^ 2))
-  #
-  # cos_orig = sum(dtm[i1, ] * dtm[i2, ]) /
-  #   sqrt(sum(dtm[i1, ] ^ 2)) /
-  #   sqrt(sum(dtm[i2, ] ^ 2))
-  #
-  # expect_equal(cos_lsa,  cos_orig)
+  m1 = model$fit_transform(dtm)
+  m2 = model$transform(dtm)
+  expect_equal(m1, m2, tolerance = 1e-8)
+  expect_equal(rownames(m2), ids)
+  expect_equal(dim(model$components), c(n_topics, ncol(dtm)))
 })
 

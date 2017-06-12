@@ -25,13 +25,13 @@ Imports:
     foreach(>= 1.4.3),
     data.table(>= 1.9.6),
     magrittr (>= 1.5),
-    irlba (>= 2.1.2),
+    irlba (>= 2.2.1),
     R6 (>= 2.1.2), 
-    uuid
+    uuid (>= 0.1-2)
 LinkingTo: Rcpp,
     RcppParallel,
     digest,
-    sparsepp
+    sparsepp (>= 0.1.1)
 Suggests:
     stringr (>= 1.1.0),
     doParallel,

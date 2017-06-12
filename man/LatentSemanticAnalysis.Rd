@@ -15,19 +15,14 @@ LSA
 Creates LSA(Latent semantic analysis) model.
 See \url{https://en.wikipedia.org/wiki/Latent_semantic_analysis} for details.
 }
-\section{Fields}{
-
-\describe{
-\item{\code{verbose}}{\code{logical = TRUE} whether to display training inforamtion}
-}}
-
 \section{Usage}{
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
 \preformatted{
-lsa = LatentSemanticAnalysis$new(n_topics)
-lsa$fit_transform(x)
-lsa$get_word_vectors()
+lsa = LatentSemanticAnalysis$new(n_topics, method = c("randomized", "irlba"))
+lsa$fit_transform(x, ...)
+lsa$transform(x, ...)
+lsa$components
 }
 }
 
@@ -35,9 +30,9 @@ lsa$get_word_vectors()
 
 \describe{
   \item{\code{$new(n_topics)}}{create LSA model with \code{n_topics} latent topics}
-  \item{\code{$fit(x, ...)}}{fit model to an input DTM (preferably in "dgCMatrix" format)}
-  \item{\code{$fit_transform(x, ...)}}{fit model to an input sparse matrix (preferably in "dgCMatrix"
+  \item{\code{$fit_transform(x, ...)}}{fit model to an input sparse matrix (preferably in \code{dgCMatrix}
    format) and then transform \code{x} to latent space}
+  \item{\code{$fit(x, ...)}}{Provided for consistency, same as \code{$fit_transform(x, ...)}. }
   \item{\code{$transform(x, ...)}}{transform new data \code{x} to latent space}
 }
 }
@@ -46,10 +41,12 @@ lsa$get_word_vectors()
 
 \describe{
  \item{lsa}{A \code{LSA} object.}
- \item{x}{An input document-term matrix.}
+ \item{x}{An input document-term matrix. Preferably in \code{dgCMatrix} format}
  \item{n_topics}{\code{integer} desired number of latent topics.}
+ \item{method}{\code{character}, one of \code{c("randomized", "irlba")}. Defines underlying SVD algorithm.
+ For very large data "randomized" usually works faster and more accurate. }
  \item{...}{Arguments to internal functions. Notably useful for \code{fit(), fit_transform()} -
- these arguments will be passed to \link{irlba} function which is used as backend for SVD.}
+ these arguments will be passed to \link{irlba} or \link{svdr} functions which are used as backend for SVD.}
 }
 }
 
