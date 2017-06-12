@@ -44,6 +44,21 @@ such that ngram_min <= n <= ngram_max will be used.}
 
 \item{...}{additional arguments to \link{foreach} function.}
 }
+\value{
+\code{text2vec_vocabulary} object, which is actually a \code{data.frame}
+ with following columns:
+ \item{\code{terms}       }{ \code{character} vector of unique terms}
+ \item{\code{terms_counts} }{ \code{integer} vector of term counts across all
+ documents} \item{\code{doc_counts}  }{ \code{integer} vector of document
+ counts that contain corresponding term}
+Also it contains metainformation in attributes:
+ \code{ngram}: \code{integer} vector, the lower and upper boundary of the
+ range of n-gram-values.
+ \code{document_count}: \code{integer} number of documents vocabulary was
+ built.
+ \code{stopwords}: \code{character} vector of stopwords
+ \code{sep_ngram}: \code{character} separator for ngrams
+}
 \description{
 This function collects unique terms and corresponding statistics.
  See the below for details.
@@ -70,6 +85,6 @@ data("movie_review")
 txt = movie_review[['review']][1:100]
 it = itoken(txt, tolower, word_tokenizer, n_chunks = 10)
 vocab = create_vocabulary(it)
-pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
- doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
+pruned_vocab = prune_vocabulary(vocab, term_count_min = 10, doc_proportion_max = 0.8,
+doc_proportion_min = 0.001, max_number_of_terms = 20000)
 }

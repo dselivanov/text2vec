@@ -33,7 +33,7 @@
 #'  \item{\code{terms}       }{ \code{character} vector of unique terms}
 #'  \item{\code{terms_counts} }{ \code{integer} vector of term counts across all
 #'  documents} \item{\code{doc_counts}  }{ \code{integer} vector of document
-#'  counts that contain corresponding term} }
+#'  counts that contain corresponding term}
 #' Also it contains metainformation in attributes:
 #'  \code{ngram}: \code{integer} vector, the lower and upper boundary of the
 #'  range of n-gram-values.
@@ -47,8 +47,8 @@
 #' txt = movie_review[['review']][1:100]
 #' it = itoken(txt, tolower, word_tokenizer, n_chunks = 10)
 #' vocab = create_vocabulary(it)
-#' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10,
-#'  doc_proportion_max = 0.8, doc_proportion_min = 0.001, max_number_of_terms = 20000)
+#' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10, doc_proportion_max = 0.8,
+#' doc_proportion_min = 0.001, max_number_of_terms = 20000)
 #'@export
 create_vocabulary = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
                        stopwords = character(0), sep_ngram = "_") {
@@ -206,10 +206,10 @@ combine_vocabulary = function(...) {
 #' @param vocabulary a vocabulary from the \link{vocabulary} function.
 #' @param term_count_min minimum number of occurences over all documents.
 #' @param term_count_max maximum number of occurences over all documents.
-#' @param doc_proportion_min minimum proportion of documents which should
-#'   contain term.
-#' @param doc_proportion_max maximum proportion of documents which should
-#'   contain term.
+#' @param doc_count_min term will be kept number of documents contain this term is larger than this value
+#' @param doc_count_max term will be kept number of documents contain this term is smaller than this value
+#' @param doc_proportion_min minimum proportion of documents which should contain term.
+#' @param doc_proportion_max maximum proportion of documents which should contain term.
 #' @param max_number_of_terms maximum number of terms in vocabulary.
 #' @seealso \link{vocabulary}
 #' @export
@@ -218,6 +218,8 @@ prune_vocabulary = function(vocabulary,
                   term_count_max = Inf,
                   doc_proportion_min = 0.0,
                   doc_proportion_max = 1.0,
+                  doc_count_min = 1L,
+                  doc_count_max = Inf,
                   max_number_of_terms = Inf) {
 
   if (!inherits(vocabulary, "text2vec_vocabulary"))
@@ -235,6 +237,11 @@ prune_vocabulary = function(vocabulary,
     ind = ind & (vocabulary[["terms_counts"]] >= term_count_min)
   if (is.finite(term_count_max))
     ind = ind & (vocabulary[["terms_counts"]] <= term_count_max)
+
+  if (doc_count_min > 1L)
+    ind = ind & (vocabulary[["doc_counts"]] >= doc_count_min)
+  if (is.finite(doc_count_max))
+    ind = ind & (vocabulary[["doc_counts"]] <= doc_count_max)
 
   if (doc_proportion_min > 0) {
     doc_proportion = vocabulary[["doc_counts"]] / douments_count

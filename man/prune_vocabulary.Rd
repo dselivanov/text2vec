@@ -5,8 +5,8 @@
 \title{Prune vocabulary}
 \usage{
 prune_vocabulary(vocabulary, term_count_min = 1L, term_count_max = Inf,
-  doc_proportion_min = 0, doc_proportion_max = 1,
-  max_number_of_terms = Inf)
+  doc_proportion_min = 0, doc_proportion_max = 1, doc_count_min = 1L,
+  doc_count_max = Inf, max_number_of_terms = Inf)
 }
 \arguments{
 \item{vocabulary}{a vocabulary from the \link{vocabulary} function.}
@@ -15,11 +15,13 @@ prune_vocabulary(vocabulary, term_count_min = 1L, term_count_max = Inf,
 
 \item{term_count_max}{maximum number of occurences over all documents.}
 
-\item{doc_proportion_min}{minimum proportion of documents which should
-contain term.}
+\item{doc_proportion_min}{minimum proportion of documents which should contain term.}
 
-\item{doc_proportion_max}{maximum proportion of documents which should
-contain term.}
+\item{doc_proportion_max}{maximum proportion of documents which should contain term.}
+
+\item{doc_count_min}{term will be kept number of documents contain this term is larger than this value}
+
+\item{doc_count_max}{term will be kept number of documents contain this term is smaller than this value}
 
 \item{max_number_of_terms}{maximum number of terms in vocabulary.}
 }

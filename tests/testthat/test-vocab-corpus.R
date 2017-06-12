@@ -38,6 +38,14 @@ test_that("Vocabulary pruning", {
   # number of terms in prunned vocab
   expect_equal(nrow(p_vocab), 429L)
 
+  doc_count_min = 10L
+  doc_count_max = 100L
+  p_vocab = prune_vocabulary(vocab,
+                             doc_count_min = doc_count_min,
+                             doc_count_max = doc_count_max)
+  expect_true( all(p_vocab$doc_counts <= doc_count_max))
+  expect_true( all(p_vocab$doc_counts >= doc_count_min))
+
   PROP_MAX = 0.05
   LIMIT = 20L
   p_vocab = prune_vocabulary(vocab,
