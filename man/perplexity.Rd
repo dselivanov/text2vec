@@ -7,16 +7,16 @@
 perplexity(X, topic_word_distribution, doc_topic_distribution)
 }
 \arguments{
-\item{X}{sparse document-term matrix. Internally \code{Matrix::RsparseMatrix} is used.
+\item{X}{sparse document-term matrix which contains terms counts. Internally \code{Matrix::RsparseMatrix} is used.
 If \code{class(X) != 'RsparseMatrix'} function will try to coerce \code{X} to \code{RsparseMatrix}
 via \code{as()} call.}
 
 \item{topic_word_distribution}{dense matrix for topic-word distribution. Number of rows = \code{n_topics},
-numbe of columns = \code{vocabulary_size}. Sum of elements in each row should be equal to 1 -
+number of columns = \code{vocabulary_size}. Sum of elements in each row should be equal to 1 -
 each row is a distribution of words over topic.}
 
 \item{doc_topic_distribution}{dense matrix for document-topic distribution. Number of rows = \code{n_documents},
-numbe of columns = \code{n_topics}. Sum of elements in each row should be equal to 1 -
+number of columns = \code{n_topics}. Sum of elements in each row should be equal to 1 -
 each row is a distribution of topics over document.}
 }
 \description{

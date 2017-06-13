@@ -2,14 +2,14 @@
 #' @title Perplexity of a topic model
 #' @description Given document-term matrix, topic-word distribution, document-topic
 #' distribution calculates perplexity
-#' @param X sparse document-term matrix. Internally \code{Matrix::RsparseMatrix} is used.
+#' @param X sparse document-term matrix which contains terms counts. Internally \code{Matrix::RsparseMatrix} is used.
 #' If \code{class(X) != 'RsparseMatrix'} function will try to coerce \code{X} to \code{RsparseMatrix}
 #' via \code{as()} call.
 #' @param topic_word_distribution dense matrix for topic-word distribution. Number of rows = \code{n_topics},
-#' numbe of columns = \code{vocabulary_size}. Sum of elements in each row should be equal to 1 -
+#' number of columns = \code{vocabulary_size}. Sum of elements in each row should be equal to 1 -
 #' each row is a distribution of words over topic.
 #' @param doc_topic_distribution dense matrix for document-topic distribution. Number of rows = \code{n_documents},
-#' numbe of columns = \code{n_topics}. Sum of elements in each row should be equal to 1 -
+#' number of columns = \code{n_topics}. Sum of elements in each row should be equal to 1 -
 #' each row is a distribution of topics over document.
 #' @examples
 #' library(text2vec)
@@ -33,6 +33,8 @@
 #' perplexity(dtm, topic_word_distr_10, doc_topic_distr)
 #' @export
 perplexity = function(X, topic_word_distribution, doc_topic_distribution) {
+  # introduce EPS for stability - avoid log(0)
+  EPS = 1e-16
   stopifnot(inherits(X, "sparseMatrix"))
 
   stopifnot(nrow(X) == nrow(doc_topic_distribution))
@@ -64,7 +66,7 @@ perplexity = function(X, topic_word_distribution, doc_topic_distribution) {
     word_counds = x[pointer]
     dot_prod = doc_topic_distribution[i, , drop = FALSE] %*%
       topic_word_distribution[ , word_indices, drop = FALSE]
-    ll = ll +  log(dot_prod) %*% word_counds
+    ll = ll +  log(dot_prod + EPS) %*% word_counds
   }
   # drop dimensions
   ll = as.numeric(ll)
