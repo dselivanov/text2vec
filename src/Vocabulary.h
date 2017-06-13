@@ -66,9 +66,9 @@ public:
       doc_counts[i] = vocab_statistics[it.second].document_term_count;
       i++;
     }
-    return DataFrame::create(_["terms"] = terms,
-                             _["terms_counts"] = term_counts,
-                             _["doc_counts"] = doc_counts,
+    return DataFrame::create(_["term"] = terms,
+                             _["term_count"] = term_counts,
+                             _["doc_count"] = doc_counts,
                              _["stringsAsFactors"] = false );
   }
   void insert_terms (vector< string> &terms) {
@@ -164,9 +164,9 @@ private:
 //     doc_counts[i] = vocab_statistics[it.second].document_term_count;
 //     i++;
 //   }
-//   return DataFrame::create(_["terms"] = terms,
-//                            _["terms_counts"] = term_counts,
-//                            _["doc_counts"] = doc_counts,
+//   return DataFrame::create(_["term"] = terms,
+//                            _["term_count"] = term_counts,
+//                            _["doc_count"] = doc_counts,
 //                            _["stringsAsFactors"] = false );
 // }
 //-----------------------------------------------------------------

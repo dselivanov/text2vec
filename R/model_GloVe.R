@@ -125,7 +125,7 @@ GlobalVectors = R6::R6Class(
       stopifnot(inherits(vocabulary, "character") || inherits(vocabulary, "text2vec_vocabulary"))
       private$vocab_terms =
         if (inherits(vocabulary, "character")) vocabulary
-        else vocabulary$terms
+        else vocabulary$term
 
       private$word_vectors_size = word_vectors_size
       private$learning_rate = learning_rate

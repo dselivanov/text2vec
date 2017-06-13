@@ -47,9 +47,9 @@ such that ngram_min <= n <= ngram_max will be used.}
 \value{
 \code{text2vec_vocabulary} object, which is actually a \code{data.frame}
  with following columns:
- \item{\code{terms}       }{ \code{character} vector of unique terms}
- \item{\code{terms_counts} }{ \code{integer} vector of term counts across all
- documents} \item{\code{doc_counts}  }{ \code{integer} vector of document
+ \item{\code{term}       }{ \code{character} vector of unique terms}
+ \item{\code{term_count} }{ \code{integer} vector of term counts across all
+ documents} \item{\code{doc_count}  }{ \code{integer} vector of document
  counts that contain corresponding term}
 Also it contains metainformation in attributes:
  \code{ngram}: \code{integer} vector, the lower and upper boundary of the

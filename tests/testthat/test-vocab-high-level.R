@@ -23,7 +23,7 @@ test_that("Vocabulary with foreach", {
   iterator_list = mapply(function(x, i) get_test_iterator(x, i), txt_splits, ids_splits)
   expect_warning(vocab_2 <- create_vocabulary(iterator_list))
 
-  expect_equal(sort(vocab_1$terms),  sort(vocab_2$terms))
+  expect_equal(sort(vocab_1$term),  sort(vocab_2$term))
   expect_equal(attr(vocab_1, "document_count"),  attr(vocab_2, "document_count"))
   expect_equal(attr(vocab_1, "document_count"),  max(train_ind))
   expect_equal(attr(vocab_1, "ngram"), attr(vocab_2, "ngram"))

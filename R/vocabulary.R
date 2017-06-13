@@ -30,9 +30,9 @@
 #'@param sep_ngram \code{character} a character string to concatenate words in ngrams
 #'@return \code{text2vec_vocabulary} object, which is actually a \code{data.frame}
 #'  with following columns:
-#'  \item{\code{terms}       }{ \code{character} vector of unique terms}
-#'  \item{\code{terms_counts} }{ \code{integer} vector of term counts across all
-#'  documents} \item{\code{doc_counts}  }{ \code{integer} vector of document
+#'  \item{\code{term}       }{ \code{character} vector of unique terms}
+#'  \item{\code{term_count} }{ \code{integer} vector of term counts across all
+#'  documents} \item{\code{doc_count}  }{ \code{integer} vector of document
 #'  counts that contain corresponding term}
 #' Also it contains metainformation in attributes:
 #'  \code{ngram}: \code{integer} vector, the lower and upper boundary of the
@@ -50,7 +50,7 @@
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10, doc_proportion_max = 0.8,
 #' doc_proportion_min = 0.001, max_number_of_terms = 20000)
 #'@export
-create_vocabulary = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
                        stopwords = character(0), sep_ngram = "_") {
   stopifnot(is.numeric(ngram) && length(ngram) == 2 && ngram[[2]] >= ngram[[1]])
   UseMethod("create_vocabulary")
@@ -58,7 +58,7 @@ create_vocabulary = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
 
 #' @rdname create_vocabulary
 #' @export
-vocabulary = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+vocabulary = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
                        stopwords = character(0), sep_ngram = "_") {
   .Deprecated("create_vocabulary")
   create_vocabulary(it, ngram, stopwords)
@@ -67,19 +67,19 @@ vocabulary = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
 #' character vector. Terms will be inserted \bold{as is}, without any checks
 #' (ngrams numner, ngram delimiters, etc.).
 #' @export
-create_vocabulary.character = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary.character = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
                                  stopwords = character(0), sep_ngram = "_") {
 
   ngram_min = as.integer( ngram[[1]] )
   ngram_max = as.integer( ngram[[2]] )
   vocab_length = length(it)
 
-  res = data.frame('terms' = setdiff(it, stopwords),
-                   'terms_counts' = rep(NA_integer_, vocab_length),
-                   'doc_counts' = rep(NA_integer_, vocab_length))
-  res = res[order(res$terms_counts), ]
+  res = data.frame("term" = setdiff(it, stopwords),
+                   "term_count" = rep(NA_integer_, vocab_length),
+                   "doc_count" = rep(NA_integer_, vocab_length))
+  res = res[order(res$term_count), ]
 
-  setattr(res, "ngram", c('ngram_min' = ngram_min, 'ngram_max' = ngram_max))
+  setattr(res, "ngram", c("ngram_min" = ngram_min, "ngram_max" = ngram_max))
   setattr(res, "document_count", NA_integer_)
   setattr(res, "stopwords", stopwords)
   setattr(res, "sep_ngram", sep_ngram)
@@ -89,9 +89,9 @@ create_vocabulary.character = function(it, ngram = c('ngram_min' = 1L, 'ngram_ma
 
 #' @describeIn create_vocabulary collects unique terms and corresponding statistics from object.
 #' @export
-create_vocabulary.itoken = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
                               stopwords = character(0), sep_ngram = "_") {
-  if (inherits(it, 'R6'))
+  if (inherits(it, "R6"))
     it = it$clone(deep = TRUE)
   else {
     warning("Can't clone input iterator. It will be modified by current function call", immediate. = T)
@@ -110,9 +110,9 @@ create_vocabulary.itoken = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' 
   # vocab = setDT(vocab_module$get_vocab_statistics())
 
   res = cpp_get_vocab_statistics(vocab_ptr)
-  res = res[order(res$terms_counts), ]
+  res = res[order(res$term_count), ]
 
-  setattr(res, "ngram", c('ngram_min' = ngram_min, 'ngram_max' = ngram_max))
+  setattr(res, "ngram", c("ngram_min" = ngram_min, "ngram_max" = ngram_max))
   setattr(res, "document_count", cpp_get_document_count(vocab_ptr))
   setattr(res, "stopwords", stopwords)
   setattr(res, "sep_ngram", sep_ngram)
@@ -152,7 +152,7 @@ create_vocabulary.list = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 
 #'   registered, it will build vocabulary in parallel using \link{foreach}.
 #' @param ... additional arguments to \link{foreach} function.
 #' @export
-create_vocabulary.itoken_parallel = function(it, ngram = c('ngram_min' = 1L, 'ngram_max' = 1L),
+create_vocabulary.itoken_parallel = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
                                   stopwords = character(0), sep_ngram = "_", ...) {
   stopifnot( all( vapply(X = it, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
   res =
@@ -174,14 +174,14 @@ combine_vocabulary = function(...) {
   ngram = attr(vocab_list[[1]], "ngram", exact = TRUE)
   # extract vocabulary stats data.frame and rbind them
   res = vocab_list %>%
-    lapply(function(x) x[, .(terms_counts, doc_counts, terms)]) %>%
+    lapply(function(x) x[, .(term_count, doc_count, term)]) %>%
     rbindlist
 
   # reduce by terms
-  res = res[, .("terms_counts" = sum(terms_counts),
-                                       "doc_counts" = sum(doc_counts)),
-                                   by = terms]
-  setcolorder(res, c("terms", "terms_counts", "doc_counts"))
+  res = res[, .("term_count" = sum(term_count),
+                                       "doc_count" = sum(doc_count)),
+                                   by = term]
+  setcolorder(res, c("term", "term_count", "doc_count"))
 
   combined_document_count = 0
   for(v in vocab_list)
@@ -234,24 +234,24 @@ prune_vocabulary = function(vocabulary,
   doc_proportion = NULL
 
   if (term_count_min > 1L)
-    ind = ind & (vocabulary[["terms_counts"]] >= term_count_min)
+    ind = ind & (vocabulary[["term_count"]] >= term_count_min)
   if (is.finite(term_count_max))
-    ind = ind & (vocabulary[["terms_counts"]] <= term_count_max)
+    ind = ind & (vocabulary[["term_count"]] <= term_count_max)
 
   if (doc_count_min > 1L)
-    ind = ind & (vocabulary[["doc_counts"]] >= doc_count_min)
+    ind = ind & (vocabulary[["doc_count"]] >= doc_count_min)
   if (is.finite(doc_count_max))
-    ind = ind & (vocabulary[["doc_counts"]] <= doc_count_max)
+    ind = ind & (vocabulary[["doc_count"]] <= doc_count_max)
 
   if (doc_proportion_min > 0) {
-    doc_proportion = vocabulary[["doc_counts"]] / douments_count
+    doc_proportion = vocabulary[["doc_count"]] / douments_count
     ind = ind & (doc_proportion >= doc_proportion_min)
   }
 
   if (doc_proportion_max < 1.0) {
     # not calculated in prev ster
     if (is.null(doc_proportion))
-      doc_proportion = vocabulary[["doc_counts"]] / douments_count
+      doc_proportion = vocabulary[["doc_count"]] / douments_count
 
     ind = ind & (doc_proportion <= doc_proportion_max)
   }
@@ -260,7 +260,7 @@ prune_vocabulary = function(vocabulary,
 
   # restrict to max number if asked
   if (is.finite(max_number_of_terms)) {
-    res = res[order(res$terms_counts, decreasing = TRUE),]
+    res = res[order(res$term_count, decreasing = TRUE),]
     max_number_of_terms = min(max_number_of_terms, nrow(res))
     res = res[1:max_number_of_terms, ]
   }
@@ -276,7 +276,7 @@ prune_vocabulary = function(vocabulary,
 
 detect_ngrams = function(vocab, ...) {
   stopifnot(inherits(vocab, "text2vec_vocabulary"))
-  strsplit(vocab$terms, attr(vocab, "sep_ngram", TRUE), fixed = TRUE, ...) %>%
+  strsplit(vocab$term, attr(vocab, "sep_ngram", TRUE), fixed = TRUE, ...) %>%
     vapply(length, 0L)
 }
 
@@ -286,7 +286,7 @@ detect_ngrams = function(vocab, ...) {
 print.text2vec_vocabulary = function(x, ...) {
   m1 = paste("Number of docs:", attr(x, "document_count", TRUE))
   m2 = paste(length(attr(x, "stopwords", TRUE)), "stopwords:", paste(head(attr(x, "stopwords", TRUE)), collapse = ", "), "...", collapse = ", ")
-  m3 = paste(names(attr(x, "ngram", TRUE)), attr(x, "ngram", TRUE), sep = ' = ', collapse = '; ')
+  m3 = paste(names(attr(x, "ngram", TRUE)), attr(x, "ngram", TRUE), sep = " = ", collapse = "; ")
   cat(m1, "\n")
   cat(m2, "\n")
   cat(m3, "\n")

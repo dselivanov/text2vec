@@ -12,7 +12,7 @@ test_that("tcm", {
   v = create_vocabulary(it, c(1L, 1L) )
   v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.5)
   v = as.data.frame(v)
-  v = v[rev(order(v$terms)), ]
+  v = v[rev(order(v$term)), ]
   # attributes(v) = v_attr
   vectorizer = vocab_vectorizer(v)
   tcm = create_tcm(it, vectorizer, skip_grams_window = 1L,

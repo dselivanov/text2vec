@@ -46,8 +46,7 @@ Collocations = R6::R6Class(
     },
     fit = function(it) {
       if(!is.null(self$collocation_stat)) {
-        private$v = create_vocabulary(unique(c(private$phrases, private$v$vocab$terms)), sep_ngram = private$sep )
-        # private$v = create_vocabulary(unique(c(private$phrases, private$v$vocab$terms)), sep_ngram = private$sep )
+        private$v = create_vocabulary(unique(c(private$phrases, private$v$term)), sep_ngram = private$sep )
         it_internal = self$transform(it)
       }
       else {
