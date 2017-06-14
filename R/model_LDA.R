@@ -217,8 +217,13 @@ LatentDirichletAllocation = R6::R6Class(
                                     vocab = private$vocabulary,
                                     term.frequency = colSums(self$components),
                                     ...)
-          # LDAvis::serVis(json, ...)
-          text2vec_serVis(json, ...)
+          # modify global option - fixes #181
+          # also we save user encoding and restore it after exit
+          enc = getOption("encoding")
+          on.exit(options(encoding = enc))
+          options(encoding = "UTF-8")
+
+          LDAvis::serVis(json, ...)
         } else {
           stop("Model was not fitted, please fit it first...")
         }
@@ -489,63 +494,3 @@ LatentDirichletAllocationDistributed = R6::R6Class(
     }
   )
 )
-
-
-
-text2vec_serVis = function (json, out.dir = tempfile(), open.browser = interactive(),
-          as.gist = FALSE, language = "english", ...) { # nocov start
-  stopifnot(is.character(language), length(language) == 1,
-            language %in% c("english", "polish"))
-  dir.create(out.dir)
-  src.dir <- system.file("htmljs", package = "LDAvis")
-  to.copy <- Sys.glob(file.path(src.dir, "*"))
-  file.copy(to.copy, out.dir, overwrite = TRUE, recursive = TRUE)
-  if (language != "english") {
-    ldavis.js <- readLines(file.path(out.dir, "ldavis.js"))
-    lang.dict <- read.csv(system.file("languages/dictionary.txt",
-                                      package = "LDAvis"))
-    for (i in 1:nrow(lang.dict)) {
-      ldavis.js <- gsub(x = ldavis.js, pattern = lang.dict[i,
-                                                           1], replacement = lang.dict[i, language], fixed = TRUE)
-    }
-    if (language == "polish") {
-      ldavis.js[674] <- gsub(ldavis.js[674], pattern = "80",
-                             replacement = "175", fixed = TRUE)
-    }
-    write(ldavis.js, file = file.path(out.dir, "ldavis.js"))
-  }
-  con = file(file.path(out.dir, "lda.json"), encoding = "UTF-8")
-  on.exit(close.connection(con))
-  cat(json, file = con)
-  if (as.gist) {
-    gistd <- requireNamespace("gistr")
-    if (!gistd) {
-      warning("Please run `devtools::install_github('rOpenSci/gistr')` \n              to upload files to https://gist.github.com")
-    }
-    else {
-      gist <- gistr::gist_create(file.path(out.dir, list.files(out.dir)),
-                                 ...)
-      if (interactive())
-        gist
-      url_name <- paste("http://bl.ocks.org", gist$id,
-                        sep = "/")
-      if (open.browser)
-        utils::browseURL(url_name)
-    }
-    return(invisible())
-  }
-  servd <- requireNamespace("servr")
-  if (open.browser) {
-    if (!servd) {
-      message("If the visualization doesn't render, install the servr package\n",
-              "and re-run serVis: \n install.packages('servr') \n",
-              "Alternatively, you could configure your default browser to allow\n",
-              "access to local files as some browsers block this by default")
-      utils::browseURL(sprintf("%s/index.html", out.dir))
-    }
-    else {
-      servr::httd(dir = out.dir)
-    }
-  }
-  return(invisible())
-} # nocov end
