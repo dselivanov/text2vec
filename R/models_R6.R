@@ -25,14 +25,6 @@ text2vec_estimator = R6::R6Class(
   )
 )
 
-text2vec_word_embedding_model = R6::R6Class(
-  classname = "word_embedding_model",
-  inherit = text2vec_estimator,
-  public = list(
-    get_word_vectors = function(...) {stop("Method is not implemented")}
-  )
-)
-
 text2vec_transformer = R6::R6Class(
   classname = c("transformer"),
   inherit = text2vec_estimator,

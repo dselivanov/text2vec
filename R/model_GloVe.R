@@ -22,23 +22,28 @@
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
-#' glove = GlobalVectors$new(word_vectors_size, vocabulary, x_max)
-#' glove$fit(x, n_iter)
-#' glove$get_word_vectors()
-#' glove$dump_model()
+#' glove = GlobalVectors$new(word_vectors_size, vocabulary, x_max, learning_rate = 0.15,
+#'                           clip_gradient = 10, alpha = 0.75, lambda = 0.0, shuffle = FALSE, initial = NULL)
+#' glove$fit_transform(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
+#'               n_threads = RcppParallel::defaultNumThreads(), ...)
+#' glove$components
+#' glove$dump()
 #' }
 #' @section Methods:
 #' \describe{
 #'   \item{\code{$new(word_vectors_size, vocabulary, x_max, learning_rate = 0.15,
-#'                     max_cost = 10, alpha = 0.75, lambda = 0, shuffle = FALSE,
+#'                     clip_gradient = 10, alpha = 0.75, lambda = 0, shuffle = FALSE,
 #'                     initial = NULL)}}{Constructor for Global vectors model.
 #'                     For description of arguments see \bold{Arguments} section.}
-#'   \item{\code{$fit(x, n_iter, convergence_tol = -1)}}{fit Glove model to input matrix \code{x}}
-#'   \item{\code{$get_word_vectors()}}{get word vector - obtain GloVe word embeddings}
-#'   \item{\code{$dump_model()}}{get model internals - word vectors and biases for main and context words}
-#'   \item{\code{$get_history}}{get history of SGD costs and word vectors (if \code{dump_every_n > 0)}}
+#'   \item{\code{$fit_transform(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
+#'               n_threads = RcppParallel::defaultNumThreads(), ...)}}{fit Glove model to input matrix \code{x}}
+#'   \item{\code{$fit(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
+#'               n_threads = RcppParallel::defaultNumThreads(), ...)}}{same as \code{fit_transform} provided for consistency}
+#'   \item{\code{$dump()}}{get model internals - word vectors and biases for main and context words}
+#'   \item{\code{$get_history}}{get history of SGD costs and word vectors (if \code{n_dump_every > 0)}}
 #'}
-#' @field dump_every_n \code{integer = 0L} by default. Defines frequency of dumping word vectors. For example user
+#' @field components represensts context word vectors
+#' @field n_dump_every \code{integer = 0L} by default. Defines frequency of dumping word vectors. For example user
 #' can ask to dump word vectors each 5 iteration.
 #' @field shuffle \code{logical = FALSE} by default. Defines shuffling before each SGD iteration.
 #'   Generelly shuffling is a good idea for stochastic-gradient descent, but
@@ -64,7 +69,7 @@
 #'     when one of two following conditions will be satisfied: (a) we have used
 #'     all iterations, or (b) \code{cost_previous_iter / cost_current_iter - 1 <
 #'     convergence_tol}. By default perform all iterations.}
-#'  \item{max_cost}{\code{numeric = 10} the maximum absolute value of calculated gradient for any
+#'  \item{clip_gradient}{\code{numeric = 10} the maximum absolute value of calculated gradient for any
 #'     single co-occurrence pair. Try to set this to a smaller value if you have
 #'     problems with numerical stability}
 #'  \item{alpha}{\code{numeric = 0.75} the alpha in weighting function formula : \eqn{f(x) = 1 if x >
@@ -102,24 +107,23 @@ NULL
 #' @export
 
 GlobalVectors = R6::R6Class(
-  "GloVe",
-  inherit = text2vec_word_embedding_model,
+  classname = c("GloVe"),
+  inherit = mlapiDecomposition,
   public = list(
-    dump_every_n = 0L,
+    n_dump_every = 0L,
     shuffle = FALSE,
     initialize = function(word_vectors_size,
                           vocabulary,
                           x_max,
                           learning_rate = 0.15,
-                          max_cost = 10,
+                          clip_gradient = 10,
                           alpha = 0.75,
                           lambda = 0.0,
                           shuffle = FALSE,
                           initial = NULL
                           ) {
       self$shuffle = shuffle
-      private$internal_matrix_format = "TsparseMatrix"
-
+      super$set_internal_matrix_formats(sparse = "TsparseMatrix")
       stopifnot(inherits(vocabulary, "character") || inherits(vocabulary, "text2vec_vocabulary"))
       private$vocab_terms =
         if (inherits(vocabulary, "character")) vocabulary
@@ -128,7 +132,7 @@ GlobalVectors = R6::R6Class(
       private$word_vectors_size = word_vectors_size
       private$learning_rate = learning_rate
       private$x_max = x_max
-      private$max_cost = max_cost
+      private$clip_gradient = clip_gradient
       private$alpha = alpha
       private$lambda = lambda
 
@@ -167,10 +171,16 @@ GlobalVectors = R6::R6Class(
         private$b_j = initial$b_j
       }
     },
-    # fit method will work only with sparse matrices coercible to "dgTMatrix"
-    fit = function(x, n_iter, convergence_tol = -1, ...) {
+    fit = function(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
+                   n_threads = RcppParallel::defaultNumThreads(), ...) {
+      res = self$fit_transform(x, n_iter, convergence_tol, n_check_convergence, n_threads, ...)
+      res
+    },
+    fit_transform = function(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
+                   n_threads = RcppParallel::defaultNumThreads(), ...) {
       # convert to internal native format
-      x = as(x, private$internal_matrix_format)
+      x = super$check_convert_input(x, private$internal_matrix_formats)
+
       IS_TRIANGULAR = isTriangular(x)
       # params in a specific format to pass to C++ backend
       initial = list(w_i = private$w_i, w_j = private$w_j,
@@ -180,7 +190,7 @@ GlobalVectors = R6::R6Class(
              word_vec_size = private$word_vectors_size,
              learning_rate = private$learning_rate,
              x_max = private$x_max,
-             max_cost = private$max_cost,
+             max_cost = private$clip_gradient,
              alpha = private$alpha,
              lambda = private$lambda,
              grain_size = private$grain_size,
@@ -192,10 +202,10 @@ GlobalVectors = R6::R6Class(
       # number of non-zero elements in cooccurence matrix
       n_nnz = length(x@i)
       # create list for saving word vectors if need to dump between iterations
-      if (self$dump_every_n > 0) {
-        n_elem = n_iter %/% self$dump_every_n
+      if (self$n_dump_every > 0) {
+        n_elem = n_iter %/% self$n_dump_every
         temp = vector('list', max(1, n_elem))
-        names(temp) = paste0("iter_", self$dump_every_n * seq_len(n_elem))
+        names(temp) = paste0("iter_", self$n_dump_every * seq_len(n_elem))
         private$word_vectors_history = temp
         rm(temp, n_elem);
       }
@@ -219,9 +229,9 @@ GlobalVectors = R6::R6Class(
 
         # check whether SGD is numerically correct - no NaN at C++ level
         if (is.nan(cost))
-          stop("Cost becomes NaN, try to use smaller learning_rate or smaller max_cost.")
+          stop("Cost becomes NaN, try to use smaller learning_rate or smaller clip_gradient.")
         if (cost / n_nnz / 2 > 0.5)
-          warning("Cost is too big, probably something goes wrong... try smaller learning rate", immediate. = T)
+          warning("Cost is too big, probably something goes wrong... try smaller learning rate", immediate. = TRUE)
 
         # save cost history
         private$cost_history = c(private$cost_history, cost / n_nnz / 2)
@@ -240,8 +250,8 @@ GlobalVectors = R6::R6Class(
           break;
         }
         # write word vectors history
-        if (self$dump_every_n > 0L) {
-          if ( i %% self$dump_every_n == 0) {
+        if (self$n_dump_every > 0L) {
+          if ( i %% self$n_dump_every == 0) {
             iter_name = paste0("iter_", i)
             private$word_vectors_history[[iter_name]] = cpp_glove_get_word_vectors(private$glove_fitter)
           }
@@ -255,22 +265,28 @@ GlobalVectors = R6::R6Class(
       private$w_j = res$w_j
       private$b_i = res$b_i
       private$b_j = res$b_j
-      invisible(self)
+
+      private$components_ = private$w_j
+      rownames(private$components_) = private$vocab_terms
+
+      res = private$w_i + private$w_j
+      rownames(res) = private$vocab_terms
+      invisible(res)
     },
+    transform = function(x, y = NULL, ...) {
+      flog.error("transform() method doesn't make sense for GloVe model")
+      stop("transform() method doesn't make sense for GloVe model")
+    },
+    # FIXME - depreciated
     get_word_vectors = function() {
-      if (private$fitted) {
-        res = private$w_i + private$w_j
-        rownames(res) = private$vocab_terms
-        res
-      } else {
-        stop("Model was not fitted, please fit it first...")
-      }
+      .Deprecated("model$components")
+      self$components
     },
     get_history = function() {
       list(cost_history = private$cost_history,
            word_vectors_history = private$word_vectors_history)
     },
-    dump_model = function() {
+    dump = function() {
       list(w_i = private$w_i, w_j = private$w_j,
            b_i = private$b_i, b_j = private$b_j)
     }
@@ -283,7 +299,7 @@ GlobalVectors = R6::R6Class(
     vocab_terms = NULL,
     word_vectors_size = NULL,
     initial = NULL,
-    max_cost = NULL,
+    clip_gradient = NULL,
     alpha = NULL,
     x_max = NULL,
     learning_rate = NULL,
@@ -291,7 +307,8 @@ GlobalVectors = R6::R6Class(
     grain_size = 1e5L,
     cost_history = numeric(0),
     word_vectors_history = NULL,
-    glove_fitter = NULL
+    glove_fitter = NULL,
+    fitted = FALSE
   )
 )
 
@@ -330,7 +347,7 @@ GloVe = GlobalVectors
 #' @param grain_size I do not recommend adjusting this paramenter. This is the
 #'   grain_size for \code{RcppParallel::parallelReduce}. For details, see
 #'   \url{http://rcppcore.github.io/RcppParallel/#grain-size}.
-#' @param max_cost the maximum absolute value of calculated gradient for any
+#' @param clip_gradient the maximum absolute value of calculated gradient for any
 #'   single co-occurrence pair. Try to set this to a smaller value if you have
 #'   problems with numerical stability.
 #' @param alpha the alpha in weighting function formula : \eqn{f(x) = 1 if x >
@@ -346,7 +363,7 @@ glove = function(tcm,
                  learning_rate = 0.05,
                  convergence_threshold = -1.0,
                  grain_size =  1e5L,
-                 max_cost = 10.0,
+                 clip_gradient = 10.0,
                  alpha = 0.75,
                  ...) {
   .Deprecated("GloVe")
@@ -359,7 +376,7 @@ glove = function(tcm,
                        vocabulary = rownames(tcm),
                        x_max = x_max,
                        learning_rate = learning_rate,
-                       max_cost = max_cost,
+                       clip_gradient = clip_gradient,
                        alpha = alpha,
                        lambda = 0.0,
                        shuffle = !is.na(shuffle_seed),

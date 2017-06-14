@@ -6,7 +6,7 @@
 \usage{
 glove(tcm, vocabulary_size = nrow(tcm), word_vectors_size, x_max, num_iters,
   shuffle_seed = NA_integer_, learning_rate = 0.05,
-  convergence_threshold = -1, grain_size = 100000L, max_cost = 10,
+  convergence_threshold = -1, grain_size = 100000L, clip_gradient = 10,
   alpha = 0.75, ...)
 }
 \arguments{
@@ -46,7 +46,7 @@ convergence_threshold}.}
 grain_size for \code{RcppParallel::parallelReduce}. For details, see
 \url{http://rcppcore.github.io/RcppParallel/#grain-size}.}
 
-\item{max_cost}{the maximum absolute value of calculated gradient for any
+\item{clip_gradient}{the maximum absolute value of calculated gradient for any
 single co-occurrence pair. Try to set this to a smaller value if you have
 problems with numerical stability.}
 

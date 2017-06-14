@@ -17,7 +17,9 @@ AdaGrad with \code{$fit()} method.
 \section{Fields}{
 
 \describe{
-\item{\code{dump_every_n}}{\code{integer = 0L} by default. Defines frequency of dumping word vectors. For example user
+\item{\code{components}}{represensts context word vectors}
+
+\item{\code{n_dump_every}}{\code{integer = 0L} by default. Defines frequency of dumping word vectors. For example user
 can ask to dump word vectors each 5 iteration.}
 
 \item{\code{shuffle}}{\code{logical = FALSE} by default. Defines shuffling before each SGD iteration.
@@ -34,10 +36,12 @@ grain_size for \code{RcppParallel::parallelReduce}. For details, see
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
 \preformatted{
-glove = GlobalVectors$new(word_vectors_size, vocabulary, x_max)
-glove$fit(x, n_iter)
-glove$get_word_vectors()
-glove$dump_model()
+glove = GlobalVectors$new(word_vectors_size, vocabulary, x_max, learning_rate = 0.15,
+                          clip_gradient = 10, alpha = 0.75, lambda = 0.0, shuffle = FALSE, initial = NULL)
+glove$fit_transform(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
+              n_threads = RcppParallel::defaultNumThreads(), ...)
+glove$components
+glove$dump()
 }
 }
 
@@ -45,13 +49,15 @@ glove$dump_model()
 
 \describe{
   \item{\code{$new(word_vectors_size, vocabulary, x_max, learning_rate = 0.15,
-                    max_cost = 10, alpha = 0.75, lambda = 0, shuffle = FALSE,
+                    clip_gradient = 10, alpha = 0.75, lambda = 0, shuffle = FALSE,
                     initial = NULL)}}{Constructor for Global vectors model.
                     For description of arguments see \bold{Arguments} section.}
-  \item{\code{$fit(x, n_iter, convergence_tol = -1)}}{fit Glove model to input matrix \code{x}}
-  \item{\code{$get_word_vectors()}}{get word vector - obtain GloVe word embeddings}
-  \item{\code{$dump_model()}}{get model internals - word vectors and biases for main and context words}
-  \item{\code{$get_history}}{get history of SGD costs and word vectors (if \code{dump_every_n > 0)}}
+  \item{\code{$fit_transform(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
+              n_threads = RcppParallel::defaultNumThreads(), ...)}}{fit Glove model to input matrix \code{x}}
+  \item{\code{$fit(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
+              n_threads = RcppParallel::defaultNumThreads(), ...)}}{same as \code{fit_transform} provided for consistency}
+  \item{\code{$dump()}}{get model internals - word vectors and biases for main and context words}
+  \item{\code{$get_history}}{get history of SGD costs and word vectors (if \code{n_dump_every > 0)}}
 }
 }
 
@@ -73,7 +79,7 @@ glove$dump_model()
     when one of two following conditions will be satisfied: (a) we have used
     all iterations, or (b) \code{cost_previous_iter / cost_current_iter - 1 <
     convergence_tol}. By default perform all iterations.}
- \item{max_cost}{\code{numeric = 10} the maximum absolute value of calculated gradient for any
+ \item{clip_gradient}{\code{numeric = 10} the maximum absolute value of calculated gradient for any
     single co-occurrence pair. Try to set this to a smaller value if you have
     problems with numerical stability}
  \item{alpha}{\code{numeric = 0.75} the alpha in weighting function formula : \eqn{f(x) = 1 if x >
