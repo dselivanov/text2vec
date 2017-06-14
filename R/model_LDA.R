@@ -240,13 +240,6 @@ LatentDirichletAllocation = R6::R6Class(
       if (!missing(value)) stop("Sorry this is a read-only field")
       if (is.null(private$doc_topic_count)) stop("LDA model was not fitted yet!")
       else (private$doc_topic_count + private$doc_topic_prior) %>% normalize("l1")
-    },
-    components = function(value) {
-      if (!missing(value)) stop("Sorry this is a read-only field")
-      else {
-        if(is.null(private$components_)) stop("LDA model was not fitted yet!")
-        else private$components_
-      }
     }
   ),
   private = list(
