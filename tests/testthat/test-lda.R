@@ -19,7 +19,7 @@ n_topic = 10
 
 test_that("LDA, perplexity", {
 
-  model = LDA$new(n_topic, doc_topic_prior = 0.1, topic_word_prior = 0.01, verbose = FALSE)
+  model = LDA$new(n_topic, doc_topic_prior = 0.1, topic_word_prior = 0.01)
 
   expect_error(model$components)
   expect_error(model$topic_word_distribution)
@@ -28,7 +28,7 @@ test_that("LDA, perplexity", {
   set.seed(1)
   n_iter = 10
   doc_topic_distr_10  = model$fit_transform(dtm, n_iter = n_iter, n_check_convergence = 1,
-                                            convergence_tol = -1, progress = FALSE)
+                                            convergence_tol = -1, progressbar = FALSE)
   expect_equal(nrow(attr(doc_topic_distr_10, "likelihood")), n_iter)
   topic_word_distr_10 = model$topic_word_distribution
 
@@ -42,7 +42,7 @@ test_that("LDA, perplexity", {
   set.seed(1)
   n_iter = 20
   doc_topic_distr_20  = model$fit_transform(dtm, n_iter = n_iter, n_check_convergence = 4,
-                                           convergence_tol = -1, progress = FALSE)
+                                           convergence_tol = -1, progressbar = FALSE)
   topic_word_distr_20 = model$topic_word_distribution
   expect_equal(nrow(attr(doc_topic_distr_20, "likelihood")), n_iter / 4)
 

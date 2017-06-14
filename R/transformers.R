@@ -201,7 +201,7 @@ transform_tfidf = function(dtm, idf = NULL, sublinear_tf = FALSE, norm = c("l1",
   tf = transform_tf(dtm, sublinear_tf, norm)
 
   if (!inherits(idf, "ddiMatrix")) {
-    message("IDF scaling matrix not provided; calculating it from input matrix.")
+    flog.info("IDF scaling matrix not provided; calculating it from input matrix.")
     idf = get_idf(dtm)
   }
 

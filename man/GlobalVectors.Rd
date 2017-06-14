@@ -28,8 +28,6 @@ from my experience in this particular case it does not improve convergence.}
 grain_size for \code{RcppParallel::parallelReduce}. For details, see
 \url{http://rcppcore.github.io/RcppParallel/#grain-size}.
 \bold{We don't recommend to change this paramenter.}}
-
-\item{\code{verbose}}{\code{logical = TRUE} whether to display training inforamtion}
 }}
 
 \section{Usage}{

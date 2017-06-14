@@ -5,7 +5,7 @@
 \title{Fit a GloVe word-embedded model}
 \usage{
 glove(tcm, vocabulary_size = nrow(tcm), word_vectors_size, x_max, num_iters,
-  shuffle_seed = NA_integer_, learning_rate = 0.05, verbose = TRUE,
+  shuffle_seed = NA_integer_, learning_rate = 0.05,
   convergence_threshold = -1, grain_size = 100000L, max_cost = 10,
   alpha = 0.75, ...)
 }
@@ -36,8 +36,6 @@ improves your score.}
 
 \item{learning_rate}{learning rate for SGD. I do not recommend that you
 modify this parameter, since AdaGrad will quickly adjust it to optimal.}
-
-\item{verbose}{\code{logical} whether to display training inforamtion}
 
 \item{convergence_threshold}{defines early stopping strategy. We stop fitting
 when one of two following conditions will be satisfied: (a) we have used

@@ -36,7 +36,6 @@
 #'    format) and then transforms it.}
 #'   \item{\code{$transform(x)}}{transform new data \code{x} using tf-idf from train data}
 #' }
-#' @field verbose \code{logical = TRUE} whether to display training inforamtion
 #' @section Arguments:
 #' \describe{
 #'  \item{tfidf}{A \code{TfIdf} object}
@@ -62,11 +61,8 @@
 #' identical(dtm_1, dtm_2)
 TfIdf = R6::R6Class(
   classname = c("TfIdf"),
-  inherit = mlTransformer,
+  inherit = mlapiTransformer,
   public = list(
-    #----------------------------------------------------------------------------
-    # members
-    verbose = NULL,
     #----------------------------------------------------------------------------
     # methods
 
@@ -75,7 +71,7 @@ TfIdf = R6::R6Class(
                           norm = c("l1", "l2", "none"),
                           sublinear_tf = FALSE) {
 
-      private$set_internal_matrix_formats(sparse = "CsparseMatrix")
+      super$set_internal_matrix_formats(sparse = "CsparseMatrix")
 
       private$sublinear_tf = sublinear_tf
       private$smooth_idf = smooth_idf
@@ -104,7 +100,7 @@ TfIdf = R6::R6Class(
     smooth_idf = TRUE,
     fitted = FALSE,
     prepare_x = function(x) {
-      x_internal = check_convert_input(x, private$internal_matrix_formats)
+      x_internal = super$check_convert_input(x, private$internal_matrix_formats)
       if(private$sublinear_tf)
         x_internal@x = 1 + log(x_internal@x)
       normalize(x_internal, private$norm)

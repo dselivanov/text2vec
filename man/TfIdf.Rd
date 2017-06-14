@@ -16,12 +16,6 @@ The IDF is defined as follows: \code{idf = log(# documents in the corpus) /
 \details{
 Term Frequency Inverse Document Frequency
 }
-\section{Fields}{
-
-\describe{
-\item{\code{verbose}}{\code{logical = TRUE} whether to display training inforamtion}
-}}
-
 \section{Usage}{
 
 For usage details see \bold{Methods, Arguments and Examples} sections.

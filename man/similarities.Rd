@@ -6,11 +6,9 @@
 \alias{psim2}
 \title{Pairwise Similarity Matrix Computation}
 \usage{
-sim2(x, y = NULL, method = c("cosine", "jaccard"), norm = c("l2", "none"),
-  verbose = TRUE)
+sim2(x, y = NULL, method = c("cosine", "jaccard"), norm = c("l2", "none"))
 
-psim2(x, y, method = c("cosine", "jaccard"), norm = c("l2", "none"),
-  verbose = TRUE)
+psim2(x, y, method = c("cosine", "jaccard"), norm = c("l2", "none"))
 }
 \arguments{
 \item{x}{first matrix.}
@@ -21,8 +19,6 @@ This means that we will assume \code{y = x} and calculate similarities between a
 \item{method}{\code{character}, the similarity measure to be used. One of \code{c("cosine", "jaccard")}.}
 
 \item{norm}{\code{character = c("l2", "none")} - how to scale input matrices. If they already scaled - use \code{"none"}}
-
-\item{verbose}{\code{logical} whether to display additional information during calculations}
 }
 \value{
 \code{sim2} returns \code{matrix} of similarities between each row of

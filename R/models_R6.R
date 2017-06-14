@@ -17,8 +17,7 @@
 text2vec_estimator = R6::R6Class(
   classname = "estimator",
   public = list(
-    fit = function(...) {stop("Method is not implemented")},
-    verbose = FALSE
+    fit = function(...) {stop("Method is not implemented")}
   ),
   private = list(
     fitted = FALSE,

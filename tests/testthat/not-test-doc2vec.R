@@ -30,7 +30,7 @@
 #
 # Sys.time()
 # fit <- glove(tcm = m2, word_vectors_size = 50, x_max = 30,  num_iters = 0, shuffle = T,
-#              learning_rate = 0.1, verbose = T, convergence_threshold = 0.005)
+#              learning_rate = 0.1, convergence_threshold = 0.005)
 # Sys.time()
 #
 # m1 <- fit$word_vectors$w_i + fit$word_vectors$w_j

@@ -9,7 +9,7 @@ names(txt) = ids
 
 tokens = word_tokenizer(txt)
 
-it = itoken(tokens, progressbar = F, ids = ids)
+it = itoken(tokens, progressbar = FALSE, ids = ids)
 
 test_that("Vocabulary pruning", {
   vocab = create_vocabulary(it)

@@ -65,22 +65,22 @@
 
 LatentSemanticAnalysis = R6::R6Class(
   "LatentSemanticAnalysis",
-  inherit = mlDecomposition,
+  inherit = mlapiDecomposition,
   public = list(
     #----------------------------------------------------------------------------
     # methods
     # constructor
     initialize = function(n_topics, method = c("irlba", "randomized")) {
+      super$set_internal_matrix_formats(sparse = "CsparseMatrix")
       private$n_topics = n_topics
       private$fitted = FALSE
-      private$set_internal_matrix_formats(sparse = "CsparseMatrix")
       private$svd_method = match.arg(method)
     },
     fit = function(x, ...) {
       invisible(self$fit_transform(x, ...))
     },
     fit_transform = function(x, ...) {
-      x = check_convert_input(x, private$internal_matrix_formats)
+      x = super$check_convert_input(x, private$internal_matrix_formats)
       if(private$svd_method == "irlba") {
         # http://stackoverflow.com/questions/7028385/can-i-remove-an-element-in-dot-dot-dot-and-pass-it-on
         # remove "y" from S3 call

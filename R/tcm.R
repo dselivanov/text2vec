@@ -131,20 +131,18 @@ create_tcm.itoken = function(it, vectorizer, skip_grams_window = 5L,
 }
 
 #' @rdname create_tcm
-#' @param verbose \code{logical} print status messages
 #' @param work_dir working directory for intermediate results
 #' @export
 create_tcm.list = function(it, vectorizer,
                            skip_grams_window = 5L,
                            skip_grams_window_context = c("symmetric", "right", "left"),
                            weights = 1 / seq_len(skip_grams_window),
-                           verbose = FALSE, work_dir = tempdir(), ...) {
+                           work_dir = tempdir(), ...) {
   skip_grams_window_context = match.arg(skip_grams_window_context)
   jobs = Map(function(job_id, it) list(job_id = job_id, it = it), seq_along(it), it)
   tcm_files =
     foreach(batch = jobs,
             .combine = c,
-            #.combine = function(...) triplet_sum(..., verbose = verbose),
             .inorder = F,
             .multicombine = T,
             # user already made split for jobs
@@ -158,16 +156,14 @@ create_tcm.list = function(it, vectorizer,
               saveRDS(tcm, file_to_save, compress = FALSE)
               file_to_save
             }
-  if (verbose)
-    message(paste(Sys.time(), "map phase finished, starting reduce"))
-  res_file = mc_triplet_rds_sum(tcm_files, work_dir, verbose = verbose)
+  flog.debug("map phase finished, starting reduce")
+  res_file = mc_triplet_rds_sum(tcm_files, work_dir)
   res = readRDS(res_file); unlink(res_file)
   as(res, 'dgTMatrix')
 }
 
-# triplet_sum = function(..., verbose = FALSE) {
-#   if (verbose)
-#     print(paste(Sys.time(), "got results from workers, call combine ..."))
+# triplet_sum = function(...) {
+#   flog.debug("got results from workers, call combine ...")
 #
 #   lst = list(...)
 #
@@ -205,7 +201,7 @@ mc_reduce = function(X, FUN,  ...) {
     X[[1]]
 }
 
-mc_triplet_rds_sum = function(fls, work_dir, verbose) {
+mc_triplet_rds_sum = function(fls, work_dir) {
   sum_m = function(a, b) {
     m1 = readRDS(a); unlink(a)
     if (!inherits(m1, 'dgCMatrix')) {

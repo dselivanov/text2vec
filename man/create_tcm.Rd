@@ -16,8 +16,7 @@ create_tcm(it, vectorizer, skip_grams_window = 5L,
 
 \method{create_tcm}{list}(it, vectorizer, skip_grams_window = 5L,
   skip_grams_window_context = c("symmetric", "right", "left"),
-  weights = 1/seq_len(skip_grams_window), verbose = FALSE,
-  work_dir = tempdir(), ...)
+  weights = 1/seq_len(skip_grams_window), work_dir = tempdir(), ...)
 }
 \arguments{
 \item{it}{\code{list} of iterators over tokens from \link{itoken}.
@@ -42,8 +41,6 @@ Should have length equal to skip_grams_window.
 
 \item{...}{arguments to \link{foreach} function which is used to iterate over
 \code{it}.}
-
-\item{verbose}{\code{logical} print status messages}
 
 \item{work_dir}{working directory for intermediate results}
 }

@@ -51,7 +51,6 @@ jaccard_sim = function(x, y = NULL, format = "dgCMatrix") {
 #' \bold{In case of \code{"cosine"} distance max distance will be 1 - (-1) = 2}
 #' @param norm \code{character = c("l2", "l1", "none")} - how to scale input matrices.
 #' If they already scaled - use \code{"none"}
-#' @param verbose \code{logical} whether to display additional information during calculations
 #' @title Pairwise Distance Matrix Computation
 #' @description \code{dist2} calculates pairwise distances/similarities between the
 #' rows of two data matrices. \bold{Note} that some methods work only on sparse matrices and
@@ -62,7 +61,7 @@ jaccard_sim = function(x, y = NULL, format = "dgCMatrix") {
 #' matrix \code{x} and each row of matrix \code{y}.
 #' @export
 dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
-                     norm = c("l2", "l1", "none"), verbose = TRUE) {
+                     norm = c("l2", "l1", "none")) {
   stopifnot(inherits(x, "matrix") || inherits(x, "Matrix"))
   stopifnot(inherits(method, "distance_model") || inherits(method, "character"))
 
@@ -82,15 +81,18 @@ dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
     method = match.arg(method)
     if(method %in% c("cosine", "jaccard")) {
       if( inherits(x, "sparseMatrix") || inherits(y, "sparseMatrix"))
-        message("Sparsity will be lost - worth to calculate similarity instead of distance.")
-      RESULT = 1 - sim2(x = x, y = y, method = method, norm = norm, verbose = verbose)
+        flog.warn("Sparsity will be lost - worth to calculate similarity instead of distance.")
+      RESULT = 1 - sim2(x = x, y = y, method = method, norm = norm)
     }
     if (method == "euclidean") {
       if (!FLAG_TWO_MATRICES_INPUT)
         y = x
-      if (!inherits(x, "matrix") || !inherits(y, "matrix"))
-        stop("At the moment eucludian distance can be calculated only for
-              dense matrices of class 'matrix'")
+      if (!inherits(x, "matrix") || !inherits(y, "matrix")) {
+        msg = "At the moment eucludian distance could be calculated only for dense matrices of class 'matrix'"
+        flog.error(msg)
+        stop(msg)
+
+      }
       # transpose, because euclidean_dist() function calculates dist between columns
       x = t(normalize(x, norm))
       if (FLAG_TWO_MATRICES_INPUT) {
@@ -107,7 +109,7 @@ dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
     if (inherits(method, "RWMD")) {
       if (norm != "none") {
         msg = paste(norm, "norm provided. RWMD can be computed only on bag-of-words matrices - raw word-counts")
-        message(msg)
+        flog.warn(msg)
       }
       RESULT = method$dist2(x, y)
     }
@@ -127,7 +129,7 @@ dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
 #' of \code{x} and \code{y}.
 #' @export
 pdist2 = function(x, y, method = c("cosine", "euclidean", "jaccard"),
-                  norm = c("l2", "l1", "none"), verbose = TRUE) {
+                  norm = c("l2", "l1", "none")) {
   stopifnot(inherits(x, "matrix") || inherits(x, "Matrix"))
   stopifnot(inherits(y, "matrix") || inherits(y, "Matrix"))
   stopifnot(inherits(method, "distance_model") || inherits(method, "character"))
@@ -139,7 +141,7 @@ pdist2 = function(x, y, method = c("cosine", "euclidean", "jaccard"),
   if (inherits(method, "character")) {
     method = match.arg(method)
     if(method %in% c("cosine", "jaccard")) {
-      RESULT = 1 - psim2(x = x, y = y, method = method, norm = norm, verbose = verbose)
+      RESULT = 1 - psim2(x = x, y = y, method = method, norm = norm)
     }
     if (method == "euclidean") {
       if (!inherits(x, "matrix") || !inherits(y, "matrix"))
@@ -152,7 +154,7 @@ pdist2 = function(x, y, method = c("cosine", "euclidean", "jaccard"),
     if (inherits(method, "RWMD")) {
       if (norm != "none") {
         msg = paste(norm, "norm provided. RWMD can be computed only on bag-of-words matrices - raw word-counts")
-        message(msg)
+        flog.warn(msg)
       }
       RESULT = method$pdist2(x, y)
     }
@@ -174,13 +176,12 @@ pdist2 = function(x, y, method = c("cosine", "euclidean", "jaccard"),
 #' This means that we will assume \code{y = x} and calculate similarities between all rows of the \code{x}.
 #' @param method \code{character}, the similarity measure to be used. One of \code{c("cosine", "jaccard")}.
 #' @param norm \code{character = c("l2", "none")} - how to scale input matrices. If they already scaled - use \code{"none"}
-#' @param verbose \code{logical} whether to display additional information during calculations
 #' @details Computes the similarity matrix using given method.
 #' @return \code{sim2} returns \code{matrix} of similarities between each row of
 #' matrix \code{x} and each row of matrix \code{y}.
 #' @export
 sim2 = function(x, y = NULL, method = c("cosine", "jaccard"),
-                norm = c("l2", "none"), verbose = TRUE) {
+                norm = c("l2", "none")) {
   norm = match.arg(norm)
   method = match.arg(method)
   # check first matrix
@@ -216,7 +217,7 @@ sim2 = function(x, y = NULL, method = c("cosine", "jaccard"),
     if (norm != "none") {
       msg = paste(norm, "norm provided. Howewer matrix will be converted to binary (0,1) automatically.")
       msg = paste(msg, "'jaccard' can be computed only on sets which should be encoded as sparse matrices of 0, 1.")
-      message(msg)
+      flog.warn(msg)
     }
     x@x = sign(x@x)
     if (FLAG_TWO_MATRICES_INPUT) {
@@ -234,7 +235,7 @@ sim2 = function(x, y = NULL, method = c("cosine", "jaccard"),
 #' giving the ‘parallel’ similarities of the vectors.
 #' @return \code{psim2} returns \code{vector} of "parallel" similarities between rows of \code{x} and \code{y}.
 #' @export
-psim2 = function(x, y, method = c("cosine", "jaccard"), norm = c("l2", "none"), verbose = TRUE) {
+psim2 = function(x, y, method = c("cosine", "jaccard"), norm = c("l2", "none")) {
   method = match.arg(method)
   norm = match.arg(norm)
 
@@ -258,7 +259,7 @@ psim2 = function(x, y, method = c("cosine", "jaccard"), norm = c("l2", "none"), 
     if (norm != "none") {
       msg = paste(norm, "norm provided. Howewer matrix will be converted to binary (0,1) automatically.")
       msg = paste(msg, "'jaccard' can be computed only on sets which should be encoded as sparse matrices of 0, 1.")
-      message(msg)
+      flog.warn(msg)
     }
 
     x@x = sign(x@x)

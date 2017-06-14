@@ -7,10 +7,10 @@
 \title{Pairwise Distance Matrix Computation}
 \usage{
 dist2(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
-  norm = c("l2", "l1", "none"), verbose = TRUE)
+  norm = c("l2", "l1", "none"))
 
 pdist2(x, y, method = c("cosine", "euclidean", "jaccard"), norm = c("l2",
-  "l1", "none"), verbose = TRUE)
+  "l1", "none"))
 }
 \arguments{
 \item{x}{first matrix.}
@@ -25,8 +25,6 @@ The distances/similarity measure to be used. One of \code{c("cosine", "euclidean
 
 \item{norm}{\code{character = c("l2", "l1", "none")} - how to scale input matrices.
 If they already scaled - use \code{"none"}}
-
-\item{verbose}{\code{logical} whether to display additional information during calculations}
 }
 \value{
 \code{dist2} returns \code{matrix} of distances/similarities between each row of

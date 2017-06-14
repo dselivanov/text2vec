@@ -21,7 +21,7 @@ text2vec_dist = R6::R6Class(
   public = list(
     dist2 = function(...) {stop("Method is not implemented")},
     pdist2 = function(...) {stop("Method is not implemented")},
-    verbose = TRUE
+    progressbar = TRUE
   ),
   private = list(
     internal_matrix_format = NULL
@@ -35,7 +35,7 @@ text2vec_dist = R6::R6Class(
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
-#' rwmd = RelaxedWordMoversDistance$new(wv, method = c("cosine", "euclidean"))
+#' rwmd = RelaxedWordMoversDistance$new(wv, method = c("cosine", "euclidean"), normalize = TRUE, progressbar = interactive())
 #' rwmd$dist2(x, y)
 #' rwmd$pdist2(x, y)
 #' }
@@ -49,8 +49,7 @@ text2vec_dist = R6::R6Class(
 #'   \item{\code{$pdist2(x, y)}}{Computes "parallel" distance between rows of
 #'         sparse matrix \code{x} and corresponding rows of the sparse matrix \code{y}}
 #' }
-#' @field verbose \code{logical = TRUE} whether to display
-#' additional inforamtion during calculations.
+#' @field progressbar \code{logical = TRUE} whether to display progressbar
 #' @section Arguments:
 #' \describe{
 #'  \item{rwmd}{\code{RWMD} object}
@@ -88,14 +87,19 @@ RelaxedWordMoversDistance = R6::R6Class(
   classname = "RWMD",
   inherit = text2vec_dist,
   public = list(
-    initialize = function(wv, method = c('cosine', 'euclidean'), normalize = TRUE) {
+    initialize = function(wv, method = c('cosine', 'euclidean'), normalize = TRUE, progressbar = interactive()) {
+      stopifnot(is.matrix(wv))
+      stopifnot(is.numeric(wv))
+      stopifnot(is.logical(normalize) && is.logical(progressbar))
+
       private$internal_matrix_format = 'RsparseMatrix'
       private$method = match.arg(method)
+      self$progressbar = progressbar
       # private$wv = t(wv / sqrt(rowSums(wv ^ 2)))# %>% as.matrix
       # make shure  that word vectors are L2 normalized
       # and transpose them for faster column subsetting
       # R stores matrices in column-major format
-      private$wv = t(wv %>% normalize("l2") %>% as.matrix)
+      private$wv = t(normalize(wv, "l2") %>% as.matrix)
     },
     dist2 = function(x, y) {
       stopifnot( inherits(x, "sparseMatrix") && inherits(y, "sparseMatrix"))
@@ -114,13 +118,13 @@ RelaxedWordMoversDistance = R6::R6Class(
         normalize("l1") %>%
         as(private$internal_matrix_format)
 
-      if (self$verbose)
+      if (self$progressbar)
         pb = txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)
       # preallocate resulting matrix
       res = matrix(Inf, nrow = nrow(x_csr), ncol = nrow(y_csr))
       # main loop
       for (j in 2L:(length(x_csr@p))) {
-        if (self$verbose) setTxtProgressBar(pb, j)
+        if (self$progressbar) setTxtProgressBar(pb, j)
         i1 = (x_csr@p[[j - 1]] + 1L):x_csr@p[[j]]
         j1 = x_csr@j[i1] + 1L
         m_j1 = wv_internal[, j1, drop = F]
@@ -157,12 +161,12 @@ RelaxedWordMoversDistance = R6::R6Class(
         normalize("l1") %>%
         as(private$internal_matrix_format)
 
-      if (self$verbose)
+      if (self$progressbar)
         pb = txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)
       # preallocate space for result
       res = rep(Inf,  nrow(x_csr))
       for (j in 2L:(length(x_csr@p))) {
-        if (self$verbose) setTxtProgressBar(pb, j)
+        if (self$progressbar) setTxtProgressBar(pb, j)
         i1 = (x_csr@p[[j - 1]] + 1L):x_csr@p[[j]]
         j1 = x_csr@j[i1] + 1L
         m_j1 = wv_internal[ , j1, drop = FALSE]

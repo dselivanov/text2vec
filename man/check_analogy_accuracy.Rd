@@ -4,7 +4,7 @@
 \alias{check_analogy_accuracy}
 \title{Checks accuracy of word embeddings on the analogy task}
 \usage{
-check_analogy_accuracy(questions_list, m_word_vectors, verbose = TRUE)
+check_analogy_accuracy(questions_list, m_word_vectors)
 }
 \arguments{
 \item{questions_list}{\code{list} of questions. Each element of
@@ -15,8 +15,6 @@ of \link{prepare_analogy_questions} for details}
 
 \item{m_word_vectors}{word vectors \code{numeric matrix}. Each row should
 represent a word.}
-
-\item{verbose}{\code{logical} whether to print messages during evaluation.}
 }
 \description{
 This function checks how well the GloVe word embeddings do on

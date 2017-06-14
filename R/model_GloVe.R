@@ -47,7 +47,6 @@
 #'   grain_size for \code{RcppParallel::parallelReduce}. For details, see
 #'   \url{http://rcppcore.github.io/RcppParallel/#grain-size}.
 #'   \bold{We don't recommend to change this paramenter.}
-#' @field verbose \code{logical = TRUE} whether to display training inforamtion
 #' @section Arguments:
 #' \describe{
 #'  \item{glove}{A \code{GloVe} object}
@@ -118,7 +117,6 @@ GlobalVectors = R6::R6Class(
                           shuffle = FALSE,
                           initial = NULL
                           ) {
-      self$verbose = TRUE
       self$shuffle = shuffle
       private$internal_matrix_format = "TsparseMatrix"
 
@@ -227,21 +225,18 @@ GlobalVectors = R6::R6Class(
 
         # save cost history
         private$cost_history = c(private$cost_history, cost / n_nnz / 2)
-        if (self$verbose) {
-          msg = sprintf("%s - epoch %d, expected cost %.4f", as.character(Sys.time()),
-                         i, private$cost_history[[i]])
-          if (private$lambda > 0)
-            msg = paste0(msg, sprintf(", sparsity %.4f", cpp_glove_get_sparsity_level(private$glove_fitter)))
-          message(msg)
-        }
+        msg = sprintf("%s - epoch %d, expected cost %.4f", as.character(Sys.time()),
+                       i, private$cost_history[[i]])
+        if (private$lambda > 0)
+          msg = paste0(msg, sprintf(", sparsity %.4f", cpp_glove_get_sparsity_level(private$glove_fitter)))
+        flog.info(msg)
 
         # reset cost for next iteration
         cpp_glove_set_cost_zero(private$glove_fitter)
 
         # check convergence
         if ( i > 1 && (private$cost_history[[i - 1]] / private$cost_history[[i]] - 1) < convergence_tol) {
-          message(paste("Success: early stopping. Improvement at iterartion", i,
-                        "is less then convergence_tol"))
+          flog.info("Success: early stopping. Improvement at iterartion %d is less then convergence_tol", i)
           break;
         }
         # write word vectors history
@@ -328,7 +323,6 @@ GloVe = GlobalVectors
 #'   improves your score.
 #' @param learning_rate learning rate for SGD. I do not recommend that you
 #'   modify this parameter, since AdaGrad will quickly adjust it to optimal.
-#' @param verbose \code{logical} whether to display training inforamtion
 #' @param convergence_threshold defines early stopping strategy. We stop fitting
 #'   when one of two following conditions will be satisfied: (a) we have used
 #'   all iterations, or (b) \code{cost_previous_iter / cost_current_iter - 1 <
@@ -350,7 +344,6 @@ glove = function(tcm,
                  num_iters,
                  shuffle_seed = NA_integer_,
                  learning_rate = 0.05,
-                 verbose = TRUE,
                  convergence_threshold = -1.0,
                  grain_size =  1e5L,
                  max_cost = 10.0,
@@ -372,7 +365,6 @@ glove = function(tcm,
                        shuffle = !is.na(shuffle_seed),
                        grain_size =  grain_size)
 
-  glove_model$verbose = TRUE
   glove_model$fit(tcm, n_iter = num_iters, convergence_tol = convergence_threshold)
   glove_model$get_word_vectors()
 }

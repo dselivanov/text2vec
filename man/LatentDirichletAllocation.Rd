@@ -26,8 +26,6 @@ Creates Latent Dirichlet Allocation model.
 \section{Fields}{
 
 \describe{
-\item{\code{verbose}}{\code{logical = FALSE} whether to display more information about internal routines.}
-
 \item{\code{topic_word_distribution}}{distribution of words for each topic. Available after model fitting with
 \code{model$fit()} or \code{model$fit_transform()} methods.}
 
@@ -42,9 +40,9 @@ Creates Latent Dirichlet Allocation model.
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
 \preformatted{
-lda = LDA$new(n_topics = 10L, doc_topic_prior = 50 / n_topics, topic_word_prior = 1 / n_topics, verbose = FALSE)
-lda$fit_transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10, progress = interactive())
-lda$transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5, progress = FALSE)
+lda = LDA$new(n_topics = 10L, doc_topic_prior = 50 / n_topics, topic_word_prior = 1 / n_topics)
+lda$fit_transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10, progressbar = interactive())
+lda$transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5, progressbar = FALSE)
 lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
 }
 }
@@ -55,17 +53,17 @@ lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
   \item{\code{$new(n_topics,
               doc_topic_prior = 50 / n_topics, # alpha
               topic_word_prior = 1 / n_topics, # beta
-              verbose = FALSE, method = "WarpLDA")}}{Constructor for LDA model.
+              method = "WarpLDA")}}{Constructor for LDA model.
               For description of arguments see \bold{Arguments} section.}
   \item{\code{$fit(x, n_iter, convergence_tol = -1,
                n_check_convergence = 10)}}{fit LDA model to input matrix \code{x}. Not that useful -
                \code{fit_transform} is used under the hood. Implemented just to follow API.}
   \item{\code{$fit_transform(x, n_iter, convergence_tol = -1,
-               n_check_convergence = 0, progress = interactive())}}{fit LDA model to input matrix
+               n_check_convergence = 0, progressbar = interactive())}}{fit LDA model to input matrix
                \code{x} and transforms input documents to topic space -
                model input matrix as a distribution over topic space}
   \item{\code{$transform(x, n_iter, convergence_tol = -1,
-               n_check_convergence = 0, progress = FALSE)}}{ transforms new documents to topic space -
+               n_check_convergence = 0, progressbar = FALSE)}}{ transforms new documents to topic space -
                model input matrix as a distribution over topic space}
   \item{\code{$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)}}{returns "top words"
                for a given topic (or several topics). Words for each topic can be

@@ -116,7 +116,7 @@ create_dtm.list = function(it, vectorizer,
   stopifnot(all( check_itoken ))
   type = match.arg(type)
   combine_fun = function(...) {
-    # message(paste(Sys.time(), "got results from workers, call combine ..."))
+    flog.debug("got results from workers, call combine ...")
     rbind_dgTMatrix(...)
   }
 

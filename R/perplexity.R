@@ -25,10 +25,10 @@
 #'   prune_vocabulary(term_count_min = 5, doc_proportion_min = 0.02)
 #' dtm = create_dtm(it, vectorizer = vocab_vectorizer(vocab))
 #' n_topic = 10
-#' model = LDA$new(n_topic, doc_topic_prior = 0.1, topic_word_prior = 0.01, verbose = FALSE)
+#' model = LDA$new(n_topic, doc_topic_prior = 0.1, topic_word_prior = 0.01)
 #' doc_topic_distr  =
 #'   model$fit_transform(dtm, n_iter = n_iter, n_check_convergence = 1,
-#'                       convergence_tol = -1, progress = FALSE)
+#'                       convergence_tol = -1, progressbar = FALSE)
 #' topic_word_distr_10 = model$topic_word_distribution
 #' perplexity(dtm, topic_word_distr_10, doc_topic_distr)
 #' @export

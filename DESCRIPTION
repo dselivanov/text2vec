@@ -27,7 +27,8 @@ Imports:
     magrittr (>= 1.5),
     irlba (>= 2.2.1),
     R6 (>= 2.1.2), 
-    uuid (>= 0.1-2)
+    uuid (>= 0.1-2), 
+    futile.logger (>= 1.4.3)
 LinkingTo: Rcpp,
     RcppParallel,
     digest,

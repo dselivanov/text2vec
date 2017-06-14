@@ -19,15 +19,14 @@ and vice versa. For more detail see original article: \url{http://mkusner.github
 \section{Fields}{
 
 \describe{
-\item{\code{verbose}}{\code{logical = TRUE} whether to display
-additional inforamtion during calculations.}
+\item{\code{progressbar}}{\code{logical = TRUE} whether to display progressbar}
 }}
 
 \section{Usage}{
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
 \preformatted{
-rwmd = RelaxedWordMoversDistance$new(wv, method = c("cosine", "euclidean"))
+rwmd = RelaxedWordMoversDistance$new(wv, method = c("cosine", "euclidean"), normalize = TRUE, progressbar = interactive())
 rwmd$dist2(x, y)
 rwmd$pdist2(x, y)
 }

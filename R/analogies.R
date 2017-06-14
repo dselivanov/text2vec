@@ -3,12 +3,11 @@
 #' @param questions_file_path \code{character} path to questions file.
 #' @param vocab_terms \code{character} words which we have in the
 #'   vocabulary and word embeddings matrix.
-#' @param verbose \code{logical} whether to print messages during evaluation.
 #' @description  This function prepares a list of questions from a
 #'   \code{questions-words.txt} format. For full examples see \link{GloVe}.
 #' @seealso \link{check_analogy_accuracy}, \link{GloVe}
 #' @export
-prepare_analogy_questions = function(questions_file_path, vocab_terms, verbose = TRUE) {# nocov start
+prepare_analogy_questions = function(questions_file_path, vocab_terms) {# nocov start
   lines = readLines(questions_file_path) %>%
     tolower %>%
     strsplit(split = " ", fixed = TRUE)
@@ -40,16 +39,12 @@ prepare_analogy_questions = function(questions_file_path, vocab_terms, verbose =
     MoreArgs = list(quetsions = lines)
   )
 
-  questions_number = sapply(q, nrow) %>% sum
+  questions_number = sum(sapply(q, nrow))
 
-  if (verbose) {
-    msg = sprintf("%s -  %d full questions found out of %d total",
-                   as.character(Sys.time()),
-                   questions_number,
-                   length(lines) - length(section_name_ind)
-    )
-    message(msg)
-  }
+  flog.info("%d full questions found out of %d total",
+            as.character(Sys.time()),
+            questions_number,
+            length(lines) - length(section_name_ind))
 
   stats::setNames(q, sapply(lines[section_name_ind], .subset2, 2))
 }
@@ -63,12 +58,11 @@ prepare_analogy_questions = function(questions_file_path, vocab_terms, verbose =
 #'   of \link{prepare_analogy_questions} for details
 #' @param m_word_vectors word vectors \code{numeric matrix}. Each row should
 #'   represent a word.
-#' @param verbose \code{logical} whether to print messages during evaluation.
 #' @description This function checks how well the GloVe word embeddings do on
 #'   the analogy task. For full examples see \link{glove}.
 #' @seealso \link{prepare_analogy_questions}, \link{glove}
 #' @export
-check_analogy_accuracy = function(questions_list, m_word_vectors, verbose = TRUE) {
+check_analogy_accuracy = function(questions_list, m_word_vectors) {
 
   m_word_vectors_norm =  sqrt(rowSums(m_word_vectors ^ 2))
   m_word_vectors_normalized = m_word_vectors / m_word_vectors_norm
@@ -99,15 +93,12 @@ check_analogy_accuracy = function(questions_list, m_word_vectors, verbose = TRUE
     act = q_mat[, 4]
     correct_number = sum(preds == act)
 
-    if (verbose) {
-      msg = sprintf("%s - %s: correct %d out of %d, accuracy = %.4f",
-                     as.character(Sys.time()),
-                     category,
-                     correct_number,
-                     q_number,
-                     correct_number / q_number )
-      message(msg)
-    }
+    flog.info("%s: correct %d out of %d, accuracy = %.4f",
+                   category,
+                   correct_number,
+                   q_number,
+                   correct_number / q_number )
+
     res[[i]] =
       data.table(
         'predicted' = preds,
@@ -116,12 +107,6 @@ check_analogy_accuracy = function(questions_list, m_word_vectors, verbose = TRUE
       )
   }
   res = rbindlist(res)
-  # res = do.call(rbind, res)
-
-  if (verbose) {
-    msg = sprintf("%s - OVERALL ACCURACY = %.4f", as.character(Sys.time()),
-                   sum(res[['predicted']] == res[['actual']]) / nrow(res) )
-    message(msg)
-  }
+  flog.info("OVERALL ACCURACY = %.4f", sum(res[['predicted']] == res[['actual']]) / nrow(res) )
   res
 }# nocov end

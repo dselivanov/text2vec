@@ -27,7 +27,7 @@
 #' @return \code{invisible(object$self())}
 #' @export
 fit = function(x, model, y = NULL, ...) {
-  stopifnot(inherits(model, "mlEstimator") || inherits(model, "mlTransformer"))
+  stopifnot(inherits(model, "mlapiEstimator") || inherits(model, "mlapiTransformer"))
   UseMethod("fit")
 }
 
@@ -57,7 +57,7 @@ fit.matrix = function(x, model, y = NULL, ...) {
 #' @return Transformed version of \code{x}
 #' @export
 fit_transform = function(x, model, y = NULL, ...) {
-  stopifnot(inherits(model, "mlTransformer"))
+  stopifnot(inherits(model, "mlapiTransformer"))
   UseMethod("fit_transform")
 }
 
@@ -84,7 +84,7 @@ fit_transform.matrix = function(x, model, y = NULL, ...) {
 #' implements method \code{$transform(x, ...)}
 #' @param ... additional data/model dependent arguments to downstream functions.
 transform.Matrix = function(`_data`, model, ...) {
-  stopifnot(inherits(model, "mlTransformer"))
+  stopifnot(inherits(model, "mlapiTransformer"))
   model$transform(`_data`, ...)
 }
 
@@ -92,7 +92,7 @@ transform.Matrix = function(`_data`, model, ...) {
 #' @export
 #' @method transform matrix
 transform.matrix = function(`_data`, model, ...) {
-  stopifnot(inherits(model, "mlTransformer"))
+  stopifnot(inherits(model, "mlapiTransformer"))
   model$transform(`_data`, ...)
 }
 

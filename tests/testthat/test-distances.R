@@ -1,3 +1,4 @@
+futile.logger::flog.threshold(futile.logger::FATAL)
 context("distances")
 ind = 1:100
 m1 = matrix(1:15, nrow = 5)
@@ -5,7 +6,7 @@ m2 = matrix(1:12, nrow = 4)
 tol = 1e-5
 
 tokens = movie_review$review[ind] %>% tolower %>% word_tokenizer
-it = itoken(tokens, progressbar = F)
+it = itoken(tokens, progressbar = FALSE)
 v = create_vocabulary(it) %>% prune_vocabulary(term_count_min = 3)
 # vv = vocab_vectorizer(v)
 #
@@ -71,7 +72,6 @@ test_that("relaxed word mover distance", {
   glove$fit(tcm, n_iter = 10)
   wv = glove$get_word_vectors()
   rwmd_model = RWMD$new(wv)
-  rwmd_model$verbose = FALSE
   rwmd_dist = dist2(dtm[i1, ], dtm[i2, ], method = rwmd_model, norm = "none")
   expect_equal(nrow(rwmd_dist), length(i1))
   expect_equal(ncol(rwmd_dist), length(i2))

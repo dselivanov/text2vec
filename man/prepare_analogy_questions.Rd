@@ -4,15 +4,13 @@
 \alias{prepare_analogy_questions}
 \title{Prepares list of analogy questions}
 \usage{
-prepare_analogy_questions(questions_file_path, vocab_terms, verbose = TRUE)
+prepare_analogy_questions(questions_file_path, vocab_terms)
 }
 \arguments{
 \item{questions_file_path}{\code{character} path to questions file.}
 
 \item{vocab_terms}{\code{character} words which we have in the
 vocabulary and word embeddings matrix.}
-
-\item{verbose}{\code{logical} whether to print messages during evaluation.}
 }
 \description{
 This function prepares a list of questions from a

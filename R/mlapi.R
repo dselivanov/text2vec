@@ -1,27 +1,51 @@
-mlEstimator = R6::R6Class(
-  classname = "mlEstimator",
+mlapiEstimator = R6::R6Class(
+  classname = "mlapiEstimator",
   public = list(
-    fit = function(X, y, ...) raise_placeholder_error(),
-    predict = function(X, ...) raise_placeholder_error()
+    fit = function(x, y, ...) raise_placeholder_error(),
+    predict = function(x, ...) raise_placeholder_error()
   ),
   private = list(
+    #-------------------------------------------------------------------------------------
     internal_matrix_formats = list(sparse = NULL, dense = NULL),
-
+    #-------------------------------------------------------------------------------------
     set_internal_matrix_formats = function(sparse = NULL, dense = NULL) {
 
-      stopifnot((length(sparse) <= 1) && (is.character(sparse) || is.null(sparse)))
-      stopifnot((length(dense)  <= 1) && (is.character(dense)  || is.null(dense)))
+      stopifnot(is.character(sparse) || is.null(sparse))
+      stopifnot(length(sparse) <= 1)
+
+      stopifnot(is.character(dense) || is.null(dense))
+      stopifnot(length(dense) <= 1)
 
       private$internal_matrix_formats = list(sparse = sparse, dense = dense)
+    },
+    #-------------------------------------------------------------------------------------
+    check_convert_input = function(x, internal_formats, verbose = FALSE) {
+      stopifnot(all(names(internal_formats) %in% c("sparse", "dense")))
+
+      # first check sparse input
+      if(inherits(x, "sparseMatrix")) {
+        sparse_format = internal_formats[["sparse"]]
+        if(is.null(sparse_format))
+          stop("input inherits from 'sparseMatrix', but underlying functions don't work with sparse matrices (yet)")
+        return(as(x, sparse_format))
+      }
+      # them check dense formats
+      else {
+        dense_format = internal_formats[["dense"]]
+        if(is.null(dense_format))
+          stop("input is supposed to be dense matrix, but underlying functions don't work with dense matrices (yet)")
+        return(as(x, dense_format))
+      }
     }
+    #-------------------------------------------------------------------------------------
   )
 )
 #---------------------------------------------------------------------------------------
-mlEstimatorOnline <- R6::R6Class(
-  classname = "mlEstimatorOnline",
-  inherit = mlEstimator,
+mlapiEstimatorOnline <- R6::R6Class(
+  classname = "mlapiEstimatorOnline",
+  inherit = mlapiEstimator,
   public = list(
-    partial_fit = function(X, y, ...) {},
+    partial_fit = function(x, y, ...) {},
     # has to dump inpternal model representation to R object in order to be able to load it in future
     # for example internally model can keep data out of R's heap and have external pointer to it
     dump = function() raise_placeholder_error(),
@@ -32,32 +56,35 @@ mlEstimatorOnline <- R6::R6Class(
   private = list()
 )
 #---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-mlTransformer = R6::R6Class(
-  classname = "mlTransformer",
+mlapiTransformer = R6::R6Class(
+  classname = "mlapiTransformer",
+  inherit = mlapiEstimator,
   public = list(
-    fit = function(X, y = NULL, ...) raise_placeholder_error(),
-    fit_transform = function(X, y = NULL, ...) raise_placeholder_error(),
-    transform = function(X, y = NULL, ...) raise_placeholder_error()
+    fit = function(x, y = NULL, ...) raise_placeholder_error(),
+    fit_transform = function(x, y = NULL, ...) raise_placeholder_error(),
+    transform = function(x, y = NULL, ...) raise_placeholder_error()
   ),
   private = list(
     internal_matrix_formats = list(sparse = NULL, dense = NULL),
 
     set_internal_matrix_formats = function(sparse = NULL, dense = NULL) {
 
-      stopifnot((length(sparse) <= 1) && (is.character(sparse) || is.null(sparse)))
-      stopifnot((length(dense)  <= 1) && (is.character(dense)  || is.null(dense)))
+      stopifnot(is.character(sparse) || is.null(sparse))
+      stopifnot(length(sparse) <= 1)
+
+      stopifnot(is.character(dense) || is.null(dense))
+      stopifnot(length(dense) <= 1)
 
       private$internal_matrix_formats = list(sparse = sparse, dense = dense)
     }
   )
 )
 #---------------------------------------------------------------------------------------
-mlTransformerOnline <- R6::R6Class(
-  classname = "mlTransformerOnline",
-  inherit = mlTransformer,
+mlapiTransformerOnline <- R6::R6Class(
+  classname = "mlapiTransformerOnline",
+  inherit = mlapiTransformer,
   public = list(
-    partial_fit = function(X, y = NULL, ...) raise_placeholder_error(),
+    partial_fit = function(x, y = NULL, ...) raise_placeholder_error(),
     # has to dump inpternal model representation to R object in order to be able to load it in future
     # for example internally model can keep data out of R's heap and have external pointer to it
     dump = function() raise_placeholder_error(),
@@ -68,9 +95,9 @@ mlTransformerOnline <- R6::R6Class(
 )
 #---------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------
-mlDecomposition = R6::R6Class(
-  classname = "mlDecomposition",
-  inherit = mlTransformer,
+mlapiDecomposition = R6::R6Class(
+  classname = "mlapiDecomposition",
+  inherit = mlapiTransformer,
   # public = list (
   #   components = NULL
   # ),
@@ -94,11 +121,11 @@ mlDecomposition = R6::R6Class(
   )
 )
 #---------------------------------------------------------------------------------------
-mlDecompositionOnline <- R6::R6Class(
-  classname = "mlDecompositionOnline",
-  inherit = mlDecomposition,
+mlapiDecompositionOnline <- R6::R6Class(
+  classname = "mlapiDecompositionOnline",
+  inherit = mlapiDecomposition,
   public = list(
-    partial_fit = function(X, y = NULL, ...) raise_placeholder_error(),
+    partial_fit = function(x, y = NULL, ...) raise_placeholder_error(),
     # has to dump inpternal model representation to R object in order to be able to load it in future
     # for example internally model can keep data out of R's heap and have external pointer to it
     dump = function() raise_placeholder_error(),
@@ -107,28 +134,10 @@ mlDecompositionOnline <- R6::R6Class(
   ),
   private = list()
 )
+
 ################################################################################
 # utils
 # to be moved to a separate file
 ################################################################################
 raise_placeholder_error = function()
   stop("Placeholder for method. Subclasses should implement this method!")
-
-check_convert_input = function(X, internal_formats, verbose = FALSE) {
-  stopifnot(all(names(internal_formats) %in% c("sparse", "dense")))
-
-  # first check sparse input
-  if(inherits(X, "sparseMatrix")) {
-    sparse_format = internal_formats[['sparse']]
-    if(is.null(sparse_format))
-      stop("input inherits from 'sparseMatrix', but underlying functions don't work with sparse matrices (yet)")
-    return(as(X, sparse_format))
-  }
-  # them check dense formats
-  else {
-    dense_format = internal_formats[['dense']]
-    if(is.null(dense_format))
-      stop("input is supposed to be dense matrix, but underlying functions don't work with dense matrices (yet)")
-    return(as(X, dense_format))
-  }
-}

@@ -38,6 +38,7 @@ NULL
 #' @importFrom magrittr %>%
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' @importFrom methods as
+#' @importFrom futile.logger flog.debug flog.info flog.warn flog.error
 #' @useDynLib "text2vec", .registration=TRUE
 NULL
 

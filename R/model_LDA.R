@@ -26,12 +26,11 @@
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
-#' lda = LDA$new(n_topics = 10L, doc_topic_prior = 50 / n_topics, topic_word_prior = 1 / n_topics, verbose = FALSE)
-#' lda$fit_transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10, progress = interactive())
-#' lda$transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5, progress = FALSE)
+#' lda = LDA$new(n_topics = 10L, doc_topic_prior = 50 / n_topics, topic_word_prior = 1 / n_topics)
+#' lda$fit_transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10, progressbar = interactive())
+#' lda$transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5, progressbar = FALSE)
 #' lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
 #' }
-#' @field verbose \code{logical = FALSE} whether to display more information about internal routines.
 #' @field topic_word_distribution distribution of words for each topic. Available after model fitting with
 #' \code{model$fit()} or \code{model$fit_transform()} methods.
 #' @field doc_topic_distribution distribution of topics for each document. Available after model fitting with
@@ -43,17 +42,17 @@
 #'   \item{\code{$new(n_topics,
 #'               doc_topic_prior = 50 / n_topics, # alpha
 #'               topic_word_prior = 1 / n_topics, # beta
-#'               verbose = FALSE, method = "WarpLDA")}}{Constructor for LDA model.
+#'               method = "WarpLDA")}}{Constructor for LDA model.
 #'               For description of arguments see \bold{Arguments} section.}
 #'   \item{\code{$fit(x, n_iter, convergence_tol = -1,
 #'                n_check_convergence = 10)}}{fit LDA model to input matrix \code{x}. Not that useful -
 #'                \code{fit_transform} is used under the hood. Implemented just to follow API.}
 #'   \item{\code{$fit_transform(x, n_iter, convergence_tol = -1,
-#'                n_check_convergence = 0, progress = interactive())}}{fit LDA model to input matrix
+#'                n_check_convergence = 0, progressbar = interactive())}}{fit LDA model to input matrix
 #'                \code{x} and transforms input documents to topic space -
 #'                model input matrix as a distribution over topic space}
 #'   \item{\code{$transform(x, n_iter, convergence_tol = -1,
-#'                n_check_convergence = 0, progress = FALSE)}}{ transforms new documents to topic space -
+#'                n_check_convergence = 0, progressbar = FALSE)}}{ transforms new documents to topic space -
 #'                model input matrix as a distribution over topic space}
 #'   \item{\code{$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)}}{returns "top words"
 #'                for a given topic (or several topics). Words for each topic can be
@@ -97,23 +96,20 @@
 #' @export
 LatentDirichletAllocation = R6::R6Class(
   classname = c("WarpLDA", "LDA"),
-  inherit = mlDecomposition,
+  inherit = mlapiDecomposition,
   public = list(
     #----------------------------------------------------------------------------
     # members
-    verbose = NULL,
     #----------------------------------------------------------------------------
     # methods
 
     # constructor
     initialize = function(n_topics = 10L,
                           doc_topic_prior = 50 / n_topics,
-                          topic_word_prior = 1 / n_topics,
-                          verbose = FALSE) {
+                          topic_word_prior = 1 / n_topics) {
 
-      self$verbose  = verbose
 
-      private$set_internal_matrix_formats(sparse = "RsparseMatrix")
+      super$set_internal_matrix_formats(sparse = "RsparseMatrix")
 
       private$n_topics = n_topics
       private$doc_topic_prior = doc_topic_prior
@@ -126,8 +122,8 @@ LatentDirichletAllocation = R6::R6Class(
     },
     #---------------------------------------------------------------------------------------------
     fit_transform = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10,
-                             progress = interactive(), ...) {
-      stopifnot(is.logical(progress))
+                             progressbar = interactive(), ...) {
+      stopifnot(is.logical(progressbar))
 
       private$ptr = warplda_create(n = private$n_topics,
                                    doc_topic_prior = private$doc_topic_prior,
@@ -142,7 +138,7 @@ LatentDirichletAllocation = R6::R6Class(
         private$fit_transform_internal(private$ptr, n_iter = n_iter,
                                        convergence_tol = convergence_tol,
                                        n_check_convergence = n_check_convergence,
-                                       update_topics = TRUE, progress = progress)
+                                       update_topics = TRUE, progressbar = progressbar)
 
       # got topic word count distribution
       private$components_ = private$get_topic_word_count()
@@ -156,13 +152,13 @@ LatentDirichletAllocation = R6::R6Class(
     #---------------------------------------------------------------------------------------------
     # not that useful - just to follow API
     fit = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10,
-                   progress = interactive(), ...) {
+                   progressbar = interactive(), ...) {
       invisible(self$fit_transform(x = x, n_iter = n_iter, convergence_tol = convergence_tol,
-                                   n_check_convergence = n_check_convergence, progress = progress))
+                                   n_check_convergence = n_check_convergence, progressbar = progressbar))
     },
     #---------------------------------------------------------------------------------------------
     transform = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5,
-                         progress = FALSE, ...) {
+                         progressbar = FALSE, ...) {
       # create model for inferenct (we have to init internal C++ data structures for document-term matrix)
       inference_model_ptr = warplda_create(n = private$n_topics,
                                            doc_topic_prior = private$doc_topic_prior,
@@ -178,7 +174,7 @@ LatentDirichletAllocation = R6::R6Class(
         private$fit_transform_internal(inference_model_ptr, n_iter = n_iter,
                                        convergence_tol = convergence_tol,
                                        n_check_convergence = n_check_convergence,
-                                       update_topics = 0L, progress = progress)
+                                       update_topics = 0L, progressbar = progressbar)
       # add priors and normalize to get distribution
       doc_topic_distr = (doc_topic_count + private$doc_topic_prior) %>% text2vec::normalize("l1")
       attributes(doc_topic_distr) = attributes(doc_topic_count)
@@ -270,8 +266,8 @@ LatentDirichletAllocation = R6::R6Class(
                                       convergence_tol = -1,
                                       n_check_convergence = 10,
                                       update_topics = 1L,
-                                      progress = FALSE) {
-      if(progress)
+                                      progressbar = FALSE) {
+      if(progressbar)
         pb = txtProgressBar(min = 0, max = n_iter, initial = 0, style = 3)
 
       loglik_previous = -Inf
@@ -287,23 +283,22 @@ LatentDirichletAllocation = R6::R6Class(
         if(i %% n_check_convergence == 0) {
           loglik = private$calc_pseudo_loglikelihood()
 
-          if(self$verbose)
-            message(sprintf("%s iter %d current loglikelihood %.4f", Sys.time(), i, loglik))
+          flog.info("iter %d current loglikelihood %.4f", i, loglik)
 
           loglik_hist[[j]] = data.frame(iter = i, loglikelihood = loglik)
 
           if(loglik_previous / loglik - 1 < convergence_tol) {
-            if(progress) setTxtProgressBar(pb, n_iter)
-            if(self$verbose) message(sprintf("%s early stopping at %d iteration", Sys.time(), i))
+            if(progressbar) setTxtProgressBar(pb, n_iter)
+            flog.info("%s early stopping at %d iteration", i)
             break
           }
           loglik_previous = loglik
           j = j + 1
         }
-        if(progress)
+        if(progressbar)
           setTxtProgressBar(pb, i)
       }
-      if(progress)
+      if(progressbar)
         close(pb)
 
       res = warplda_get_doc_topic_count(model_ptr)
@@ -313,12 +308,11 @@ LatentDirichletAllocation = R6::R6Class(
     },
     #--------------------------------------------------------------
     init_model_dtm = function(x, ptr = private$ptr) {
-      x = check_convert_input(x, private$internal_matrix_formats, private$verbose)
+      x = super$check_convert_input(x, private$internal_matrix_formats)
       # Document-term matrix should have column names - vocabulary
       stopifnot(!is.null(colnames(x)))
 
-      if(self$verbose)
-        message(sprintf("%s converting DTM to internal C++ structure", Sys.time()))
+      flog.debug("converting DTM to internal C++ structure")
 
       # random topic assignements for each word
       nnz = sum(x@x)
@@ -384,8 +378,7 @@ LatentDirichletAllocationDistributed = R6::R6Class(
     initialize = function(n_topics = 10L,
                           doc_topic_prior = 50 / n_topics,
                           topic_word_prior = 1 / n_topics,
-                          cl = NULL,
-                          verbose = FALSE) {
+                          cl = NULL) {
 
       foreach(seq_len(foreach::getDoParWorkers())) %dopar% {
         text2vec.environment <<- new.env(parent = emptyenv())
@@ -399,9 +392,9 @@ LatentDirichletAllocationDistributed = R6::R6Class(
       # })
     },
     fit_transform = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10,
-                             progress = interactive(), ...) {
+                             progressbar = interactive(), ...) {
       stopifnot(inherits(x, "RowDistributedMatrix"))
-      stopifnot(is.logical(progress))
+      stopifnot(is.logical(progressbar))
       # sun_counts = function(...) do.call(`+`, ...)
       # ii = parallel::splitIndices(nrow(x), foreach::getDoParWorkers())
       global_counts =
@@ -442,13 +435,13 @@ LatentDirichletAllocationDistributed = R6::R6Class(
                     stat = sprintf("pid %d %.3f", Sys.getpid(), difftime( Sys.time(), t0, units = "sec"))
                     list(ll = ll, local_counts = local_counts, stat = stat)
                   }
-        lapply(iter_data, function(x) message(x[['stat']]))
+        # lapply(iter_data, function(x) message(x[['stat']]))
         global_counts = lapply(iter_data, function(x) x[['local_counts']]) %>%
           Reduce(`+`,  ., init = global_counts)
 
         ll = lapply(iter_data, function(x) x[['ll']]) %>%
           do.call(sum, .)
-        message(sprintf("%s %d loglik = %.3f", Sys.time(), i, ll))
+        flog.info("iter %d loglik = %.3f", i, ll)
 
         # iter_doc =
         #   foreach(seq_len(foreach::getDoParWorkers()), .combine = list,
