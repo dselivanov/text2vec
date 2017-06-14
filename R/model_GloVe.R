@@ -372,7 +372,7 @@ glove = function(tcm,
   if ( !inherits(tcm, 'dgTMatrix') )
     tcm = as(tcm, 'dgTMatrix')
   #init
-  glove_model_ptr = GlobalVectors$new(word_vectors_size = word_vectors_size,
+  glove_model = GlobalVectors$new(word_vectors_size = word_vectors_size,
                        vocabulary = rownames(tcm),
                        x_max = x_max,
                        learning_rate = learning_rate,
