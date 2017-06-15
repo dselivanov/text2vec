@@ -132,12 +132,11 @@ void HashCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context
 void HashCorpus::insert_document(const CharacterVector doc, int grow_dtm, int context,
                                  uint32_t window_size, const NumericVector &weights) {
   checkUserInterrupt();
-  generate_ngrams(doc, this->ngram_min, this->ngram_max,
-                  this->stopwords,
-                  this->terms_filtered_buffer,
-                  this->ngrams_buffer,
-                  this->ngram_delim);
-  insert_terms(this->ngrams_buffer, grow_dtm, context, window_size, weights);
+  std::vector<std::string> std_string_vec = charvec2stdvec(doc, this->stopwords);
+  std::vector<std::string> ngram_vec
+    = generate_ngrams(std_string_vec, this->ngram_min, this->ngram_max, this->ngram_delim);
+
+  this->insert_terms(ngram_vec, grow_dtm, context, window_size, weights);
   this->dtm.increment_nrows();
   this->doc_count++;
 }

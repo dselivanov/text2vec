@@ -49,12 +49,6 @@ protected:
   uint32_t ngram_max;
   // ngram concatenation delimiter
   string ngram_delim;
-  // buffer for filtering out stopwords
-  // this is to avoid memory re-allocation
-  vector<string> terms_filtered_buffer;
-  // buffer for ngrans
-  // this is to avoid memory re-allocation
-  vector< string> ngrams_buffer;
 
   // uint32_t window_size;
   // stopwords

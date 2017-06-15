@@ -13,11 +13,15 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
+#pragma once
+#ifndef TEXT2VEC_H
+#define TEXT2VEC_H
 
 #include <Rcpp.h>
 #include <stdio.h>
 #include <time.h>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <functional>
 #include <unordered_map>
@@ -31,7 +35,6 @@ using namespace Rcpp;
 // fast integer hashing
 uint32_t fast_int_hash(uint32_t a);
 
-
 NumericMatrix convert2Rmat(vector<vector<float> > &mat, size_t ncol);
 
 void fill_mat_val(vector<vector<float> > &mat, size_t ncol, float val);
@@ -42,13 +45,11 @@ void fill_vec_rand(vector<float>  &vec, float runif_min, float runif_max);
 
 void fill_vec_val(vector<float>  &vec, float val);
 
-void generate_ngrams(CharacterVector terms_raw,
-                     const uint32_t ngram_min,
-                     const uint32_t ngram_max,
-                     unordered_set<string> &stopwords,
-                     // pass buffer by reference to avoid memory allocation
-                     // on each iteration
-                     vector<string> &terms_filtered_buffer,
-                     vector<string> &ngrams,
-                     const string ngram_delim);
+vector<string> generate_ngrams(const std::vector< std::string> &terms,
+                               const uint32_t ngram_min,
+                               const uint32_t ngram_max,
+                               const string ngram_delim);
+std::vector<std::string> charvec2stdvec(CharacterVector terms_raw, unordered_set<string> &stopwords);
 const std::string currentDateTime();
+std::vector<std::string> char_tokenizer(const std::string &s, unordered_set<string> &stopwords, char delim = ' ');
+#endif /* TEXT2VEC_H */

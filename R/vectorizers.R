@@ -22,13 +22,13 @@ encode_context = function(context_string_name = c("symmetric", "right", "left"))
          left = -1L)
 }
 
-corpus_insert_generic = function(corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights) {
+corpus_insert_generic = function(corpus_ptr, tokens, grow_dtm, skip_grams_window_context, window_size, weights) {
   if(inherits(corpus_ptr, "HashCorpus")) {
-    cpp_hash_corpus_insert_document_batch(corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights)
+    cpp_hash_corpus_insert_document_batch(corpus_ptr, tokens, grow_dtm, skip_grams_window_context, window_size, weights)
     return(TRUE)
   }
   if(inherits(corpus_ptr, "VocabCorpus")) {
-    cpp_vocabulary_corpus_insert_document_batch(corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights)
+    cpp_vocabulary_corpus_insert_document_batch(corpus_ptr, tokens, grow_dtm, skip_grams_window_context, window_size, weights)
     return(TRUE)
   }
   stop("can't recognize corpus - neither HashCorpus or VocabCorpus")

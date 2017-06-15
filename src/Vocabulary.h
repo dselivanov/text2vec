@@ -71,9 +71,10 @@ public:
                              _["doc_count"] = doc_counts,
                              _["stringsAsFactors"] = false );
   }
-  void insert_terms (vector< string> &terms) {
+  void insert_terms (const vector< string> &terms) {
     typename sparse_hash_map < string, uint32_t > :: iterator term_iterator;
     int term_id;
+    this->temp_document_word_set.clear();
     for (auto it:terms) {
       this->temp_document_word_set.insert(it);
       term_iterator = this->vocab.find(it);
@@ -88,30 +89,39 @@ public:
       }
       this->token_count++;
     }
-  }
-
-  // void insert_terms (vector< string> &terms);
-  // void insert_document(const CharacterVector doc);
-  void insert_document(const CharacterVector doc) {
-    this->document_count++;
-    this->temp_document_word_set.clear();
-    generate_ngrams(doc, this->ngram_min, this->ngram_max,
-                    this->stopwords,
-                    this->terms_filtered_buffer,
-                    this->ngrams_buffer,
-                    this->ngram_delim);
-    insert_terms(this->ngrams_buffer);
-
-    typename sparse_hash_map < string, uint32_t > :: iterator term_iterator;
     for ( auto it: this->temp_document_word_set) {
       term_iterator = vocab.find(it);
       if(term_iterator != vocab.end())
         this->vocab_statistics[term_iterator->second].document_term_count++;
     }
+    this->document_count++;
   }
+
   void insert_document_batch(const ListOf<const CharacterVector> document_batch) {
-    for(auto s:document_batch)
-      insert_document(s);
+    std::vector<std::string> std_string_vec;
+    std::vector<std::string> ngram_vec;
+    for(auto s:document_batch) {
+      std_string_vec = charvec2stdvec(s, this->stopwords);
+      ngram_vec = generate_ngrams(std_string_vec,
+                        this->ngram_min,
+                        this->ngram_max,
+                        this->ngram_delim);
+      insert_terms(ngram_vec);
+    }
+  }
+  void tokenize_insert_document_batch(const CharacterVector document_batch) {
+    std::string str_string_doc;
+    std::vector<std::string> std_string_vec;
+    std::vector<std::string> ngram_vec;
+    for(auto s:document_batch) {
+      str_string_doc = as<string>(s);
+      std_string_vec = char_tokenizer(str_string_doc, this->stopwords);
+      ngram_vec = generate_ngrams(std_string_vec,
+                                  this->ngram_min,
+                                  this->ngram_max,
+                                  this->ngram_delim);
+      insert_terms(ngram_vec);
+    }
   }
   // void insert_document_batch(const ListOf<const CharacterVector> document_batch);
   int get_document_count() {return(this->document_count);};
@@ -129,10 +139,6 @@ private:
   // keep words set for document which is currently we processing
   unordered_set< string > temp_document_word_set;
   unordered_set< string > stopwords;
-  // buffer for filtering out stopwords. This is to avoid memory re-allocation
-  vector<string> terms_filtered_buffer;
-  // buffer for ngrans. This is to avoid memory re-allocation
-  vector< string> ngrams_buffer;
 };
 
 //-----------------------------------------------------------------
