@@ -73,8 +73,16 @@ euclidean_dist <- function(x, y) {
     .Call(text2vec_euclidean_dist, x, y)
 }
 
+malloc_trim <- function(keep) {
+    .Call(text2vec_malloc_trim, keep)
+}
+
 is_invalid_ptr <- function(sexp_ptr) {
     .Call(text2vec_is_invalid_ptr, sexp_ptr)
+}
+
+cpp_fixed_char_tokenizer <- function(x, delim) {
+    .Call(text2vec_cpp_fixed_char_tokenizer, x, delim)
 }
 
 cpp_vocabulary_corpus_create <- function(vocab_R, n_min, n_max, stopwords_R, delim) {
@@ -99,6 +107,10 @@ cpp_vocab_create <- function(ngram_min, ngram_max, stopwords_R, delim) {
 
 cpp_vocabulary_insert_document_batch <- function(ptr, document_batch) {
     invisible(.Call(text2vec_cpp_vocabulary_insert_document_batch, ptr, document_batch))
+}
+
+cpp_vocabulary_insert_document_batch_xptr <- function(ptr, document_batch_ptr) {
+    invisible(.Call(text2vec_cpp_vocabulary_insert_document_batch_xptr, ptr, document_batch_ptr))
 }
 
 cpp_get_vocab_statistics <- function(ptr) {

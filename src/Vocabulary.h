@@ -101,29 +101,26 @@ public:
     std::vector<std::string> std_string_vec;
     std::vector<std::string> ngram_vec;
     for(auto s:document_batch) {
-      std_string_vec = charvec2stdvec(s, this->stopwords);
+      std_string_vec = charvec2stdvec(s);
       ngram_vec = generate_ngrams(std_string_vec,
                         this->ngram_min,
                         this->ngram_max,
+                        this->stopwords,
                         this->ngram_delim);
       insert_terms(ngram_vec);
     }
   }
-  void tokenize_insert_document_batch(const CharacterVector document_batch) {
-    std::string str_string_doc;
-    std::vector<std::string> std_string_vec;
+  void insert_document_batch_ptr(std::vector<std::vector < std::string> > *doc_tokens) {
     std::vector<std::string> ngram_vec;
-    for(auto s:document_batch) {
-      str_string_doc = as<string>(s);
-      std_string_vec = char_tokenizer(str_string_doc, this->stopwords);
-      ngram_vec = generate_ngrams(std_string_vec,
+    for(auto doc:*doc_tokens) {
+      ngram_vec = generate_ngrams(doc,
                                   this->ngram_min,
                                   this->ngram_max,
+                                  this->stopwords,
                                   this->ngram_delim);
       insert_terms(ngram_vec);
     }
   }
-  // void insert_document_batch(const ListOf<const CharacterVector> document_batch);
   int get_document_count() {return(this->document_count);};
   // DataFrame get_vocab_statistics();
   void increase_token_count() {token_count++;};
@@ -140,80 +137,3 @@ private:
   unordered_set< string > temp_document_word_set;
   unordered_set< string > stopwords;
 };
-
-//-----------------------------------------------------------------
-// implementation Vocabulary methods
-//-----------------------------------------------------------------
-// Vocabulary::Vocabulary(uint32_t ngram_min,
-//            uint32_t ngram_max,
-//            const CharacterVector stopwords_R,
-//            const String delim):
-//   ngram_min(ngram_min), ngram_max(ngram_max),
-//   document_count(0), token_count(0) {
-//   ngram_delim = delim;
-//   for(auto it:stopwords_R)
-//     stopwords.insert(as<string>(it));
-// };
-// //-----------------------------------------------------------------
-// DataFrame Vocabulary::get_vocab_statistics() {
-//   size_t N = vocab.size();
-//   size_t i = 0;
-//   CharacterVector terms(N);
-//   IntegerVector term_counts(N);
-//   IntegerVector doc_counts(N);
-//   NumericVector doc_prop(N);
-//   for(auto it:vocab) {
-//     // use this intead of simple terms[i] = it.first to preserve encoding
-//     // see #101 for details
-//     terms[i] = Rf_mkCharLenCE( it.first.c_str(), it.first.size(), CE_UTF8);
-//     term_counts[i] = vocab_statistics[it.second].term_global_count;
-//     doc_counts[i] = vocab_statistics[it.second].document_term_count;
-//     i++;
-//   }
-//   return DataFrame::create(_["term"] = terms,
-//                            _["term_count"] = term_counts,
-//                            _["doc_count"] = doc_counts,
-//                            _["stringsAsFactors"] = false );
-// }
-//-----------------------------------------------------------------
-// void Vocabulary::insert_document_batch(const ListOf<const CharacterVector> document_batch) {
-//   for(auto s:document_batch)
-//     insert_document(s);
-// }
-//-----------------------------------------------------------------
-// void Vocabulary::insert_document(const CharacterVector doc) {
-//   this->document_count++;
-//   this->temp_document_word_set.clear();
-//   generate_ngrams(doc, this->ngram_min, this->ngram_max,
-//                   this->stopwords,
-//                   this->terms_filtered_buffer,
-//                   this->ngrams_buffer,
-//                   this->ngram_delim);
-//   insert_terms(this->ngrams_buffer);
-//
-//   typename sparse_hash_map < string, uint32_t > :: iterator term_iterator;
-//   for ( auto it: this->temp_document_word_set) {
-//     term_iterator = vocab.find(it);
-//     if(term_iterator != vocab.end())
-//       this->vocab_statistics[term_iterator->second].document_term_count++;
-//   }
-// }
-//-----------------------------------------------------------------
-// void Vocabulary::insert_terms (vector< string> &terms) {
-//   typename sparse_hash_map < string, uint32_t > :: iterator term_iterator;
-//   int term_id;
-//   for (auto it:terms) {
-//     this->temp_document_word_set.insert(it);
-//     term_iterator = this->vocab.find(it);
-//     if(term_iterator == this->vocab.end()) {
-//       term_id = this->vocab.size();
-//       // insert term into vocabulary
-//       this->vocab.insert(make_pair(it, term_id ));
-//       vocab_statistics.push_back(TermStat( term_id ) );
-//     }
-//     else {
-//       vocab_statistics[term_iterator->second].term_global_count++;
-//     }
-//     this->token_count++;
-//   }
-// }

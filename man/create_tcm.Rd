@@ -3,7 +3,7 @@
 \name{create_tcm}
 \alias{create_tcm}
 \alias{create_tcm.itoken}
-\alias{create_tcm.list}
+\alias{create_tcm.itoken_parallel}
 \title{Term-co-occurence matrix construction}
 \usage{
 create_tcm(it, vectorizer, skip_grams_window = 5L,
@@ -14,9 +14,9 @@ create_tcm(it, vectorizer, skip_grams_window = 5L,
   skip_grams_window_context = c("symmetric", "right", "left"),
   weights = 1/seq_len(skip_grams_window), ...)
 
-\method{create_tcm}{list}(it, vectorizer, skip_grams_window = 5L,
+\method{create_tcm}{itoken_parallel}(it, vectorizer, skip_grams_window = 5L,
   skip_grams_window_context = c("symmetric", "right", "left"),
-  weights = 1/seq_len(skip_grams_window), work_dir = tempdir(), ...)
+  weights = 1/seq_len(skip_grams_window), ...)
 }
 \arguments{
 \item{it}{\code{list} of iterators over tokens from \link{itoken}.
@@ -41,8 +41,6 @@ Should have length equal to skip_grams_window.
 
 \item{...}{arguments to \link{foreach} function which is used to iterate over
 \code{it}.}
-
-\item{work_dir}{working directory for intermediate results}
 }
 \value{
 \code{dgTMatrix} TCM matrix

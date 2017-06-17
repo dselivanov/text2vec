@@ -45,6 +45,10 @@ corpus_insert = function(corpus_ptr, iterator, grow_dtm, skip_grams_window_conte
   ids = foreach(val = it, .combine = c, .multicombine = TRUE ) %do% {
     res = corpus_insert_generic(corpus_ptr, val$tokens, grow_dtm, skip_grams_window_context_code, window_size, weights)
     if(!res) stop("something went wrong during insert into corpus")
+    if(R.version$os == "linux-gnu") {
+      flog.debug("linux system detected - calling malloc_trim(0L) to trigger glibc to release memory")
+      malloc_trim(0L)
+    }
     val$ids
   }
   attr(corpus_ptr, "ids") = ids

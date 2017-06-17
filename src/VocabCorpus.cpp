@@ -147,9 +147,9 @@ void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int contex
 void VocabCorpus::insert_document(const CharacterVector doc, int grow_dtm, int context,
                                   uint32_t window_size, const NumericVector& weights) {
   checkUserInterrupt();
-  std::vector<std::string> std_string_vec = charvec2stdvec(doc, this->stopwords);
+  std::vector<std::string> std_string_vec = charvec2stdvec(doc);
   std::vector<std::string> ngram_vec
-    = generate_ngrams(std_string_vec, this->ngram_min, this->ngram_max, this->ngram_delim);
+    = generate_ngrams(std_string_vec, this->ngram_min, this->ngram_max, this->stopwords, this->ngram_delim);
 
   this->insert_terms(ngram_vec, grow_dtm, context, window_size, weights);
   this->dtm.increment_nrows();

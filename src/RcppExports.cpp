@@ -217,6 +217,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// malloc_trim
+SEXP malloc_trim(SEXP keep);
+RcppExport SEXP text2vec_malloc_trim(SEXP keepSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type keep(keepSEXP);
+    rcpp_result_gen = Rcpp::wrap(malloc_trim(keep));
+    return rcpp_result_gen;
+END_RCPP
+}
 // is_invalid_ptr
 int is_invalid_ptr(SEXP sexp_ptr);
 RcppExport SEXP text2vec_is_invalid_ptr(SEXP sexp_ptrSEXP) {
@@ -225,6 +236,18 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type sexp_ptr(sexp_ptrSEXP);
     rcpp_result_gen = Rcpp::wrap(is_invalid_ptr(sexp_ptr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_fixed_char_tokenizer
+SEXP cpp_fixed_char_tokenizer(CharacterVector x, char delim);
+RcppExport SEXP text2vec_cpp_fixed_char_tokenizer(SEXP xSEXP, SEXP delimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< char >::type delim(delimSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_fixed_char_tokenizer(x, delim));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -302,6 +325,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
     Rcpp::traits::input_parameter< const ListOf<const CharacterVector> >::type document_batch(document_batchSEXP);
     cpp_vocabulary_insert_document_batch(ptr, document_batch);
+    return R_NilValue;
+END_RCPP
+}
+// cpp_vocabulary_insert_document_batch_xptr
+void cpp_vocabulary_insert_document_batch_xptr(SEXP ptr, SEXP document_batch_ptr);
+RcppExport SEXP text2vec_cpp_vocabulary_insert_document_batch_xptr(SEXP ptrSEXP, SEXP document_batch_ptrSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type document_batch_ptr(document_batch_ptrSEXP);
+    cpp_vocabulary_insert_document_batch_xptr(ptr, document_batch_ptr);
     return R_NilValue;
 END_RCPP
 }
@@ -482,13 +516,16 @@ static const R_CallMethodDef CallEntries[] = {
     {"text2vec_rowMins", (DL_FUNC) &text2vec_rowMins, 1},
     {"text2vec_rowMaxs", (DL_FUNC) &text2vec_rowMaxs, 1},
     {"text2vec_euclidean_dist", (DL_FUNC) &text2vec_euclidean_dist, 2},
+    {"text2vec_malloc_trim", (DL_FUNC) &text2vec_malloc_trim, 1},
     {"text2vec_is_invalid_ptr", (DL_FUNC) &text2vec_is_invalid_ptr, 1},
+    {"text2vec_cpp_fixed_char_tokenizer", (DL_FUNC) &text2vec_cpp_fixed_char_tokenizer, 2},
     {"text2vec_cpp_vocabulary_corpus_create", (DL_FUNC) &text2vec_cpp_vocabulary_corpus_create, 5},
     {"text2vec_cpp_vocabulary_corpus_insert_document_batch", (DL_FUNC) &text2vec_cpp_vocabulary_corpus_insert_document_batch, 6},
     {"text2vec_cpp_vocabulary_corpus_get_tcm", (DL_FUNC) &text2vec_cpp_vocabulary_corpus_get_tcm, 1},
     {"text2vec_cpp_vocabulary_corpus_get_dtm", (DL_FUNC) &text2vec_cpp_vocabulary_corpus_get_dtm, 1},
     {"text2vec_cpp_vocab_create", (DL_FUNC) &text2vec_cpp_vocab_create, 4},
     {"text2vec_cpp_vocabulary_insert_document_batch", (DL_FUNC) &text2vec_cpp_vocabulary_insert_document_batch, 2},
+    {"text2vec_cpp_vocabulary_insert_document_batch_xptr", (DL_FUNC) &text2vec_cpp_vocabulary_insert_document_batch_xptr, 2},
     {"text2vec_cpp_get_vocab_statistics", (DL_FUNC) &text2vec_cpp_get_vocab_statistics, 1},
     {"text2vec_cpp_get_document_count", (DL_FUNC) &text2vec_cpp_get_document_count, 1},
     {"text2vec_warplda_create", (DL_FUNC) &text2vec_warplda_create, 3},

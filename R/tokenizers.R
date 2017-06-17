@@ -1,4 +1,4 @@
-# // Copyright (C) 2015 - 2016  Dmitriy Selivanov
+# // Copyright (C) 2015 - 2017  Dmitriy Selivanov
 # // This file is part of text2vec
 # //
 #   // text2vec is free software: you can redistribute it and/or modify it
@@ -15,24 +15,24 @@
 # // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
 
 #' @name tokenizers
-#' @title Simple tokenization functions, which performs string splitting
-#' @description simple wrappers around \code{base} regular expressions.
-#' For much more faster and functional tokenizers see \code{tokenizers} package:
-#' \url{https://cran.r-project.org/package=tokenizers}.
-#' Also see \code{str_split_*} functions in \code{stringi} and \code{stringr} packages.
-#' The reason for not including this packages to \code{text2vec} dependencies is our
-#' desare to keep number of dependencies as small as possible.
+#' @title Simple tokenization functions for string splitting
+#' @description very thin wrappers around \code{base} regular expressions.
+#' \bold{For much more faster and functional tokenizers see \code{tokenizers} package:
+#' \url{https://cran.r-project.org/package=tokenizers}}.
+#' The reason for not including this to \code{text2vec} is to keep number of dependencies small.
+#' Also check \code{stringi::stri_split_*} and \code{stringr::str_split_*}.
 #' @param strings \code{character} vector
 #' @param pattern \code{character} pattern symbol.
+#' @param xptr \code{logical} tokenize at C++ level - could speed-up by 15-50\%.
+#' @param sep \code{character}, \code{nchar(sep)} = 1 - split strings by this character.
 #' @param ... other parameters to \link{strsplit} function, which is used under the hood.
-#' @return \code{list} of \code{character} vectors.
-#' Each element of list containts vector of tokens.
+#' @return \code{list} of \code{character} vectors. Each element of list containts vector of tokens.
 #' @examples
 #' doc = c("first  second", "bla, bla, blaa")
 #' # split by words
 #' word_tokenizer(doc)
 #' #faster, but far less general - perform split by a fixed single whitespace symbol.
-#' regexp_tokenizer(doc, " ", TRUE)
+#' space_tokenizer(doc, " ")
 
 #' @rdname tokenizers
 #' @export
@@ -57,7 +57,12 @@ char_tokenizer = function(strings, ...)
 
 #' @rdname tokenizers
 #' @export
-space_tokenizer = function(strings, ...)
+space_tokenizer = function(strings, sep = " ", xptr = FALSE, ...)
 {
-  strsplit(strings, " ", TRUE, ...)
+  stopifnot(nchar(sep) == 1)
+  if(!xptr) {
+    strsplit(strings, sep, TRUE, ...)
+  } else {
+    cpp_fixed_char_tokenizer(strings, sep)
+  }
 }

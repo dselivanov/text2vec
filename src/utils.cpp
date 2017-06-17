@@ -45,14 +45,11 @@ const std::string currentDateTime() {
   return buf;
 }
 
-std::vector<std::string> charvec2stdvec(CharacterVector terms_raw, unordered_set<string> &stopwords) {
+std::vector<std::string> charvec2stdvec(CharacterVector terms_raw) {
   std::vector<std::string> result;
-  string term;
-  // filter out stopwords
+  result.reserve(terms_raw.size());
   for (auto it: terms_raw) {
-    term = as<string>(it);
-    if(stopwords.find(term) == stopwords.end())
-      result.push_back(term);
+    result.push_back(as<string>(it));
   }
   return(result);
 }
@@ -60,14 +57,23 @@ std::vector<std::string> charvec2stdvec(CharacterVector terms_raw, unordered_set
 vector<string> generate_ngrams(const std::vector< std::string> &terms,
                                const uint32_t ngram_min,
                                const uint32_t ngram_max,
+                               unordered_set<string> &stopwords,
                                const string ngram_delim) {
-  // special case for unigrams
-  if( ngram_min == ngram_max &&  ngram_max == 1 ) {
-    return(terms);
+  uint32_t len = terms.size();
+  vector<string> ngrams;
+  vector<string> terms_filtered;
+  terms_filtered.reserve(len);
+  ngrams.reserve(len);
+
+  for (auto it: terms) {
+    if(stopwords.find(it) == stopwords.end())
+      terms_filtered.push_back(it);
   }
 
-  vector<string> ngrams;
-  uint32_t len = terms.size();
+  // special case for unigrams
+  if( ngram_min == ngram_max &&  ngram_max == 1 ) {
+    return(terms_filtered);
+  }
 
   string k_gram;
   size_t k, j_max_observed;
@@ -81,9 +87,9 @@ vector<string> generate_ngrams(const std::vector< std::string> &terms,
     while (k <= ngram_max && j_max_observed < len) {
 
       if( k == 1) {
-        k_gram = terms[j_max_observed];
+        k_gram = terms_filtered[j_max_observed];
       } else
-        k_gram = k_gram + ngram_delim + terms[j_max_observed];
+        k_gram = k_gram + ngram_delim + terms_filtered[j_max_observed];
 
       if(k >= ngram_min) {
         ngrams.push_back(k_gram);
@@ -95,13 +101,25 @@ vector<string> generate_ngrams(const std::vector< std::string> &terms,
   return(ngrams);
 }
 
-std::vector<std::string> char_tokenizer(const std::string &s, unordered_set<string> &stopwords, char delim) {
+std::vector<std::string> fixed_char_tokenizer(const std::string &s, char delim) {
   std::stringstream ss(s);
   std::string item;
   std::vector<std::string> elems;
   while (std::getline(ss, item, delim)) {
-    if(stopwords.find(item) == stopwords.end())
-      elems.push_back(std::move(item));
+    elems.push_back(std::move(item));
   }
   return elems;
+}
+
+// [[Rcpp::export]]
+SEXP cpp_fixed_char_tokenizer(CharacterVector x, char delim) {
+  std::vector<std::string> docs = charvec2stdvec(x);
+  std::vector<std::vector < std::string> > *tokens = new std::vector<std::vector < std::string> >;
+  tokens->reserve(x.size());
+  for(auto doc : docs) {
+    tokens->push_back(fixed_char_tokenizer(doc, delim));
+  }
+  XPtr< std::vector<std::vector < std::string> > > ptr(tokens, true);
+  ptr.attr("class") = CharacterVector::create("tokens_xprt");
+  return ptr;
 }

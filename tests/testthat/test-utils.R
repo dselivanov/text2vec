@@ -1,43 +1,41 @@
 context("text2vec utils - tokenization, etc.")
 
-txt <- tolower(movie_review$review[[1]])
+txt = tolower(movie_review$review[[1]])
 N = 20
 it = itoken(movie_review$review[1:N], ids = movie_review$id[1:N], progressbar = F)
 dtm = create_dtm(it, hash_vectorizer(2**8), "dgTMatrix")
 
-txt_first_10 <- c("with", "all", "this", "stuff",
+txt_first_10 = c("with", "all", "this", "stuff",
              "going", "down", "at", "the",
              "moment", "with")
 
 test_that("word_tokenizer ", {
-  tokens <- word_tokenizer(txt)[[1]]
+  tokens = word_tokenizer(txt)[[1]]
   expect_equal(length(tokens), 446)
   expect_equal(tokens[1:10], txt_first_10)
   # non ASCII symbols
-  tokens <- word_tokenizer("one, two. Three! four")[[1]]
+  tokens = word_tokenizer("one, two. Three! four")[[1]]
   expect_equal(tokens, c("one", "two", "Three", "four"))
 })
 test_that("regexp_tokenizer ", {
-  tokens <- regexp_tokenizer(txt, pattern = "[[:punct:]]|\\s+")[[1]]
+  tokens = regexp_tokenizer(txt, pattern = "[[:punct:]]|\\s+")[[1]]
   expect_equal(length(tokens), 499)
   expect_equal(tokens[1:10], txt_first_10)
   # non ASCII symbols
-  tokens <- regexp_tokenizer("one, two. Three! four", "[[:punct:]]|\\s+")[[1]]
+  tokens = regexp_tokenizer("one, two. Three! four", "[[:punct:]]|\\s+")[[1]]
   expect_equal(tokens, c("one", "", "two", "", "Three", "", "four"))
 })
 
 test_that("space_tokenizer ", {
-  tokens <- space_tokenizer(txt)[[1]]
+  tokens = space_tokenizer(txt)[[1]]
   expect_equal(length(tokens), 433)
   expect_equal(tokens[1:10], txt_first_10)
-  # non ASCII symbols
-  tokens <- space_tokenizer("one, two. Three! four", "[[:punct:]]|\\s+")[[1]]
-  expect_equal(tokens, c("one,", "two.", "Three!", "four"))
+  expect_error(space_tokenizer("one, two. Three! four", "[[:punct:]]|\\s+")[[1]])
 })
 
 test_that("char_tokenizer ", {
   txt = "aaabbc!."
-  tokens <- char_tokenizer(txt)[[1]]
+  tokens = char_tokenizer(txt)[[1]]
   expect_equal(length(tokens), nchar(txt))
 })
 

@@ -33,6 +33,13 @@ void cpp_vocabulary_insert_document_batch(SEXP ptr, const ListOf<const Character
 }
 
 // [[Rcpp::export]]
+void cpp_vocabulary_insert_document_batch_xptr(SEXP ptr, SEXP document_batch_ptr) {
+  Rcpp::XPtr<Vocabulary> v(ptr);
+  XPtr< std::vector<std::vector < std::string> > > tokens(document_batch_ptr);
+  v->insert_document_batch_ptr(tokens);
+}
+
+// [[Rcpp::export]]
 DataFrame cpp_get_vocab_statistics(SEXP ptr) {
   Rcpp::XPtr<Vocabulary> v(ptr);
   return v->get_vocab_statistics();

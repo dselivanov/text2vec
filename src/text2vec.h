@@ -24,9 +24,37 @@
 #include <sstream>
 #include <vector>
 #include <functional>
+
 #include <unordered_map>
 #include <unordered_set>
 #include <RcppParallel.h>
+
+// #include <stdarg.h>
+// namespace spp {
+// int fprintf(std::FILE* stream, const char* fmt, ...) {
+//   int nchar = -1;
+//   va_list argp;
+//   va_start(argp, fmt);
+//   if(stream == stderr) {
+//     ::REprintf(fmt, argp);
+//   }
+//   else if(stream == stdout) {
+//     ::Rprintf(fmt, argp);
+//   } else {
+//     vfprintf(stream, fmt, argp);
+//   }
+//   va_end(argp);
+//   return nchar;
+// }
+// }
+
+// spp has calls to 'exit' on failure, which upsets R CMD check.
+// We won't bump into them during normal test execution so just override
+// it in the spp namespace before we include 'sparsepp'.
+//https://github.com/hadley/testthat/blob/c7e8330867645c174f9a286d00eb0036cea78b0c/inst/include/testthat/testthat.h#L44-L50
+namespace spp {
+  inline void exit(int status) throw() {}
+}
 #include <sparsepp.h>
 
 using namespace std;
@@ -48,8 +76,10 @@ void fill_vec_val(vector<float>  &vec, float val);
 vector<string> generate_ngrams(const std::vector< std::string> &terms,
                                const uint32_t ngram_min,
                                const uint32_t ngram_max,
+                               unordered_set<string> &stopwords,
                                const string ngram_delim);
-std::vector<std::string> charvec2stdvec(CharacterVector terms_raw, unordered_set<string> &stopwords);
+std::vector<std::string> charvec2stdvec(CharacterVector terms_raw);
 const std::string currentDateTime();
-std::vector<std::string> char_tokenizer(const std::string &s, unordered_set<string> &stopwords, char delim = ' ');
+std::vector<std::string> fixed_char_tokenizer(const std::string &s, char delim = ' ');
+
 #endif /* TEXT2VEC_H */

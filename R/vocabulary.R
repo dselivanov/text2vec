@@ -104,8 +104,16 @@ create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" 
   vocab_ptr = cpp_vocab_create(ngram_min, ngram_max, stopwords, sep_ngram)
 
   foreach(tokens = it) %do% {
-    cpp_vocabulary_insert_document_batch(vocab_ptr, tokens$tokens)
-    # vocab_module$insert_document_batch(tokens$tokens)
+    if(inherits(tokens$tokens, "tokens_xprt")) {
+      cpp_vocabulary_insert_document_batch_xptr(vocab_ptr, tokens$tokens)
+      rm(tokens)
+    } else {
+      cpp_vocabulary_insert_document_batch(vocab_ptr, tokens$tokens)
+    }
+    if(R.version$os == "linux-gnu") {
+      flog.debug("linux system detected - calling malloc_trim(0L) to trigger glibc to release memory")
+      malloc_trim(0L)
+    }
   }
   # vocab = setDT(vocab_module$get_vocab_statistics())
 
