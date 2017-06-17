@@ -36,7 +36,7 @@
 # }
 
 get_tcm = function(corpus_ptr) {
-  stopifnot(inherits(corpus_ptr, 'VocabCorpus') || inherits(corpus_ptr, 'HashCorpus'))
+  stopifnot(inherits(corpus_ptr, "VocabCorpus") || inherits(corpus_ptr, "HashCorpus"))
   if(class(corpus_ptr) == "HashCorpus")
     tcm = cpp_hash_corpus_get_tcm(corpus_ptr)
   if(class(corpus_ptr) == "VocabCorpus")
@@ -131,20 +131,26 @@ create_tcm.itoken = function(it, vectorizer, skip_grams_window = 5L,
 }
 
 #' @rdname create_tcm
-#' @param work_dir working directory for intermediate results
 #' @export
-create_tcm.list = function(it, vectorizer,
+create_tcm.itoken_parallel = function(it, vectorizer,
                            skip_grams_window = 5L,
                            skip_grams_window_context = c("symmetric", "right", "left"),
-                           weights = 1 / seq_len(skip_grams_window),
-                           work_dir = tempdir(), ...) {
+                           weights = 1 / seq_len(skip_grams_window), ...) {
+  # see ?mclapply
+  # Prior to R 3.4.0 and on a 32-bit platform, the serialized result from each forked process is
+  # limited to 2^31 - 1 bytes. (Returning very large results via serialization is inefficient and should be avoided.)
+  R_VERSION = as.numeric(utils::sessionInfo()$R.version$major) * 10 +
+    as.numeric(utils::sessionInfo()$R.version$minor)
+  MIN_R_VERSION_large_serialization = 34
+  #---------------------------------------------------------------
   skip_grams_window_context = match.arg(skip_grams_window_context)
   jobs = Map(function(job_id, it) list(job_id = job_id, it = it), seq_along(it), it)
-  tcm_files =
+  res =
     foreach(batch = jobs,
-            .combine = c,
+            .combine = mc_triplet_sum,
             .inorder = F,
             .multicombine = T,
+            # .maxcombine = foreach::getDoParWorkers(),
             # user already made split for jobs
             # preschedule = FALSE is much more memory efficient
             .options.multicore = list(preschedule = FALSE),
@@ -152,31 +158,22 @@ create_tcm.list = function(it, vectorizer,
             {
               tcm = create_tcm(batch$it, vectorizer = vectorizer, skip_grams_window = skip_grams_window,
                                skip_grams_window_context = skip_grams_window_context, weights = weights, ...)
-              file_to_save = tempfile(pattern = paste0("tcm_map_part_", batch$job_id, "_"), tmpdir = work_dir, fileext = '.rds')
-              saveRDS(tcm, file_to_save, compress = FALSE)
-              file_to_save
+              tcm_bytes = utils::object.size(tcm)
+              if(tcm_bytes >= 2**31 &&  R_VERSION < MIN_R_VERSION_large_serialization) {
+                err_msg = sprintf("result from worker pid=%d can't be transfered to master:
+                                  relust %d bytes, max_bytes allowed = 2^31",
+                                  Sys.getpid(), tcm_bytes)
+                flog.error(err_msg)
+                stop(err_msg)
+              }
+              tcm
             }
   flog.debug("map phase finished, starting reduce")
-  res_file = mc_triplet_rds_sum(tcm_files, work_dir)
-  res = readRDS(res_file); unlink(res_file)
-  as(res, 'dgTMatrix')
+  wc = attr(res, "word_count", TRUE)
+  res = as(res, "dgTMatrix")
+  data.table::setattr(res, "word_count", wc)
+  res
 }
-
-# triplet_sum = function(...) {
-#   flog.debug("got results from workers, call combine ...")
-#
-#   lst = list(...)
-#
-#   if (any(vapply(lst, is.null, FALSE)))
-#     stop('Got NULL from one of the jobs.
-#           Probably result size >= 2gb and package "parallel" can\'t collect results.
-#           Try to split input into more chunks (so result on each chunk must be < 2gb)')
-#
-#   res = uniqTsparse(Reduce(`+`, lst))
-#   # assume all matrices have same dimnames
-#   res@Dimnames = lst[[1]]@Dimnames
-#   res
-# }
 
 # multicore combine
 mc_reduce = function(X, FUN,  ...) {
@@ -201,35 +198,34 @@ mc_reduce = function(X, FUN,  ...) {
     X[[1]]
 }
 
-mc_triplet_rds_sum = function(fls, work_dir) {
-  sum_m = function(a, b) {
-    m1 = readRDS(a); unlink(a)
-    if (!inherits(m1, 'dgCMatrix')) {
-      m1 = as(m1, 'dgCMatrix')
-      gc()
-    }
-    m2 = readRDS(b); unlink(b);
-    if (!inherits(m2, 'dgCMatrix')) {
-      m2 = as(m2, 'dgCMatrix')
-      gc()
-    }
-    res = m1 + m2
-    rm(m1, m2);gc();
-    file_to_save = tempfile(pattern = "reduce_", tmpdir = work_dir, fileext = '.rds')
-    saveRDS(res, file_to_save, compress = F)
-    file_to_save
+sum_m = function(m1, m2) {
+  wc1 = attr(m1, "word_count", TRUE)
+  if (!inherits(m1, "dgCMatrix")) {
+    m1 = as(m1, "dgCMatrix")
+    gc()
   }
-  mc_reduce(fls,
+  wc2 = attr(m2, "word_count", TRUE)
+  if (!inherits(m2, "dgCMatrix")) {
+    m2 = as(m2, "dgCMatrix")
+    gc()
+  }
+  res = m1 + m2
+  rm(m1, m2)
+  data.table::setattr(res, "word_count", wc1 + wc2)
+  res
+}
+
+# multicore version of triplet_sum
+mc_triplet_sum = function(...) {
+  lst = list(...)
+  if(any(vapply(lst, is.null, TRUE))) {
+    err_msg = "got NULL from one of the workers - something went wrong (uncaught error)"
+    flog.error(err_msg)
+    stop(err_msg)
+  }
+  mc_reduce(lst,
             FUN = sum_m,
             .inorder = FALSE,
             .multicombine = TRUE)
 }
-
-# multicore version of triplet_sum
-# mc_triplet_sum = function(...) {
-#   mc_reduce(list(...),
-#             FUN = function(a, b) uniqTsparse(a + b),
-#             .inorder = FALSE,
-#             .multicombine = TRUE)
-# }
 

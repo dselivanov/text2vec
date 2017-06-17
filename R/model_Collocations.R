@@ -45,16 +45,24 @@ Collocations = R6::R6Class(
       private$min_collocation_count = min_collocation_count
     },
     fit = function(it) {
+      stopifnot(inherits(it, "itoken") || inherits(it, "itoken_parallel"))
+
       if(!is.null(self$collocation_stat)) {
         private$v = create_vocabulary(unique(c(private$phrases, private$v$term)), sep_ngram = private$sep )
         it_internal = self$transform(it)
       }
       else {
-        it_internal = it$clone(deep = TRUE)
+        if(inherits(it, "itoken_parallel")) {
+          flog.debug("clonning itoken_parallel")
+          it_internal = lapply(it, function(x) x$clone(deep = TRUE))
+          data.table::setattr(it_internal, "class", "itoken_parallel")
+        } else
+          it_internal = it$clone(deep = TRUE)
       }
       vectorizer = vocab_vectorizer(private$v)
       tcm = create_tcm(it_internal, vectorizer, skip_grams_window = 1L,
                        skip_grams_window_context = "right")
+      # flog.debug("tcm done dim = %d * %d", nrow(tcm), ncol(tcm))
       word_counts = attr(tcm, "word_count", TRUE)
       nword = sum(word_counts)
       ii = tcm@x >= private$min_collocation_count
@@ -87,6 +95,7 @@ Collocations = R6::R6Class(
       self$collocation_stat[, rank_lfmd := frank(-lfmd, ties.method = "first")]
       self$collocation_stat[, rank_gensim := frank(-gensim, ties.method = "first")]
       self$collocation_stat = self$collocation_stat[order(rank_pmi + rank_lfmd + rank_gensim)]
+      setkey(self$collocation_stat, rank_pmi)
     },
     prune = function(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf) {
       ii = self$collocation_stat$pmi >= pmi_min &
@@ -102,9 +111,18 @@ Collocations = R6::R6Class(
       if(is_invalid_ptr(private$phrases_ptr))
         private$phrases_ptr = create_xptr_unordered_set(private$phrases)
 
-      it_internal = it$clone(deep = TRUE)
       collapse_collocations = function(x) collapse_collocations_cpp(x$tokens, private$phrases_ptr, private$sep)
-      itoken_transformer_R6$new(it_internal, collapse_collocations)
+      if(inherits(it, "itoken_parallel")) {
+        flog.debug("clonning itoken_parallel")
+        res = lapply(it, function(x) {
+          itoken_transformer_R6$new(x$clone(deep = TRUE), collapse_collocations)
+        })
+        data.table::setattr(res, "class", "itoken_parallel")
+      } else {
+        res = itoken_transformer_R6$new(it$clone(deep = TRUE), collapse_collocations)
+        data.table::setattr(res, "class", "itoken")
+      }
+      res
     }
   )
 )
