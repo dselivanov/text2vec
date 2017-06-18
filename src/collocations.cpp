@@ -53,7 +53,7 @@ ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVe
           collocation_candidate_2 = w0 + sep + w1;
           auto it2 = collocations->find(collocation_candidate_2);
           // can combine previous collocation and current
-          if(it2 != collocations->end()) {
+          if(it2 != collocations->end() && k > 1) {
             out_terms[k - 1] = collocation_candidate_2;
           }
           else {

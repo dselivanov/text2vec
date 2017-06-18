@@ -39,7 +39,7 @@ corpus_insert = function(corpus_ptr, iterator, grow_dtm, skip_grams_window_conte
   if (inherits(iterator, "R6"))
     it = iterator$clone(deep = TRUE)
   else {
-    warning("Can't clone input iterator. It will be modified by current function call", immediate. = T)
+    warning("Can't clone input iterator. It will be modified by current function call", immediate. = TRUE)
     it = iterator
   }
   ids = foreach(val = it, .combine = c, .multicombine = TRUE ) %do% {

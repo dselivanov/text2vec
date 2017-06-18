@@ -120,7 +120,7 @@ Collocations = R6::R6Class(
         data.table::setattr(res, "class", "itoken_parallel")
       } else {
         res = itoken_transformer_R6$new(it$clone(deep = TRUE), collapse_collocations)
-        data.table::setattr(res, "class", "itoken")
+        data.table::setattr(res, "class", c("itoken", class(it)))
       }
       res
     }

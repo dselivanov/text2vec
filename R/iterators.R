@@ -403,7 +403,7 @@ itoken.iterator = function(iterable,
                            tokenizer = space_tokenizer,
                            n_chunks = 1L,
                            progressbar = interactive(), ...) {
-  if (inherits(iterable, 'R6'))
+  if (inherits(iterable, "R6"))
     it = iterable$clone()
   else {
     warning("Can't clone input iterator. It will be modified in place by `itoken` call", immediate. = TRUE)

@@ -94,7 +94,7 @@ create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" 
   if (inherits(it, "R6"))
     it = it$clone(deep = TRUE)
   else {
-    warning("Can't clone input iterator. It will be modified by current function call", immediate. = T)
+    warning("Can't clone input iterator. It will be modified by current function call", immediate. = TRUE)
     it = it
   }
 
