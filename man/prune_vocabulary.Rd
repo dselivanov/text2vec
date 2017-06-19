@@ -6,7 +6,7 @@
 \usage{
 prune_vocabulary(vocabulary, term_count_min = 1L, term_count_max = Inf,
   doc_proportion_min = 0, doc_proportion_max = 1, doc_count_min = 1L,
-  doc_count_max = Inf, max_number_of_terms = Inf)
+  doc_count_max = Inf, vocab_term_max = Inf)
 }
 \arguments{
 \item{vocabulary}{a vocabulary from the \link{vocabulary} function.}
@@ -23,12 +23,12 @@ prune_vocabulary(vocabulary, term_count_min = 1L, term_count_max = Inf,
 
 \item{doc_count_max}{term will be kept number of documents contain this term is smaller than this value}
 
-\item{max_number_of_terms}{maximum number of terms in vocabulary.}
+\item{vocab_term_max}{maximum number of terms in vocabulary.}
 }
 \description{
 This function filters the input vocabulary and throws out very
   frequent and very infrequent terms. See examples in for the
-  \link{vocabulary} function. The parameter \code{max_number_of_terms} can
+  \link{vocabulary} function. The parameter \code{vocab_term_max} can
   also be used to limit the absolute size of the vocabulary to only the most
   frequently used terms.
 }

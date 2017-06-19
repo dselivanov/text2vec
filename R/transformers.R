@@ -159,7 +159,7 @@ transform_filter_commons = function(dtm, term_freq = c(uncommon = 0.001, common 
 #' pruned_vocab = prune_vocabulary(vocab,
 #'  term_count_min = 10,
 #'  doc_proportion_max = 0.8, doc_proportion_min = 0.001,
-#'  max_number_of_terms = 20000)
+#'  vocab_term_max = 20000)
 #'
 #' it = itoken(txt, tolower, word_tokenizer)
 #' dtm = create_dtm(it, pruned_vocab)

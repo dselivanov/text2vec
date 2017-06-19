@@ -48,7 +48,7 @@
 #' it = itoken(txt, tolower, word_tokenizer, n_chunks = 10)
 #' vocab = create_vocabulary(it)
 #' pruned_vocab = prune_vocabulary(vocab, term_count_min = 10, doc_proportion_max = 0.8,
-#' doc_proportion_min = 0.001, max_number_of_terms = 20000)
+#' doc_proportion_min = 0.001, vocab_term_max = 20000)
 #'@export
 create_vocabulary = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
                        stopwords = character(0), sep_ngram = "_") {
@@ -208,7 +208,7 @@ combine_vocabulary = function(...) {
 #' @title Prune vocabulary
 #' @description This function filters the input vocabulary and throws out very
 #'   frequent and very infrequent terms. See examples in for the
-#'   \link{vocabulary} function. The parameter \code{max_number_of_terms} can
+#'   \link{vocabulary} function. The parameter \code{vocab_term_max} can
 #'   also be used to limit the absolute size of the vocabulary to only the most
 #'   frequently used terms.
 #' @param vocabulary a vocabulary from the \link{vocabulary} function.
@@ -218,7 +218,7 @@ combine_vocabulary = function(...) {
 #' @param doc_count_max term will be kept number of documents contain this term is smaller than this value
 #' @param doc_proportion_min minimum proportion of documents which should contain term.
 #' @param doc_proportion_max maximum proportion of documents which should contain term.
-#' @param max_number_of_terms maximum number of terms in vocabulary.
+#' @param vocab_term_max maximum number of terms in vocabulary.
 #' @seealso \link{vocabulary}
 #' @export
 prune_vocabulary = function(vocabulary,
@@ -228,7 +228,7 @@ prune_vocabulary = function(vocabulary,
                   doc_proportion_max = 1.0,
                   doc_count_min = 1L,
                   doc_count_max = Inf,
-                  max_number_of_terms = Inf) {
+                  vocab_term_max = Inf) {
 
   if (!inherits(vocabulary, "text2vec_vocabulary"))
     stop("vocabulary should be an object of class text2vec_vocabulary")
@@ -267,10 +267,10 @@ prune_vocabulary = function(vocabulary,
   res = vocabulary[ind, ]
 
   # restrict to max number if asked
-  if (is.finite(max_number_of_terms)) {
+  if (is.finite(vocab_term_max)) {
     res = res[order(res$term_count, decreasing = TRUE),]
-    max_number_of_terms = min(max_number_of_terms, nrow(res))
-    res = res[1:max_number_of_terms, ]
+    vocab_term_max = min(vocab_term_max, nrow(res))
+    res = res[1:vocab_term_max, ]
   }
 
   setDF(res)

@@ -14,7 +14,7 @@
 # #remove very common and uncommon words
 # pruned_vocab = prune_vocabulary(v, term_count_min = 10,
 #  doc_proportion_max = 0.8, doc_proportion_min = 0.001,
-#  max_number_of_terms = 10000)
+#  vocab_term_max = 10000)
 # '
 # vectorizer = vocab_vectorizer(v)
 # it = itoken(tokens)

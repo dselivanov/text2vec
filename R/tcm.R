@@ -27,7 +27,7 @@
 # vocab = create_vocabulary(it)
 # #remove very common and uncommon words
 # pruned_vocab = prune_vocabulary(vocab, term_count_min = 10, doc_proportion_max = 0.8,
-#                                 doc_proportion_min = 0.001, max_number_of_terms = 5000)
+#                                 doc_proportion_min = 0.001, vocab_term_max = 5000)
 #
 # vectorizer = vocab_vectorizer(pruned_vocab, grow_dtm = FALSE, skip_grams_window = 5L)
 # it = itoken(txt, tolower, word_tokenizer)

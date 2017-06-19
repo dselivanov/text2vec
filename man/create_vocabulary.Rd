@@ -86,5 +86,5 @@ txt = movie_review[['review']][1:100]
 it = itoken(txt, tolower, word_tokenizer, n_chunks = 10)
 vocab = create_vocabulary(it)
 pruned_vocab = prune_vocabulary(vocab, term_count_min = 10, doc_proportion_max = 0.8,
-doc_proportion_min = 0.001, max_number_of_terms = 20000)
+doc_proportion_min = 0.001, vocab_term_max = 20000)
 }

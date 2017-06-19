@@ -29,7 +29,7 @@ test_that("Vocabulary pruning", {
                               term_count_max = COUNT_MAX,
                               doc_proportion_min = PROP_MIN,
                               doc_proportion_max = PROP_MAX,
-                              max_number_of_terms = Inf
+                             vocab_term_max = Inf
                               )
   # same number of underlying documents
   expect_identical(p_vocab$document_count, vocab$document_count)
@@ -50,7 +50,7 @@ test_that("Vocabulary pruning", {
   LIMIT = 20L
   p_vocab = prune_vocabulary(vocab,
                               doc_proportion_max = PROP_MAX,
-                              max_number_of_terms = LIMIT)
+                             vocab_term_max = LIMIT)
 
   expect_equal( nrow(p_vocab), LIMIT)
   expect_true( all(p_vocab$doc_proportions <= PROP_MAX))
