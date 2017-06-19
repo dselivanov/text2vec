@@ -4,7 +4,7 @@
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
-#' colloc = Collocations$new(vocabulary, collocation_count_min = 50, pmi_min = 5, gensim_min = 0, lfmd_min = -Inf, sep = "_")
+#' colloc = Collocations$new(vocabulary = NULL, collocation_count_min = 50, pmi_min = 5, gensim_min = 0, lfmd_min = -Inf, sep = "_")
 #' colloc$partial_fit(it, ...)
 #' colloc$fit(it, n_iter = 1, ...)
 #' colloc$transform(it)
@@ -14,7 +14,7 @@
 #' @format \code{\link{R6Class}} object.
 #' @section Methods:
 #' \describe{
-#'   \item{\code{$new(vocabulary, collocation_count_min = 50, sep = "_")}}{Constructor for Collocations model.For description of arguments see \bold{Arguments} section.}
+#'   \item{\code{$new(vocabulary = NULL, collocation_count_min = 50, sep = "_")}}{Constructor for Collocations model.For description of arguments see \bold{Arguments} section.}
 #'   \item{\code{$fit(it, n_iter = 1, ...)}}{fit Collocations model to input iterator \code{it}.
 #'   Iterating over input iterator \code{it} \code{n_iter} times, so hieararchically can learn multi-word phrases.
 #'   Invisibly returns \code{collocation_stat}.}
@@ -35,7 +35,7 @@
 #'  \item{pmi_min, gensim_min, lfmd_min}{minimal scores of the corresponding statistics in order to collapse tokens into collocation
 #'  see data in \code{colloc$collocation_stat} for better understanding}
 #'  \item{it}{An input \code{itoken} or \code{itoken_parallel} iterator}
-#'  \item{vocabulary}{\code{text2vec_vocabulary} - will look for collactions only for words in vocabulary}
+#'  \item{vocabulary}{\code{text2vec_vocabulary} - if provided will look for collocations consisted of only from vocabulary}
 #' }
 #' @examples
 #' library(text2vec)
@@ -50,23 +50,32 @@
 #' system.time(v <- create_vocabulary(it))
 #' v = prune_vocabulary(v, term_count_min = 5)
 #'
-#' cc = Collocations$new(v, collocation_count_min = 5, pmi_min = 5)
+#' cc = Collocations$new(collocation_count_min = 5, pmi_min = 5)
 #' cc$fit(it, n_iter = 2)
 #' cc$collocation_stat
 #'
-#' # now we can create new iterator wich will generate tokens with phrases collapsed:
 #' it2 = cc$transform(it)
 #' v2 = create_vocabulary(it2)
-#' # for example we can see that now vocabulary will contain term "jeroen_krabb"
-#' ind = which(startsWith(v2$term, "jeroen"))
-#' ind
-#' v2[ind, ]
+#' v2 = prune_vocabulary(v2, term_count_min = 5)
+#' # check what phrases model has learned
+#' setdiff(v2$term, v$term)
+#' # [1] "main_character"  "jeroen_krabb"    "boogey_man"      "in_order"
+#' # [5] "couldn_t"        "much_more"       "my_favorite"     "worst_film"
+#' # [9] "have_seen"       "characters_are"  "i_mean"          "better_than"
+#' # [13] "don_t_care"      "more_than"       "look_at"         "they_re"
+#' # [17] "each_other"      "must_be"         "sexual_scenes"   "have_been"
+#' # [21] "there_are_some"  "you_re"          "would_have"      "i_loved"
+#' # [25] "special_effects" "hit_man"         "those_who"       "people_who"
+#' # [29] "i_am"            "there_are"       "could_have_been" "we_re"
+#' # [33] "so_bad"          "should_be"       "at_least"        "can_t"
+#' # [37] "i_thought"       "isn_t"           "i_ve"            "if_you"
+#' # [41] "didn_t"          "doesn_t"         "i_m"             "don_t"
 #'
 #' # and same way we can create document-term matrix which contains
 #' # words and phrases!
 #' dtm = create_dtm(it2, vocab_vectorizer(v2))
 #' # check that dtm contains phrases
-#' identical(ind, which(colnames(dtm) == "jeroen_krabb"))
+#' which(colnames(dtm) == "jeroen_krabb")
 #' @export
 Collocations = R6::R6Class(
   private = list(
@@ -81,14 +90,20 @@ Collocations = R6::R6Class(
   ),
   public = list(
     collocation_stat = NULL,
-    initialize = function(vocab,
-                          collocation_count_min = 50,
+    initialize = function(vocab = NULL,
+                          collocation_count_min = 50L,
                           pmi_min = 5,
                           gensim_min = 0,
                           lfmd_min = -Inf,
                           sep = "_") {
-      stopifnot(inherits(vocab, "text2vec_vocabulary"))
-      private$v = copy(vocab)
+      if(is.null(vocab)) {
+        flog.debug("got NULL as vocabulary - so it will be built from training data iterator later")
+      } else if(inherits(vocab, "text2vec_vocabulary")) {
+        private$v = copy(vocab)
+      } else {
+        stop("'vocab' shold be object of class 'text2vec_vocabulary' or NULL")
+      }
+
       private$sep = sep
       private$collocation_count_min = collocation_count_min
       private$pmi_min = pmi_min
@@ -97,14 +112,19 @@ Collocations = R6::R6Class(
     },
     fit = function(it, n_iter = 1, ...) {
       for(i in seq_len(n_iter)) {
-        flog.info("iteration %d", i)
         self$partial_fit(it, ...)
+        flog.info("iteration %d - found %d collocations", i, nrow(self$collocation_stat))
       }
       invisible(self$collocation_stat)
     },
     partial_fit = function(it, ...) {
       stopifnot(inherits(it, "itoken") || inherits(it, "itoken_parallel"))
-
+      if(is.null(private$v)) {
+        flog.debug("building vocabulary for Collocations model")
+        private$v = create_vocabulary(it)
+        private$v = prune_vocabulary(private$v, term_count_min = private$collocation_count_min)
+        flog.debug("vocabulary construction done - %d terms", nrow(private$v))
+      }
       if(!is.null(self$collocation_stat)) {
         private$v = create_vocabulary(unique(c(private$phrases, private$v$term)), sep_ngram = private$sep )
         it_internal = self$transform(it)
