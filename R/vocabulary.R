@@ -299,5 +299,5 @@ print.text2vec_vocabulary = function(x, ...) {
   cat(m2, "\n")
   cat(m3, "\n")
   cat("Vocabulary:", "\n")
-  print(as.data.table(x))
+  data.table:::print.data.table(x)
 }

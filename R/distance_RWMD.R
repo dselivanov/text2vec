@@ -141,6 +141,7 @@ RelaxedWordMoversDistance = R6::R6Class(
           res[j - 1L, i - 1L] = private$rwmd_cache(dist_matrix[, j2, drop = FALSE], x1, x2)
         }
       }
+      if (self$progressbar) close(pb)
       res
     },
     pdist2 = function(x, y) {
@@ -177,6 +178,7 @@ RelaxedWordMoversDistance = R6::R6Class(
         x2 = y_csr@x[i2]
         res[j - 1L] = private$rwmd(m_j1, m_j2, x1, x2)
       }
+      if (self$progressbar) close(pb)
       res
     }
   ),

@@ -2,7 +2,12 @@
 # R6 iterator workhorse
 # partially inspired by rivr package - https://github.com/vsbuffalo/rivr
 #------------------------------------------------------------------------------------------
-StopIteration = function(message="Iteration is complete", call=NULL) {
+StopIteration = function(message="Iteration is complete", call = NULL, pb = NULL) {
+  if(inherits(pb, "txtProgressBar")) {
+    close(pb)
+    cat("\n")
+  }
+
   class = c("StopIteration", "error", "condition")
   structure(list(message = as.character(message), call = call),
             class = class)
@@ -27,7 +32,7 @@ finite_iterator_R6 = R6::R6Class(
     },
     nextElem = function() {
       if (self$is_complete) {
-        stop(StopIteration("StopIteration"))
+        stop(StopIteration("StopIteration", pb = self$progressbar))
       }
       new_counter = min(self$counter + self$chunk_size, self$length)
       ix = (self$counter + 1L):new_counter
@@ -101,7 +106,7 @@ itoken_character_R6 = R6::R6Class(
     #------------------------
     nextElem = function() {
       if (self$is_complete) {
-        stop(StopIteration("StopIteration"))
+        stop(StopIteration("StopIteration", pb = self$progressbar))
       }
       new_counter = min(self$counter + self$chunk_size, self$length)
       ix = (self$counter + 1L):new_counter
@@ -137,7 +142,7 @@ ifiles_R6 = R6::R6Class(
     },
     nextElem = function() {
       if (self$is_complete) {
-        stop(StopIteration("StopIteration"))
+        stop(StopIteration("StopIteration", pb = self$progressbar))
       }
       self$counter = self$counter + 1L
       path = self$iterable[[self$counter]]
@@ -189,7 +194,7 @@ itoken_iterator_R6 = R6::R6Class(
     },
     nextOuterIter = function() {
       if (self$outer_is_complete) {
-        stop(StopIteration("StopIteration"))
+        stop(StopIteration("StopIteration", pb = self$progressbar))
       }
       self$iterable = self$iterator$nextElem()
       self$outer_counter = self$outer_counter + 1L
@@ -205,7 +210,7 @@ itoken_iterator_R6 = R6::R6Class(
     nextElem = function() {
       res = try(super$nextElem(), silent = TRUE)
       self$counter = self$counter + 1L
-      if (!inherits(res, 'try-error')) {
+      if (!inherits(res, "try-error")) {
         res
       }
       else {
@@ -241,7 +246,7 @@ itoken_transformer_R6 = R6::R6Class(
         res
       }
       else {
-        stop(StopIteration("StopIteration"))
+        stop(StopIteration("StopIteration", pb = self$progressbar))
       }
     }
   )
@@ -489,13 +494,13 @@ itoken_parallel.ifiles_parallel = function(iterable,
 #     },
 #     nextElem = function() {
 #       if (is.null(self$con))
-#         stop(StopIteration("StopIteration"))
+#         stop(StopIteration("StopIteration", pb = self$progressbar))
 #       res = readLines(self$con, n = self$chunk_size)
 #       if (length(res) == 0) {
 #         if (self$do_close)
 #           close(self$con)
 #         self$con = NULL
-#         stop(StopIteration("StopIteration"))
+#         stop(StopIteration("StopIteration", pb = self$progressbar))
 #       }
 #       res
 #     }
