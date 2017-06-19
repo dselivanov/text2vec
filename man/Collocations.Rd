@@ -22,21 +22,27 @@ Useful for filtering non-relevant phrases}
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
 \preformatted{
-colloc = Collocations$new(vocabulary, min_collocation_count = 50, sep = "_")
-colloc$fit(it)
+colloc = Collocations$new(vocabulary, collocation_count_min = 50, pmi_min = 5, gensim_min = 0, lfmd_min = -Inf, sep = "_")
+colloc$partial_fit(it, ...)
+colloc$fit(it, n_iter = 1, ...)
 colloc$transform(it)
 colloc$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf)
+colloc$collocation_stat
 }
 }
 
 \section{Methods}{
 
 \describe{
-  \item{\code{$new(vocabulary, min_collocation_count = 50, sep = "_")}}{Constructor for Collocations model.For description of arguments see \bold{Arguments} section.}
-  \item{\code{$fit(it)}}{fit Collocations model to input iterator \code{it}}
-  \item{\code{$transform(it)}}{transform input iterator using learned collocations
-  and produce iterator with collapsed phraeses}
-  \item{\code{$transform()}}{ create generator which transforms iterator collapsing phrases}
+  \item{\code{$new(vocabulary, collocation_count_min = 50, sep = "_")}}{Constructor for Collocations model.For description of arguments see \bold{Arguments} section.}
+  \item{\code{$fit(it, n_iter = 1, ...)}}{fit Collocations model to input iterator \code{it}.
+  Iterating over input iterator \code{it} \code{n_iter} times, so hieararchically can learn multi-word phrases.
+  Invisibly returns \code{collocation_stat}.}
+  \item{\code{$partial_fit(it, ...)}}{iterates once over data and learns collocations. Invisibly returns \code{collocation_stat}.
+  Workhorse for \code{$fit()}}.
+  \item{\code{$transform(it)}}{transforms input iterator using learned collocations model.
+  Result of the transformation is new \code{itoken} or \code{itoken_parallel} iterator which will
+  produce tokens with phraeses collapsed into single token.}
   \item{\code{$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf)}}{
   filter out non-relevant phrases with low score. User can do it directly by modifying \code{collocation_stat} object.}
 }
@@ -46,9 +52,43 @@ colloc$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf)
 
 \describe{
  \item{colloc}{A \code{Collocation} model object}
- \item{it}{An input \code{itoken} iterator}
+ \item{n_iter}{number of iteration over data}
+ \item{pmi_min, gensim_min, lfmd_min}{minimal scores of the corresponding statistics in order to collapse tokens into collocation
+ see data in \code{colloc$collocation_stat} for better understanding}
+ \item{it}{An input \code{itoken} or \code{itoken_parallel} iterator}
  \item{vocabulary}{\code{text2vec_vocabulary} - will look for collactions only for words in vocabulary}
 }
 }
 
+\examples{
+library(text2vec)
+data("movie_review")
+
+preprocessor = function(x) {
+  tolower(x) \%>\% gsub("[^[:alnum:]\\\\s]", replacement = " ", .)
+}
+sample_ind = 1:100
+tokens = movie_review$review[sample_ind] \%>\% preprocessor \%>\% word_tokenizer
+it = itoken(tokens, ids = movie_review$id[sample_ind])
+system.time(v <- create_vocabulary(it))
+v = prune_vocabulary(v, term_count_min = 5)
+
+cc = Collocations$new(v, collocation_count_min = 5, pmi_min = 5)
+cc$fit(it, n_iter = 2)
+cc$collocation_stat
+
+# now we can create new iterator wich will generate tokens with phrases collapsed:
+it2 = cc$transform(it)
+v2 = create_vocabulary(it2)
+# for example we can see that now vocabulary will contain term "jeroen_krabb"
+ind = which(startsWith(v2$term, "jeroen"))
+ind
+v2[ind, ]
+
+# and same way we can create document-term matrix which contains
+# words and phrases!
+dtm = create_dtm(it2, vocab_vectorizer(v2))
+# check that dtm contains phrases
+identical(ind, which(colnames(dtm) == "jeroen_krabb"))
+}
 \keyword{datasets}
