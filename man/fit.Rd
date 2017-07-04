@@ -18,8 +18,8 @@ fit(x, model, y = NULL, ...)
 \item{model}{instance of class \code{estimator} which should implement method
 with signature \code{$fit(x, y, ...)}}
 
-\item{y}{\code{NULL} by default. Optional response variable for supervised models.
-Should inherit from \code{vector} \code{Matrix} or \code{matrix}. See documentation
+\item{y}{\code{NULL} by default. Optional response variable for supervised learning models.
+Should inherit from \code{vector} or \code{Matrix} or \code{matrix}. See documentation
 for corresponding models.}
 
 \item{...}{additional data/model dependent arguments to downstream functions.}

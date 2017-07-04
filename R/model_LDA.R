@@ -159,14 +159,12 @@ LatentDirichletAllocation = R6::R6Class(
     #---------------------------------------------------------------------------------------------
     transform = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5,
                          progressbar = FALSE, ...) {
+      stopifnot(all.equal(colnames(x), private$vocabulary))
       # create model for inferenct (we have to init internal C++ data structures for document-term matrix)
       inference_model_ptr = warplda_create(n = private$n_topics,
                                            doc_topic_prior = private$doc_topic_prior,
                                            topic_word_prior = private$topic_word_prior)
-
       private$init_model_dtm(x, inference_model_ptr)
-
-      stopifnot(all.equal(colnames(x), private$vocabulary))
 
       warplda_set_topic_word_count(inference_model_ptr, self$components);
 
@@ -174,7 +172,7 @@ LatentDirichletAllocation = R6::R6Class(
         private$fit_transform_internal(inference_model_ptr, n_iter = n_iter,
                                        convergence_tol = convergence_tol,
                                        n_check_convergence = n_check_convergence,
-                                       update_topics = 0L, progressbar = progressbar)
+                                       update_topics = FALSE, progressbar = progressbar)
       # add priors and normalize to get distribution
       doc_topic_distr = (doc_topic_count + private$doc_topic_prior) %>% text2vec::normalize("l1")
       attributes(doc_topic_distr) = attributes(doc_topic_count)
@@ -255,34 +253,35 @@ LatentDirichletAllocation = R6::R6Class(
     doc_topic_count = NULL,
     vocabulary = NULL,
     #--------------------------------------------------------------
-    fit_transform_internal = function(model_ptr, n_iter,
-                                      convergence_tol = -1,
-                                      n_check_convergence = 10,
-                                      update_topics = 1L,
-                                      progressbar = FALSE) {
+    fit_transform_internal = function(model_ptr,
+                                      n_iter,
+                                      convergence_tol,
+                                      n_check_convergence,
+                                      update_topics,
+                                      progressbar) {
       if(progressbar)
         pb = txtProgressBar(min = 0, max = n_iter, initial = 0, style = 3)
 
       loglik_previous = -Inf
       hist_size = ceiling(n_iter / n_check_convergence)
-      loglik_hist = vector('list', hist_size)
+      loglik_hist = vector("list", hist_size)
       j = 1L
 
       for(i in seq_len(n_iter)) {
-        private$run_iter_doc(update_topics)
-        private$run_iter_word(update_topics)
+        private$run_iter_doc(update_topics, model_ptr)
+        private$run_iter_word(update_topics, model_ptr)
 
         # check convergence
         if(i %% n_check_convergence == 0) {
-          loglik = private$calc_pseudo_loglikelihood()
+          loglik = private$calc_pseudo_loglikelihood(model_ptr)
 
-          flog.info("iter %d current loglikelihood %.4f", i, loglik)
+          flog.info("iter %d loglikelihood = %.3f", i, loglik)
 
           loglik_hist[[j]] = data.frame(iter = i, loglikelihood = loglik)
 
           if(loglik_previous / loglik - 1 < convergence_tol) {
             if(progressbar) setTxtProgressBar(pb, n_iter)
-            flog.info("%s early stopping at %d iteration", i)
+            flog.info("early stopping at %d iteration", i)
             break
           }
           loglik_previous = loglik
@@ -296,9 +295,11 @@ LatentDirichletAllocation = R6::R6Class(
 
       res = warplda_get_doc_topic_count(model_ptr)
       attr(res, "likelihood") = do.call(rbind, loglik_hist)
-      # attr(res, "iter") = i
       res
     },
+    # get_doc_topic_count_internal = function(ptr = private$ptr) {
+    #   warplda_get_doc_topic_count(ptr)
+    # },
     #--------------------------------------------------------------
     init_model_dtm = function(x, ptr = private$ptr) {
       x = super$check_convert_input(x, private$internal_matrix_formats)
@@ -344,16 +345,16 @@ LatentDirichletAllocation = R6::R6Class(
     #   run_one_iter(ptr = private$ptr, update_topics = T,  calc_ll = calc_ll)
     # },
 
-    run_iter_doc = function(update_topics = TRUE) {
-      run_one_iter_doc(ptr = private$ptr, update_topics = update_topics)
+    run_iter_doc = function(update_topics = TRUE, ptr = private$ptr) {
+      run_one_iter_doc(ptr, update_topics = update_topics)
     },
 
-    run_iter_word = function(update_topics = TRUE) {
-      run_one_iter_word(ptr = private$ptr, update_topics = update_topics)
+    run_iter_word = function(update_topics = TRUE, ptr = private$ptr) {
+      run_one_iter_word(ptr, update_topics = update_topics)
     },
 
-    calc_pseudo_loglikelihood = function() {
-      warplda_pseudo_loglikelihood(ptr = private$ptr)
+    calc_pseudo_loglikelihood = function(ptr = private$ptr) {
+      warplda_pseudo_loglikelihood(ptr)
     }
   )
 )
@@ -370,113 +371,105 @@ LatentDirichletAllocationDistributed = R6::R6Class(
   public = list(
     initialize = function(n_topics = 10L,
                           doc_topic_prior = 50 / n_topics,
-                          topic_word_prior = 1 / n_topics,
-                          cl = NULL) {
+                          topic_word_prior = 1 / n_topics) {
+      # OUT_FILE = "~/lda.txt"
+      # unlink(OUT_FILE)
+      super$set_internal_matrix_formats(sparse = "RsparseMatrix")
+      private$n_topics = n_topics
+      private$doc_topic_prior = doc_topic_prior
+      private$topic_word_prior = topic_word_prior
 
       foreach(seq_len(foreach::getDoParWorkers())) %dopar% {
         text2vec.environment <<- new.env(parent = emptyenv())
-        text2vec.environment$lda = LatentDirichletAllocation$new(n_topics, doc_topic_prior, topic_word_prior, FALSE)
+        text2vec.environment$lda = LatentDirichletAllocation$new(n_topics, doc_topic_prior, topic_word_prior)
+        # cat(sprintf("%s pid %d init done\n", Sys.time(), Sys.getpid()), file =  OUT_FILE, append = TRUE)
         TRUE
       }
-      #   parallel::clusterMap(cl, function(x) {
-      #     text2vec.environment <<- new.env(parent = emptyenv())
-      #     text2vec.environment$lda = LatentDirichletAllocation$new(n_topics, doc_topic_priortopic_word_prior, FALSE)
-      #     TRUE
-      # })
+    },
+    fit = function(...) {
+      stop("`fit` is notimplemented. Use `fit_transform()` instead")
+    },
+    transform = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5,
+                         progressbar = FALSE, ...) {
+      super$transform(x, n_iter, convergence_tol, n_check_convergence,
+                      progressbar, ...)
     },
     fit_transform = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10,
                              progressbar = interactive(), ...) {
+
       stopifnot(inherits(x, "RowDistributedMatrix"))
+      # x = super$check_convert_input(x, private$internal_matrix_formats)
       stopifnot(is.logical(progressbar))
+      # OUT_FILE = "~/lda.txt"
       # sun_counts = function(...) do.call(`+`, ...)
       # ii = parallel::splitIndices(nrow(x), foreach::getDoParWorkers())
+
+      private$vocabulary = colnames(x)
       global_counts =
         foreach(x_ref = x,
                 .combine = list, .inorder = FALSE, .multicombine = TRUE) %dopar% {
                   lda = text2vec.environment$lda
                   lda$.__enclos_env__$private$init_model_dtm(get(x_ref$env)[[x_ref$key]])
                   lda$.__enclos_env__$private$get_c_all()
+                  # cat(sprintf("%s pid %d got counts\n", Sys.time(), Sys.getpid()), file =  OUT_FILE, append = TRUE)
         }
       global_counts = Reduce(`+`, global_counts)
-      # stat = foreach(x_ref = x,
-      #         .combine = c, .inorder = FALSE, .multicombine = TRUE) %dopar% {
-      #           nnz = sprintf("pid %d sum_nnz %d nnz %d", Sys.getpid(), sum(get(x_ref$env)[[x_ref$key]]@x),
-      #                         length(get(x_ref$env)[[x_ref$key]]@x))
-      #           nnz
-      #         }
-      # lapply(stat, message)
-      for(i in seq_len(n_iter)) {
 
+      for(i in seq_len(n_iter)) {
         iter_data =
           foreach(seq_len(foreach::getDoParWorkers()), .combine = list,
                   .inorder = FALSE, .multicombine = TRUE) %dopar% {
-
-                    # extract
-                    # lda = text2vec.environment$lda
                     t0 = Sys.time()
-                    # sync
+                    # futile.logger::flog.info("pid %d start", Sys.getpid())
+                    # cat(sprintf("%s pid %d start\n", t0, Sys.getpid()), file =  OUT_FILE, append = TRUE)
+
+                    # sync models - set global word-topic counts
                     text2vec.environment$lda$.__enclos_env__$private$set_c_all(global_counts)
 
-                    # sampling
+                    # sampling from each model idependently according to global counts
                     text2vec.environment$lda$.__enclos_env__$private$run_iter_doc(TRUE)
                     text2vec.environment$lda$.__enclos_env__$private$run_iter_word(TRUE)
-
+                    # extract local counts in order to sync them across models
                     local_counts = text2vec.environment$lda$.__enclos_env__$private$get_c_all_local()
-
+                    # reset counts for next iteration
                     text2vec.environment$lda$.__enclos_env__$private$reset_c_local()
-                    ll = text2vec.environment$lda$.__enclos_env__$private$calc_pseudo_loglikelihood()
-                    stat = sprintf("pid %d %.3f", Sys.getpid(), difftime( Sys.time(), t0, units = "sec"))
-                    list(ll = ll, local_counts = local_counts, stat = stat)
+                    # calculate loglikelihood for a signle model
+                    ll = 0
+                    if(i %% n_check_convergence == 0)
+                      ll = text2vec.environment$lda$.__enclos_env__$private$calc_pseudo_loglikelihood()
+
+                    # futile.logger::flog.info("pid %d end", Sys.getpid())
+                    # cat(sprintf("%s pid %d end, took %.3f\n", Sys.time(), Sys.getpid(), difftime(Sys.time(), t0, units = "sec")),
+                    # file =  OUT_FILE, append = TRUE)
+
+                    list(ll = ll, local_counts = local_counts)
                   }
-        # lapply(iter_data, function(x) message(x[['stat']]))
-        global_counts = lapply(iter_data, function(x) x[['local_counts']]) %>%
+        # aggregate local counts - sync across single models
+        global_counts = lapply(iter_data, function(x) x[["local_counts"]]) %>%
           Reduce(`+`,  ., init = global_counts)
-
-        ll = lapply(iter_data, function(x) x[['ll']]) %>%
-          do.call(sum, .)
-        flog.info("iter %d loglik = %.3f", i, ll)
-
-        # iter_doc =
-        #   foreach(seq_len(foreach::getDoParWorkers()), .combine = list,
-        #           .inorder = FALSE, .multicombine = TRUE) %dopar% {
-        #             lda = text2vec.environment$lda
-        #
-        #             lda$.__enclos_env__$private$set_c_all(global_counts)
-        #
-        #             lda$.__enclos_env__$private$run_iter_doc(TRUE)
-        #
-        #             local_counts = lda$.__enclos_env__$private$get_c_all_local()
-        #
-        #             lda$.__enclos_env__$private$reset_c_local()
-        #             local_counts
-        #           }
-        #
-        # global_counts =  Reduce(`+`, iter_doc , init = global_counts)
-        #
-        # iter_word =
-        #   foreach(seq_len(foreach::getDoParWorkers()), .combine = list,
-        #           .inorder = FALSE, .multicombine = TRUE) %dopar% {
-        #             lda = text2vec.environment$lda
-        #
-        #             lda$.__enclos_env__$private$set_c_all(global_counts)
-        #
-        #             lda$.__enclos_env__$private$run_iter_word(TRUE)
-        #
-        #             local_counts = lda$.__enclos_env__$private$get_c_all_local()
-        #
-        #             lda$.__enclos_env__$private$reset_c_local()
-        #             local_counts
-        #           }
-        # global_counts =  Reduce(`+`, iter_word , init = global_counts)
-
-        # calculate loglikelyhood
-        # ll =
-        #   foreach(seq_len(foreach::getDoParWorkers()), .combine = sum,
-        #           .inorder = FALSE, .multicombine = TRUE) %dopar% {
-        #             text2vec.environment$lda$.__enclos_env__$private$calc_pseudo_loglikelihood()
-        #           }
-        # message(sprintf("%s %d loglik = %.3f", Sys.time(), i, ll))
+        if(i %% n_check_convergence == 0) {
+          ll = lapply(iter_data, function(x) x[["ll"]]) %>% do.call(sum, .)
+          futile.logger::flog.info("iter %d loglikelihood = %.3f", i, ll)
+        }
       }
+
+      private$doc_topic_count = foreach(seq_len(foreach::getDoParWorkers()), .combine = rbind,
+              .inorder = TRUE, .multicombine = TRUE) %dopar% {
+        text2vec:::warplda_get_doc_topic_count(text2vec.environment$lda$.__enclos_env__$private$ptr)
+      }
+      rownames(private$doc_topic_count) = rownames(x)
+      # got topic word count distribution
+      private$components_ = foreach(seq_len(foreach::getDoParWorkers()),
+                                    .combine = function(...) Reduce(`+`, list(...)),
+                                    .inorder = FALSE, .multicombine = TRUE) %dopar% {
+        text2vec.environment$lda$.__enclos_env__$private$get_topic_word_count()
+      }
+      colnames(private$components_) = private$vocabulary
+      doc_topic_distr = self$doc_topic_distribution
+
+      attributes(doc_topic_distr) = attributes(private$doc_topic_count)
+      rownames(doc_topic_distr) = rownames(x)
+      doc_topic_distr
     }
   )
 )
