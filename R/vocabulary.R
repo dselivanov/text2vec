@@ -53,6 +53,8 @@
 create_vocabulary = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
                        stopwords = character(0), sep_ngram = "_") {
   stopifnot(is.numeric(ngram) && length(ngram) == 2 && ngram[[2]] >= ngram[[1]])
+  e = environment()
+  reg.finalizer(e, malloc_trim_finalizer)
   UseMethod("create_vocabulary")
 }
 
@@ -87,6 +89,17 @@ create_vocabulary.character = function(it, ngram = c("ngram_min" = 1L, "ngram_ma
   res
 }
 
+
+vocabulary_insert_document_batch_generic = function(ptr, x) {
+  if(inherits(x, "tokens_xprt")) {
+    cpp_vocabulary_insert_document_batch_xptr(ptr, x)
+  } else {
+    cpp_vocabulary_insert_document_batch(ptr, x)
+  }
+  e = environment()
+  reg.finalizer(e, malloc_trim_finalizer)
+  TRUE
+}
 #' @describeIn create_vocabulary collects unique terms and corresponding statistics from object.
 #' @export
 create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
@@ -104,18 +117,8 @@ create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" 
   vocab_ptr = cpp_vocab_create(ngram_min, ngram_max, stopwords, sep_ngram)
 
   foreach(tokens = it) %do% {
-    if(inherits(tokens$tokens, "tokens_xprt")) {
-      cpp_vocabulary_insert_document_batch_xptr(vocab_ptr, tokens$tokens)
-      rm(tokens)
-    } else {
-      cpp_vocabulary_insert_document_batch(vocab_ptr, tokens$tokens)
-    }
-    if(R.version$os == "linux-gnu") {
-      flog.debug("linux system detected - calling malloc_trim(0L) to trigger glibc to release memory")
-      malloc_trim(0L)
-    }
+    vocabulary_insert_document_batch_generic(vocab_ptr, tokens$tokens)
   }
-  # vocab = setDT(vocab_module$get_vocab_statistics())
 
   res = cpp_get_vocab_statistics(vocab_ptr)
   res = res[order(res$term_count), ]

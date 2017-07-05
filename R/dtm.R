@@ -79,6 +79,8 @@ get_dtm = function(corpus_ptr) {
 create_dtm = function(it, vectorizer,
                        type = c("dgCMatrix", "dgTMatrix"),
                        ...) {
+  e = environment()
+  reg.finalizer(e, malloc_trim_finalizer)
   UseMethod("create_dtm")
 }
 
