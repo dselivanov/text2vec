@@ -107,6 +107,8 @@ create_tcm = function(it, vectorizer, skip_grams_window = 5L,
                       weights = 1 / seq_len(skip_grams_window), ...) {
   stopifnot(length(weights) == skip_grams_window)
   stopifnot(class(weights) %in% c("numeric", "integer"))
+  e = environment()
+  reg.finalizer(e, malloc_trim_finalizer)
   # if(attr(vectorizer, "skip_grams_window", TRUE) == 0)
   #   stop("You should provide vectorizer with skip_grams_window > 0")
   UseMethod("create_tcm")
