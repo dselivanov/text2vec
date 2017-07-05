@@ -221,3 +221,15 @@ dimnames.RowDistributedMatrix = function(x) {
   }
   list(row_names, col_names)
 }
+
+#' @export
+#' @method dimnames RowDistributedMatrix
+dim.RowDistributedMatrix = function(x) {
+  nr = foreach(x_remote = x, .combine = sum, .multicombine = TRUE, .inorder = TRUE) %dopar% {
+    nrow(get(x_remote$env)[[x_remote$key]])
+  }
+  nc = foreach(x_remote = x[1], .combine = c, .multicombine = TRUE, .inorder = TRUE) %dopar% {
+    ncol(get(x_remote$env)[[x_remote$key]])
+  }
+  c(nr, nc)
+}
