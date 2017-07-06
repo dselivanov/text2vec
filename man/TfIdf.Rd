@@ -21,7 +21,6 @@ Term Frequency Inverse Document Frequency
 For usage details see \bold{Methods, Arguments and Examples} sections.
 \preformatted{
 tfidf = TfIdf$new(smooth_idf = TRUE, norm = c('l1', 'l2', 'none'), sublinear_tf = FALSE)
-tfidf$fit(x)
 tfidf$fit_transform(x)
 tfidf$transform(x)
 }
@@ -31,7 +30,6 @@ tfidf$transform(x)
 
 \describe{
   \item{\code{$new(smooth_idf = TRUE, norm = c("l1", "l2", "none"), sublinear_tf = FALSE)}}{Creates tf-idf model}
-  \item{\code{$fit(x)}}{fit tf-idf model to an input DTM (preferably in "dgCMatrix" format)}
   \item{\code{$fit_transform(x)}}{fit model to an input sparse matrix (preferably in "dgCMatrix"
    format) and then transforms it.}
   \item{\code{$transform(x)}}{transform new data \code{x} using tf-idf from train data}
@@ -59,9 +57,6 @@ N = 100
 tokens = movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
 dtm = create_dtm(itoken(tokens), hash_vectorizer())
 model_tfidf = TfIdf$new()
-model_tfidf$fit(dtm)
-dtm_1 = model_tfidf$transform(dtm)
-dtm_2 = model_tfidf$fit_transform(dtm)
-identical(dtm_1, dtm_2)
+dtm_tfidf = model_tfidf$fit_transform(dtm)
 }
 \keyword{datasets}

@@ -32,11 +32,11 @@
 #' lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
 #' }
 #' @field topic_word_distribution distribution of words for each topic. Available after model fitting with
-#' \code{model$fit()} or \code{model$fit_transform()} methods.
+#' \code{model$fit_transform()} method.
 #' @field doc_topic_distribution distribution of topics for each document. Available after model fitting with
-#' \code{model$fit()} or \code{model$fit_transform()} methods.
+#' \code{model$fit_transform()} method.
 #' @field components word counts for each topic-word entry. Available after model fitting with
-#' \code{model$fit()} or \code{model$fit_transform()} methods.
+#' \code{model$fit_transform()} method.
 #' @section Methods:
 #' \describe{
 #'   \item{\code{$new(n_topics,
@@ -44,9 +44,6 @@
 #'               topic_word_prior = 1 / n_topics, # beta
 #'               method = "WarpLDA")}}{Constructor for LDA model.
 #'               For description of arguments see \bold{Arguments} section.}
-#'   \item{\code{$fit(x, n_iter, convergence_tol = -1,
-#'                n_check_convergence = 10)}}{fit LDA model to input matrix \code{x}. Not that useful -
-#'                \code{fit_transform} is used under the hood. Implemented just to follow API.}
 #'   \item{\code{$fit_transform(x, n_iter, convergence_tol = -1,
 #'                n_check_convergence = 0, progressbar = interactive())}}{fit LDA model to input matrix
 #'                \code{x} and transforms input documents to topic space -
@@ -66,8 +63,9 @@
 #' @section Arguments:
 #' \describe{
 #'  \item{lda}{A \code{LDA} object}
-#'  \item{x}{An input document-term matrix. \bold{CSR \code{RsparseMatrix} used internally}}.
-#'  Should have column names.
+#'  \item{x}{An input document-term matrix (should have column names = terms).
+#'  \bold{CSR \code{RsparseMatrix} used internally},
+#'  other formats will be tried to convert to CSR via \code{as()} function call.}
 #'  \item{n_topics}{\code{integer} desired number of latent topics. Also knows as \bold{K}}
 #'  \item{doc_topic_prior}{\code{numeric} prior for document-topic multinomial distribution.
 #'    Also knows as \bold{alpha}}
@@ -148,13 +146,6 @@ LatentDirichletAllocation = R6::R6Class(
       attributes(doc_topic_distr) = attributes(private$doc_topic_count)
       rownames(doc_topic_distr) = rownames(x)
       doc_topic_distr
-    },
-    #---------------------------------------------------------------------------------------------
-    # not that useful - just to follow API
-    fit = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10,
-                   progressbar = interactive(), ...) {
-      invisible(self$fit_transform(x = x, n_iter = n_iter, convergence_tol = convergence_tol,
-                                   n_check_convergence = n_check_convergence, progressbar = progressbar))
     },
     #---------------------------------------------------------------------------------------------
     transform = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5,
@@ -372,6 +363,7 @@ LatentDirichletAllocationDistributed = R6::R6Class(
     initialize = function(n_topics = 10L,
                           doc_topic_prior = 50 / n_topics,
                           topic_word_prior = 1 / n_topics) {
+      warning("very experimental, probably doesn't work 100% correct", immediate. = TRUE)
       # OUT_FILE = "~/lda.txt"
       # unlink(OUT_FILE)
       super$set_internal_matrix_formats(sparse = "RsparseMatrix")
@@ -385,9 +377,6 @@ LatentDirichletAllocationDistributed = R6::R6Class(
         # cat(sprintf("%s pid %d init done\n", Sys.time(), Sys.getpid()), file =  OUT_FILE, append = TRUE)
         TRUE
       }
-    },
-    fit = function(...) {
-      stop("`fit` is notimplemented. Use `fit_transform()` instead")
     },
     transform = function(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 5,
                          progressbar = FALSE, ...) {
