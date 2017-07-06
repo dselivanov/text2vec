@@ -4,14 +4,14 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
 
 <meta name="author" content="Dmitriy Selivanov" />
 
-<meta name="date" content="2016-11-01" />
+<meta name="date" content="2017-06-21" />
 
 <title>Vectorization</title>
 
@@ -24,6 +24,7 @@
 <script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 
@@ -178,7 +179,6 @@ $(document).ready(function () {
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
-<script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
@@ -204,7 +204,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
@@ -263,8 +263,9 @@ div.tocify {
 }
 
 .tocify-subheader .tocify-item {
-  font-size: 0.9em;
-  padding-left: 5px;
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -276,7 +277,6 @@ div.tocify {
 }
 .tocify-subheader .tocify-item {
   font-size: 0.95em;
-  padding-left: 10px;
 }
 
 </style>
@@ -360,7 +360,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Vectorization</h1>
 <h4 class="author"><em>Dmitriy Selivanov</em></h4>
-<h4 class="date"><em>2016-11-01</em></h4>
+<h4 class="date"><em>2017-06-21</em></h4>
 
 </div>
 
@@ -426,25 +426,25 @@ vocab</code></pre></div>
 ## 0 stopwords:  ... 
 ## ngram_min = 1; ngram_max = 1 
 ## Vocabulary: 
-##                 terms terms_counts doc_counts
-##     1:     overturned            1          1
-##     2: disintegration            1          1
-##     3:         vachon            1          1
-##     4:     interfered            1          1
-##     5:      michonoku            1          1
-##    ---                                       
-## 35592:        penises            2          2
-## 35593:        arabian            1          1
-## 35594:       personal          102         94
-## 35595:            end          921        743
-## 35596:        address           10         10</code></pre>
+##              term term_count doc_count
+##     1: injections          1         1
+##     2:    albeniz          1         1
+##     3:    everone          1         1
+##     4:      argie          1         1
+##     5:  naturists          1         1
+##    ---                                
+## 35592:         to      22101      3805
+## 35593:         of      23660      3792
+## 35594:          a      26678      3879
+## 35595:        and      27079      3877
+## 35596:        the      54462      3969</code></pre>
 <p>Note that <em>text2vec</em> provides a few tokenizer functions (see <code>?tokenizers</code>). These are just simple wrappers for the <code>base::gsub()</code> function and are not very fast or flexible. If you need something smarter or faster you can use the <a href="https://cran.r-project.org/package=tokenizers">tokenizers</a> package which will cover most use cases, or write your own tokenizer using the <a href="https://cran.r-project.org/package=stringi">stringi</a> package.</p>
 <p>Now that we have a vocabulary, we can construct a document-term matrix.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(vocab)
 t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
 dtm_train =<span class="st"> </span><span class="kw">create_dtm</span>(it_train, vectorizer)
 <span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
-<pre><code>## Time difference of 0.593056 secs</code></pre>
+<pre><code>## Time difference of 0.5949841 secs</code></pre>
 <p>Now we have a DTM and can check its dimensions.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(dtm_train)</code></pre></div>
 <pre><code>## [1]  4000 35596</code></pre>
@@ -468,11 +468,11 @@ glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<s
                               <span class="co"># again lower number of iterations for faster training</span>
                               <span class="dt">maxit =</span> <span class="fl">1e3</span>)
 <span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
-<pre><code>## Time difference of 3.569187 secs</code></pre>
+<pre><code>## Time difference of 3.219369 secs</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(glmnet_classifier)</code></pre></div>
 <p><img src="vectorization_files/figure-html/fit_1-1.png" width="672" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">paste</span>(<span class="st">&quot;max AUC =&quot;</span>, <span class="kw">round</span>(<span class="kw">max</span>(glmnet_classifier$cvm), <span class="dv">4</span>)))</code></pre></div>
-<pre><code>## [1] &quot;max AUC = 0.923&quot;</code></pre>
+<pre><code>## [1] &quot;max AUC = 0.9231&quot;</code></pre>
 <p>We have successfully fit a model to our DTM. Now we can check the model’s performance on test data. Note that we use exactly the same functions from prepossessing and tokenization. Also we reuse/use the same <code>vectorizer</code> - function which maps terms to indices.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Note that most text2vec functions are pipe friendly!</span>
 it_test =<span class="st"> </span>test$review %&gt;%<span class="st"> </span>
@@ -486,7 +486,7 @@ dtm_test =<span class="st"> </span><span class="kw">create_dtm</span>(it_test, v
 
 preds =<span class="st"> </span><span class="kw">predict</span>(glmnet_classifier, dtm_test, <span class="dt">type =</span> <span class="st">&#39;response&#39;</span>)[,<span class="dv">1</span>]
 glmnet:::<span class="kw">auc</span>(test$sentiment, preds)</code></pre></div>
-<pre><code>## [1] 0.916697</code></pre>
+<pre><code>## [1] 0.916713</code></pre>
 <p>As we can see, performance on the test data is roughly the same as we expect from cross-validation.</p>
 <div id="pruning-vocabulary" class="section level3">
 <h3>Pruning vocabulary</h3>
@@ -496,7 +496,7 @@ glmnet:::<span class="kw">auc</span>(test$sentiment, preds)</code></pre></div>
 t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
 vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_train, <span class="dt">stopwords =</span> stop_words)
 <span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
-<pre><code>## Time difference of 0.4054861 secs</code></pre>
+<pre><code>## Time difference of 0.316581 secs</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pruned_vocab =<span class="st"> </span><span class="kw">prune_vocabulary</span>(vocab, 
                                  <span class="dt">term_count_min =</span> <span class="dv">10</span>, 
                                  <span class="dt">doc_proportion_max =</span> <span class="fl">0.5</span>,
@@ -506,7 +506,7 @@ vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(pr
 t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
 dtm_train  =<span class="st"> </span><span class="kw">create_dtm</span>(it_train, vectorizer)
 <span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
-<pre><code>## Time difference of 0.5097289 secs</code></pre>
+<pre><code>## Time difference of 0.381896 secs</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(dtm_train)</code></pre></div>
 <pre><code>## [1] 4000 6585</code></pre>
 <p>Note that the new DTM has many fewer columns than the original DTM. This usually leads to both accuracy improvement (because we removed “noise”) and reduction of the training time.</p>
@@ -522,7 +522,7 @@ dtm_train  =<span class="st"> </span><span class="kw">create_dtm</span>(it_train
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
 vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_train, <span class="dt">ngram =</span> <span class="kw">c</span>(1L, 2L))
 <span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
-<pre><code>## Time difference of 1.600132 secs</code></pre>
+<pre><code>## Time difference of 1.369197 secs</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vocab =<span class="st"> </span>vocab %&gt;%<span class="st"> </span><span class="kw">prune_vocabulary</span>(<span class="dt">term_count_min =</span> <span class="dv">10</span>, 
                    <span class="dt">doc_proportion_max =</span> <span class="fl">0.5</span>)
 
@@ -539,17 +539,17 @@ glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<s
                  <span class="dt">thresh =</span> <span class="fl">1e-3</span>,
                  <span class="dt">maxit =</span> <span class="fl">1e3</span>)
 <span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
-<pre><code>## Time difference of 2.909883 secs</code></pre>
+<pre><code>## Time difference of 2.467955 secs</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(glmnet_classifier)</code></pre></div>
 <p><img src="vectorization_files/figure-html/ngram_dtm_1-1.png" width="672" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">paste</span>(<span class="st">&quot;max AUC =&quot;</span>, <span class="kw">round</span>(<span class="kw">max</span>(glmnet_classifier$cvm), <span class="dv">4</span>)))</code></pre></div>
-<pre><code>## [1] &quot;max AUC = 0.9217&quot;</code></pre>
+<pre><code>## [1] &quot;max AUC = 0.9215&quot;</code></pre>
 <p>Seems that usage of n-grams improved our model a little bit more. Let’s check performance on test dataset:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># apply vectorizer</span>
 dtm_test =<span class="st"> </span><span class="kw">create_dtm</span>(it_test, bigram_vectorizer)
 preds =<span class="st"> </span><span class="kw">predict</span>(glmnet_classifier, dtm_test, <span class="dt">type =</span> <span class="st">&#39;response&#39;</span>)[,<span class="dv">1</span>]
 glmnet:::<span class="kw">auc</span>(test$sentiment, preds)</code></pre></div>
-<pre><code>## [1] 0.9268974</code></pre>
+<pre><code>## [1] 0.9270214</code></pre>
 <p>Further tuning is left up to the reader.</p>
 </div>
 <div id="feature-hashing" class="section level2">
@@ -561,7 +561,7 @@ glmnet:::<span class="kw">auc</span>(test$sentiment, preds)</code></pre></div>
 t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
 dtm_train =<span class="st"> </span><span class="kw">create_dtm</span>(it_train, h_vectorizer)
 <span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
-<pre><code>## Time difference of 1.172304 secs</code></pre>
+<pre><code>## Time difference of 1.023576 secs</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
 glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]], 
                              <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>, 
@@ -571,7 +571,7 @@ glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<s
                              <span class="dt">thresh =</span> <span class="fl">1e-3</span>,
                              <span class="dt">maxit =</span> <span class="fl">1e3</span>)
 <span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
-<pre><code>## Time difference of 4.589972 secs</code></pre>
+<pre><code>## Time difference of 4.223187 secs</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(glmnet_classifier)</code></pre></div>
 <p><img src="vectorization_files/figure-html/hash_dtm-1.png" width="672" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">paste</span>(<span class="st">&quot;max AUC =&quot;</span>, <span class="kw">round</span>(<span class="kw">max</span>(glmnet_classifier$cvm), <span class="dv">4</span>)))</code></pre></div>
@@ -612,9 +612,9 @@ dtm_test_tfidf  =<span class="st"> </span><span class="kw">create_dtm</span>(it_
 <ol style="list-style-type: decimal">
 <li>Models can be fitted on a given data (train) and applied to unseen data (test)</li>
 <li><strong>Models are mutable</strong> - once you will pass model to <code>fit()</code> or <code>fit_transform()</code> function, model will be modifed by it.</li>
-<li>After model is fitted, it can be applied to a new data with <code>transform(new_data, fitted_model)</code> method.</li>
+<li>After model is fitted, it can be applied to a new data with <code>fitted_model$transform(new_data)</code> method or equivalent S3 method: <code>transform(new_data, fitted_model)</code>.</li>
 </ol>
-<p>More detailed overview of models and models API will be available soon in a separate vignette.</p>
+<p>You can find more detailed overview of models and models API in a <a href="#FIXME">separate vignette</a>.</p>
 <p>Once we have tf-idf reweighted DTM we can fit our linear classifier again:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
 glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train_tfidf, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]], 
@@ -625,15 +625,15 @@ glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<s
                               <span class="dt">thresh =</span> <span class="fl">1e-3</span>,
                               <span class="dt">maxit =</span> <span class="fl">1e3</span>)
 <span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
-<pre><code>## Time difference of 3.194087 secs</code></pre>
+<pre><code>## Time difference of 2.891163 secs</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(glmnet_classifier)</code></pre></div>
 <p><img src="vectorization_files/figure-html/fit_2-1.png" width="672" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">paste</span>(<span class="st">&quot;max AUC =&quot;</span>, <span class="kw">round</span>(<span class="kw">max</span>(glmnet_classifier$cvm), <span class="dv">4</span>)))</code></pre></div>
-<pre><code>## [1] &quot;max AUC = 0.9146&quot;</code></pre>
+<pre><code>## [1] &quot;max AUC = 0.9147&quot;</code></pre>
 <p>Let’s check the model performance on the test dataset:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">preds =<span class="st"> </span><span class="kw">predict</span>(glmnet_classifier, dtm_test_tfidf, <span class="dt">type =</span> <span class="st">&#39;response&#39;</span>)[,<span class="dv">1</span>]
 glmnet:::<span class="kw">auc</span>(test$sentiment, preds)</code></pre></div>
-<pre><code>## [1] 0.9053246</code></pre>
+<pre><code>## [1] 0.9044766</code></pre>
 <p>Usually <em>tf-idf</em> transformation <strong>significantly</strong> improve performance on most of the dowstream tasks.</p>
 </div>
 </div>
@@ -669,8 +669,11 @@ glmnet:::<span class="kw">auc</span>(test$sentiment, preds)</code></pre></div>
 <script>
 
 // add bootstrap table styles to pandoc tables
-$(document).ready(function () {
+function bootstrapStylePandocTables() {
   $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
 });
 
 
@@ -681,7 +684,7 @@ $(document).ready(function () {
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

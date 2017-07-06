@@ -4,7 +4,7 @@ author: "Dmitriy Selivanov"
 date: "`r Sys.Date()`"
 ---
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(echo=TRUE, eval=T, warning=FALSE, message=FALSE)
 ```
 # Word embeddings
 
@@ -56,28 +56,25 @@ In the next step we will create a vocabulary, a set of words for which we want t
 
 ```{r}
 # Create iterator over tokens
-tokens <- space_tokenizer(wiki)
+tokens = space_tokenizer(wiki)
 # Create vocabulary. Terms will be unigrams (simple words).
 it = itoken(tokens, progressbar = FALSE)
-vocab <- create_vocabulary(it)
+vocab = create_vocabulary(it)
 ```
 
 These words should not be too uncommon. Fot example we cannot calculate a meaningful word vector for a word which we saw only once in the entire corpus. Here we will take only words which appear at least five times. text2vec provides additional options to filter vocabulary (see `?prune_vocabulary`).
 
 ```{r}
-vocab <- prune_vocabulary(vocab, term_count_min = 5L)
+vocab = prune_vocabulary(vocab, term_count_min = 5L)
 ```
 
 Now we have 71,290 terms in the vocabulary and are ready to construct term-co-occurence matrix (TCM).
 
 ```{r}
 # Use our filtered vocabulary
-vectorizer <- vocab_vectorizer(vocab, 
-                               # don't vectorize input
-                               grow_dtm = FALSE, 
-                               # use window of 5 for context words
-                               skip_grams_window = 5L)
-tcm <- create_tcm(it, vectorizer)
+vectorizer = vocab_vectorizer(vocab)
+# use window of 5 for context words
+tcm = create_tcm(it, vectorizer, skip_grams_window = 5L)
 ```
 
 Now we have a TCM matrix and can factorize it via the GloVe algorithm.  
@@ -87,46 +84,38 @@ Let's fit our model. (It can take several minutes to fit!)
 
 ```{r, message=TRUE}
 glove = GlobalVectors$new(word_vectors_size = 50, vocabulary = vocab, x_max = 10)
-glove$fit(tcm, n_iter = 20)
-# 2016-10-03 10:09:14 - epoch 1, expected cost 0.0893
-# 2016-10-03 10:09:17 - epoch 2, expected cost 0.0608
-# 2016-10-03 10:09:19 - epoch 3, expected cost 0.0537
-# 2016-10-03 10:09:22 - epoch 4, expected cost 0.0499
-# 2016-10-03 10:09:25 - epoch 5, expected cost 0.0475
-# 2016-10-03 10:09:28 - epoch 6, expected cost 0.0457
-# 2016-10-03 10:09:30 - epoch 7, expected cost 0.0443
-# 2016-10-03 10:09:33 - epoch 8, expected cost 0.0431
-# 2016-10-03 10:09:36 - epoch 9, expected cost 0.0423
-# 2016-10-03 10:09:39 - epoch 10, expected cost 0.0415
-# 2016-10-03 10:09:42 - epoch 11, expected cost 0.0408
-# 2016-10-03 10:09:44 - epoch 12, expected cost 0.0403
-# 2016-10-03 10:09:47 - epoch 13, expected cost 0.0400
-# 2016-10-03 10:09:50 - epoch 14, expected cost 0.0395
-# 2016-10-03 10:09:53 - epoch 15, expected cost 0.0391
-# 2016-10-03 10:09:56 - epoch 16, expected cost 0.0388
-# 2016-10-03 10:09:59 - epoch 17, expected cost 0.0385
-# 2016-10-03 10:10:02 - epoch 18, expected cost 0.0383
-# 2016-10-03 10:10:05 - epoch 19, expected cost 0.0380
-# 2016-10-03 10:10:08 - epoch 20, expected cost 0.0378
+wv_main = glove$fit_transform(tcm, n_iter = 10, convergence_tol = 0.01)
 ```
-
-Alternatively we can train model with R's `S3` interface (but keep in mind that all text2vec models are R6 classes and they are mutable! So `fit`, `fit_transform` methods modify models!):
+```{r}
+dim(wv_main)
+```
+Alternatively we can train model with R's `S3` interface (but keep in mind that all text2vec models are R6 classes and they are mutable! So `fit_transform` methods modify models!):
 ```{r, message=TRUE, eval=FALSE}
 glove = GlobalVectors$new(word_vectors_size = 50, vocabulary = vocab, x_max = 10)
-# `glove` object will be modified by `fit()` call !
-fit(tcm, glove, n_iter = 20)
+# `glove` object will be modified by `fit_transform()` call !
+wv_main = fit_transform(tcm, glove, n_iter = 20)
 ```
 
-And now we get the word vectors:
+Note that model learns two sets of word vectors - main and context. Essentially they are the same since model is symmetric. From our experience learning two sets of word vectors leads to higher quality embeddings.
+GloVe model is "decomposition" model (inherits from `mlapiDecomposition` - generic class of models which decompose input matrix into two low-rank matrices). So on par with any other `mlapiDecomposition` model second low-rank matrix (context word vectors) is available in `components` field:
 
 ```{r}
-word_vectors <- glove$get_word_vectors()
+wv_context = glove$components
+dim(wv_context)
+```
+
+Note that as in all models which inherit from `mlapiDecomposition` transformed matrix will has `nrow = nrow(input)`, `ncol = rank` and second `component` matrix will has `nrow = rank`,  `ncol = ncol(input)`.
+
+While both of word-vectors matrices can be used as result it usually better (idea from GloVe paper) to average or take a sum of main and context vector:
+
+```{r}
+word_vectors = wv_main + t(wv_context)
 ```
 
 We can find the closest word vectors for our *paris - france + germany* example:
 
 ```{r}
-berlin <- word_vectors["paris", , drop = FALSE] - 
+berlin = word_vectors["paris", , drop = FALSE] - 
   word_vectors["france", , drop = FALSE] + 
   word_vectors["germany", , drop = FALSE]
 cos_sim = sim2(x = word_vectors, y = berlin, method = "cosine", norm = "l2")

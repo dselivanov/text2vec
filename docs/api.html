@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -23,6 +23,7 @@
 <script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 
@@ -139,7 +140,6 @@ $(document).ready(function () {
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
-<script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
@@ -165,7 +165,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
@@ -224,8 +224,9 @@ div.tocify {
 }
 
 .tocify-subheader .tocify-item {
-  font-size: 0.9em;
-  padding-left: 5px;
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -237,7 +238,6 @@ div.tocify {
 }
 .tocify-subheader .tocify-item {
   font-size: 0.95em;
-  padding-left: 10px;
 }
 
 </style>
@@ -347,23 +347,34 @@ div.tocify {
 <li><code>vocab_vectorizer()</code>, <code>hash_vectorizer()</code>.</li>
 </ul>
 </div>
-<div id="io-handling." class="section level2">
-<h2>I/O handling.</h2>
+<div id="io-handling" class="section level2">
+<h2>I/O handling</h2>
 <p>All functions from <code>create_*</code> family work with <strong>iterators</strong> over tokens as input. Good examples for creation of such iterators are:</p>
 <ul>
-<li><code>itoken()</code> for creation iterator over tokens;</li>
 <li><code>ifiles()</code> for creation iterator over files. Note that text2vec doesn’t handle I/O, users should provide their own reader function (<code>data.table::fread()</code> and functions from <code>readr</code> package usually are good choices).</li>
+<li><code>itoken()</code> for creation iterator over tokens;</li>
 </ul>
 <p>Once user needs some custom source (for example data stream from some RDBMS), he/she just needs to create correct iterator over tokens.</p>
+<div id="easy-parallel-processing" class="section level3">
+<h3>Easy parallel processing</h3>
+<p><code>text2vec</code> also provides convenient functions for <strong>easy parallel processing</strong> of text (many of tasks are emrassingly parallel).</p>
+<ul>
+<li><code>ifiles_parallel()</code> same as <code>ifiles()</code> above, but creates <strong>parallel iterator</strong> if parallel backend is registered (for example with <code>registerDoParallel</code>)</li>
+<li><code>itoken_parallel()</code> is the same as <code>itoken()</code> above but also creates <strong>parallel iterator</strong> if parallel backend is registered.</li>
+</ul>
+<p>Parallel <code>itoken</code> iterators can be used in <code>create_dtm()</code>, <code>create_tcm()</code> functions exatly the same way as sequential counterparts.</p>
+</div>
 </div>
 <div id="models" class="section level2">
 <h2>Models</h2>
-<p>text2vec provides unified interface for models, which is inspired by <code>scikit-learn</code> interface. Models in text2vec are mostly <em>transformers</em> - they transform Document-Term matrix. Models include:</p>
+<p>text2vec provides unified interface for models, which is inspired by <code>scikit-learn</code> interface. Models in text2vec are mostly <em>transformers</em> and <em>decompositions</em> - they transform Document-Term matrix or decompose into 2 low-rank matrices.</p>
+<p>Models include:</p>
 <ul>
 <li>Tf-idf reweighting. See <a href="vectorization.html#tf-idf">Tf-idf in vectorization</a> section;</li>
 <li>Global Vectors (<strong>GloVe</strong>) word embeddings. See <a href="glove.html">Word Embeddings</a> section;</li>
 <li>Latent Semantic Analysis (<strong>LSA</strong>). See <a href="topic_modeling.html#latent_semantic_analysis">LSA</a> section;</li>
 <li>Latent Dirichlet Allocation (<strong>LDA</strong>). See <a href="topic_modeling.html#latent_dirichlet_allocation">LDA</a> section.</li>
+<li><strong>Collocations</strong>. Collocations model which can learn phrases from text is a bit separate from others and has a little bit different interface. It takes <code>itoken</code> iterator as input to <code>fit</code> method and learn model. After that user can pass another <code>itoken</code> iterator to <code>transform</code> method and receive another <code>itoken</code> iterator wich will produce tokens with phrases concatenated into single token.</li>
 </ul>
 <p><strong>All text2vec models are mutable! This means that <code>fit()</code> and <code>fit_transform()</code> methods change model which was provided as argument.</strong></p>
 <div id="important-verbs" class="section level3">
@@ -371,10 +382,11 @@ div.tocify {
 <p>All models have unified interface. User should only remember few verbs for models manipulation:</p>
 <ul>
 <li><code>model$new(...)</code> - create model object, set up initial parameters for model. This is model-specific. For example for LDA it can be number of topics <span class="math inline">\(K\)</span>, alpha(<span class="math inline">\(\alpha\)</span>) and eta(<span class="math inline">\(\eta\)</span>) priors;</li>
-<li><code>model$fit(x, ...)</code> - fits model to data;</li>
+<li><code>model$partial_fit(x, ...)</code> - partially fits model to data (for online models);</li>
 <li><code>model$fit_transform(x, ...)</code> - fits model to data and then transforms data with fitted model;</li>
 <li><code>model$transform(x_new, ...)</code> - transforms new data with pretrained model.</li>
 </ul>
+<p>Decomposition models decompose matrix into 2 low rank matrices <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. <span class="math inline">\(X\)</span> corresponds to item embeddings and <span class="math inline">\(Y\)</span> corresponds to feature embeddings. For example for <code>LDA</code> <span class="math inline">\(X\)</span> will be document-topic assignements and <span class="math inline">\(Y\)</span> will be topic-word assignements. While <code>fit_transform</code> or <code>transform</code> methods gives you <span class="math inline">\(X\)</span>, second, matrix <span class="math inline">\(Y\)</span> is available as <code>components</code> read-only field: <code>model$components</code>. Examples of “decomposition” models in <code>text2vec</code> are <code>LDA</code>, <code>LSA</code>, <code>GloVe</code>. Check documentation of these classes for additional information.</p>
 </div>
 </div>
 <div id="distances" class="section level2">
@@ -428,8 +440,11 @@ div.tocify {
 <script>
 
 // add bootstrap table styles to pandoc tables
-$(document).ready(function () {
+function bootstrapStylePandocTables() {
   $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
 });
 
 
@@ -440,7 +455,7 @@ $(document).ready(function () {
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

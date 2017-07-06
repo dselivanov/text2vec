@@ -296,9 +296,9 @@ Note that here we first time touched *model* object in *text2vec*. At this momen
 
 1. Models can be fitted on a given data (train) and applied to unseen data (test)
 1. **Models are mutable** - once you will pass model to `fit()` or `fit_transform()` function, model will be modifed by it.
-1. After model is fitted, it can be applied to a new data with `transform(new_data, fitted_model)` method.
+1. After model is fitted, it can be applied to a new data with `fitted_model$transform(new_data)` method or equivalent S3 method: `transform(new_data, fitted_model)`.
 
-More detailed overview of models and models API will be available soon in a separate vignette.
+You can find more detailed overview of models and models API in a [separate vignette](#FIXME).
 
 Once we have tf-idf reweighted DTM we can fit our linear classifier again:
 ```{r, fit_2, message=FALSE, warning=FALSE}
