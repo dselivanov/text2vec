@@ -256,11 +256,12 @@ class GloveFit {
     NumericMatrix wv(this->w_i.size(), this->word_vec_size);
     for (size_t i = 0; i < this->w_i.size(); i++)
       for (size_t j = 0; j < this->word_vec_size; j++)
-        if(this->FLAG_DO_L1_REGURARIZATION)
-          wv(i, j) = this->w_i[i][j];
-        else
-          // sum of context and main word vectors
-          wv(i, j) = this->w_i[i][j] + this->w_j[i][j];
+        wv(i, j) = this->w_i[i][j];
+        // if(this->FLAG_DO_L1_REGURARIZATION)
+        //   wv(i, j) = this->w_i[i][j];
+        // else
+        //   // sum of context and main word vectors
+        //   wv(i, j) = this->w_i[i][j] + this->w_j[i][j];
     return wv;
   }
 

@@ -17,7 +17,6 @@ mlapiBase = R6::R6Class(
     #-------------------------------------------------------------------------------------
     check_convert_input = function(x, internal_formats) {
       stopifnot(all(names(internal_formats) %in% c("sparse", "dense")))
-
       # first check sparse input
       if(inherits(x, "sparseMatrix")) {
         sparse_format = internal_formats[["sparse"]]
@@ -29,7 +28,7 @@ mlapiBase = R6::R6Class(
       else {
         dense_format = internal_formats[["dense"]]
         if(is.null(dense_format))
-          stop("input is supposed to be dense matrix, but underlying functions don't work with dense matrices (yet)")
+          stop(sprintf("don't know how to deal with input of class '%s'", paste(class(x), collapse = " | ") ))
         return(as(x, dense_format))
       }
     }
