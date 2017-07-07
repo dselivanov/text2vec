@@ -9,17 +9,19 @@ navbar:
       href: vectorization.html
     - text: "GloVe"
       menu:
-        - text: "GloVe" 
+        - text: "GloVe"
           href: glove.html
         - text: "GloVe-CLI"
           href: glove-cli.html
       href: glove.html
+    - text: "Collocations"
+      href: collocations.html
     - text: "Topic modeling"
       href: topic_modeling.html
     - text: "Similarity"
       href: similarity.html
     - text: "API"
-      href: api.html      
+      href: api.html
   right:
     - icon: fa-github fa-lg
       href: https://github.com/dselivanov/text2vec

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Dmitriy Selivanov" />
+
+<meta name="date" content="2017-07-07" />
+
+<title>Collocations</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #0000ff; } /* Keyword */
+code > span.ch { color: #008080; } /* Char */
+code > span.st { color: #008080; } /* String */
+code > span.co { color: #008000; } /* Comment */
+code > span.ot { color: #ff4000; } /* Other */
+code > span.al { color: #ff0000; } /* Alert */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #008000; font-weight: bold; } /* Warning */
+code > span.cn { } /* Constant */
+code > span.sc { color: #008080; } /* SpecialChar */
+code > span.vs { color: #008080; } /* VerbatimString */
+code > span.ss { color: #008080; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { } /* Variable */
+code > span.cf { color: #0000ff; } /* ControlFlow */
+code > span.op { } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #ff4000; } /* Preprocessor */
+code > span.do { color: #008000; } /* Documentation */
+code > span.an { color: #008000; } /* Annotation */
+code > span.cv { color: #008000; } /* CommentVar */
+code > span.at { } /* Attribute */
+code > span.in { color: #008000; } /* Information */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">text2vec</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="vectorization.html">Vectorization</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    GloVe
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="glove.html">GloVe</a>
+    </li>
+    <li>
+      <a href="glove-cli.html">GloVe-CLI</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="collocations.html">Collocations</a>
+</li>
+<li>
+  <a href="topic_modeling.html">Topic modeling</a>
+</li>
+<li>
+  <a href="similarity.html">Similarity</a>
+</li>
+<li>
+  <a href="api.html">API</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dselivanov/text2vec">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://stackoverflow.com/questions/tagged/text2vec">
+    <span class="fa fa-stack-overflow"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Collocations</h1>
+<h4 class="author"><em>Dmitriy Selivanov</em></h4>
+<h4 class="date"><em>2017-07-07</em></h4>
+
+</div>
+
+
+<p>It this tutorial I will show how to extract phrases from text and how they can be used in downstream tasks. I will use <code>text8</code> dataset which is available for download <a href="http://mattmahoney.net/dc/text8.zip">here</a>. It consists of 100mb of texts from english wikipedia.</p>
+<p>Fitting model is as easy as:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(text2vec)
+model =<span class="st"> </span>Collocations$<span class="kw">new</span>(<span class="dt">collocation_count_min =</span> <span class="dv">50</span>)
+txt =<span class="st"> </span><span class="kw">readLines</span>(<span class="st">&quot;~/text8&quot;</span>)
+it =<span class="st"> </span><span class="kw">itoken</span>(txt)
+model$<span class="kw">fit</span>(it, <span class="dt">n_iter =</span> <span class="dv">3</span>)</code></pre></div>
+<pre><code>## INFO [2017-07-07 19:02:08] iteration 1 - found 5300 collocations
+## INFO [2017-07-07 19:02:24] iteration 2 - found 6778 collocations
+## INFO [2017-07-07 19:02:37] iteration 3 - found 6802 collocations</code></pre>
+<p>Now let us check what we got. Learned collocations are kept in <code>collocation_stat</code> field of the model:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model$collocation_stat</code></pre></div>
+<pre><code>##                  prefix               suffix   n_i    n_j n_ij       pmi
+##    1:     politics_main     article_politics    52     50   50 18.143106
+##    2:            krag_j              rgensen    54     50   50 18.088658
+##    3: demographics_main article_demographics    54     50   50 18.088658
+##    4:      economy_main      article_economy    55     55   55 18.062186
+##    5:           merleau                ponty    63     65   62 17.880585
+##   ---                                                                   
+## 6798:          produced                   by  3457 111831  777  5.001542
+## 6799:              seem                   to   807 316376  513  5.001146
+## 6800:        referendum                   on   300  91250   55  5.001041
+## 6801:             other                types 32433   2518  164  5.000351
+## 6802:                 k                    n  4472   6942   66  5.000100
+##            lfmd       gensim rank_pmi rank_lfmd rank_gensim
+##    1: -18.25627     0.000000        1       138        6638
+##    2: -18.31072     0.000000        2       143        6639
+##    3: -18.31072     0.000000        3       144        6640
+##    4: -18.06219 24880.960331        4       119          85
+##    5: -18.06310 46707.003663        5       120          33
+##   ---                                                      
+## 6798: -23.64699    29.972812     6798      1266        4121
+## 6799: -24.84530    28.904043     6799      1812        4203
+## 6800: -31.28831     2.911190     6800      6769        6423
+## 6801: -28.13662    22.249316     6801      4162        4772
+## 6802: -30.59820     7.758113     6802      6353        6022</code></pre>
+<div id="how-it-works" class="section level1">
+<h1>How it works</h1>
+<p>Model goes through subsequent tokens and calculate some statstics - how frequently one token follows another, frequencies of tokens, etc. Based on this statistics model calculates several scores: <a href="https://en.wikipedia.org/wiki/Pointwise_mutual_information">PMI</a>, LFMD (see paper below), <a href="https://radimrehurek.com/gensim/models/phrases.html">“gensim”</a>. Scores are actually heuristics - model is unsupervised. For overview of performance of different approaches check <a href="http://www.aclweb.org/anthology/I05-1050">Automatic Extraction of Fixed Multiword Expressions</a> paper.</p>
+<div id="details" class="section level2">
+<h2>Details</h2>
+<p>There are several important parameters in the model. Let’s take a closer look into constructor:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">colloc =<span class="st"> </span>Collocations$<span class="kw">new</span>(<span class="dt">vocabulary =</span> <span class="ot">NULL</span>, <span class="dt">collocation_count_min =</span> <span class="dv">50</span>, <span class="dt">pmi_min =</span> <span class="dv">5</span>, <span class="dt">gensim_min =</span> <span class="dv">0</span>, <span class="dt">lfmd_min =</span> -<span class="ot">Inf</span>, <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>)</code></pre></div>
+<ul>
+<li><code>vocabulary</code>(optional parameter) - instance of <code>text2vec</code> vocabulary. If provided, the model will search for collocations consisted of words from vocabulary. If not provided, first the model will make one pass over data and create it.</li>
+<li><code>collocation_count_min</code> - model will only consider set of words as phrase if it will observe it at least <code>collocation_count_min</code> time. For example if collocation <em>“new york”</em> was observed less than 50 times, model will treat <em>“new”</em> and <em>“york”</em> as separate words.</li>
+<li><code>pmi_min</code>, <code>gensim_min</code>, <code>lfmd_min</code> minimal values of corresponding scores for filtering out low-scored collocation candidates.</li>
+</ul>
+<p>Generally model need to make several iterations over the data. As mentioned apove on each pass it collects some statistics about adjacent word co-occurences.</p>
+</div>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>Let’s consider example.</p>
+<ol style="list-style-type: decimal">
+<li>Suppose at first pass model found that words <em>“new”</em> and <em>“york”</em> occurs 100 times together as <em>“new_york”</em> and each of words <em>“new”</em> and <em>“york”</em> occur 150 and 115 respectively. So intuitevely there is a very high chance that <em>“new_york”</em> is good phrase candidate (and it will have high <code>pmi</code>, <code>lfmd</code>, <code>gensim</code> scores). In contrast if we take a look at words <em>“it”</em>, <em>“is”</em> it can happen that <em>“it_is”</em> occurs 500 times, but words <em>“it”</em> and <em>“is”</em> separately occur 15000 and 17000 times. Intuitevely it is very unlikely that <em>“it_is”</em> represents good phrase. So after each pass over the data we prune phrase candidates by removing co-occurences with low <code>pmi</code>, <code>lfmd</code>, <code>gensim</code> scores.</li>
+<li>Suppose we have detected phrase <em>“new_york”</em> after first pass. During second pass model will scan tokens and if it finds words <em>“new”</em> and <em>“york”</em> in sequence it will concatenate them into “new_york” and treat as single token (if any other word follows <em>“new”</em> then model won’t concatenate them and consider them as 2 separate tokens). Now imagine next token after <em>“new_york”</em> is <em>“city”</em>. Then model again will calculate co-occurence scores as in step 1 and decide whether to keep <em>“new_york_city”</em> as phrase/collocation or treat sequence <em>“new_york”</em> and <em>“city”</em> as separate tokens. So by repeating the process we can learn large multi-word phrases.</li>
+</ol>
+<p>As a result, in the end model will be able to concatenate collocations from tokens. Let’s check how naive model trained on wikipedia will work:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">test_txt =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;i am living in a new apartment in new york city&quot;</span>, 
+        <span class="st">&quot;new york is the same as new york city&quot;</span>, 
+        <span class="st">&quot;san francisco is very expensive city&quot;</span>, 
+        <span class="st">&quot;who claimed that model works?&quot;</span>)
+it =<span class="st"> </span><span class="kw">itoken</span>(test_txt, <span class="dt">n_chunks =</span> <span class="dv">1</span>, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+it_phrases =<span class="st"> </span>model$<span class="kw">transform</span>(it)
+it_phrases$<span class="kw">nextElem</span>()</code></pre></div>
+<pre><code>## $tokens
+## $tokens[[1]]
+## [1] &quot;i_am&quot;          &quot;living&quot;        &quot;in&quot;            &quot;a&quot;            
+## [5] &quot;new&quot;           &quot;apartment&quot;     &quot;in&quot;            &quot;new_york_city&quot;
+## 
+## $tokens[[2]]
+## [1] &quot;new_york&quot;      &quot;is&quot;            &quot;the&quot;           &quot;same&quot;         
+## [5] &quot;as&quot;            &quot;new_york_city&quot;
+## 
+## $tokens[[3]]
+## [1] &quot;san_francisco&quot; &quot;is&quot;            &quot;very&quot;          &quot;expensive&quot;    
+## [5] &quot;city&quot;         
+## 
+## $tokens[[4]]
+## [1] &quot;who&quot;          &quot;claimed_that&quot; &quot;model&quot;        &quot;works?&quot;      
+## 
+## 
+## $ids
+## [1] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot;</code></pre>
+<p>As we can see results are pretty impressive but not ideal - we probably do not want to get <em>“claimed_that”</em> as collocation. One solution is to provide <code>vocabulary</code> without stopwords to the model constructor. But this won’t solve most of the edge cases. Another solution is to keep tracking what model learned after each pass over the data. We can fit model incrementally with <code>partial_fit()</code> method and prune bad phrases after each iteration.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">it =<span class="st"> </span><span class="kw">itoken</span>(txt)
+v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it, <span class="dt">stopwords =</span> tokenizers::<span class="kw">stopwords</span>(<span class="st">&quot;en&quot;</span>))
+v =<span class="st"> </span><span class="kw">prune_vocabulary</span>(v, <span class="dt">term_count_min =</span> <span class="dv">50</span>)
+model2 =<span class="st"> </span>Collocations$<span class="kw">new</span>(<span class="dt">vocabulary =</span> v, <span class="dt">collocation_count_min =</span> <span class="dv">50</span>, <span class="dt">pmi_min =</span> <span class="dv">0</span>)
+model2$<span class="kw">partial_fit</span>(it)
+model2$collocation_stat</code></pre></div>
+<pre><code>##          prefix  suffix    n_i    n_j n_ij          pmi      lfmd
+##     1:  merleau   ponty     63     65   62 1.736649e+01 -17.54900
+##     2:     limp  bizkit     66     57   54 1.728955e+01 -18.02457
+##     3: bhagavad    gita     51     70   50 1.725409e+01 -18.28208
+##     4:     krav    maga     76     73   70 1.710348e+01 -17.46185
+##     5:      orl     ans     59     81   58 1.704743e+01 -18.06050
+##    ---                                                           
+## 10763:     when     its  20623  29567   55 9.637992e-03 -35.25153
+## 10764:     from english  72871  11868   78 9.500960e-03 -34.24358
+## 10765:        e     two  11426 192644  198 5.691199e-03 -31.55949
+## 10766:        s       l 116710   5343   56 3.297087e-03 -35.20588
+## 10767:     zero       k 264975   4970  118 6.130957e-05 -33.05854
+##              gensim rank_pmi rank_lfmd rank_gensim
+##     1: 3.270582e+04        1        88          15
+##     2: 1.186695e+04        2       117          73
+##     3: 0.000000e+00        3       141       10541
+##     4: 4.023382e+04        4        82           7
+##     5: 1.868318e+04        5       121          49
+##    ---                                            
+## 10763: 9.151845e-02    10763     10747       10338
+## 10764: 3.613462e-01    10764     10421        9757
+## 10765: 7.504292e-01    10765      7987        8938
+## 10766: 1.073880e-01    10766     10742       10303
+## 10767: 5.762957e-01    10767      9528        9295</code></pre>
+<p>Since we set restriction to PMI scrore to 0 we got a lot of garbage collocations like <em>“when_its”</em>. Fortunately we can manually prune them manually and continue training. Let’s filter by some thresholds:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">temp =<span class="st"> </span>model2$collocation_stat[pmi &gt;=<span class="st"> </span><span class="dv">8</span> &amp;<span class="st"> </span>gensim &gt;=<span class="st"> </span><span class="dv">10</span> &amp;<span class="st"> </span>lfmd &gt;=<span class="st"> </span>-<span class="dv">25</span>, ]
+temp</code></pre></div>
+<pre><code>##           prefix   suffix  n_i   n_j n_ij       pmi      lfmd     gensim
+##    1:    merleau    ponty   63    65   62 17.366494 -17.54900 32705.8227
+##    2:       limp   bizkit   66    57   54 17.289548 -18.02457 11866.9452
+##    3:       krav     maga   76    73   70 17.103476 -17.46185 40233.8212
+##    4:        orl      ans   59    81   58 17.047433 -18.06050 18683.1756
+##    5:     lingua   franca   78    55   52 17.045623 -18.37739  5203.1991
+##   ---                                                                   
+## 1337: difference  between 1375 15737  506  8.027850 -20.83005   235.2003
+## 1338:    working    class 2271  3412  181  8.026277 -23.79792   188.6874
+## 1339:   chemical elements 1944  2723  123  8.018666 -24.92020   153.9135
+## 1340:   republic  ireland 4231  2362  231  8.011118 -23.10927   202.1405
+## 1341:       rock     band 2819  3304  214  8.002446 -23.33851   196.5199
+##       rank_pmi rank_lfmd rank_gensim
+##    1:        1        88          15
+##    2:        2       117          73
+##    3:        4        82           7
+##    4:        5       121          49
+##    5:        6       152         150
+##   ---                               
+## 1337:     1899       474        1182
+## 1338:     1900      1392        1324
+## 1339:     1904      1887        1461
+## 1340:     1907      1111        1279
+## 1341:     1916      1201        1295</code></pre>
+<p>If it looks reasonable we can prune learned collocations:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model2$<span class="kw">prune</span>(<span class="dt">pmi_min =</span> <span class="dv">8</span>, <span class="dt">gensim_min =</span> <span class="dv">10</span>, <span class="dt">lfmd_min =</span> -<span class="dv">25</span>)
+<span class="kw">identical</span>(temp, model2$collocation_stat)</code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>And continue training:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model2$<span class="kw">partial_fit</span>(it)
+model2$<span class="kw">prune</span>(<span class="dt">pmi_min =</span> <span class="dv">8</span>, <span class="dt">gensim_min =</span> <span class="dv">10</span>, <span class="dt">lfmd_min =</span> -<span class="dv">25</span>)
+model2$collocation_stat</code></pre></div>
+<pre><code>##               prefix   suffix  n_i   n_j n_ij       pmi      lfmd
+##    1:        merleau    ponty   63    65   62 17.366494 -17.54900
+##    2:       ifad_ifc    ifrcs   64    64   60 17.291136 -17.66357
+##    3:           limp   bizkit   66    57   54 17.289548 -18.02457
+##    4:    leonardo_da    vinci   66    75   66 17.155426 -17.52428
+##    5:           krav     maga   76    73   70 17.103476 -17.46185
+##   ---                                                            
+## 1572:            ice      age 1441  4875  167  8.023908 -23.97717
+## 1573:       chemical elements 1944  2723  123  8.018666 -24.92020
+## 1574:       republic  ireland 4231  2362  231  8.011118 -23.10927
+## 1575: prize_laureate        d  428 16581  167  8.009239 -23.99184
+## 1576:           rock     band 2819  3304  214  8.002446 -23.33851
+##           gensim rank_pmi rank_lfmd rank_gensim
+##    1: 32705.8227        2        96          21
+##    2: 26730.0171        3       101          33
+##    3: 11866.9452        4       133          97
+##    4: 35389.4626        6        94          16
+##    5: 40233.8212        7        87          10
+##   ---                                          
+## 1572:   182.3503     2032      1571        1534
+## 1573:   153.9135     2036      2048        1628
+## 1574:   202.1405     2042      1193        1469
+## 1575:   180.5055     2044      1577        1544
+## 1576:   196.5199     2045      1289        1480</code></pre>
+<p>And so on until we will decide to stop process (for example if number of learned phrases between two passes remains the same).</p>
+</div>
+</div>
+<div id="usage" class="section level1">
+<h1>Usage</h1>
+<p>It is pretty interesting that we can extract collocation like <em>“george_washington”</em> or <em>“new_york_city”</em>, but it is even more exciting to use them in downstream tasks. Good examples could be <strong>topic models</strong> (phrases improves interpretability a lot!) and <strong>word embeddings</strong>.</p>
+<p>How to incorporate them into the model? This is simple - create vocabulary which contains words and phrases and then document-term matrix or term-co-occurence matrix.</p>
+<p>In order to do that we need to create <code>itoken</code> iterator which will concatenate collocations and then just pass it to any fucntion which consumes iterators.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">it_phrases =<span class="st"> </span>model2$<span class="kw">transform</span>(it)
+vocabulary_with_phrases =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_phrases, <span class="dt">stopwords =</span> tokenizers::<span class="kw">stopwords</span>(<span class="st">&quot;en&quot;</span>))
+vocabulary_with_phrases =<span class="st"> </span><span class="kw">prune_vocabulary</span>(vocabulary_with_phrases, <span class="dt">term_count_min =</span> <span class="dv">10</span>)
+vocabulary_with_phrases[<span class="kw">startsWith</span>(vocabulary_with_phrases$term, <span class="st">&quot;new_&quot;</span>), ]</code></pre></div>
+<pre><code>## Number of docs: 1 
+## 33 stopwords: a, an, and, are, as, at ... 
+## ngram_min = 1; ngram_max = 1 
+## Vocabulary: 
+##                term term_count doc_count
+## 1: new_york_yankees         85         1
+## 2:    new_hampshire        183         1
+## 3:    new_brunswick        188         1
+## 4:  new_south_wales        204         1
+## 5:      new_orleans        300         1
+## 6:       new_jersey        425         1
+## 7:    new_testament        517         1
+## 8:      new_zealand       1095         1
+## 9:         new_york       4884         1</code></pre>
+<div id="word-embeddings-with-collocations" class="section level2">
+<h2>Word embeddings with collocations</h2>
+<p>Now we can create term-co-occurence matrix wich will contain both words and multi-word phrases (make sure you provide <code>itoken</code> iterator which generates phrases, not plain words):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tcm =<span class="st"> </span><span class="kw">create_tcm</span>(it_phrases, <span class="kw">vocab_vectorizer</span>(vocabulary_with_phrases))</code></pre></div>
+<p>And train word embeddings model:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">glove =<span class="st"> </span>GloVe$<span class="kw">new</span>(<span class="dv">50</span>, <span class="dt">vocabulary =</span> vocabulary_with_phrases, <span class="dt">x_max =</span> <span class="dv">50</span>)
+wv_main =<span class="st"> </span>glove$<span class="kw">fit_transform</span>(tcm, <span class="dv">10</span>)</code></pre></div>
+<pre><code>## INFO [2017-07-07 19:05:05] 2017-07-07 19:05:05 - epoch 1, expected cost 0.0305
+## INFO [2017-07-07 19:05:08] 2017-07-07 19:05:08 - epoch 2, expected cost 0.0211
+## INFO [2017-07-07 19:05:11] 2017-07-07 19:05:11 - epoch 3, expected cost 0.0187
+## INFO [2017-07-07 19:05:14] 2017-07-07 19:05:14 - epoch 4, expected cost 0.0173
+## INFO [2017-07-07 19:05:18] 2017-07-07 19:05:18 - epoch 5, expected cost 0.0164
+## INFO [2017-07-07 19:05:21] 2017-07-07 19:05:21 - epoch 6, expected cost 0.0157
+## INFO [2017-07-07 19:05:24] 2017-07-07 19:05:24 - epoch 7, expected cost 0.0153
+## INFO [2017-07-07 19:05:28] 2017-07-07 19:05:28 - epoch 8, expected cost 0.0149
+## INFO [2017-07-07 19:05:31] 2017-07-07 19:05:31 - epoch 9, expected cost 0.0146
+## INFO [2017-07-07 19:05:35] 2017-07-07 19:05:35 - epoch 10, expected cost 0.0143</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">wv_context =<span class="st"> </span>glove$components
+wv =<span class="st"> </span>wv_main +<span class="st"> </span><span class="kw">t</span>(wv_context)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> wv, <span class="dt">y =</span> wv[<span class="st">&quot;new_zealand&quot;</span>, , <span class="dt">drop =</span> <span class="ot">FALSE</span>], <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
+<span class="kw">head</span>(<span class="kw">sort</span>(cos_sim[,<span class="dv">1</span>], <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), <span class="dv">5</span>)</code></pre></div>
+<pre><code>##    new_zealand      australia united_kingdom         canada     queensland 
+##      1.0000000      0.8906049      0.7560024      0.7496143      0.7143516</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">us_cities =<span class="st"> </span>wv[<span class="st">&quot;new_york&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] -<span class="st"> </span>
+<span class="st">  </span>wv[<span class="st">&quot;usa&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] +<span class="st"> </span>
+<span class="st">  </span>wv[<span class="st">&quot;france&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>]
+cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> wv, <span class="dt">y =</span> us_cities, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
+<span class="kw">head</span>(<span class="kw">sort</span>(cos_sim[,<span class="dv">1</span>], <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), <span class="dv">5</span>)</code></pre></div>
+<pre><code>##    france     paris    london     after   england 
+## 0.7630746 0.7031228 0.6930537 0.6638524 0.6628017</code></pre>
+</div>
+<div id="topic-models-with-collocations" class="section level2">
+<h2>Topic models with collocations</h2>
+<p>Incorporating collocations into topic models are straightforward - need just to create document-term matrix and pass it to LDA model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;movie_review&quot;</span>)
+prep_fun =<span class="st"> </span>function(x) {
+  stringr::<span class="kw">str_replace_all</span>(<span class="kw">tolower</span>(x), <span class="st">&quot;[^[:alpha:]]&quot;</span>, <span class="st">&quot; &quot;</span>)
+}
+it =<span class="st"> </span><span class="kw">itoken</span>(movie_review$review, <span class="dt">preprocessor =</span> prep_fun, <span class="dt">tokenizer =</span> word_tokenizer, 
+            <span class="dt">ids =</span> movie_review$id, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+it =<span class="st"> </span>model2$<span class="kw">transform</span>(it)
+v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it, <span class="dt">stopwords =</span> tokenizers::<span class="kw">stopwords</span>(<span class="st">&quot;en&quot;</span>))
+v =<span class="st"> </span><span class="kw">prune_vocabulary</span>(v, <span class="dt">term_count_min =</span> <span class="dv">10</span>, <span class="dt">doc_proportion_min =</span> <span class="fl">0.01</span>)</code></pre></div>
+<p>Let’s check how many phrases that we’ve learned from wikipedia we can find in <code>movie_review</code> dataset:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">word_count_per_token =<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">strsplit</span>(v$term, <span class="st">&quot;_&quot;</span>, T), length)
+v$term[word_count_per_token &gt;<span class="st"> </span><span class="dv">1</span>]</code></pre></div>
+<pre><code>##  [1] &quot;ve_got&quot;        &quot;th_century&quot;    &quot;anything_else&quot; &quot;takes_place&quot;  
+##  [5] &quot;her_husband&quot;   &quot;once_again&quot;    &quot;weren_t&quot;       &quot;sci_fi&quot;       
+##  [9] &quot;years_ago&quot;     &quot;new_york&quot;      &quot;looks_like&quot;    &quot;rather_than&quot;  
+## [13] &quot;don_t_know&quot;    &quot;wouldn_t&quot;      &quot;aren_t&quot;        &quot;couldn_t&quot;     
+## [17] &quot;wasn_t&quot;        &quot;i_am&quot;          &quot;isn_t&quot;         &quot;didn_t&quot;       
+## [21] &quot;doesn_t&quot;       &quot;don_t&quot;</code></pre>
+<p>Not many. Seems we may need to learn collocations from <code>movie_review</code> dataset itself or use other thresholds for scores. I leave this exercise for the reader.</p>
+<p>Anyway now we can create document-term matrix and run LDA:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">N_TOPICS =<span class="st"> </span><span class="dv">20</span>
+vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(v)
+dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer)
+lda =<span class="st"> </span>LDA$<span class="kw">new</span>(N_TOPICS)
+doc_topic =<span class="st"> </span>lda$<span class="kw">fit_transform</span>(dtm)</code></pre></div>
+</div>
+</div>
+
+
+
+
+
+<footer class="footer">
+  <div class="text-muted"><strong>text2vec</strong> is created by <a href="http://www.dsnotes.com">Dmitry Selivanov</a> and contributors. &copy;  2016.</div>
+  <div class="text-muted"> If you have found any BUGS please report them <a href="https://github.com/dselivanov/text2vec/issues">here</a>.</div>
+</footer>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+
+  ga('create', 'UA-56994099-2', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
