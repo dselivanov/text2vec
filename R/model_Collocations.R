@@ -90,18 +90,18 @@ Collocations = R6::R6Class(
   ),
   public = list(
     collocation_stat = NULL,
-    initialize = function(vocab = NULL,
+    initialize = function(vocabulary = NULL,
                           collocation_count_min = 50L,
                           pmi_min = 5,
                           gensim_min = 0,
                           lfmd_min = -Inf,
                           sep = "_") {
-      if(is.null(vocab)) {
+      if(is.null(vocabulary)) {
         flog.debug("got NULL as vocabulary - so it will be built from training data iterator later")
-      } else if(inherits(vocab, "text2vec_vocabulary")) {
-        private$v = copy(vocab)
+      } else if(inherits(vocabulary, "text2vec_vocabulary")) {
+        private$v = copy(vocabulary)
       } else {
-        stop("'vocab' shold be object of class 'text2vec_vocabulary' or NULL")
+        stop("'vocabulary' shold be object of class 'text2vec_vocabulary' or NULL")
       }
 
       private$sep = sep
