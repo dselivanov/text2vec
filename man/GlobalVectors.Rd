@@ -12,7 +12,7 @@ GloVe
 \description{
 Class for GloVe word-embeddings model.
 It can be trained via fully can asynchronous and parallel
-AdaGrad with \code{$fit()} method.
+AdaGrad with \code{$fit_transform()} method.
 }
 \section{Fields}{
 
@@ -54,8 +54,6 @@ glove$dump()
                     For description of arguments see \bold{Arguments} section.}
   \item{\code{$fit_transform(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
               n_threads = RcppParallel::defaultNumThreads(), ...)}}{fit Glove model to input matrix \code{x}}
-  \item{\code{$fit(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
-              n_threads = RcppParallel::defaultNumThreads(), ...)}}{same as \code{fit_transform} provided for consistency}
   \item{\code{$dump()}}{get model internals - word vectors and biases for main and context words}
   \item{\code{$get_history}}{get history of SGD costs and word vectors (if \code{n_dump_every > 0)}}
 }
@@ -103,15 +101,15 @@ temp = tempfile()
 download.file('http://mattmahoney.net/dc/text8.zip', temp)
 text8 = readLines(unz(temp, "text8"))
 it = itoken(text8)
-vocab = create_vocabulary(it) \%>\%
- prune_vocabulary(term_count_min = 5)
-v_vect = vocab_vectorizer(vocab, grow_dtm = FALSE, skip_grams_window = 5L)
-tcm = create_tcm(it, v_vect)
-
-glove_model = GloVe(word_vectors_size = 50, vocabulary = vocab, x_max = 10, learning_rate = .25)
+vocabulary = create_vocabulary(it) \%>\%
+  prune_vocabulary(term_count_min = 5)
+v_vect = vocab_vectorizer(vocabulary)
+tcm = create_tcm(it, v_vect, skip_grams_window = 5L)
+glove_model = GloVe$new(word_vectors_size = 50, vocabulary = vocabulary, x_max = 10, learning_rate = .25)
 # fit model and get word vectors
-fit(tcm, glove_model, n_iter = 10)
-wv = glove_model$get_word_vectors()
+word_vectors_main = glove_model$fit_transform(tcm, n_iter = 10)
+word_vectors_context = glove_model$components
+word_vectors = word_vectors_main + t(word_vectors_context)
 }
 }
 \seealso{

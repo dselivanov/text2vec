@@ -27,13 +27,13 @@ Creates Latent Dirichlet Allocation model.
 
 \describe{
 \item{\code{topic_word_distribution}}{distribution of words for each topic. Available after model fitting with
-\code{model$fit()} or \code{model$fit_transform()} methods.}
+\code{model$fit_transform()} method.}
 
 \item{\code{doc_topic_distribution}}{distribution of topics for each document. Available after model fitting with
-\code{model$fit()} or \code{model$fit_transform()} methods.}
+\code{model$fit_transform()} method.}
 
 \item{\code{components}}{word counts for each topic-word entry. Available after model fitting with
-\code{model$fit()} or \code{model$fit_transform()} methods.}
+\code{model$fit_transform()} method.}
 }}
 
 \section{Usage}{
@@ -55,9 +55,6 @@ lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
               topic_word_prior = 1 / n_topics, # beta
               method = "WarpLDA")}}{Constructor for LDA model.
               For description of arguments see \bold{Arguments} section.}
-  \item{\code{$fit(x, n_iter, convergence_tol = -1,
-               n_check_convergence = 10)}}{fit LDA model to input matrix \code{x}. Not that useful -
-               \code{fit_transform} is used under the hood. Implemented just to follow API.}
   \item{\code{$fit_transform(x, n_iter, convergence_tol = -1,
                n_check_convergence = 0, progressbar = interactive())}}{fit LDA model to input matrix
                \code{x} and transforms input documents to topic space -
@@ -80,8 +77,9 @@ lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
 
 \describe{
  \item{lda}{A \code{LDA} object}
- \item{x}{An input document-term matrix. \bold{CSR \code{RsparseMatrix} used internally}}.
- Should have column names.
+ \item{x}{An input document-term matrix (should have column names = terms).
+ \bold{CSR \code{RsparseMatrix} used internally},
+ other formats will be tried to convert to CSR via \code{as()} function call.}
  \item{n_topics}{\code{integer} desired number of latent topics. Also knows as \bold{K}}
  \item{doc_topic_prior}{\code{numeric} prior for document-topic multinomial distribution.
    Also knows as \bold{alpha}}

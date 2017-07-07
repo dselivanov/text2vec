@@ -20,8 +20,8 @@
 #' @param x a matrix like object, should inherit from \code{Matrix} or \code{matrix}
 #' @param model instance of class \code{estimator} which should implement method
 #' with signature \code{$fit(x, y, ...)}
-#' @param y \code{NULL} by default. Optional response variable for supervised models.
-#' Should inherit from \code{vector} \code{Matrix} or \code{matrix}. See documentation
+#' @param y \code{NULL} by default. Optional response variable for supervised learning models.
+#' Should inherit from \code{vector} or \code{Matrix} or \code{matrix}. See documentation
 #' for corresponding models.
 #' @param ... additional data/model dependent arguments to downstream functions.
 #' @return \code{invisible(object$self())}

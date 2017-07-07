@@ -1,9 +1,5 @@
-mlapiEstimator = R6::R6Class(
-  classname = "mlapiEstimator",
-  public = list(
-    fit = function(x, y, ...) raise_placeholder_error(),
-    predict = function(x, ...) raise_placeholder_error()
-  ),
+mlapiBase = R6::R6Class(
+  classname = "mlapiBase",
   private = list(
     #-------------------------------------------------------------------------------------
     internal_matrix_formats = list(sparse = NULL, dense = NULL),
@@ -19,9 +15,8 @@ mlapiEstimator = R6::R6Class(
       private$internal_matrix_formats = list(sparse = sparse, dense = dense)
     },
     #-------------------------------------------------------------------------------------
-    check_convert_input = function(x, internal_formats, verbose = FALSE) {
+    check_convert_input = function(x, internal_formats) {
       stopifnot(all(names(internal_formats) %in% c("sparse", "dense")))
-
       # first check sparse input
       if(inherits(x, "sparseMatrix")) {
         sparse_format = internal_formats[["sparse"]]
@@ -33,11 +28,19 @@ mlapiEstimator = R6::R6Class(
       else {
         dense_format = internal_formats[["dense"]]
         if(is.null(dense_format))
-          stop("input is supposed to be dense matrix, but underlying functions don't work with dense matrices (yet)")
+          stop(sprintf("don't know how to deal with input of class '%s'", paste(class(x), collapse = " | ") ))
         return(as(x, dense_format))
       }
     }
     #-------------------------------------------------------------------------------------
+  )
+)
+mlapiEstimator = R6::R6Class(
+  classname = "mlapiEstimator",
+  inherit = mlapiBase,
+  public = list(
+    fit = function(x, y, ...) raise_placeholder_error(),
+    predict = function(x, ...) raise_placeholder_error()
   )
 )
 #---------------------------------------------------------------------------------------
@@ -58,25 +61,10 @@ mlapiEstimatorOnline <- R6::R6Class(
 #---------------------------------------------------------------------------------------
 mlapiTransformer = R6::R6Class(
   classname = "mlapiTransformer",
-  inherit = mlapiEstimator,
+  inherit = mlapiBase,
   public = list(
-    fit = function(x, y = NULL, ...) raise_placeholder_error(),
     fit_transform = function(x, y = NULL, ...) raise_placeholder_error(),
     transform = function(x, y = NULL, ...) raise_placeholder_error()
-  ),
-  private = list(
-    internal_matrix_formats = list(sparse = NULL, dense = NULL),
-
-    set_internal_matrix_formats = function(sparse = NULL, dense = NULL) {
-
-      stopifnot(is.character(sparse) || is.null(sparse))
-      stopifnot(length(sparse) <= 1)
-
-      stopifnot(is.character(dense) || is.null(dense))
-      stopifnot(length(dense) <= 1)
-
-      private$internal_matrix_formats = list(sparse = sparse, dense = dense)
-    }
   )
 )
 #---------------------------------------------------------------------------------------
@@ -94,13 +82,9 @@ mlapiTransformerOnline <- R6::R6Class(
   private = list()
 )
 #---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
 mlapiDecomposition = R6::R6Class(
   classname = "mlapiDecomposition",
   inherit = mlapiTransformer,
-  # public = list (
-  #   components = NULL
-  # ),
   active = list(
     # make components read only via active bindings
     components = function(value) {
@@ -109,8 +93,10 @@ mlapiDecomposition = R6::R6Class(
         stop("Sorry this is a read-only variable.")
       else {
         # In "getter" role
-        if(is.null(private$components_))
+        if(is.null(private$components_)) {
           stop("Decomposition model was not fitted yet!")
+          NULL
+        }
         else
           private$components_
       }

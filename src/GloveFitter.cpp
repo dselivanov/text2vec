@@ -157,18 +157,6 @@ private:
   AdaGradIter adaGradIter;
 };
 
-// RCPP_MODULE(GloveFitter) {
-//   class_< GloveFitter >( "GloveFitter" )
-//   .constructor<List>()
-//   .method( "get_word_vectors", &GloveFitter::get_word_vectors, "returns word vectors")
-//   .method( "set_cost_zero", &GloveFitter::set_cost_zero, "sets cost to zero")
-//   .method( "partial_fit", &GloveFitter::partial_fit, "process TCM data chunk")
-//   .method( "get_sparsity_level", &GloveFitter::get_word_vectors_sparsity_ratio, "return current sparsity level")
-//   .method( "dump_model", &GloveFitter::dump_model, "return model parameters")
-//   ;
-// }
-
-
 // [[Rcpp::export]]
 SEXP cpp_glove_create(const List &params) {
   GloveFitter *glove = new GloveFitter(params);

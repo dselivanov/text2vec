@@ -33,7 +33,6 @@
 #'   \item{\code{$new(n_topics)}}{create LSA model with \code{n_topics} latent topics}
 #'   \item{\code{$fit_transform(x, ...)}}{fit model to an input sparse matrix (preferably in \code{dgCMatrix}
 #'    format) and then transform \code{x} to latent space}
-#'   \item{\code{$fit(x, ...)}}{Provided for consistency, same as \code{$fit_transform(x, ...)}. }
 #'   \item{\code{$transform(x, ...)}}{transform new data \code{x} to latent space}
 #'}
 #' @section Arguments:
@@ -43,7 +42,7 @@
 #'  \item{n_topics}{\code{integer} desired number of latent topics.}
 #'  \item{method}{\code{character}, one of \code{c("randomized", "irlba")}. Defines underlying SVD algorithm.
 #'  For very large data "randomized" usually works faster and more accurate. }
-#'  \item{...}{Arguments to internal functions. Notably useful for \code{fit(), fit_transform()} -
+#'  \item{...}{Arguments to internal functions. Notably useful for \code{fit_transform()} -
 #'  these arguments will be passed to \link{irlba} or \link{svdr} functions which are used as backend for SVD.}
 #' }
 #' @export
@@ -54,13 +53,9 @@
 #' dtm = create_dtm(itoken(tokens), hash_vectorizer())
 #' n_topics = 10
 #' lsa_1 = LatentSemanticAnalysis$new(n_topics)
-#' fit(dtm, lsa_1) # or lsa_1$fit(dtm)
-#' d1 = lsa_1$transform(dtm)
-#' lsa_2 = LatentSemanticAnalysis$new(n_topics)
-#' d2 = lsa_2$fit_transform(dtm)
-#' all.equal(d1, d2)
+#' d1 = lsa_1$fit_transform(dtm)
 #' # the same, but wrapped with S3 methods
-#' all.equal(fit_transform(dtm, lsa_2), fit_transform(dtm, lsa_1))
+#' d2 = fit_transform(dtm, lsa_1)
 #'
 
 LatentSemanticAnalysis = R6::R6Class(
@@ -75,9 +70,6 @@ LatentSemanticAnalysis = R6::R6Class(
       private$n_topics = n_topics
       private$fitted = FALSE
       private$svd_method = match.arg(method)
-    },
-    fit = function(x, ...) {
-      invisible(self$fit_transform(x, ...))
     },
     fit_transform = function(x, ...) {
       x = super$check_convert_input(x, private$internal_matrix_formats)
@@ -111,7 +103,7 @@ LatentSemanticAnalysis = R6::R6Class(
         t(solve(lhs, rhs))
       }
       else
-        stop("Fit the model first!")
+        stop("Fit the model first woth model$fit_transofrm()!")
     },
     active = list(
       # make components read only via active bindings

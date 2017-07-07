@@ -79,6 +79,8 @@ get_dtm = function(corpus_ptr) {
 create_dtm = function(it, vectorizer,
                        type = c("dgCMatrix", "dgTMatrix"),
                        ...) {
+  e = environment()
+  reg.finalizer(e, malloc_trim_finalizer)
   UseMethod("create_dtm")
 }
 
@@ -141,12 +143,11 @@ create_dtm.itoken_parallel = function(it, vectorizer,
                            type = c("dgCMatrix", "dgTMatrix"),
                            distributed = FALSE,
                            ...) {
-  # check_itoken = sapply(it, inherits, 'itoken', USE.NAMES = FALSE)
-  # stopifnot(all( check_itoken ))
 
   if(distributed) {
     if(foreach::getDoParName() == "doParallelMC")
-      stop("Please register cluster explicitly. At the moment didtributed mode can be used only with 'snow' clusters.")
+      stop("Please register cluster explicitly with `cl = makeCluster(N_WORKERS); registerDoParallel(cl)`
+           At the moment didtributed mode can be used only with socket 'snow' clusters.")
   }
 
   type = match.arg(type)
@@ -209,4 +210,28 @@ collect.RowDistributedMatrix = function(x, ...) {
   foreach(x_remote = x, .combine = combine_fun, .multicombine = TRUE) %dopar% {
     get(x_remote$env)[[x_remote$key]]
   }
+}
+
+#' @export
+#' @method dimnames RowDistributedMatrix
+dimnames.RowDistributedMatrix = function(x) {
+  row_names = foreach(x_remote = x, .combine = c, .multicombine = TRUE, .inorder = TRUE) %dopar% {
+    rownames(get(x_remote$env)[[x_remote$key]])
+  }
+  col_names = foreach(x_remote = x[1], .combine = c, .multicombine = TRUE, .inorder = TRUE) %dopar% {
+    colnames(get(x_remote$env)[[x_remote$key]])
+  }
+  list(row_names, col_names)
+}
+
+#' @export
+#' @method dimnames RowDistributedMatrix
+dim.RowDistributedMatrix = function(x) {
+  nr = foreach(x_remote = x, .combine = sum, .multicombine = TRUE, .inorder = TRUE) %dopar% {
+    nrow(get(x_remote$env)[[x_remote$key]])
+  }
+  nc = foreach(x_remote = x[1], .combine = c, .multicombine = TRUE, .inorder = TRUE) %dopar% {
+    ncol(get(x_remote$env)[[x_remote$key]])
+  }
+  c(nr, nc)
 }
