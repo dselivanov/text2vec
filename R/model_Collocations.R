@@ -4,12 +4,12 @@
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
-#' colloc = Collocations$new(vocabulary = NULL, collocation_count_min = 50, pmi_min = 5, gensim_min = 0, lfmd_min = -Inf, sep = "_")
-#' colloc$partial_fit(it, ...)
-#' colloc$fit(it, n_iter = 1, ...)
-#' colloc$transform(it)
-#' colloc$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf)
-#' colloc$collocation_stat
+#' model = Collocations$new(vocabulary = NULL, collocation_count_min = 50, pmi_min = 5, gensim_min = 0, lfmd_min = -Inf, sep = "_")
+#' model$partial_fit(it, ...)
+#' model$fit(it, n_iter = 1, ...)
+#' model$transform(it)
+#' model$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf)
+#' model$collocation_stat
 #' }
 #' @format \code{\link{R6Class}} object.
 #' @section Methods:
@@ -19,7 +19,7 @@
 #'   Iterating over input iterator \code{it} \code{n_iter} times, so hieararchically can learn multi-word phrases.
 #'   Invisibly returns \code{collocation_stat}.}
 #'   \item{\code{$partial_fit(it, ...)}}{iterates once over data and learns collocations. Invisibly returns \code{collocation_stat}.
-#'   Workhorse for \code{$fit()}}.
+#'   Workhorse for \code{$fit()}}
 #'   \item{\code{$transform(it)}}{transforms input iterator using learned collocations model.
 #'   Result of the transformation is new \code{itoken} or \code{itoken_parallel} iterator which will
 #'   produce tokens with phraeses collapsed into single token.}
@@ -30,10 +30,10 @@
 #' Useful for filtering non-relevant phrases
 #' @section Arguments:
 #' \describe{
-#'  \item{colloc}{A \code{Collocation} model object}
+#'  \item{model}{A \code{Collocation} model object}
 #'  \item{n_iter}{number of iteration over data}
 #'  \item{pmi_min, gensim_min, lfmd_min}{minimal scores of the corresponding statistics in order to collapse tokens into collocation
-#'  see data in \code{colloc$collocation_stat} for better understanding}
+#'  see data in \code{model$collocation_stat} for better understanding}
 #'  \item{it}{An input \code{itoken} or \code{itoken_parallel} iterator}
 #'  \item{vocabulary}{\code{text2vec_vocabulary} - if provided will look for collocations consisted of only from vocabulary}
 #' }
@@ -50,11 +50,11 @@
 #' system.time(v <- create_vocabulary(it))
 #' v = prune_vocabulary(v, term_count_min = 5)
 #'
-#' cc = Collocations$new(collocation_count_min = 5, pmi_min = 5)
-#' cc$fit(it, n_iter = 2)
-#' cc$collocation_stat
+#' model = Collocations$new(collocation_count_min = 5, pmi_min = 5)
+#' model$fit(it, n_iter = 2)
+#' model$collocation_stat
 #'
-#' it2 = cc$transform(it)
+#' it2 = model$transform(it)
 #' v2 = create_vocabulary(it2)
 #' v2 = prune_vocabulary(v2, term_count_min = 5)
 #' # check what phrases model has learned
@@ -90,18 +90,18 @@ Collocations = R6::R6Class(
   ),
   public = list(
     collocation_stat = NULL,
-    initialize = function(vocab = NULL,
+    initialize = function(vocabulary = NULL,
                           collocation_count_min = 50L,
                           pmi_min = 5,
                           gensim_min = 0,
                           lfmd_min = -Inf,
                           sep = "_") {
-      if(is.null(vocab)) {
+      if(is.null(vocabulary)) {
         flog.debug("got NULL as vocabulary - so it will be built from training data iterator later")
-      } else if(inherits(vocab, "text2vec_vocabulary")) {
-        private$v = copy(vocab)
+      } else if(inherits(vocabulary, "text2vec_vocabulary")) {
+        private$v = copy(vocabulary)
       } else {
-        stop("'vocab' shold be object of class 'text2vec_vocabulary' or NULL")
+        stop("'vocabulary' shold be object of class 'text2vec_vocabulary' or NULL")
       }
 
       private$sep = sep
@@ -164,10 +164,18 @@ Collocations = R6::R6Class(
       # A phrase of words a and b is accepted if (cnt(a, b) - min_count) * N / (cnt(a) * cnt(b)) > threshold
       # where N is the total vocabulary size.
       dt[ , gensim := (n_ij - private$collocation_count_min) * nword / (as.numeric(n_i) * n_j)]
+      # remove duplicates
+      # Not sure where they coming from... - should not happen
+      # FIXME
+      dups = dt$prefix %in% self$collocation_stat$prefix &
+             dt$suffix %in% self$collocation_stat$suffix
+      dt = dt[!dups, ]
+
       self$collocation_stat = rbindlist(list(self$collocation_stat, dt), use.names = TRUE, fill = TRUE)
+      # self$collocation_stat = self$collocation_stat[, .SD[1, ], by = .(prefix, suffix)]
       self$prune()
 
-      private$phrases = paste(self$collocation_stat$prefix, self$collocation_stat$suffix, sep = private$sep)
+      # private$phrases = paste(self$collocation_stat$prefix, self$collocation_stat$suffix, sep = private$sep)
       private$phrases_ptr = create_xptr_unordered_set(private$phrases)
 
       self$collocation_stat[, rank_pmi := frank(-pmi, ties.method = "first")]
