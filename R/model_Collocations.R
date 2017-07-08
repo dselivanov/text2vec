@@ -142,7 +142,8 @@ Collocations = R6::R6Class(
                        skip_grams_window_context = "right")
       # flog.debug("tcm done dim = %d * %d", nrow(tcm), ncol(tcm))
       word_counts = attr(tcm, "word_count", TRUE)
-      nword = sum(word_counts)
+      # cast to double in order to not get integer overflow in multiplications below
+      nword = as.numeric(sum(word_counts))
       ii = tcm@x >= private$collocation_count_min
       tcm@i = tcm@i[ii]
       tcm@j = tcm@j[ii]
