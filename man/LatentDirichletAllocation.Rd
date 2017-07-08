@@ -68,7 +68,7 @@ lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
                "relevance" wich also takes into account frequency of word in corpus (\code{lambda < 1}).
                From our experience in most cases setting \code{ 0.2 < lambda < 0.4} works well.
                See \url{http://nlp.stanford.edu/events/illvi2014/papers/sievert-illvi2014.pdf} for details.}
-  \item{\code{$plot(...)}}{plot LDA model using \url{https://cran.r-project.org/package=LDAvis} package.
+  \item{\code{$plot(lambda.step = 0.1, reorder.topics = FALSE, ...)}}{plot LDA model using \url{https://cran.r-project.org/package=LDAvis} package.
                \code{...} will be passed to \code{LDAvis::createJSON} and \code{LDAvis::serVis} functions}
 }
 }

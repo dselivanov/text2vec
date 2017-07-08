@@ -57,7 +57,7 @@
 #'                "relevance" wich also takes into account frequency of word in corpus (\code{lambda < 1}).
 #'                From our experience in most cases setting \code{ 0.2 < lambda < 0.4} works well.
 #'                See \url{http://nlp.stanford.edu/events/illvi2014/papers/sievert-illvi2014.pdf} for details.}
-#'   \item{\code{$plot(...)}}{plot LDA model using \url{https://cran.r-project.org/package=LDAvis} package.
+#'   \item{\code{$plot(lambda.step = 0.1, reorder.topics = FALSE, ...)}}{plot LDA model using \url{https://cran.r-project.org/package=LDAvis} package.
 #'                \code{...} will be passed to \code{LDAvis::createJSON} and \code{LDAvis::serVis} functions}
 #'}
 #' @section Arguments:
@@ -192,7 +192,7 @@ LatentDirichletAllocation = R6::R6Class(
       }) %>% do.call(cbind, .)
     },
     #---------------------------------------------------------------------------------------------
-    plot = function(...) {
+    plot = function(lambda.step = 0.1, reorder.topics = FALSE, ...) {
       if("LDAvis" %in% rownames(installed.packages())) {
         if (!is.null(self$components)) {
 
@@ -201,6 +201,8 @@ LatentDirichletAllocation = R6::R6Class(
                                     doc.length = rowSums(private$doc_topic_count),
                                     vocab = private$vocabulary,
                                     term.frequency = colSums(self$components),
+                                    lambda.step = lambda.step,
+                                    reorder.topics = reorder.topics,
                                     ...)
           # modify global option - fixes #181
           # also we save user encoding and restore it after exit
@@ -265,7 +267,7 @@ LatentDirichletAllocation = R6::R6Class(
         # check convergence
         if(i %% n_check_convergence == 0) {
           loglik = private$calc_pseudo_loglikelihood(model_ptr)
-
+          if(progressbar) cat("\n")
           flog.info("iter %d loglikelihood = %.3f", i, loglik)
 
           loglik_hist[[j]] = data.frame(iter = i, loglikelihood = loglik)
