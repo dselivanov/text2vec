@@ -11,7 +11,7 @@
 
 <meta name="author" content="Dmitriy Selivanov" />
 
-<meta name="date" content="2017-07-07" />
+<meta name="date" content="2017-07-09" />
 
 <title>Collocations</title>
 
@@ -363,7 +363,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Collocations</h1>
 <h4 class="author"><em>Dmitriy Selivanov</em></h4>
-<h4 class="date"><em>2017-07-07</em></h4>
+<h4 class="date"><em>2017-07-09</em></h4>
 
 </div>
 
@@ -483,7 +483,7 @@ model2$collocation_stat</code></pre></div>
 ## 10765: 7.504292e-01    10765      7987        8938
 ## 10766: 1.073880e-01    10766     10742       10303
 ## 10767: 5.762957e-01    10767      9528        9295</code></pre>
-<p>Since we set restriction to PMI scrore to 0 we got a lot of garbage collocations like <em>“when_its”</em>. Fortunately we can manually prune them manually and continue training. Let’s filter by some thresholds:</p>
+<p>Since we set restriction to PMI scrore to 0 we got a lot of garbage collocations like <em>“when_its”</em>. Fortunately we can manually prune them and continue training. Let’s filter by some thresholds:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">temp =<span class="st"> </span>model2$collocation_stat[pmi &gt;=<span class="st"> </span><span class="dv">8</span> &amp;<span class="st"> </span>gensim &gt;=<span class="st"> </span><span class="dv">10</span> &amp;<span class="st"> </span>lfmd &gt;=<span class="st"> </span>-<span class="dv">25</span>, ]
 temp</code></pre></div>
 <pre><code>##           prefix   suffix  n_i   n_j n_ij       pmi      lfmd     gensim
@@ -591,17 +591,17 @@ wv =<span class="st"> </span>wv_main +<span class="st"> </span><span class="kw">
 <span class="kw">head</span>(<span class="kw">sort</span>(cos_sim[,<span class="dv">1</span>], <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), <span class="dv">5</span>)</code></pre></div>
 <pre><code>##    new_zealand      australia united_kingdom         canada     queensland 
 ##      1.0000000      0.8906049      0.7560024      0.7496143      0.7143516</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">us_cities =<span class="st"> </span>wv[<span class="st">&quot;new_york&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] -<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">paris =<span class="st"> </span>wv[<span class="st">&quot;new_york&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] -<span class="st"> </span>
 <span class="st">  </span>wv[<span class="st">&quot;usa&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] +<span class="st"> </span>
 <span class="st">  </span>wv[<span class="st">&quot;france&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>]
-cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> wv, <span class="dt">y =</span> us_cities, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
+cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> wv, <span class="dt">y =</span> paris, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
 <span class="kw">head</span>(<span class="kw">sort</span>(cos_sim[,<span class="dv">1</span>], <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), <span class="dv">5</span>)</code></pre></div>
 <pre><code>##    france     paris    london     after   england 
 ## 0.7630746 0.7031228 0.6930537 0.6638524 0.6628017</code></pre>
 </div>
 <div id="topic-models-with-collocations" class="section level2">
 <h2>Topic models with collocations</h2>
-<p>Incorporating collocations into topic models are straightforward - need just to create document-term matrix and pass it to LDA model.</p>
+<p>Incorporating collocations into topic models is very straightforward - need just to create document-term matrix and pass it to LDA model.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;movie_review&quot;</span>)
 prep_fun =<span class="st"> </span>function(x) {
   stringr::<span class="kw">str_replace_all</span>(<span class="kw">tolower</span>(x), <span class="st">&quot;[^[:alpha:]]&quot;</span>, <span class="st">&quot; &quot;</span>)

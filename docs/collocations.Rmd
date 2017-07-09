@@ -70,7 +70,7 @@ model2 = Collocations$new(vocabulary = v, collocation_count_min = 50, pmi_min = 
 model2$partial_fit(it)
 model2$collocation_stat
 ```
-Since we set restriction to PMI scrore to 0 we got a lot of garbage collocations like *"when_its"*. Fortunately we can manually prune them manually and continue training. Let's filter by some thresholds:
+Since we set restriction to PMI scrore to 0 we got a lot of garbage collocations like *"when_its"*. Fortunately we can manually prune them and continue training. Let's filter by some thresholds:
 ```{r}
 temp = model2$collocation_stat[pmi >= 8 & gensim >= 10 & lfmd >= -25, ]
 temp
@@ -123,16 +123,16 @@ cos_sim = sim2(x = wv, y = wv["new_zealand", , drop = FALSE], method = "cosine",
 head(sort(cos_sim[,1], decreasing = TRUE), 5)
 ```
 ```{r}
-us_cities = wv["new_york", , drop = FALSE] - 
+paris = wv["new_york", , drop = FALSE] - 
   wv["usa", , drop = FALSE] + 
   wv["france", , drop = FALSE]
-cos_sim = sim2(x = wv, y = us_cities, method = "cosine", norm = "l2")
+cos_sim = sim2(x = wv, y = paris, method = "cosine", norm = "l2")
 head(sort(cos_sim[,1], decreasing = TRUE), 5)
 ```
 
 ## Topic models with collocations
 
-Incorporating collocations into topic models are straightforward - need just to create document-term matrix and pass it to LDA model.
+Incorporating collocations into topic models is very straightforward - need just to create document-term matrix and pass it to LDA model.
 ```{r}
 data("movie_review")
 prep_fun = function(x) {
