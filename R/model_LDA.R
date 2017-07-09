@@ -14,6 +14,81 @@
 #   // You should have received a copy of the GNU General Public License
 # // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
 
+#---------------------------------------------------------------------------------------------
+# base class for all topic models
+#---------------------------------------------------------------------------------------------
+TopicModel = R6::R6Class(
+  classname = c("TopicModel"),
+  inherit = mlapiDecomposition,
+  private = list(
+    doc_topic_prior = NULL, # alpha
+    topic_word_prior = NULL, # beta
+    n_topics = NULL,
+    vocabulary = NULL,
+    doc_len = NULL,
+    doc_topic_matrix = NULL
+  ),
+  public = list(
+    get_top_words = function(n = 10, topic_number = 1L:private$n_topics, lambda = 1) {
+
+      stopifnot(topic_number %in% seq_len(private$n_topics))
+      stopifnot(lambda >= 0 && lambda <= 1)
+      stopifnot(n >= 1 && n <= length(private$vocabulary ))
+
+      topic_word_distribution = self$topic_word_distribution
+      # re-weight by frequency of word in corpus
+      # http://nlp.stanford.edu/events/illvi2014/papers/sievert-illvi2014.pdf
+      topic_word_freq =
+        lambda * log(topic_word_distribution) +
+        (1 - lambda) * log(t(t(topic_word_distribution) / (colSums(self$components) / sum(self$components)) ))
+
+      lapply(topic_number, function(tn) {
+        word_by_freq = sort(topic_word_freq[tn, ], decreasing = TRUE, method = "radix")
+        names(word_by_freq)[seq_len(n)]
+      }) %>% do.call(cbind, .)
+    },
+    plot = function(lambda.step = 0.1, reorder.topics = FALSE, doc_len = private$doc_len, ...) {
+      if("LDAvis" %in% rownames(installed.packages())) {
+        if (!is.null(self$components)) {
+
+          json = LDAvis::createJSON(phi = self$topic_word_distribution,
+                                    theta = self$doc_topic_distribution,
+                                    doc.length = doc_len,
+                                    vocab = private$vocabulary,
+                                    term.frequency = colSums(self$components),
+                                    lambda.step = lambda.step,
+                                    reorder.topics = reorder.topics,
+                                    ...)
+          # modify global option - fixes #181
+          # also we save user encoding and restore it after exit
+          enc = getOption("encoding")
+          on.exit(options(encoding = enc))
+          options(encoding = "UTF-8")
+
+          LDAvis::serVis(json, ...)
+        } else {
+          stop("Model was not fitted, please fit it first...")
+        }
+      } else
+        stop("To use visualisation, please install 'LDAvis' package first.")
+    }
+  ),
+  active = list(
+    # make components read only via active bindings
+    topic_word_distribution = function(value) {
+      if (!missing(value)) stop("Sorry this is a read-only field")
+      # self$components is topic word count
+      else (self$components + private$topic_word_prior) %>% normalize("l1")
+    },
+    doc_topic_distribution = function(value) {
+      if (!missing(value)) stop("Sorry this is a read-only field")
+      if (is.null(private$doc_topic_matrix)) stop("LDA model was not fitted yet!")
+      else (private$doc_topic_matrix + private$doc_topic_prior) %>% normalize("l1")
+    }
+  )
+)
+#---------------------------------------------------------------------------------------------
+
 #' @name LatentDirichletAllocation
 #' @title Creates Latent Dirichlet Allocation model.
 #' @description Creates Latent Dirichlet Allocation model.
@@ -94,13 +169,10 @@
 #' @export
 LatentDirichletAllocation = R6::R6Class(
   classname = c("WarpLDA", "LDA"),
-  inherit = mlapiDecomposition,
+  inherit = TopicModel,
   public = list(
     #----------------------------------------------------------------------------
-    # members
-    #----------------------------------------------------------------------------
     # methods
-
     # constructor
     initialize = function(n_topics = 10L,
                           doc_topic_prior = 50 / n_topics,
@@ -123,6 +195,8 @@ LatentDirichletAllocation = R6::R6Class(
                              progressbar = interactive(), ...) {
       stopifnot(is.logical(progressbar))
 
+      private$doc_len = rowSums(x)
+
       private$ptr = warplda_create(n = private$n_topics,
                                    doc_topic_prior = private$doc_topic_prior,
                                    topic_word_prior = private$topic_word_prior)
@@ -132,7 +206,7 @@ LatentDirichletAllocation = R6::R6Class(
       # init
       private$vocabulary = colnames(x)
 
-      private$doc_topic_count =
+      private$doc_topic_matrix =
         private$fit_transform_internal(private$ptr, n_iter = n_iter,
                                        convergence_tol = convergence_tol,
                                        n_check_convergence = n_check_convergence,
@@ -143,7 +217,7 @@ LatentDirichletAllocation = R6::R6Class(
 
       # doc_topic_distr = self$get_doc_topic_distribution()
       doc_topic_distr = self$doc_topic_distribution
-      attributes(doc_topic_distr) = attributes(private$doc_topic_count)
+      attributes(doc_topic_distr) = attributes(private$doc_topic_matrix)
       rownames(doc_topic_distr) = rownames(x)
       doc_topic_distr
     },
@@ -159,79 +233,19 @@ LatentDirichletAllocation = R6::R6Class(
 
       warplda_set_topic_word_count(inference_model_ptr, self$components);
 
-      doc_topic_count =
+      doc_topic_matrix =
         private$fit_transform_internal(inference_model_ptr, n_iter = n_iter,
                                        convergence_tol = convergence_tol,
                                        n_check_convergence = n_check_convergence,
                                        update_topics = FALSE, progressbar = progressbar)
       # add priors and normalize to get distribution
-      doc_topic_distr = (doc_topic_count + private$doc_topic_prior) %>% text2vec::normalize("l1")
-      attributes(doc_topic_distr) = attributes(doc_topic_count)
+      doc_topic_distr = (doc_topic_matrix + private$doc_topic_prior) %>% text2vec::normalize("l1")
+      attributes(doc_topic_distr) = attributes(doc_topic_matrix)
       rownames(doc_topic_distr) = rownames(x)
       doc_topic_distr
     },
     # FIXME - depreciated
-    get_word_vectors = function() {.Deprecated("model$components")},
-
-    get_top_words = function(n = 10, topic_number = 1L:private$n_topics, lambda = 1) {
-
-      stopifnot(topic_number %in% seq_len(private$n_topics))
-      stopifnot(lambda >= 0 && lambda <= 1)
-      stopifnot(n >= 1 && n <= length(private$vocabulary ))
-
-      topic_word_distribution = self$topic_word_distribution
-      # re-weight by frequency of word in corpus
-      # http://nlp.stanford.edu/events/illvi2014/papers/sievert-illvi2014.pdf
-      topic_word_freq =
-        lambda * log(topic_word_distribution) +
-        (1 - lambda) * log(t(t(topic_word_distribution) /  (colSums(self$components) / sum(self$components)) ))
-
-      lapply(topic_number, function(tn) {
-        word_by_freq = sort(topic_word_freq[tn, ], decreasing = TRUE, method = "radix")
-        names(word_by_freq)[seq_len(n)]
-      }) %>% do.call(cbind, .)
-    },
-    #---------------------------------------------------------------------------------------------
-    plot = function(lambda.step = 0.1, reorder.topics = FALSE, ...) {
-      if("LDAvis" %in% rownames(installed.packages())) {
-        if (!is.null(self$components)) {
-
-          json = LDAvis::createJSON(phi = self$topic_word_distribution,
-                                    theta = self$doc_topic_distribution,
-                                    doc.length = rowSums(private$doc_topic_count),
-                                    vocab = private$vocabulary,
-                                    term.frequency = colSums(self$components),
-                                    lambda.step = lambda.step,
-                                    reorder.topics = reorder.topics,
-                                    ...)
-          # modify global option - fixes #181
-          # also we save user encoding and restore it after exit
-          enc = getOption("encoding")
-          on.exit(options(encoding = enc))
-          options(encoding = "UTF-8")
-
-          LDAvis::serVis(json, ...)
-        } else {
-          stop("Model was not fitted, please fit it first...")
-        }
-      } else
-        stop("To use visualisation, please install 'LDAvis' package first.")
-    }
-  ),
-  active = list(
-    # make components read only via active bindings
-    #---------------------------------------------------------------------------------------------
-    topic_word_distribution = function(value) {
-      if (!missing(value)) stop("Sorry this is a read-only field")
-      # self$components is topic word count
-      else (self$components + private$topic_word_prior) %>% normalize("l1")
-    },
-    #---------------------------------------------------------------------------------------------
-    doc_topic_distribution = function(value) {
-      if (!missing(value)) stop("Sorry this is a read-only field")
-      if (is.null(private$doc_topic_count)) stop("LDA model was not fitted yet!")
-      else (private$doc_topic_count + private$doc_topic_prior) %>% normalize("l1")
-    }
+    get_word_vectors = function() {.Deprecated("model$components")}
   ),
   private = list(
     #--------------------------------------------------------------
@@ -239,12 +253,12 @@ LatentDirichletAllocation = R6::R6Class(
     # internal_matrix_formats inherited from base mlDecomposition class -
     # need to set it with check_convert_input()
     is_initialized = FALSE,
-    doc_topic_prior = NULL, # alpha
-    topic_word_prior = NULL, # beta
-    n_topics = NULL,
+    # doc_topic_prior = NULL, # alpha
+    # topic_word_prior = NULL, # beta
+    # n_topics = NULL,
     ptr = NULL,
-    doc_topic_count = NULL,
-    vocabulary = NULL,
+    doc_topic_matrix = NULL,
+    # vocabulary = NULL,
     #--------------------------------------------------------------
     fit_transform_internal = function(model_ptr,
                                       n_iter,
@@ -290,7 +304,7 @@ LatentDirichletAllocation = R6::R6Class(
       attr(res, "likelihood") = do.call(rbind, loglik_hist)
       res
     },
-    # get_doc_topic_count_internal = function(ptr = private$ptr) {
+    # get_doc_topic_matrix_internal = function(ptr = private$ptr) {
     #   warplda_get_doc_topic_count(ptr)
     # },
     #--------------------------------------------------------------
@@ -444,11 +458,11 @@ LatentDirichletAllocationDistributed = R6::R6Class(
         }
       }
 
-      private$doc_topic_count = foreach(seq_len(foreach::getDoParWorkers()), .combine = rbind,
+      private$doc_topic_matrix = foreach(seq_len(foreach::getDoParWorkers()), .combine = rbind,
               .inorder = TRUE, .multicombine = TRUE) %dopar% {
         text2vec:::warplda_get_doc_topic_count(text2vec.environment$lda$.__enclos_env__$private$ptr)
       }
-      rownames(private$doc_topic_count) = rownames(x)
+      rownames(private$doc_topic_matrix) = rownames(x)
       # got topic word count distribution
       private$components_ = foreach(seq_len(foreach::getDoParWorkers()),
                                     .combine = function(...) Reduce(`+`, list(...)),
@@ -458,7 +472,7 @@ LatentDirichletAllocationDistributed = R6::R6Class(
       colnames(private$components_) = private$vocabulary
       doc_topic_distr = self$doc_topic_distribution
 
-      attributes(doc_topic_distr) = attributes(private$doc_topic_count)
+      attributes(doc_topic_distr) = attributes(private$doc_topic_matrix)
       rownames(doc_topic_distr) = rownames(x)
       doc_topic_distr
     }
