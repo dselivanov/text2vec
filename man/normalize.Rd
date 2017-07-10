@@ -18,5 +18,5 @@ normalized matrix
 normalize matrix rows using given norm
 }
 \seealso{
-\link{get_idf}, \link{create_dtm}
+\link{create_dtm}
 }

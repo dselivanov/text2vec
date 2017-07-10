@@ -19,7 +19,7 @@
 #' @description normalize matrix rows using given norm
 #' @param m \code{matrix} (sparse or dense).
 #' @param norm \code{character} the method used to normalize term vectors
-#' @seealso \link{get_idf}, \link{create_dtm}
+#' @seealso \link{create_dtm}
 #' @return normalized matrix
 #' @export
 normalize = function(m, norm = c("l1", "l2", "none")) {
