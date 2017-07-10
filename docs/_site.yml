@@ -23,10 +23,17 @@ navbar:
     - text: "API"
       href: api.html
   right:
-    - icon: fa-github fa-lg
+    - icon: fa-language
+      menu:
+        - text: "English"
+          href: http://text2vec.org/
+        - text: "Chinese"
+          href: https://cndocr.github.io/text2vec-doc-cn/
+    - icon: fa-github
       href: https://github.com/dselivanov/text2vec
     - icon: fa-stack-overflow
       href: http://stackoverflow.com/questions/tagged/text2vec
+
 output:
   html_document:
     toc: true
