@@ -4,14 +4,14 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
 
 <meta name="author" content="Dmitriy Selivanov" />
 
-<meta name="date" content="2016-11-01" />
+<meta name="date" content="2017-07-10" />
 
 <title>Topic modeling</title>
 
@@ -24,6 +24,7 @@
 <script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 
@@ -178,7 +179,6 @@ $(document).ready(function () {
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
-<script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
@@ -204,7 +204,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
@@ -263,8 +263,9 @@ div.tocify {
 }
 
 .tocify-subheader .tocify-item {
-  font-size: 0.9em;
-  padding-left: 5px;
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -276,7 +277,6 @@ div.tocify {
 }
 .tocify-subheader .tocify-item {
   font-size: 0.95em;
-  padding-left: 10px;
 }
 
 </style>
@@ -327,6 +327,9 @@ div.tocify {
   </ul>
 </li>
 <li>
+  <a href="collocations.html">Collocations</a>
+</li>
+<li>
   <a href="topic_modeling.html">Topic modeling</a>
 </li>
 <li>
@@ -337,9 +340,25 @@ div.tocify {
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li>
+        <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-language"></span>
+     
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="http://text2vec.org/">English</a>
+    </li>
+    <li>
+      <a href="https://cndocr.github.io/text2vec-doc-cn/">Chinese</a>
+    </li>
+  </ul>
+</li>
+<li>
   <a href="https://github.com/dselivanov/text2vec">
-    <span class="fa fa-github fa-lg"></span>
+    <span class="fa fa-github"></span>
      
   </a>
 </li>
@@ -360,27 +379,31 @@ div.tocify {
 
 <h1 class="title toc-ignore">Topic modeling</h1>
 <h4 class="author"><em>Dmitriy Selivanov</em></h4>
-<h4 class="date"><em>2016-11-01</em></h4>
+<h4 class="date"><em>2017-07-10</em></h4>
 
 </div>
 
 
+<p>Topic modeling is technique to extract abstract topics from a collection of documents. In order to do that input Document-Term matrix usually decomposed into 2 low-rank matrices: document-topic matrix and topic-word matrix.</p>
 <div id="latent-semantic-analysis" class="section level1">
 <h1>Latent Semantic Analysis</h1>
-<p>TODO</p>
+<p>Latent Semantic Analysis is the oldest among topic modeling techniques. It decomposes Document-Term matrix into a product of 2 <strong>low rank</strong> matrices <span class="math inline">\(X \approx D \times T\)</span>. Goal of LSA is to receive approximation with a <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition#Low-rank_matrix_approximation">respect to minimize Frobenious norm</a>: <span class="math inline">\(error = \left\lVert X - D \times T \right\rVert _F\)</span>. Turns out this can be done with <strong>truncated SVD</strong> decomposition.</p>
+<p><code>text2vec</code> borrows SVD from very efficient <a href="https://cran.r-project.org/package=irlba">irlba</a> package and adds convenient interface with ability to fit model and apply it to new data.</p>
+<div id="example" class="section level2">
+<h2>Example</h2>
 <p>As usual we will use built-in <code>text2vec::moview_review</code> dataset. Let’s clean it a little bit and create DTM:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(stringr)
 <span class="kw">library</span>(text2vec)
 <span class="kw">data</span>(<span class="st">&quot;movie_review&quot;</span>)
-<span class="co"># select 500 rows for faster running times</span>
-movie_review_test =<span class="st"> </span>movie_review[<span class="dv">501</span>:<span class="dv">1000</span>, ]
-movie_review_train =<span class="st"> </span>movie_review[<span class="dv">1</span>:<span class="dv">500</span>, ]
+<span class="co"># select 1000 rows for faster running times</span>
+movie_review_train =<span class="st"> </span>movie_review[<span class="dv">1</span>:<span class="dv">700</span>, ]
+movie_review_test =<span class="st"> </span>movie_review[<span class="dv">701</span>:<span class="dv">1000</span>, ]
 prep_fun =<span class="st"> </span>function(x) {
   x %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="co"># make text lower case</span>
 <span class="st">    </span>str_to_lower %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="co"># remove non-alphanumeric symbols</span>
-<span class="st">    </span><span class="kw">str_replace_all</span>(<span class="st">&quot;[^[:alnum:]]&quot;</span>, <span class="st">&quot; &quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">str_replace_all</span>(<span class="st">&quot;[^[:alpha:]]&quot;</span>, <span class="st">&quot; &quot;</span>) %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="co"># collapse multiple spaces</span>
 <span class="st">    </span><span class="kw">str_replace_all</span>(<span class="st">&quot;</span><span class="ch">\\</span><span class="st">s+&quot;</span>, <span class="st">&quot; &quot;</span>)
 }
@@ -395,52 +418,58 @@ dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer)
 lsa =<span class="st"> </span>LSA$<span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">10</span>)
 
 <span class="co"># pipe friendly transformation</span>
-dtm_tfidf_lsa =<span class="st"> </span>dtm %&gt;%<span class="st"> </span>
+doc_embeddings =<span class="st"> </span>dtm %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">fit_transform</span>(tfidf) %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">fit_transform</span>(lsa)</code></pre></div>
-<p>And we can elegantly apply exactly the same transformation to new data. Elegantly with “not-a-pipe” <code>%&gt;%</code>:</p>
+<p><code>doc_embeddings</code> contains matrix with document embeddings (document-topic matrix) and <code>lsa$components</code> contains topic-word matrix:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(doc_embeddings)</code></pre></div>
+<pre><code>## [1] 700  10</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(lsa$components)</code></pre></div>
+<pre><code>## [1]   10 3030</code></pre>
+<p>Usually we need to analyze not a fixed dataset, but also to apply models to new data. For instance we may need to embed new unseen documents into the same latent space in order to use their representation in the downstream task (for example classification). <code>text2vec</code> cares about such problem from the very first days. We can elegantly <strong>perform exactly the same transformation on the new data</strong> with a “not-a-pipe” <code>%&gt;%</code>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">new_data =<span class="st"> </span>movie_review_test
-new_data_dtm_tfidf_lsa =<span class="st"> </span>
+new_doc_embeddings =<span class="st"> </span>
 <span class="st">  </span>new_data$review %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">itoken</span>(<span class="dt">preprocessor =</span> prep_fun, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>) %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">create_dtm</span>(vectorizer) %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">transform</span>(tfidf) %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">transform</span>(lsa)
-<span class="kw">head</span>(new_data_dtm_tfidf_lsa)</code></pre></div>
-<pre><code>##           [,1]       [,2]         [,3]         [,4]         [,5]
-## 1 0.0010757498 0.07883588 -0.012792492  0.001803077 -0.016498829
-## 2 0.0010309045 0.07827933 -0.002480813  0.007431587 -0.013045284
-## 3 0.0008995570 0.09534925 -0.004880675 -0.007976679 -0.033347235
-## 4 0.0009023917 0.09403420  0.012338197  0.007145261 -0.007353982
-## 5 0.0010801880 0.07638067 -0.010959332  0.011642504 -0.017630506
-## 6 0.0009748510 0.08042964 -0.008732528  0.007173264 -0.014004544
-##            [,6]        [,7]          [,8]         [,9]        [,10]
-## 1  0.0103262362 0.009852323 -0.0064973268  0.002294977  0.003113058
-## 2 -0.0001511818 0.007605538 -0.0076489837  0.005333738  0.003353584
-## 3 -0.0028268780 0.016753258 -0.0423168721 -0.521265026  0.038670324
-## 4  0.0171269927 0.005365014 -0.0002391057 -0.007158379  0.012387447
-## 5 -0.0034931519 0.005086364  0.0020006889 -0.001887502 -0.003574490
-## 6 -0.0124146267 0.003978910 -0.0209399126  0.008284681  0.011476810</code></pre>
+<span class="kw">dim</span>(new_doc_embeddings)</code></pre></div>
+<pre><code>## [1] 300  10</code></pre>
+</div>
+<div id="pros-and-cons" class="section level2">
+<h2>Pros and cons</h2>
+<p><strong>Pros:</strong></p>
+<ol style="list-style-type: decimal">
+<li><strong>LSA</strong> is easy to train and tune (no hyperparameters except rank)</li>
+<li>Embeddings usually work fine in dowstream tasks such as clusterization, classification, regression, similarity-search</li>
+</ol>
+<p><strong>Cons:</strong></p>
+<ol style="list-style-type: decimal">
+<li>Major drawback is that embeddings are <strong>not interpretable</strong> (components might be negative)</li>
+<li>Could be quite slow to train on <strong>very large</strong> collections of documents</li>
+<li>The probabilistic model of LSA does not match observed data: LSA assumes that words and documents form a joint Gaussian model (ergodic hypothesis), while a Poisson distribution has been observed</li>
+</ol>
+</div>
 </div>
 <div id="latent-dirichlet-allocation" class="section level1">
 <h1>Latent Dirichlet Allocation</h1>
-<p>TODO</p>
+<p><a href="https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation">LDA (Latent Dirichlet Allocation)</a> model also decompose document-term matrix into 2 - document-topic distribution and topic-word distribution. Bit it is much more complex <strong>non-linear generative model</strong>. We won’t go into details about mathematical behind LDA, reader can find a lot of material in internet.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tokens =<span class="st"> </span>movie_review$review %&gt;%<span class="st"> </span>
 <span class="st">  </span>tolower %&gt;%<span class="st"> </span>
 <span class="st">  </span>word_tokenizer
-<span class="co"># turn off progressbar because it won&#39;t look nice in rmd</span>
 it =<span class="st"> </span><span class="kw">itoken</span>(tokens, <span class="dt">ids =</span> movie_review$id, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
 v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it) %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">prune_vocabulary</span>(<span class="dt">term_count_min =</span> <span class="dv">10</span>, <span class="dt">doc_proportion_max =</span> <span class="fl">0.2</span>)
 vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(v)
-dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer, <span class="dt">type =</span> <span class="st">&quot;lda_c&quot;</span>)
+dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer)
 
 lda_model =<span class="st"> </span>
-<span class="st">  </span>LDA$<span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">10</span>, <span class="dt">vocabulary =</span> v, 
+<span class="st">  </span>LDA$<span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">10</span>,
           <span class="dt">doc_topic_prior =</span> <span class="fl">0.1</span>, <span class="dt">topic_word_prior =</span> <span class="fl">0.01</span>)
 doc_topic_distr =<span class="st"> </span>
-<span class="st">  </span>lda_model$<span class="kw">fit_transform</span>(dtm, <span class="dt">n_iter =</span> <span class="dv">1000</span>, <span class="dt">convergence_tol =</span> <span class="fl">0.01</span>, 
-                          <span class="dt">check_convergence_every_n =</span> <span class="dv">10</span>)</code></pre></div>
+<span class="st">  </span>lda_model$<span class="kw">fit_transform</span>(<span class="dt">x =</span> dtm, <span class="dt">n_iter =</span> <span class="dv">1000</span>, <span class="dt">convergence_tol =</span> <span class="fl">0.001</span>, 
+                          <span class="dt">n_check_convergence =</span> <span class="dv">25</span>, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lda_model$<span class="kw">plot</span>()</code></pre></div>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -492,8 +521,11 @@ LDAvis
 <script>
 
 // add bootstrap table styles to pandoc tables
-$(document).ready(function () {
+function bootstrapStylePandocTables() {
   $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
 });
 
 
@@ -504,7 +536,7 @@ $(document).ready(function () {
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

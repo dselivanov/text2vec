@@ -9,23 +9,30 @@ set.seed(2016L)
 ```
 
 
+Topic modeling is technique to extract abstract topics from a collection of documents. In order to do that input Document-Term matrix usually decomposed into 2 low-rank matrices: document-topic matrix and topic-word matrix.
+
 # Latent Semantic Analysis
-TODO
+
+Latent Semantic Analysis is the oldest among topic modeling techniques. It decomposes Document-Term matrix into a product of 2 **low rank** matrices $X \approx D \times T$. Goal of LSA is to receive approximation with a [respect to minimize Frobenious norm](https://en.wikipedia.org/wiki/Singular_value_decomposition#Low-rank_matrix_approximation): $error = \left\lVert X - D \times T \right\rVert _F$. Turns out this can be done with **truncated SVD** decomposition. 
+
+`text2vec` borrows SVD from very efficient [irlba](https://cran.r-project.org/package=irlba) package and adds convenient interface with ability to fit model and apply it to new data.
+ 
+## Example
 
 As usual we will use built-in `text2vec::moview_review` dataset. Let's clean it a little bit and create DTM:
 ```{r}
 library(stringr)
 library(text2vec)
 data("movie_review")
-# select 500 rows for faster running times
-movie_review_test = movie_review[501:1000, ]
-movie_review_train = movie_review[1:500, ]
+# select 1000 rows for faster running times
+movie_review_train = movie_review[1:700, ]
+movie_review_test = movie_review[701:1000, ]
 prep_fun = function(x) {
   x %>% 
     # make text lower case
     str_to_lower %>% 
     # remove non-alphanumeric symbols
-    str_replace_all("[^[:alnum:]]", " ") %>% 
+    str_replace_all("[^[:alpha:]]", " ") %>% 
     # collapse multiple spaces
     str_replace_all("\\s+", " ")
 }
@@ -36,47 +43,70 @@ v = create_vocabulary(it) %>%
 vectorizer = vocab_vectorizer(v)
 dtm = create_dtm(it, vectorizer)
 ```
+
 Now we will perform tf-idf scaling and the fit and apply LSA model:
 ```{r}
 tfidf = TfIdf$new()
 lsa = LSA$new(n_topics = 10)
 
 # pipe friendly transformation
-dtm_tfidf_lsa = dtm %>% 
+doc_embeddings = dtm %>% 
   fit_transform(tfidf) %>% 
   fit_transform(lsa)
 ```
-And we can elegantly apply exactly the same transformation to new data. Elegantly with "not-a-pipe" `%>%`:
+
+`doc_embeddings` contains matrix with document embeddings (document-topic matrix) and `lsa$components` contains topic-word matrix:
+```{r}
+dim(doc_embeddings)
+dim(lsa$components)
+```
+
+Usually we need to analyze not a fixed dataset, but also to apply models to new data. For instance we may need to embed new unseen documents into the same latent space in order to use their representation in the downstream task (for example classification). `text2vec` cares about such problem from the very first days. We can elegantly **perform exactly the same transformation on the new data** with a "not-a-pipe" `%>%`:
+
 ```{r}
 new_data = movie_review_test
-new_data_dtm_tfidf_lsa = 
+new_doc_embeddings = 
   new_data$review %>% 
   itoken(preprocessor = prep_fun, progressbar = FALSE) %>% 
   create_dtm(vectorizer) %>% 
   transform(tfidf) %>% 
   transform(lsa)
-head(new_data_dtm_tfidf_lsa)
+dim(new_doc_embeddings)
 ```
 
+## Pros and cons
+
+**Pros:**
+
+1. **LSA** is easy to train and tune (no hyperparameters except rank)
+1. Embeddings usually work fine in dowstream tasks such as clusterization, classification, regression, similarity-search
+
+**Cons:**
+
+1. Major drawback is that embeddings are **not interpretable** (components might be negative)
+1. Could be quite slow to train on **very large** collections of documents
+1. The probabilistic model of LSA does not match observed data: LSA assumes that words and documents form a joint Gaussian model (ergodic hypothesis), while a Poisson distribution has been observed
+
 # Latent Dirichlet Allocation
-TODO
+
+[LDA (Latent Dirichlet Allocation)](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) model also decompose document-term matrix into 2 - document-topic distribution and topic-word distribution. Bit it is much more complex **non-linear generative model**. We won't go into details about mathematical behind LDA, reader can find a lot of material in internet. 
+
 ```{r, eval = FALSE}
 tokens = movie_review$review %>% 
   tolower %>% 
   word_tokenizer
-# turn off progressbar because it won't look nice in rmd
 it = itoken(tokens, ids = movie_review$id, progressbar = FALSE)
 v = create_vocabulary(it) %>% 
   prune_vocabulary(term_count_min = 10, doc_proportion_max = 0.2)
 vectorizer = vocab_vectorizer(v)
-dtm = create_dtm(it, vectorizer, type = "lda_c")
+dtm = create_dtm(it, vectorizer)
 
 lda_model = 
-  LDA$new(n_topics = 10, vocabulary = v, 
+  LDA$new(n_topics = 10,
           doc_topic_prior = 0.1, topic_word_prior = 0.01)
 doc_topic_distr = 
-  lda_model$fit_transform(dtm, n_iter = 1000, convergence_tol = 0.01, 
-                          check_convergence_every_n = 10)
+  lda_model$fit_transform(x = dtm, n_iter = 1000, convergence_tol = 0.001, 
+                          n_check_convergence = 25, progressbar = FALSE)
 ```
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, eval = FALSE}
