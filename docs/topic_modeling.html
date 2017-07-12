@@ -11,7 +11,7 @@
 
 <meta name="author" content="Dmitriy Selivanov" />
 
-<meta name="date" content="2017-07-10" />
+<meta name="date" content="2017-07-12" />
 
 <title>Topic modeling</title>
 
@@ -379,7 +379,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Topic modeling</h1>
 <h4 class="author"><em>Dmitriy Selivanov</em></h4>
-<h4 class="date"><em>2017-07-10</em></h4>
+<h4 class="date"><em>2017-07-12</em></h4>
 
 </div>
 
@@ -425,7 +425,7 @@ doc_embeddings =<span class="st"> </span>dtm %&gt;%<span class="st"> </span>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(doc_embeddings)</code></pre></div>
 <pre><code>## [1] 700  10</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(lsa$components)</code></pre></div>
-<pre><code>## [1]   10 3030</code></pre>
+<pre><code>## [1]   10 3029</code></pre>
 <p>Usually we need to analyze not a fixed dataset, but also to apply models to new data. For instance we may need to embed new unseen documents into the same latent space in order to use their representation in the downstream task (for example classification). <code>text2vec</code> cares about such problem from the very first days. We can elegantly <strong>perform exactly the same transformation on the new data</strong> with a “not-a-pipe” <code>%&gt;%</code>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">new_data =<span class="st"> </span>movie_review_test
 new_doc_embeddings =<span class="st"> </span>
@@ -454,22 +454,97 @@ new_doc_embeddings =<span class="st"> </span>
 </div>
 <div id="latent-dirichlet-allocation" class="section level1">
 <h1>Latent Dirichlet Allocation</h1>
-<p><a href="https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation">LDA (Latent Dirichlet Allocation)</a> model also decompose document-term matrix into 2 - document-topic distribution and topic-word distribution. Bit it is much more complex <strong>non-linear generative model</strong>. We won’t go into details about mathematical behind LDA, reader can find a lot of material in internet.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tokens =<span class="st"> </span>movie_review$review %&gt;%<span class="st"> </span>
+<p><a href="https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation">LDA (Latent Dirichlet Allocation)</a> model also decompose document-term matrix into two low-rank matrices - document-topic distribution and topic-word distribution. Bit it is more complex <strong>non-linear generative model</strong>. We won’t go into gory details behind LDA probabilistic model, reader can find a lot of material on the internet. For example <a href="https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation">wikipedia article</a> is pretty good.</p>
+<p>There several important hyper-parameters:</p>
+<ol style="list-style-type: decimal">
+<li><code>n_topics</code> - Number of latent topics.</li>
+<li><code>doc_topic_prior</code> - document-topic prior. Normally a number less than 1, e.g. 0.1, to prefer sparse topic distributions, i.e. few topics per document.</li>
+<li><code>topic_word_prior</code> - topic-word prior. Normally a number much less than 1, e.g. 0.001, to strongly prefer sparse word distributions, i.e. few words per topic.</li>
+</ol>
+<p>LDA is iterative algorithm. With <code>text2vec</code> implementation you can set <code>convergence_tol</code> parameter for early stopping. For example setting <code>lda$fit_transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10)</code> will stop earlier if log-likelihood at iteration <code>n</code> is within 0.1% of the log-likelihood of iteration <code>n - 10</code>.</p>
+<div id="remark-on-implementation" class="section level3">
+<h3>Remark on implementation</h3>
+<p><code>text2vec</code> implementation is based on state-of-the-art <a href="https://arxiv.org/abs/1510.08628">WarpLDA</a> sampling algorithm. It has O(1) sampling complexity which means run-time does not depend on the number of topics. Current implementation is single-threaded, but this can be improved in future versions.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tokens =<span class="st"> </span>movie_review$review[<span class="dv">1</span>:<span class="dv">4000</span>] %&gt;%<span class="st"> </span>
 <span class="st">  </span>tolower %&gt;%<span class="st"> </span>
 <span class="st">  </span>word_tokenizer
-it =<span class="st"> </span><span class="kw">itoken</span>(tokens, <span class="dt">ids =</span> movie_review$id, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+it =<span class="st"> </span><span class="kw">itoken</span>(tokens, <span class="dt">ids =</span> movie_review$id[<span class="dv">1</span>:<span class="dv">4000</span>], <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
 v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it) %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">prune_vocabulary</span>(<span class="dt">term_count_min =</span> <span class="dv">10</span>, <span class="dt">doc_proportion_max =</span> <span class="fl">0.2</span>)
 vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(v)
-dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer)
+dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer, <span class="dt">type =</span> <span class="st">&quot;dgTMatrix&quot;</span>)
 
-lda_model =<span class="st"> </span>
-<span class="st">  </span>LDA$<span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">10</span>,
-          <span class="dt">doc_topic_prior =</span> <span class="fl">0.1</span>, <span class="dt">topic_word_prior =</span> <span class="fl">0.01</span>)
+lda_model =<span class="st"> </span>LDA$<span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">10</span>, <span class="dt">doc_topic_prior =</span> <span class="fl">0.1</span>, <span class="dt">topic_word_prior =</span> <span class="fl">0.01</span>)
 doc_topic_distr =<span class="st"> </span>
-<span class="st">  </span>lda_model$<span class="kw">fit_transform</span>(<span class="dt">x =</span> dtm, <span class="dt">n_iter =</span> <span class="dv">1000</span>, <span class="dt">convergence_tol =</span> <span class="fl">0.001</span>, 
-                          <span class="dt">n_check_convergence =</span> <span class="dv">25</span>, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<span class="st">  </span>lda_model$<span class="kw">fit_transform</span>(<span class="dt">x =</span> dtm, <span class="dt">n_iter =</span> <span class="dv">1000</span>, 
+                          <span class="dt">convergence_tol =</span> <span class="fl">0.001</span>, <span class="dt">n_check_convergence =</span> <span class="dv">25</span>, 
+                          <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<pre><code>## INFO [2017-07-12 09:28:41] iter 25 loglikelihood = -2739471.624
+## INFO [2017-07-12 09:28:42] iter 50 loglikelihood = -2689784.369
+## INFO [2017-07-12 09:28:43] iter 75 loglikelihood = -2665906.863
+## INFO [2017-07-12 09:28:44] iter 100 loglikelihood = -2650951.848
+## INFO [2017-07-12 09:28:45] iter 125 loglikelihood = -2640540.549
+## INFO [2017-07-12 09:28:46] iter 150 loglikelihood = -2631921.113
+## INFO [2017-07-12 09:28:47] iter 175 loglikelihood = -2625292.752
+## INFO [2017-07-12 09:28:48] iter 200 loglikelihood = -2622313.280
+## INFO [2017-07-12 09:28:49] iter 225 loglikelihood = -2617041.128
+## INFO [2017-07-12 09:28:50] iter 250 loglikelihood = -2614400.745
+## INFO [2017-07-12 09:28:51] iter 275 loglikelihood = -2612813.374
+## INFO [2017-07-12 09:28:51] early stopping at 275 iteration</code></pre>
+</div>
+<div id="describing-topics---top-words" class="section level2">
+<h2>Describing topics - top words</h2>
+<p>Also we get top words for each topic. Words for each topic can be sorted by probability of the chance to observe word in a given topic (<code>lambda = 1</code>):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lda_model$<span class="kw">get_top_words</span>(<span class="dt">n =</span> <span class="dv">10</span>, <span class="dt">topic_number =</span> <span class="kw">c</span>(1L, 5L, 10L), <span class="dt">lambda =</span> <span class="dv">1</span>)</code></pre></div>
+<pre><code>##       [,1]        [,2]     [,3]      
+##  [1,] &quot;know&quot;      &quot;war&quot;    &quot;director&quot;
+##  [2,] &quot;horror&quot;    &quot;before&quot; &quot;films&quot;   
+##  [3,] &quot;why&quot;       &quot;years&quot;  &quot;quite&quot;   
+##  [4,] &quot;your&quot;      &quot;still&quot;  &quot;while&quot;   
+##  [5,] &quot;worst&quot;     &quot;world&quot;  &quot;little&quot;  
+##  [6,] &quot;guy&quot;       &quot;man&quot;    &quot;horror&quot;  
+##  [7,] &quot;nothing&quot;   &quot;match&quot;  &quot;though&quot;  
+##  [8,] &quot;something&quot; &quot;best&quot;   &quot;such&quot;    
+##  [9,] &quot;scene&quot;     &quot;these&quot;  &quot;may&quot;     
+## [10,] &quot;ever&quot;      &quot;part&quot;   &quot;enough&quot;</code></pre>
+<p>Also top-words could be sorted by “relevance” which also takes into account frequency of word in the corpus (<code>lambda &lt; 1</code>). From my experience in most cases setting <code>0.2 &lt; lambda &lt; 0.4</code> works well. See <a href="http://nlp.stanford.edu/events/illvi2014/papers/sievert-illvi2014.pdf">LDAvis: A method for visualizing and interpreting topics</a> paper for details.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lda_model$<span class="kw">get_top_words</span>(<span class="dt">n =</span> <span class="dv">10</span>, <span class="dt">topic_number =</span> <span class="kw">c</span>(1L, 5L, 10L), <span class="dt">lambda =</span> <span class="fl">0.2</span>)</code></pre></div>
+<pre><code>##       [,1]      [,2]         [,3]        
+##  [1,] &quot;zombie&quot;  &quot;war&quot;        &quot;atmosphere&quot;
+##  [2,] &quot;gore&quot;    &quot;match&quot;      &quot;thriller&quot;  
+##  [3,] &quot;stupid&quot;  &quot;anti&quot;       &quot;viewer&quot;    
+##  [4,] &quot;cheesy&quot;  &quot;army&quot;       &quot;page&quot;      
+##  [5,] &quot;flick&quot;   &quot;green&quot;      &quot;narrative&quot; 
+##  [6,] &quot;horror&quot;  &quot;jackson&quot;    &quot;identity&quot;  
+##  [7,] &quot;zombies&quot; &quot;hitler&quot;     &quot;images&quot;    
+##  [8,] &quot;slasher&quot; &quot;soldiers&quot;   &quot;france&quot;    
+##  [9,] &quot;killer&quot;  &quot;historical&quot; &quot;engaging&quot;  
+## [10,] &quot;worst&quot;   &quot;kelly&quot;      &quot;caine&quot;</code></pre>
+</div>
+<div id="apply-learned-model-to-new-data" class="section level2">
+<h2>Apply learned model to new data</h2>
+<p>As with other decompositions we can apply model to new data and obtain document-topic distribution:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">new_dtm =<span class="st"> </span><span class="kw">itoken</span>(movie_review$review[<span class="dv">4001</span>:<span class="dv">5000</span>], tolower, word_tokenizer, <span class="dt">ids =</span> movie_review$id[<span class="dv">4001</span>:<span class="dv">5000</span>]) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">create_dtm</span>(vectorizer, <span class="dt">type =</span> <span class="st">&quot;dgTMatrix&quot;</span>)
+new_doc_topic_distr =<span class="st"> </span>lda_model$<span class="kw">transform</span>(new_dtm)</code></pre></div>
+<pre><code>## INFO [2017-07-12 09:28:54] iter 5 loglikelihood = -509731.596
+## INFO [2017-07-12 09:28:54] iter 10 loglikelihood = -504774.598
+## INFO [2017-07-12 09:28:54] iter 15 loglikelihood = -504082.274
+## INFO [2017-07-12 09:28:54] iter 20 loglikelihood = -503266.085
+## INFO [2017-07-12 09:28:54] iter 25 loglikelihood = -503086.430
+## INFO [2017-07-12 09:28:54] early stopping at 25 iteration</code></pre>
+</div>
+<div id="cross-validation-and-hyper-parameter-tuning" class="section level2">
+<h2>Cross-validation and hyper-parameter tuning</h2>
+<p>One widely used approach for model hyper-parameter tuning is validation of per-word <strong>perplexity</strong> on hold-out set. This is quite easy with <code>text2vec</code>.</p>
+<p>Remember that we’ve fitted model on first 4000 reviews (learned <code>topic_word_distribution</code> which will be fixed during <code>transform</code> phase) and predicted last 1000. We can calculate perplexity on these 1000 docs:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">perplexity</span>(new_dtm, <span class="dt">topic_word_distribution =</span> lda_model$topic_word_distribution, <span class="dt">doc_topic_distribution =</span> new_doc_topic_distr)</code></pre></div>
+<pre><code>## [1] 2552.401</code></pre>
+<p>The lower perplexity the better. Goal could to find set of hyper-parameters (<code>n_topics</code>, <code>doc_topic_prior</code>, <code>topic_word_prior</code>) which minimize per-word perplexity on hold-out dataset. However it is worth to keep in mind that perplexity is not always correlated with people judgement about topics interpretability and coherence. I personally usually use <strong>LDAvis</strong> for parameter tuning - see next section.</p>
+</div>
+<div id="visualization" class="section level2">
+<h2>Visualization</h2>
+<p>Finally <code>text2vec</code> wraps <code>LDAvis</code> package in order to provide interactive tool for topic exploration. Usually it worth to play with such visualizations in order to find meaningfull model hyperparameters.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lda_model$<span class="kw">plot</span>()</code></pre></div>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -488,6 +563,7 @@ LDAvis
     var vis = new LDAvis("#lda", "topic_modeling_files/ldavis/lda.json");
   </script>
 </body>
+</div>
 </div>
 
 

@@ -4,7 +4,7 @@ author: "Dmitriy Selivanov"
 date: "`r Sys.Date()`"
 ---
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(eval = TRUE, echo=TRUE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(eval = TRUE, echo=TRUE, warning=FALSE, message=FALSE, cache = TRUE)
 set.seed(2016L)
 ```
 
@@ -89,28 +89,76 @@ dim(new_doc_embeddings)
 
 # Latent Dirichlet Allocation
 
-[LDA (Latent Dirichlet Allocation)](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) model also decompose document-term matrix into 2 - document-topic distribution and topic-word distribution. Bit it is much more complex **non-linear generative model**. We won't go into details about mathematical behind LDA, reader can find a lot of material in internet. 
+[LDA (Latent Dirichlet Allocation)](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) model also decompose document-term matrix into two low-rank matrices - document-topic distribution and topic-word distribution. Bit it is more complex **non-linear generative model**. We won't go into gory details behind LDA probabilistic model, reader can find a lot of material on the internet. For example [wikipedia article](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) is pretty good.
 
-```{r, eval = FALSE}
-tokens = movie_review$review %>% 
+There several important hyper-parameters:
+
+1. `n_topics` - Number of latent topics.
+1. `doc_topic_prior` - document-topic prior. Normally a number less than 1, e.g. 0.1, to prefer sparse topic distributions, i.e. few topics per document.
+1. `topic_word_prior` - topic-word prior. Normally a number much less than 1, e.g. 0.001, to strongly prefer sparse word distributions, i.e. few words per topic.
+
+LDA is iterative algorithm. With `text2vec` implementation you can set `convergence_tol` parameter for early stopping. For example setting `lda$fit_transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10)` will stop earlier if log-likelihood at iteration `n` is within 0.1% of the log-likelihood of iteration `n - 10`.
+
+### Remark on implementation
+
+`text2vec` implementation is based on state-of-the-art [WarpLDA](https://arxiv.org/abs/1510.08628) sampling algorithm. It has O(1) sampling complexity which means run-time does not depend on the number of topics. Current implementation is single-threaded, but this can be improved in future versions.
+
+
+```{r, eval = TRUE}
+tokens = movie_review$review[1:4000] %>% 
   tolower %>% 
   word_tokenizer
-it = itoken(tokens, ids = movie_review$id, progressbar = FALSE)
+it = itoken(tokens, ids = movie_review$id[1:4000], progressbar = FALSE)
 v = create_vocabulary(it) %>% 
   prune_vocabulary(term_count_min = 10, doc_proportion_max = 0.2)
 vectorizer = vocab_vectorizer(v)
-dtm = create_dtm(it, vectorizer)
+dtm = create_dtm(it, vectorizer, type = "dgTMatrix")
 
-lda_model = 
-  LDA$new(n_topics = 10,
-          doc_topic_prior = 0.1, topic_word_prior = 0.01)
+lda_model = LDA$new(n_topics = 10, doc_topic_prior = 0.1, topic_word_prior = 0.01)
 doc_topic_distr = 
-  lda_model$fit_transform(x = dtm, n_iter = 1000, convergence_tol = 0.001, 
-                          n_check_convergence = 25, progressbar = FALSE)
+  lda_model$fit_transform(x = dtm, n_iter = 1000, 
+                          convergence_tol = 0.001, n_check_convergence = 25, 
+                          progressbar = FALSE)
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, eval = FALSE}
-lda_model$plot(out.dir = "./topic_modeling_files/ldavis", lambda.step = 0.1, open.browser = FALSE)
+## Describing topics - top words
+
+Also we get top words for each topic. Words for each topic can be sorted by probability of the chance to observe word in a given topic (`lambda = 1`):
+```{r}
+lda_model$get_top_words(n = 10, topic_number = c(1L, 5L, 10L), lambda = 1)
+```
+Also top-words could be sorted by "relevance" which also takes into account frequency of word in the corpus (`lambda < 1`). From my experience in most cases setting `0.2 < lambda < 0.4` works well. See [LDAvis: A method for visualizing and interpreting topics](http://nlp.stanford.edu/events/illvi2014/papers/sievert-illvi2014.pdf) paper for details.
+
+```{r}
+lda_model$get_top_words(n = 10, topic_number = c(1L, 5L, 10L), lambda = 0.2)
+```
+
+## Apply learned model to new data
+
+As with other decompositions we can apply model to new data and obtain document-topic distribution:
+```{r}
+new_dtm = itoken(movie_review$review[4001:5000], tolower, word_tokenizer, ids = movie_review$id[4001:5000]) %>% 
+  create_dtm(vectorizer, type = "dgTMatrix")
+new_doc_topic_distr = lda_model$transform(new_dtm)
+```
+
+## Cross-validation and hyper-parameter tuning
+
+One widely used approach for model hyper-parameter tuning is validation of per-word **perplexity** on hold-out set. This is quite easy with `text2vec`.
+
+Remember that we've fitted model on first 4000 reviews (learned `topic_word_distribution` which will be fixed during `transform` phase) and predicted last 1000. We can calculate perplexity on these 1000 docs:
+
+```{r}
+perplexity(new_dtm, topic_word_distribution = lda_model$topic_word_distribution, doc_topic_distribution = new_doc_topic_distr)
+```
+The lower perplexity the better. Goal could to find set of hyper-parameters (`n_topics`, `doc_topic_prior`, `topic_word_prior`) which minimize per-word perplexity on hold-out dataset. However it is worth to keep in mind that perplexity is not always correlated with people judgement about topics interpretability and coherence. I personally usually use **LDAvis** for parameter tuning - see next section.
+
+## Visualization
+
+Finally `text2vec` wraps `LDAvis` package in order to provide interactive tool for topic exploration. Usually it worth to play with such visualizations in order to find meaningfull model hyperparameters.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, eval = TRUE}
+lda_model$plot(out.dir = "topic_modeling_files/ldavis", open.browser = FALSE)
 ```
 ```{r, eval=FALSE}
 lda_model$plot()
