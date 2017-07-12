@@ -11,3 +11,5 @@ vignettes/*.R
 ######################
 .DS_Store
 .DS_Store?
+*_cache
+drafts
