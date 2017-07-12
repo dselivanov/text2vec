@@ -53,6 +53,8 @@
 create_vocabulary = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
                        stopwords = character(0), sep_ngram = "_") {
   stopifnot(is.numeric(ngram) && length(ngram) == 2 && ngram[[2]] >= ngram[[1]])
+  stopifnot(is.character(stopwords))
+  stopifnot(is.character(sep_ngram) && nchar(sep_ngram) == 1L)
   e = environment()
   reg.finalizer(e, malloc_trim_finalizer)
   UseMethod("create_vocabulary")
@@ -74,9 +76,12 @@ create_vocabulary.character = function(it, ngram = c("ngram_min" = 1L, "ngram_ma
 
   ngram_min = as.integer( ngram[[1]] )
   ngram_max = as.integer( ngram[[2]] )
+
+  # don't allow empty stings
+  it = setdiff(it, c(stopwords, ""))
   vocab_length = length(it)
 
-  res = data.frame("term" = setdiff(it, stopwords),
+  res = data.frame("term" = it,
                    "term_count" = rep(NA_integer_, vocab_length),
                    "doc_count" = rep(NA_integer_, vocab_length))
   res = res[order(res$term_count), ]
@@ -121,6 +126,8 @@ create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" 
   }
 
   res = cpp_get_vocab_statistics(vocab_ptr)
+  # don't allow empty stings
+  res = res[res$term != "", ]
   res = res[order(res$term_count), ]
 
   setattr(res, "ngram", c("ngram_min" = ngram_min, "ngram_max" = ngram_max))
@@ -132,6 +139,7 @@ create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" 
   res
 }
 
+# FIXME
 #------------------------------------------------------------------------------
 # TO REMOVE IN text2vec 0.6
 #------------------------------------------------------------------------------

@@ -94,7 +94,8 @@
 #'   prune_vocabulary(term_count_min = 5)
 #' v_vect = vocab_vectorizer(vocabulary)
 #' tcm = create_tcm(it, v_vect, skip_grams_window = 5L)
-#' glove_model = GloVe$new(word_vectors_size = 50, vocabulary = vocabulary, x_max = 10, learning_rate = .25)
+#' glove_model = GloVe$new(word_vectors_size = 50,
+#'   vocabulary = vocabulary, x_max = 10, learning_rate = .25)
 #' # fit model and get word vectors
 #' word_vectors_main = glove_model$fit_transform(tcm, n_iter = 10)
 #' word_vectors_context = glove_model$components
@@ -308,6 +309,7 @@ GlobalVectors = R6::R6Class(
 #' @export
 GloVe = GlobalVectors
 
+# FIXME - to be removed in 0.6
 #' @name glove
 #' @title Fit a GloVe word-embedded model
 #' @description \bold{DEPRECIATED}.This function trains a GloVe word-embeddings model via fully

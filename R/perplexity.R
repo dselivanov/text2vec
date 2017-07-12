@@ -46,8 +46,16 @@ perplexity = function(X, topic_word_distribution, doc_topic_distribution) {
   stopifnot(nrow(topic_word_distribution) == ncol(doc_topic_distribution))
   n_topics = nrow(topic_word_distribution)
 
-  stopifnot(all.equal(rowSums(topic_word_distribution), rep(1, n_topics), check.attributes = FALSE))
-  stopifnot(all.equal(rowSums(doc_topic_distribution),  rep(1, n_docs),   check.attributes = FALSE))
+
+  rs = rowSums(topic_word_distribution)
+  # remove emtpty documents
+  rs[rs == 0] = 1
+  stopifnot(all.equal(rs, rep(1, n_topics), check.attributes = FALSE))
+
+  rs = rowSums(doc_topic_distribution)
+  # remove emtpty terms
+  rs[rs == 0] = 1
+  stopifnot(all.equal(rs,  rep(1, n_docs),   check.attributes = FALSE))
 
   internal_matrix_format = "RsparseMatrix"
 
