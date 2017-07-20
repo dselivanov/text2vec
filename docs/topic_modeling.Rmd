@@ -15,11 +15,11 @@ Topic modeling is technique to extract abstract topics from a collection of docu
 
 Latent Semantic Analysis is the oldest among topic modeling techniques. It decomposes Document-Term matrix into a product of 2 **low rank** matrices $X \approx D \times T$. Goal of LSA is to receive approximation with a [respect to minimize Frobenious norm](https://en.wikipedia.org/wiki/Singular_value_decomposition#Low-rank_matrix_approximation): $error = \left\lVert X - D \times T \right\rVert _F$. Turns out this can be done with **truncated SVD** decomposition. 
 
-`text2vec` borrows SVD from very efficient [irlba](https://cran.r-project.org/package=irlba) package and adds convenient interface with ability to fit model and apply it to new data.
+`text2vec` borrows SVD from very efficient [irlba](https://cran.r-project.org/package=irlba) package and adds convenient interface with an ability to fit model and apply it to new data.
  
 ## Example
 
-As usual we will use built-in `text2vec::moview_review` dataset. Let's clean it a little bit and create DTM:
+As usual we will use built-in `text2vec::moview_review` dataset. Let's clean it a bit and create DTM:
 ```{r}
 library(stringr)
 library(text2vec)
@@ -44,7 +44,7 @@ vectorizer = vocab_vectorizer(v)
 dtm = create_dtm(it, vectorizer)
 ```
 
-Now we will perform tf-idf scaling and the fit and apply LSA model:
+Now we will perform tf-idf scaling and fit LSA model:
 ```{r}
 tfidf = TfIdf$new()
 lsa = LSA$new(n_topics = 10)
@@ -61,7 +61,7 @@ dim(doc_embeddings)
 dim(lsa$components)
 ```
 
-Usually we need to analyze not a fixed dataset, but also to apply models to new data. For instance we may need to embed new unseen documents into the same latent space in order to use their representation in the downstream task (for example classification). `text2vec` cares about such problem from the very first days. We can elegantly **perform exactly the same transformation on the new data** with a "not-a-pipe" `%>%`:
+Usually we need not only analyze a fixed dataset, but also apply model to new data. For instance we may need to embed unseen documents into the same latent space in order to use their representation in some downstream task (for example classification). `text2vec` keep in mind such task from the very first days of development. We can elegantly **perform exactly the same transformation on the new data** with `transform()` method and "not-a-pipe" `%>%`:
 
 ```{r}
 new_data = movie_review_test
@@ -69,7 +69,9 @@ new_doc_embeddings =
   new_data$review %>% 
   itoken(preprocessor = prep_fun, progressbar = FALSE) %>% 
   create_dtm(vectorizer) %>% 
+  # apply exaxtly same scaling wcich was used in train data
   transform(tfidf) %>% 
+  # embed into same space as was in train data
   transform(lsa)
 dim(new_doc_embeddings)
 ```
@@ -89,7 +91,7 @@ dim(new_doc_embeddings)
 
 # Latent Dirichlet Allocation
 
-[LDA (Latent Dirichlet Allocation)](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) model also decompose document-term matrix into two low-rank matrices - document-topic distribution and topic-word distribution. Bit it is more complex **non-linear generative model**. We won't go into gory details behind LDA probabilistic model, reader can find a lot of material on the internet. For example [wikipedia article](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) is pretty good.
+[LDA (Latent Dirichlet Allocation)](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) model also decomposes document-term matrix into two low-rank matrices - document-topic distribution and topic-word distribution. Bit it is more complex **non-linear generative model**. We won't go into gory details behind LDA probabilistic model, reader can find a lot of material on the internet. For example [wikipedia article](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) is pretty good. We will rather focus on practical details.
 
 There several important hyper-parameters:
 
@@ -97,12 +99,15 @@ There several important hyper-parameters:
 1. `doc_topic_prior` - document-topic prior. Normally a number less than 1, e.g. 0.1, to prefer sparse topic distributions, i.e. few topics per document.
 1. `topic_word_prior` - topic-word prior. Normally a number much less than 1, e.g. 0.001, to strongly prefer sparse word distributions, i.e. few words per topic.
 
-LDA is iterative algorithm. With `text2vec` implementation you can set `convergence_tol` parameter for early stopping. For example setting `lda$fit_transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10)` will stop earlier if log-likelihood at iteration `n` is within 0.1% of the log-likelihood of iteration `n - 10`.
+LDA in `text2vec` is implemented using iterative sampling algorithm - it improves log-likelihood with every pass over the data. So user can set `convergence_tol` parameter for early stopping - algorithm will stop iteration if improvement is not significant. For example setting `lda$fit_transform(x, n_iter = 1000, convergence_tol = 1e-3, n_check_convergence = 10)` will stop earlier if log-likelihood at iteration `n` is within 0.1% of the log-likelihood of iteration `n - 10`.
 
 ### Remark on implementation
 
-`text2vec` implementation is based on state-of-the-art [WarpLDA](https://arxiv.org/abs/1510.08628) sampling algorithm. It has O(1) sampling complexity which means run-time does not depend on the number of topics. Current implementation is single-threaded, but this can be improved in future versions.
+`text2vec` implementation is based on the state-of-the-art [WarpLDA](https://arxiv.org/abs/1510.08628) sampling algorithm. It has O(1) sampling complexity which means **run-time does not depend on the number of topics**. Current implementation is single-threaded and reasonably fast. However it can be improved in future versions.
 
+### Example
+
+Let us create topic model with `10` topics:
 
 ```{r, eval = TRUE}
 tokens = movie_review$review[1:4000] %>% 
@@ -121,13 +126,24 @@ doc_topic_distr =
                           progressbar = FALSE)
 ```
 
+Now `doc_topic_distr` matrix represents distribution of topics in documents. Each row is document and values are proportions of corresponding topics.
+
+For example topic distribution for first document:
+
+```{r}
+barplot(doc_topic_distr[1, ], xlab = "topic", 
+        ylab = "proportion", ylim = c(0, 1), 
+        names.arg = 1:ncol(doc_topic_distr))
+```
+
 ## Describing topics - top words
 
-Also we get top words for each topic. Words for each topic can be sorted by probability of the chance to observe word in a given topic (`lambda = 1`):
+Also we can get top words for each topic. They can be sorted by probability of the chance to observe word in a given topic (`lambda = 1`):
 ```{r}
 lda_model$get_top_words(n = 10, topic_number = c(1L, 5L, 10L), lambda = 1)
 ```
-Also top-words could be sorted by "relevance" which also takes into account frequency of word in the corpus (`lambda < 1`). From my experience in most cases setting `0.2 < lambda < 0.4` works well. See [LDAvis: A method for visualizing and interpreting topics](http://nlp.stanford.edu/events/illvi2014/papers/sievert-illvi2014.pdf) paper for details.
+
+Also top-words could be sorted by "relevance" which also takes into account frequency of word in the corpus (`0 < lambda < 1`). From my experience in most cases setting `0.2 < lambda < 0.4` works best. See [LDAvis: A method for visualizing and interpreting topics](http://nlp.stanford.edu/events/illvi2014/papers/sievert-illvi2014.pdf) paper for details.
 
 ```{r}
 lda_model$get_top_words(n = 10, topic_number = c(1L, 5L, 10L), lambda = 0.2)
@@ -146,16 +162,19 @@ new_doc_topic_distr = lda_model$transform(new_dtm)
 
 One widely used approach for model hyper-parameter tuning is validation of per-word **perplexity** on hold-out set. This is quite easy with `text2vec`.
 
+### Perplexity example
+
 Remember that we've fitted model on first 4000 reviews (learned `topic_word_distribution` which will be fixed during `transform` phase) and predicted last 1000. We can calculate perplexity on these 1000 docs:
 
 ```{r}
 perplexity(new_dtm, topic_word_distribution = lda_model$topic_word_distribution, doc_topic_distribution = new_doc_topic_distr)
 ```
+
 The lower perplexity the better. Goal could to find set of hyper-parameters (`n_topics`, `doc_topic_prior`, `topic_word_prior`) which minimize per-word perplexity on hold-out dataset. However it is worth to keep in mind that perplexity is not always correlated with people judgement about topics interpretability and coherence. I personally usually use **LDAvis** for parameter tuning - see next section.
 
 ## Visualization
 
-Finally `text2vec` wraps `LDAvis` package in order to provide interactive tool for topic exploration. Usually it worth to play with such visualizations in order to find meaningfull model hyperparameters.
+Finally `text2vec` wraps `LDAvis` package in order to provide interactive tool for topic exploration. Usually it worth to play with it in order to find meaningfull model hyperparameters.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, eval = TRUE}
 lda_model$plot(out.dir = "topic_modeling_files/ldavis", open.browser = FALSE)
