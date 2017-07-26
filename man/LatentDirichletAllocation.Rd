@@ -29,10 +29,7 @@ Creates Latent Dirichlet Allocation model.
 \item{\code{topic_word_distribution}}{distribution of words for each topic. Available after model fitting with
 \code{model$fit_transform()} method.}
 
-\item{\code{doc_topic_distribution}}{distribution of topics for each document. Available after model fitting with
-\code{model$fit_transform()} method.}
-
-\item{\code{components}}{word counts for each topic-word entry. Available after model fitting with
+\item{\code{components}}{unnormalized word counts for each topic-word entry. Available after model fitting with
 \code{model$fit_transform()} method.}
 }}
 
@@ -57,11 +54,12 @@ lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
               For description of arguments see \bold{Arguments} section.}
   \item{\code{$fit_transform(x, n_iter, convergence_tol = -1,
                n_check_convergence = 0, progressbar = interactive())}}{fit LDA model to input matrix
-               \code{x} and transforms input documents to topic space -
-               model input matrix as a distribution over topic space}
+               \code{x} and transforms input documents to topic space.
+               Result is a matrix where each row represents corresponding document.
+               Values in a row form distribution over topics.}
   \item{\code{$transform(x, n_iter, convergence_tol = -1,
-               n_check_convergence = 0, progressbar = FALSE)}}{ transforms new documents to topic space -
-               model input matrix as a distribution over topic space}
+               n_check_convergence = 0, progressbar = FALSE)}}{ transforms new documents into topic space.
+               Result is a matrix where each row is a distribution of a documents over latent topic space.}
   \item{\code{$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)}}{returns "top words"
                for a given topic (or several topics). Words for each topic can be
                sorted by probability of chance to observe word in a given topic (\code{lambda = 1}) and by

@@ -23,7 +23,7 @@ test_that("LDA, perplexity", {
 
   expect_error(model$components)
   expect_error(model$topic_word_distribution)
-  expect_error(model$doc_topic_distribution)
+  expect_null(model$doc_topic_distribution)
 
   set.seed(1)
   n_iter = 10
