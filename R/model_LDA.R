@@ -26,7 +26,26 @@ TopicModel = R6::R6Class(
     n_topics = NULL,
     vocabulary = NULL,
     doc_len = NULL,
-    doc_topic_matrix = NULL
+    doc_topic_matrix = NULL,
+
+    topic_word_distribution_with_prior = function() {
+      (self$components + private$topic_word_prior) %>% normalize("l1")
+    },
+    doc_topic_distribution_with_prior = function() {
+      if (is.null(private$doc_topic_matrix)) stop("LDA model was not fitted yet!")
+      (private$doc_topic_matrix + private$doc_topic_prior) %>% normalize("l1")
+    },
+    doc_topic_distribution = function() {
+      res = NULL
+
+      if (is.null(private$doc_topic_matrix))
+        stop("LDA model was not fitted yet!")
+      else
+        res = (private$doc_topic_matrix) %>% normalize("l1")
+
+      attributes(res) = attributes(private$doc_topic_matrix)
+      res
+    }
   ),
   public = list(
     get_top_words = function(n = 10, topic_number = 1L:private$n_topics, lambda = 1) {
@@ -51,8 +70,8 @@ TopicModel = R6::R6Class(
       if("LDAvis" %in% rownames(installed.packages())) {
         if (!is.null(self$components)) {
 
-          json = LDAvis::createJSON(phi = self$topic_word_distribution,
-                                    theta = self$doc_topic_distribution,
+          json = LDAvis::createJSON(phi = private$topic_word_distribution_with_prior(),
+                                    theta = private$doc_topic_distribution_with_prior(),
                                     doc.length = doc_len,
                                     vocab = private$vocabulary,
                                     term.frequency = colSums(self$components),
@@ -78,12 +97,7 @@ TopicModel = R6::R6Class(
     topic_word_distribution = function(value) {
       if (!missing(value)) stop("Sorry this is a read-only field")
       # self$components is topic word count
-      else (self$components + private$topic_word_prior) %>% normalize("l1")
-    },
-    doc_topic_distribution = function(value) {
-      if (!missing(value)) stop("Sorry this is a read-only field")
-      if (is.null(private$doc_topic_matrix)) stop("LDA model was not fitted yet!")
-      else (private$doc_topic_matrix + private$doc_topic_prior) %>% normalize("l1")
+      else (self$components) %>% normalize("l1")
     }
   )
 )
@@ -108,9 +122,7 @@ TopicModel = R6::R6Class(
 #' }
 #' @field topic_word_distribution distribution of words for each topic. Available after model fitting with
 #' \code{model$fit_transform()} method.
-#' @field doc_topic_distribution distribution of topics for each document. Available after model fitting with
-#' \code{model$fit_transform()} method.
-#' @field components word counts for each topic-word entry. Available after model fitting with
+#' @field components unnormalized word counts for each topic-word entry. Available after model fitting with
 #' \code{model$fit_transform()} method.
 #' @section Methods:
 #' \describe{
@@ -121,11 +133,12 @@ TopicModel = R6::R6Class(
 #'               For description of arguments see \bold{Arguments} section.}
 #'   \item{\code{$fit_transform(x, n_iter, convergence_tol = -1,
 #'                n_check_convergence = 0, progressbar = interactive())}}{fit LDA model to input matrix
-#'                \code{x} and transforms input documents to topic space -
-#'                model input matrix as a distribution over topic space}
+#'                \code{x} and transforms input documents to topic space.
+#'                Result is a matrix where each row represents corresponding document.
+#'                Values in a row form distribution over topics.}
 #'   \item{\code{$transform(x, n_iter, convergence_tol = -1,
-#'                n_check_convergence = 0, progressbar = FALSE)}}{ transforms new documents to topic space -
-#'                model input matrix as a distribution over topic space}
+#'                n_check_convergence = 0, progressbar = FALSE)}}{ transforms new documents into topic space.
+#'                Result is a matrix where each row is a distribution of a documents over latent topic space.}
 #'   \item{\code{$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)}}{returns "top words"
 #'                for a given topic (or several topics). Words for each topic can be
 #'                sorted by probability of chance to observe word in a given topic (\code{lambda = 1}) and by
@@ -215,9 +228,7 @@ LatentDirichletAllocation = R6::R6Class(
       # got topic word count distribution
       private$components_ = private$get_topic_word_count()
 
-      # doc_topic_distr = self$get_doc_topic_distribution()
-      doc_topic_distr = self$doc_topic_distribution
-      attributes(doc_topic_distr) = attributes(private$doc_topic_matrix)
+      doc_topic_distr = private$doc_topic_distribution()
       rownames(doc_topic_distr) = rownames(x)
       doc_topic_distr
     },
@@ -243,9 +254,7 @@ LatentDirichletAllocation = R6::R6Class(
       attributes(doc_topic_distr) = attributes(doc_topic_matrix)
       rownames(doc_topic_distr) = rownames(x)
       doc_topic_distr
-    },
-    # FIXME - depreciated
-    get_word_vectors = function() {.Deprecated("model$components")}
+    }
   ),
   private = list(
     #--------------------------------------------------------------
@@ -470,9 +479,7 @@ LatentDirichletAllocationDistributed = R6::R6Class(
         text2vec.environment$lda$.__enclos_env__$private$get_topic_word_count()
       }
       colnames(private$components_) = private$vocabulary
-      doc_topic_distr = self$doc_topic_distribution
-
-      attributes(doc_topic_distr) = attributes(private$doc_topic_matrix)
+      doc_topic_distr = private$doc_topic_distribution()
       rownames(doc_topic_distr) = rownames(x)
       doc_topic_distr
     }
