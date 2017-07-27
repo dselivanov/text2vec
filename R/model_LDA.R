@@ -375,6 +375,8 @@ LatentDirichletAllocation = R6::R6Class(
   )
 )
 
+# nocov start
+
 #' @rdname LatentDirichletAllocation
 #' @export
 LDA = LatentDirichletAllocation
@@ -485,3 +487,4 @@ LatentDirichletAllocationDistributed = R6::R6Class(
     }
   )
 )
+# nocov end

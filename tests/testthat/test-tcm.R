@@ -1,4 +1,5 @@
 context("tcm construction")
+doParallel::registerDoParallel(2)
 
 train_ind = 1:100
 
@@ -7,6 +8,8 @@ ids = movie_review[['id']][train_ind]
 
 tokens = txt %>% tolower %>% word_tokenizer
 it = itoken(tokens, progressbar = FALSE, ids = ids)
+
+it_par = itoken_parallel(txt, preprocessor = tolower, tokenizer = word_tokenizer, ids = ids, n_chunks = 2)
 
 test_that("tcm", {
   v = create_vocabulary(it, c(1L, 1L) )
@@ -18,6 +21,10 @@ test_that("tcm", {
   tcm = create_tcm(it, vectorizer, skip_grams_window = 1L,
                    skip_grams_window_context = "symmetric")
 
+  tcm_par = create_tcm(it_par, vectorizer, skip_grams_window = 1L,
+                   skip_grams_window_context = "symmetric")
+
+  expect_identical(Matrix::uniqTsparse(tcm), Matrix::uniqTsparse(tcm_par))
   expect_equal(tcm["you", "are"], 6)
   expect_true(Matrix::isTriangular(tcm, upper = TRUE))
 
