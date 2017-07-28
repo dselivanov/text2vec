@@ -15,6 +15,10 @@
 // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "text2vec.h"
+
+// see https://github.com/maciejkula/glove-python/pull/9#issuecomment-68058795
+// clips the cost for numerical stability
+#define CLIP_GRADIENT 100
 using namespace RcppParallel;
 using namespace Rcpp;
 using namespace std;
@@ -29,7 +33,6 @@ class GloveFit {
            size_t word_vec_size,
            float learning_rate,
            uint32_t x_max,
-           float max_cost,
            float alpha,
            float lambda,
            NumericMatrix w_i_init,
@@ -37,7 +40,7 @@ class GloveFit {
            NumericVector b_i_init,
            NumericVector b_j_init):
     vocab_size(vocab_size), word_vec_size(word_vec_size),
-    x_max(x_max), learning_rate(learning_rate), max_cost(max_cost),
+    x_max(x_max), learning_rate(learning_rate),
     alpha(alpha), lambda(lambda) {
 
     b_i.resize(vocab_size);
@@ -149,10 +152,10 @@ class GloveFit {
                                    // init with (b_i + b_j - log(x_ij))
                                    b_i[ x_irow_i ] + b_i[ x_icol_i ] - log( x_val[ i_iter_order ] ) );
         //clip cost for numerical stability
-        if (cost_inner > this->max_cost)
-          cost_inner = max_cost;
-        else if (cost_inner < -(this->max_cost))
-          cost_inner = -max_cost;
+        if (cost_inner > CLIP_GRADIENT)
+          cost_inner = CLIP_GRADIENT;
+        else if (cost_inner < -CLIP_GRADIENT)
+          cost_inner = -CLIP_GRADIENT;
 
         cost = weight * cost_inner;
 
@@ -210,10 +213,10 @@ class GloveFit {
                                    // init with (b_i + b_j - log(x_ij))
                                    b_i[ x_irow_i ] + b_j[ x_icol_i ] - log( x_val[ i_iter_order ] ) );
         //clip cost for numerical stability
-        if (cost_inner > this->max_cost)
-          cost_inner = max_cost;
-        else if (cost_inner < -(this->max_cost))
-          cost_inner = -max_cost;
+        if (cost_inner > CLIP_GRADIENT)
+          cost_inner = CLIP_GRADIENT;
+        else if (cost_inner < -CLIP_GRADIENT)
+          cost_inner = -CLIP_GRADIENT;
 
         cost = weight * cost_inner;
 
@@ -275,9 +278,6 @@ class GloveFit {
     size_t vocab_size, word_vec_size;
     uint32_t x_max;
     float learning_rate;
-    // see https://github.com/maciejkula/glove-python/pull/9#issuecomment-68058795
-    // clips the cost for numerical stability
-    float max_cost;
     // initial learning rate
     float alpha;
     // word vecrtors

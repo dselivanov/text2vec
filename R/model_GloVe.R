@@ -23,7 +23,7 @@
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
 #' glove = GlobalVectors$new(word_vectors_size, vocabulary, x_max, learning_rate = 0.15,
-#'                           clip_gradient = 10, alpha = 0.75, lambda = 0.0, shuffle = FALSE, initial = NULL)
+#'                           alpha = 0.75, lambda = 0.0, shuffle = FALSE, initial = NULL)
 #' glove$fit_transform(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
 #'               n_threads = RcppParallel::defaultNumThreads(), ...)
 #' glove$components
@@ -32,7 +32,7 @@
 #' @section Methods:
 #' \describe{
 #'   \item{\code{$new(word_vectors_size, vocabulary, x_max, learning_rate = 0.15,
-#'                     clip_gradient = 10, alpha = 0.75, lambda = 0, shuffle = FALSE,
+#'                     alpha = 0.75, lambda = 0, shuffle = FALSE,
 #'                     initial = NULL)}}{Constructor for Global vectors model.
 #'                     For description of arguments see \bold{Arguments} section.}
 #'   \item{\code{$fit_transform(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
@@ -67,9 +67,6 @@
 #'     when one of two following conditions will be satisfied: (a) we have used
 #'     all iterations, or (b) \code{cost_previous_iter / cost_current_iter - 1 <
 #'     convergence_tol}. By default perform all iterations.}
-#'  \item{clip_gradient}{\code{numeric = 10} the maximum absolute value of calculated gradient for any
-#'     single co-occurrence pair. Try to set this to a smaller value if you have
-#'     problems with numerical stability}
 #'  \item{alpha}{\code{numeric = 0.75} the alpha in weighting function formula : \eqn{f(x) = 1 if x >
 #'   x_max; else (x/x_max)^alpha}}
 #'  \item{lambda}{\code{numeric = 0.0}, L1 regularization coefficient.
@@ -115,7 +112,6 @@ GlobalVectors = R6::R6Class(
                           vocabulary,
                           x_max,
                           learning_rate = 0.15,
-                          clip_gradient = 10,
                           alpha = 0.75,
                           lambda = 0.0,
                           shuffle = FALSE,
@@ -131,7 +127,6 @@ GlobalVectors = R6::R6Class(
       private$word_vectors_size = word_vectors_size
       private$learning_rate = learning_rate
       private$x_max = x_max
-      private$clip_gradient = clip_gradient
       private$alpha = alpha
       private$lambda = lambda
 
@@ -184,7 +179,6 @@ GlobalVectors = R6::R6Class(
              word_vec_size = private$word_vectors_size,
              learning_rate = private$learning_rate,
              x_max = private$x_max,
-             max_cost = private$clip_gradient,
              alpha = private$alpha,
              lambda = private$lambda,
              grain_size = private$grain_size,
@@ -223,7 +217,7 @@ GlobalVectors = R6::R6Class(
 
         # check whether SGD is numerically correct - no NaN at C++ level
         if (is.nan(cost))
-          stop("Cost becomes NaN, try to use smaller learning_rate or smaller clip_gradient.")
+          stop("Cost becomes NaN, try to use smaller learning_rate.")
         if (cost / n_nnz / 2 > 0.5)
           warning("Cost is too big, probably something goes wrong... try smaller learning rate", immediate. = TRUE)
 
@@ -292,7 +286,6 @@ GlobalVectors = R6::R6Class(
     vocab_terms = NULL,
     word_vectors_size = NULL,
     initial = NULL,
-    clip_gradient = NULL,
     alpha = NULL,
     x_max = NULL,
     learning_rate = NULL,
@@ -341,9 +334,6 @@ GloVe = GlobalVectors
 #' @param grain_size I do not recommend adjusting this paramenter. This is the
 #'   grain_size for \code{RcppParallel::parallelReduce}. For details, see
 #'   \url{http://rcppcore.github.io/RcppParallel/#grain-size}.
-#' @param clip_gradient the maximum absolute value of calculated gradient for any
-#'   single co-occurrence pair. Try to set this to a smaller value if you have
-#'   problems with numerical stability.
 #' @param alpha the alpha in weighting function formula : \eqn{f(x) = 1 if x >
 #'   x_max; else (x/x_max)^alpha}
 #' @param ... arguments passed to other methods (not used at the moment).
@@ -357,7 +347,6 @@ glove = function(tcm,
                  learning_rate = 0.05,
                  convergence_threshold = -1.0,
                  grain_size =  1e5L,
-                 clip_gradient = 10.0,
                  alpha = 0.75,
                  ...) {
   .Deprecated("GloVe")
@@ -370,7 +359,6 @@ glove = function(tcm,
                        vocabulary = rownames(tcm),
                        x_max = x_max,
                        learning_rate = learning_rate,
-                       clip_gradient = clip_gradient,
                        alpha = alpha,
                        lambda = 0.0,
                        shuffle = !is.na(shuffle_seed),

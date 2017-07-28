@@ -119,7 +119,6 @@ public:
              as<size_t>(params["word_vec_size"]),
              as<float>(params["learning_rate"]),
              as<uint32_t>(params["x_max"]),
-             as<float>(params["max_cost"]),
              as<float>(params["alpha"]),
              as<float>(params["lambda"]),
              as<List>(params["initial"])["w_i"],

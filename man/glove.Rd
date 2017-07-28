@@ -6,8 +6,7 @@
 \usage{
 glove(tcm, vocabulary_size = nrow(tcm), word_vectors_size, x_max, num_iters,
   shuffle_seed = NA_integer_, learning_rate = 0.05,
-  convergence_threshold = -1, grain_size = 100000L, clip_gradient = 10,
-  alpha = 0.75, ...)
+  convergence_threshold = -1, grain_size = 100000L, alpha = 0.75, ...)
 }
 \arguments{
 \item{tcm}{an object which represents a term-co-occurrence matrix, which is
@@ -45,10 +44,6 @@ convergence_threshold}.}
 \item{grain_size}{I do not recommend adjusting this paramenter. This is the
 grain_size for \code{RcppParallel::parallelReduce}. For details, see
 \url{http://rcppcore.github.io/RcppParallel/#grain-size}.}
-
-\item{clip_gradient}{the maximum absolute value of calculated gradient for any
-single co-occurrence pair. Try to set this to a smaller value if you have
-problems with numerical stability.}
 
 \item{alpha}{the alpha in weighting function formula : \eqn{f(x) = 1 if x >
 x_max; else (x/x_max)^alpha}}

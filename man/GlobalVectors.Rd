@@ -37,7 +37,7 @@ grain_size for \code{RcppParallel::parallelReduce}. For details, see
 For usage details see \bold{Methods, Arguments and Examples} sections.
 \preformatted{
 glove = GlobalVectors$new(word_vectors_size, vocabulary, x_max, learning_rate = 0.15,
-                          clip_gradient = 10, alpha = 0.75, lambda = 0.0, shuffle = FALSE, initial = NULL)
+                          alpha = 0.75, lambda = 0.0, shuffle = FALSE, initial = NULL)
 glove$fit_transform(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
               n_threads = RcppParallel::defaultNumThreads(), ...)
 glove$components
@@ -49,7 +49,7 @@ glove$dump()
 
 \describe{
   \item{\code{$new(word_vectors_size, vocabulary, x_max, learning_rate = 0.15,
-                    clip_gradient = 10, alpha = 0.75, lambda = 0, shuffle = FALSE,
+                    alpha = 0.75, lambda = 0, shuffle = FALSE,
                     initial = NULL)}}{Constructor for Global vectors model.
                     For description of arguments see \bold{Arguments} section.}
   \item{\code{$fit_transform(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
@@ -77,9 +77,6 @@ glove$dump()
     when one of two following conditions will be satisfied: (a) we have used
     all iterations, or (b) \code{cost_previous_iter / cost_current_iter - 1 <
     convergence_tol}. By default perform all iterations.}
- \item{clip_gradient}{\code{numeric = 10} the maximum absolute value of calculated gradient for any
-    single co-occurrence pair. Try to set this to a smaller value if you have
-    problems with numerical stability}
  \item{alpha}{\code{numeric = 0.75} the alpha in weighting function formula : \eqn{f(x) = 1 if x >
   x_max; else (x/x_max)^alpha}}
  \item{lambda}{\code{numeric = 0.0}, L1 regularization coefficient.
