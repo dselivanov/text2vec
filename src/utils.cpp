@@ -84,7 +84,7 @@ vector<string> generate_ngrams(const std::vector< std::string> &terms,
   for(size_t j = 0; j < len; j ++ ) {
     k = 1;
     j_max_observed = j;
-    while (k <= ngram_max && j_max_observed < len) {
+    while (k <= ngram_max && j_max_observed < terms_filtered.size()) {
 
       if( k == 1) {
         k_gram = terms_filtered[j_max_observed];
