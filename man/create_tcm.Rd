@@ -34,7 +34,7 @@ Value of \code{0L} means to not construct the TCM.}
 \item{skip_grams_window_context}{one of \code{c("symmetric", "right", "left")} -
 which context words to use when count co-occurence statistics.}
 
-\item{weights}{weights for context/distant words during co-occurence statistics calulation.
+\item{weights}{weights for context/distant words during co-occurence statistics calculation.
 By default we are setting \code{weight = 1 / distance_from_current_word}.
 Should have length equal to skip_grams_window.
 \code{"symmetric"} by default - take into account \code{skip_grams_window} left and right.}
@@ -50,7 +50,7 @@ This is a function for constructing a
 term-co-occurrence matrix(TCM). TCM matrix usually used with \link{GloVe} word embedding model.
 }
 \details{
-If a parallel backend is registered, it will onstruct the TCM in multiple threads.
+If a parallel backend is registered, it will construct the TCM in multiple threads.
 The user should keep in mind that he/she should split data and provide a list
 of \link{itoken} iterators. Each element of \code{it} will be handled
 in a separate thread combined at the end of processing.

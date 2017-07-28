@@ -103,7 +103,7 @@ LatentSemanticAnalysis = R6::R6Class(
         t(solve(lhs, rhs))
       }
       else
-        stop("Fit the model first woth model$fit_transofrm()!")
+        stop("Fit the model first woth model$fit_transform()!")
     },
     active = list(
       # make components read only via active bindings

@@ -67,7 +67,7 @@ This function collects unique terms and corresponding statistics.
 \itemize{
 \item \code{character}: creates \code{text2vec_vocabulary} from predefined
 character vector. Terms will be inserted \bold{as is}, without any checks
-(ngrams numner, ngram delimiters, etc.).
+(ngrams number, ngram delimiters, etc.).
 
 \item \code{itoken}: collects unique terms and corresponding statistics from object.
 

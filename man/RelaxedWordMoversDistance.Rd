@@ -13,7 +13,7 @@ RWMD
 }
 \description{
 Relaxed word movers distance tries to measure distance between documents by
-calculating how hard is to transofrm words from first document into words from second document
+calculating how hard is to transform words from first document into words from second document
 and vice versa. For more detail see original article: \url{http://mkusner.github.io/publications/WMD.pdf}.
 }
 \section{Fields}{

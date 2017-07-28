@@ -36,13 +36,13 @@ colloc$collocation_stat
 \describe{
   \item{\code{$new(vocabulary = NULL, collocation_count_min = 50, sep = "_")}}{Constructor for Collocations model.For description of arguments see \bold{Arguments} section.}
   \item{\code{$fit(it, n_iter = 1, ...)}}{fit Collocations model to input iterator \code{it}.
-  Iterating over input iterator \code{it} \code{n_iter} times, so hieararchically can learn multi-word phrases.
+  Iterating over input iterator \code{it} \code{n_iter} times, so hierarchically can learn multi-word phrases.
   Invisibly returns \code{collocation_stat}.}
   \item{\code{$partial_fit(it, ...)}}{iterates once over data and learns collocations. Invisibly returns \code{collocation_stat}.
   Workhorse for \code{$fit()}}.
   \item{\code{$transform(it)}}{transforms input iterator using learned collocations model.
   Result of the transformation is new \code{itoken} or \code{itoken_parallel} iterator which will
-  produce tokens with phraeses collapsed into single token.}
+  produce tokens with phrases collapsed into single token.}
   \item{\code{$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf)}}{
   filter out non-relevant phrases with low score. User can do it directly by modifying \code{collocation_stat} object.}
 }

@@ -17,19 +17,19 @@ AdaGrad with \code{$fit_transform()} method.
 \section{Fields}{
 
 \describe{
-\item{\code{components}}{represensts context word vectors}
+\item{\code{components}}{represents context word vectors}
 
 \item{\code{n_dump_every}}{\code{integer = 0L} by default. Defines frequency of dumping word vectors. For example user
 can ask to dump word vectors each 5 iteration.}
 
 \item{\code{shuffle}}{\code{logical = FALSE} by default. Defines shuffling before each SGD iteration.
-Generelly shuffling is a good idea for stochastic-gradient descent, but
+Generally shuffling is a good idea for stochastic-gradient descent, but
 from my experience in this particular case it does not improve convergence.}
 
 \item{\code{grain_size}}{\code{integer = 1e5L} by default. This is the
 grain_size for \code{RcppParallel::parallelReduce}. For details, see
 \url{http://rcppcore.github.io/RcppParallel/#grain-size}.
-\bold{We don't recommend to change this paramenter.}}
+\bold{We don't recommend to change this parameter.}}
 }}
 
 \section{Usage}{
@@ -65,7 +65,7 @@ glove$dump()
  \item{glove}{A \code{GloVe} object}
  \item{x}{An input term co-occurence matrix. Preferably in \code{dgTMatrix} format}
  \item{n_iter}{\code{integer} number of SGD iterations}
- \item{word_vectors_size}{desired dimenson for word vectors}
+ \item{word_vectors_size}{desired dimension for word vectors}
  \item{vocabulary}{\code{character} vector or instance of
    \code{text2vec_vocabulary} class. Each word should correspond to dimension
    of co-occurence matrix.}
@@ -80,7 +80,7 @@ glove$dump()
  \item{alpha}{\code{numeric = 0.75} the alpha in weighting function formula : \eqn{f(x) = 1 if x >
   x_max; else (x/x_max)^alpha}}
  \item{lambda}{\code{numeric = 0.0}, L1 regularization coefficient.
-   \code{0} = vanilla GloVe, corrsesponds to original paper and implementation.
+   \code{0} = vanilla GloVe, corresponds to original paper and implementation.
    \code{lambda >0} corresponds to text2vec new feature and different SGD algorithm. From our experience
    small lambda (like \code{lambda = 1e-5}) usually produces better results that vanilla GloVe
    on small corpuses}

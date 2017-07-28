@@ -37,7 +37,7 @@
 #' @section Arguments:
 #' \describe{
 #'  \item{tfidf}{A \code{TfIdf} object}
-#'  \item{x}{An input term-cooccurence matrix. Preferably in \code{dgCMatrix} format}
+#'  \item{x}{An input term-co-occurence matrix. Preferably in \code{dgCMatrix} format}
 #'  \item{smooth_idf}{\code{TRUE} smooth IDF weights by adding one to document
 #'   frequencies, as if an extra document was seen containing every term in the
 #'   collection exactly once. This prevents division by zero.}

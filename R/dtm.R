@@ -37,7 +37,7 @@ get_dtm = function(corpus_ptr) {
 #' @description This is a high-level function for creating a document-term
 #'   matrix.
 #' @details If a parallel backend is registered and first argument is a list of \code{itoken},
-#' itereators, fucntion will construct the DTM in multiple threads.
+#' iterators, function will construct the DTM in multiple threads.
 #' User should keep in mind that he or she should split the data itself and provide a list of
 #' \link{itoken} iterators. Each element of \code{it} will be handled in separate
 #' thread and combined at the end of processing.

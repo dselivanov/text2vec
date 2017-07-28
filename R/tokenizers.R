@@ -26,7 +26,7 @@
 #' @param xptr \code{logical} tokenize at C++ level - could speed-up by 15-50\%.
 #' @param sep \code{character}, \code{nchar(sep)} = 1 - split strings by this character.
 #' @param ... other parameters to \link{strsplit} function, which is used under the hood.
-#' @return \code{list} of \code{character} vectors. Each element of list containts vector of tokens.
+#' @return \code{list} of \code{character} vectors. Each element of list contains vector of tokens.
 #' @examples
 #' doc = c("first  second", "bla, bla, blaa")
 #' # split by words

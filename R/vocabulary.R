@@ -69,7 +69,7 @@ vocabulary = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
 }
 #' @describeIn create_vocabulary creates \code{text2vec_vocabulary} from predefined
 #' character vector. Terms will be inserted \bold{as is}, without any checks
-#' (ngrams numner, ngram delimiters, etc.).
+#' (ngrams number, ngram delimiters, etc.).
 #' @export
 create_vocabulary.character = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
                                  stopwords = character(0), sep_ngram = "_") {

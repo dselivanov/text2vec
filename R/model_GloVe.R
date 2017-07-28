@@ -40,22 +40,22 @@
 #'   \item{\code{$dump()}}{get model internals - word vectors and biases for main and context words}
 #'   \item{\code{$get_history}}{get history of SGD costs and word vectors (if \code{n_dump_every > 0)}}
 #'}
-#' @field components represensts context word vectors
+#' @field components represents context word vectors
 #' @field n_dump_every \code{integer = 0L} by default. Defines frequency of dumping word vectors. For example user
 #' can ask to dump word vectors each 5 iteration.
 #' @field shuffle \code{logical = FALSE} by default. Defines shuffling before each SGD iteration.
-#'   Generelly shuffling is a good idea for stochastic-gradient descent, but
+#'   Generally shuffling is a good idea for stochastic-gradient descent, but
 #'   from my experience in this particular case it does not improve convergence.
 #' @field grain_size \code{integer = 1e5L} by default. This is the
 #'   grain_size for \code{RcppParallel::parallelReduce}. For details, see
 #'   \url{http://rcppcore.github.io/RcppParallel/#grain-size}.
-#'   \bold{We don't recommend to change this paramenter.}
+#'   \bold{We don't recommend to change this parameter.}
 #' @section Arguments:
 #' \describe{
 #'  \item{glove}{A \code{GloVe} object}
 #'  \item{x}{An input term co-occurence matrix. Preferably in \code{dgTMatrix} format}
 #'  \item{n_iter}{\code{integer} number of SGD iterations}
-#'  \item{word_vectors_size}{desired dimenson for word vectors}
+#'  \item{word_vectors_size}{desired dimension for word vectors}
 #'  \item{vocabulary}{\code{character} vector or instance of
 #'    \code{text2vec_vocabulary} class. Each word should correspond to dimension
 #'    of co-occurence matrix.}
@@ -70,7 +70,7 @@
 #'  \item{alpha}{\code{numeric = 0.75} the alpha in weighting function formula : \eqn{f(x) = 1 if x >
 #'   x_max; else (x/x_max)^alpha}}
 #'  \item{lambda}{\code{numeric = 0.0}, L1 regularization coefficient.
-#'    \code{0} = vanilla GloVe, corrsesponds to original paper and implementation.
+#'    \code{0} = vanilla GloVe, corresponds to original paper and implementation.
 #'    \code{lambda >0} corresponds to text2vec new feature and different SGD algorithm. From our experience
 #'    small lambda (like \code{lambda = 1e-5}) usually produces better results that vanilla GloVe
 #'    on small corpuses}
@@ -187,7 +187,7 @@ GlobalVectors = R6::R6Class(
       # init C++ class which actually perform fitting
       private$glove_fitter = cpp_glove_create(glove_params)
       private$cost_history = numeric(0)
-      # number of non-zero elements in cooccurence matrix
+      # number of non-zero elements in co-occurence matrix
       n_nnz = length(x@i)
       # create list for saving word vectors if need to dump between iterations
       if (self$n_dump_every > 0) {
@@ -203,7 +203,7 @@ GlobalVectors = R6::R6Class(
       # length(iter_order)==0 will be checked at C++ level
       iter_order = integer(0)
 
-      # perform iterations over input cooccurence matrix
+      # perform iterations over input co-occurence matrix
       i = 1
       while (i <= n_iter) {
         # if shuffling is required, perform reordering at each iteration
@@ -312,7 +312,7 @@ GloVe = GlobalVectors
 #'   to a \code{dgTMatrix}) are supported. In future releases we will add
 #'   support for out-of-core learning and streaming a TCM from disk.
 #' @param vocabulary_size number of words in in the term-co-occurrence matrix
-#' @param word_vectors_size desired dimenson for word vectors
+#' @param word_vectors_size desired dimension for word vectors
 #' @param x_max maximum number of co-occurrences to use in the weighting
 #'   function. See the GloVe paper for details:
 #'   \url{http://nlp.stanford.edu/pubs/glove.pdf}.
@@ -321,7 +321,7 @@ GloVe = GlobalVectors
 #'   shuffling off. A seed defines shuffling before each SGD iteration.
 #'   Parameter only controls shuffling before each SGD iteration. Result still
 #'   will be unpredictable (because of Hogwild style async SGD)!
-#'   Generelly shuffling is a good idea for stochastic-gradient descent, but
+#'   Generally shuffling is a good idea for stochastic-gradient descent, but
 #'   from my experience in this particular case it does not improve convergence.
 #'   By default there is no shuffling. Please report if you find that shuffling
 #'   improves your score.
@@ -331,7 +331,7 @@ GloVe = GlobalVectors
 #'   when one of two following conditions will be satisfied: (a) we have used
 #'   all iterations, or (b) \code{cost_previous_iter / cost_current_iter - 1 <
 #'   convergence_threshold}.
-#' @param grain_size I do not recommend adjusting this paramenter. This is the
+#' @param grain_size I do not recommend adjusting this parameter. This is the
 #'   grain_size for \code{RcppParallel::parallelReduce}. For details, see
 #'   \url{http://rcppcore.github.io/RcppParallel/#grain-size}.
 #' @param alpha the alpha in weighting function formula : \eqn{f(x) = 1 if x >

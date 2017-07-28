@@ -68,5 +68,5 @@ First CRAN release of text2vec.
     * Hash vectorizer (based on digest murmurhash3)
     * Vocabulary vectorizer
 * GloVe algorithm word embeddings.
-    * Fast term-cooccurence matrix factorization via parallel async AdaGrad.
+    * Fast term-co-occurence matrix factorization via parallel async AdaGrad.
 * All core functions written in C++.

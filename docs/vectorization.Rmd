@@ -51,7 +51,7 @@ To represent documents in vector space, we first have to create mappings from te
 Let's first create a vocabulary-based DTM. Here we collect unique terms from all documents and mark each of them with a unique ID using the `create_vocabulary()` function. We use an iterator to create the vocabulary.
 
 ```{r, vocab-iterator, message=FALSE}
-# define preprocessing function and tokenization fucntion
+# define preprocessing function and tokenization function
 prep_fun = tolower
 tok_fun = word_tokenizer
 

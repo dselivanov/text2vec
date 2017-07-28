@@ -30,7 +30,7 @@ text2vec_dist = R6::R6Class(
 #' @name RelaxedWordMoversDistance
 #' @title Creates model which can be used for calculation of "relaxed word movers distance".
 #' @description Relaxed word movers distance tries to measure distance between documents by
-#' calculating how hard is to transofrm words from first document into words from second document
+#' calculating how hard is to transform words from first document into words from second document
 #' and vice versa. For more detail see original article: \url{http://mkusner.github.io/publications/WMD.pdf}.
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.

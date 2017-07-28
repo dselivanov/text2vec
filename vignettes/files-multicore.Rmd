@@ -136,7 +136,7 @@ dtm = create_dtm(it_token_par, vectorizer = v_vectorizer)
 Processing files from disk is also easy with `ifiles_parallel` and `itoken_parallel`:
 
 ```{r, warning=FALSE, message=FALSE, eval=FALSE}
-N_WORKERS = 4
+N_WORKERS = 2
 library(doParallel)
 # register parallel backend
 registerDoParallel(N_WORKERS)

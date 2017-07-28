@@ -28,7 +28,7 @@ space_tokenizer(strings, sep = " ", xptr = FALSE, ...)
 \item{xptr}{\code{logical} tokenize at C++ level - could speed-up by 15-50\%.}
 }
 \value{
-\code{list} of \code{character} vectors. Each element of list containts vector of tokens.
+\code{list} of \code{character} vectors. Each element of list contains vector of tokens.
 }
 \description{
 very thin wrappers around \code{base} regular expressions.

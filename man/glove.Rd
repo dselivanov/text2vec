@@ -16,7 +16,7 @@ support for out-of-core learning and streaming a TCM from disk.}
 
 \item{vocabulary_size}{number of words in in the term-co-occurrence matrix}
 
-\item{word_vectors_size}{desired dimenson for word vectors}
+\item{word_vectors_size}{desired dimension for word vectors}
 
 \item{x_max}{maximum number of co-occurrences to use in the weighting
 function. See the GloVe paper for details:
@@ -28,7 +28,7 @@ function. See the GloVe paper for details:
 shuffling off. A seed defines shuffling before each SGD iteration.
 Parameter only controls shuffling before each SGD iteration. Result still
 will be unpredictable (because of Hogwild style async SGD)!
-Generelly shuffling is a good idea for stochastic-gradient descent, but
+Generally shuffling is a good idea for stochastic-gradient descent, but
 from my experience in this particular case it does not improve convergence.
 By default there is no shuffling. Please report if you find that shuffling
 improves your score.}
@@ -41,7 +41,7 @@ when one of two following conditions will be satisfied: (a) we have used
 all iterations, or (b) \code{cost_previous_iter / cost_current_iter - 1 <
 convergence_threshold}.}
 
-\item{grain_size}{I do not recommend adjusting this paramenter. This is the
+\item{grain_size}{I do not recommend adjusting this parameter. This is the
 grain_size for \code{RcppParallel::parallelReduce}. For details, see
 \url{http://rcppcore.github.io/RcppParallel/#grain-size}.}
 
