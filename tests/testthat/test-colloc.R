@@ -1,3 +1,5 @@
+futile.logger::flog.threshold(futile.logger::FATAL)
+
 context("collocations")
 
 preprocessor = function(x) {

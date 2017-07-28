@@ -1,4 +1,3 @@
-futile.logger::flog.threshold(futile.logger::FATAL)
 context("distances")
 ind = 1:100
 m1 = matrix(1:15, nrow = 5)
