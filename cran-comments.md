@@ -1,6 +1,9 @@
 ## Release summary
 
-* New major release.
+* This is resubmission. I removed usage of unexported `print.data.table` as was asked by CRAN team.
+* Not sure how to reduce checking time 
+    - on my machine cheking takes ~1 min
+    - package uses a lot of compiled code (heavy tempated libraries like RcppParallel, Rcpp, sparsepp)
 
 ## Test environments
 
@@ -10,18 +13,13 @@
 
 ## R CMD check results
 
-commit 20f3b63
+commit 19ee0ff1
 
-0 ERRORs | 0 WARNING | 4 NOTEs
+0 ERRORs | 0 WARNING | 3 NOTEs
 
 * checking installed package size ... NOTE. 
     - Data was not touched since previous release. Vignettes were improved, 
     but have same size as in previous release.
-* Unexported object imported by a ':::' call: ‘data.table:::print.data.table’
-    - I use `data.table::print` for pretty printing of `data.farmes`. 
-    I can convert my internal `data.frame` into `data.table` but don't want do that 
-    because of performance penalties and copying of attributes back and forth.
-    `data.table:::print.data.table` is very stable function.
 * checking for GNU extensions in Makefiles ... NOTE
     - GNU make needed for RcppParallel
 * checking compiled code ... NOTE: *Found ‘___stderrp’, possibly from ‘stderr’ (C)*

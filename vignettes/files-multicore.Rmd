@@ -115,8 +115,8 @@ The user must do two things manually to take advantage of a multicore machine:
 
 ## Data in memory
 
-```{R}
-N_WORKERS = 4
+```{r, eval=FALSE}
+N_WORKERS = 2
 library(doParallel)
 # register parallel backend
 registerDoParallel(N_WORKERS)
