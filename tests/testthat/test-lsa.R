@@ -3,9 +3,10 @@ N = 100
 n_topics = 20
 train_ind = 1:N
 
-txt = movie_review[['review']][train_ind] %>% tolower %>% word_tokenizer
+tokens = tolower(movie_review[['review']][train_ind])
+tokens = word_tokenizer(tokens)
 ids = movie_review[['id']][train_ind]
-it = itoken(txt, ids = ids, progressbar = FALSE)
+it = itoken(tokens, ids = ids, progressbar = FALSE)
 
 vocab = create_vocabulary(it) %>%
   prune_vocabulary(term_count_min = 5, doc_proportion_max = 0.5)

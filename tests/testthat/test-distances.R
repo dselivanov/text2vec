@@ -4,9 +4,12 @@ m1 = matrix(1:15, nrow = 5)
 m2 = matrix(1:12, nrow = 4)
 tol = 1e-5
 
-tokens = movie_review$review[ind] %>% tolower %>% word_tokenizer
+tokens = tolower(movie_review$review[ind])
+tokens = word_tokenizer(tokens)
+
 it = itoken(tokens, progressbar = FALSE)
-v = create_vocabulary(it) %>% prune_vocabulary(term_count_min = 3)
+v = create_vocabulary(it)
+v = prune_vocabulary(v, term_count_min = 3)
 # vv = vocab_vectorizer(v)
 #
 # temp = vv(iterator = it, grow_dtm = T, skip_grams_window_context = "symmetric", window_size = 0)

@@ -57,15 +57,14 @@ test_that("rbind_dgTMatrix ", {
 })
 test_that("as.lda_c ", {
   K = 100
-  train_tokens = movie_review$review[1:K] %>%
-    tolower %>%
-    word_tokenizer
+  train_tokens = tolower(movie_review$review[1:K])
+  train_tokens =  word_tokenizer(train_tokens)
 
   it_train = itoken(train_tokens,
                     ids = movie_review$id[1:K])
 
-  vocab = create_vocabulary(it_train) %>%
-    prune_vocabulary(term_count_min = 10, doc_proportion_max = 0.1)
+  vocab = create_vocabulary(it_train)
+  vocab = prune_vocabulary(vocab, term_count_min = 10, doc_proportion_max = 0.1)
   dtm = create_dtm(it_train, vocab_vectorizer(vocab))
   rs = Matrix::rowSums(sign(dtm))
   expect_equal(sum(rs == 0) , 2)

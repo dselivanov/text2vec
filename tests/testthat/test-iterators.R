@@ -71,25 +71,11 @@ test_that("itoken character parallel", {
 })
 
 ########################################
-# test input empty iterators
-########################################
-# test_that("empty input iterators", {
-#   tokens = movie_review[seq_len(N),]$review %>% tolower %>% strsplit(' ', T)
-#   it = itoken(tokens)
-#   v = create_vocabulary(it)
-#   expect_equal(nrow(v), 5949L)
-#   expect_error(create_vocabulary(it), "vocabulary has no elements. Did you miss to reinitialise iterator over tokens?")
-#   expect_error(create_dtm(it, vocab_vectorizer(v)), "dtm has 0 rows. Did you miss to reinitialise iterator over tokens?")
-#   expect_error(create_dtm(it, hash_vectorizer()), "dtm has 0 rows. Did you miss to reinitialise iterator over tokens?")
-#   expect_error(create_tcm(it, vocab_vectorizer(v, grow_dtm = F, skip_grams_window = 2)), "tcm has 0 rows. Did you miss to reinitialise iterator over tokens?")
-# })
-
-
-########################################
 # test that iterators are immutable
 ########################################
 test_that("immutable input iterators", {
-  tokens = movie_review[seq_len(N),]$review %>% tolower %>% space_tokenizer
+  tokens = tolower(movie_review[seq_len(N),]$review)
+  tokens = space_tokenizer(tokens)
   it = itoken(tokens, progressbar = FALSE)
   v = create_vocabulary(it)
   dtm1 = create_dtm(it, vocab_vectorizer(v))

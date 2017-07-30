@@ -2,170 +2,170 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 create_xptr_unordered_set <- function(x) {
-    .Call(text2vec_create_xptr_unordered_set, x)
+    .Call(`_text2vec_create_xptr_unordered_set`, x)
 }
 
 collapse_collocations_cpp <- function(docs, xptr_unordered_set, r_sep) {
-    .Call(text2vec_collapse_collocations_cpp, docs, xptr_unordered_set, r_sep)
+    .Call(`_text2vec_collapse_collocations_cpp`, docs, xptr_unordered_set, r_sep)
 }
 
 cpp_glove_create <- function(params) {
-    .Call(text2vec_cpp_glove_create, params)
+    .Call(`_text2vec_cpp_glove_create`, params)
 }
 
 cpp_glove_get_word_vectors <- function(ptr) {
-    .Call(text2vec_cpp_glove_get_word_vectors, ptr)
+    .Call(`_text2vec_cpp_glove_get_word_vectors`, ptr)
 }
 
 cpp_glove_set_cost_zero <- function(ptr) {
-    invisible(.Call(text2vec_cpp_glove_set_cost_zero, ptr))
+    invisible(.Call(`_text2vec_cpp_glove_set_cost_zero`, ptr))
 }
 
 cpp_glove_partial_fit <- function(ptr, x_irow, x_icol, x_val, iter_order) {
-    .Call(text2vec_cpp_glove_partial_fit, ptr, x_irow, x_icol, x_val, iter_order)
+    .Call(`_text2vec_cpp_glove_partial_fit`, ptr, x_irow, x_icol, x_val, iter_order)
 }
 
 cpp_glove_get_sparsity_level <- function(ptr) {
-    .Call(text2vec_cpp_glove_get_sparsity_level, ptr)
+    .Call(`_text2vec_cpp_glove_get_sparsity_level`, ptr)
 }
 
 cpp_glove_dump_model <- function(ptr) {
-    .Call(text2vec_cpp_glove_dump_model, ptr)
+    .Call(`_text2vec_cpp_glove_dump_model`, ptr)
 }
 
 hasher <- function(x, hash_size) {
-    .Call(text2vec_hasher, x, hash_size)
+    .Call(`_text2vec_hasher`, x, hash_size)
 }
 
 cpp_hash_corpus_create <- function(size, n_min, n_max, use_signed_hash) {
-    .Call(text2vec_cpp_hash_corpus_create, size, n_min, n_max, use_signed_hash)
+    .Call(`_text2vec_cpp_hash_corpus_create`, size, n_min, n_max, use_signed_hash)
 }
 
 cpp_hash_corpus_insert_document_batch <- function(ptr, docs_batch, grow_dtm, context, window_size, weights) {
-    invisible(.Call(text2vec_cpp_hash_corpus_insert_document_batch, ptr, docs_batch, grow_dtm, context, window_size, weights))
+    invisible(.Call(`_text2vec_cpp_hash_corpus_insert_document_batch`, ptr, docs_batch, grow_dtm, context, window_size, weights))
 }
 
 cpp_hash_corpus_get_tcm <- function(ptr) {
-    .Call(text2vec_cpp_hash_corpus_get_tcm, ptr)
+    .Call(`_text2vec_cpp_hash_corpus_get_tcm`, ptr)
 }
 
 cpp_hash_corpus_get_dtm <- function(ptr) {
-    .Call(text2vec_cpp_hash_corpus_get_dtm, ptr)
+    .Call(`_text2vec_cpp_hash_corpus_get_dtm`, ptr)
 }
 
 colMins <- function(x) {
-    .Call(text2vec_colMins, x)
+    .Call(`_text2vec_colMins`, x)
 }
 
 colMaxs <- function(x) {
-    .Call(text2vec_colMaxs, x)
+    .Call(`_text2vec_colMaxs`, x)
 }
 
 rowMins <- function(x) {
-    .Call(text2vec_rowMins, x)
+    .Call(`_text2vec_rowMins`, x)
 }
 
 rowMaxs <- function(x) {
-    .Call(text2vec_rowMaxs, x)
+    .Call(`_text2vec_rowMaxs`, x)
 }
 
 euclidean_dist <- function(x, y) {
-    .Call(text2vec_euclidean_dist, x, y)
+    .Call(`_text2vec_euclidean_dist`, x, y)
 }
 
 malloc_trim <- function(keep) {
-    .Call(text2vec_malloc_trim, keep)
+    .Call(`_text2vec_malloc_trim`, keep)
 }
 
 is_invalid_ptr <- function(sexp_ptr) {
-    .Call(text2vec_is_invalid_ptr, sexp_ptr)
+    .Call(`_text2vec_is_invalid_ptr`, sexp_ptr)
 }
 
 cpp_fixed_char_tokenizer <- function(x, delim) {
-    .Call(text2vec_cpp_fixed_char_tokenizer, x, delim)
+    .Call(`_text2vec_cpp_fixed_char_tokenizer`, x, delim)
 }
 
 cpp_vocabulary_corpus_create <- function(vocab_R, n_min, n_max, stopwords_R, delim) {
-    .Call(text2vec_cpp_vocabulary_corpus_create, vocab_R, n_min, n_max, stopwords_R, delim)
+    .Call(`_text2vec_cpp_vocabulary_corpus_create`, vocab_R, n_min, n_max, stopwords_R, delim)
 }
 
 cpp_vocabulary_corpus_insert_document_batch <- function(ptr, docs_batch, grow_dtm, context, window_size, weights) {
-    invisible(.Call(text2vec_cpp_vocabulary_corpus_insert_document_batch, ptr, docs_batch, grow_dtm, context, window_size, weights))
+    invisible(.Call(`_text2vec_cpp_vocabulary_corpus_insert_document_batch`, ptr, docs_batch, grow_dtm, context, window_size, weights))
 }
 
 cpp_vocabulary_corpus_get_tcm <- function(ptr) {
-    .Call(text2vec_cpp_vocabulary_corpus_get_tcm, ptr)
+    .Call(`_text2vec_cpp_vocabulary_corpus_get_tcm`, ptr)
 }
 
 cpp_vocabulary_corpus_get_dtm <- function(ptr) {
-    .Call(text2vec_cpp_vocabulary_corpus_get_dtm, ptr)
+    .Call(`_text2vec_cpp_vocabulary_corpus_get_dtm`, ptr)
 }
 
 cpp_vocab_create <- function(ngram_min, ngram_max, stopwords_R, delim) {
-    .Call(text2vec_cpp_vocab_create, ngram_min, ngram_max, stopwords_R, delim)
+    .Call(`_text2vec_cpp_vocab_create`, ngram_min, ngram_max, stopwords_R, delim)
 }
 
 cpp_vocabulary_insert_document_batch <- function(ptr, document_batch) {
-    invisible(.Call(text2vec_cpp_vocabulary_insert_document_batch, ptr, document_batch))
+    invisible(.Call(`_text2vec_cpp_vocabulary_insert_document_batch`, ptr, document_batch))
 }
 
 cpp_vocabulary_insert_document_batch_xptr <- function(ptr, document_batch_ptr) {
-    invisible(.Call(text2vec_cpp_vocabulary_insert_document_batch_xptr, ptr, document_batch_ptr))
+    invisible(.Call(`_text2vec_cpp_vocabulary_insert_document_batch_xptr`, ptr, document_batch_ptr))
 }
 
 cpp_get_vocab_statistics <- function(ptr) {
-    .Call(text2vec_cpp_get_vocab_statistics, ptr)
+    .Call(`_text2vec_cpp_get_vocab_statistics`, ptr)
 }
 
 cpp_get_document_count <- function(ptr) {
-    .Call(text2vec_cpp_get_document_count, ptr)
+    .Call(`_text2vec_cpp_get_document_count`, ptr)
 }
 
 warplda_create <- function(n_topics, doc_topic_prior, topic_word_prior) {
-    .Call(text2vec_warplda_create, n_topics, doc_topic_prior, topic_word_prior)
+    .Call(`_text2vec_warplda_create`, n_topics, doc_topic_prior, topic_word_prior)
 }
 
 warplda_init_dtm <- function(ptr, m, z_old, z_new) {
-    invisible(.Call(text2vec_warplda_init_dtm, ptr, m, z_old, z_new))
+    invisible(.Call(`_text2vec_warplda_init_dtm`, ptr, m, z_old, z_new))
 }
 
 warplda_set_topic_word_count <- function(ptr, topic_word_count) {
-    invisible(.Call(text2vec_warplda_set_topic_word_count, ptr, topic_word_count))
+    invisible(.Call(`_text2vec_warplda_set_topic_word_count`, ptr, topic_word_count))
 }
 
 run_one_iter_doc <- function(ptr, update_topics = TRUE) {
-    invisible(.Call(text2vec_run_one_iter_doc, ptr, update_topics))
+    invisible(.Call(`_text2vec_run_one_iter_doc`, ptr, update_topics))
 }
 
 run_one_iter_word <- function(ptr, update_topics = TRUE) {
-    invisible(.Call(text2vec_run_one_iter_word, ptr, update_topics))
+    invisible(.Call(`_text2vec_run_one_iter_word`, ptr, update_topics))
 }
 
 warplda_pseudo_loglikelihood <- function(ptr) {
-    .Call(text2vec_warplda_pseudo_loglikelihood, ptr)
+    .Call(`_text2vec_warplda_pseudo_loglikelihood`, ptr)
 }
 
 warplda_get_doc_topic_count <- function(ptr) {
-    .Call(text2vec_warplda_get_doc_topic_count, ptr)
+    .Call(`_text2vec_warplda_get_doc_topic_count`, ptr)
 }
 
 warplda_get_topic_word_count <- function(ptr) {
-    .Call(text2vec_warplda_get_topic_word_count, ptr)
+    .Call(`_text2vec_warplda_get_topic_word_count`, ptr)
 }
 
 warplda_get_local_diff <- function(ptr) {
-    .Call(text2vec_warplda_get_local_diff, ptr)
+    .Call(`_text2vec_warplda_get_local_diff`, ptr)
 }
 
 warplda_get_c_global <- function(ptr) {
-    .Call(text2vec_warplda_get_c_global, ptr)
+    .Call(`_text2vec_warplda_get_c_global`, ptr)
 }
 
 warplda_set_c_global <- function(ptr, c_all) {
-    invisible(.Call(text2vec_warplda_set_c_global, ptr, c_all))
+    invisible(.Call(`_text2vec_warplda_set_c_global`, ptr, c_all))
 }
 
 warplda_reset_local_diff <- function(ptr) {
-    invisible(.Call(text2vec_warplda_reset_local_diff, ptr))
+    invisible(.Call(`_text2vec_warplda_reset_local_diff`, ptr))
 }
 

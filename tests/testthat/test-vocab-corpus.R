@@ -3,8 +3,7 @@ context("vocabulary-corpus construction")
 train_ind = 1:1000
 ids = movie_review$id[train_ind]
 
-txt = movie_review[['review']][train_ind] %>%
-  tolower
+txt = tolower(movie_review[['review']][train_ind])
 names(txt) = ids
 
 tokens = word_tokenizer(txt)

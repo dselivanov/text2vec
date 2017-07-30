@@ -6,7 +6,8 @@ train_ind = 1:100
 txt = movie_review[['review']][train_ind]
 ids = movie_review[['id']][train_ind]
 
-tokens = txt %>% tolower %>% word_tokenizer
+tokens = tolower(txt)
+tokens = word_tokenizer(tokens)
 it = itoken(tokens, progressbar = FALSE, ids = ids)
 
 it_par = itoken_parallel(txt, preprocessor = tolower, tokenizer = word_tokenizer, ids = ids, n_chunks = 2)

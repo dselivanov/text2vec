@@ -3,7 +3,9 @@ context("hash-corpus construction")
 train_ind = 1:1000
 
 txt = movie_review[['review']][train_ind]
-tokens = txt %>% tolower %>% word_tokenizer
+tokens = tolower(txt)
+tokens = word_tokenizer(tokens)
+
 it = itoken(tokens, progressbar = F)
 
 test_that("Unigram Hash Corpus construction", {
