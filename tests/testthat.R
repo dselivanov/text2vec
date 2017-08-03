@@ -1,3 +1,4 @@
+Sys.setenv("R_TESTS" = "")
 library(testthat)
 library(text2vec)
 data("movie_review")

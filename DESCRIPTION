@@ -1,7 +1,7 @@
 Package: text2vec
 Type: Package
 Version: 0.5.0
-Date: 2017-07-28
+Date: 2017-08-03
 Title: Modern Text Mining Framework for R
 License: GPL (>= 2) | file LICENSE
 Description: Fast and memory-friendly tools for text vectorization, topic
@@ -9,8 +9,11 @@ Description: Fast and memory-friendly tools for text vectorization, topic
     provides a source-agnostic streaming API, which allows researchers to perform
     analysis of collections of documents which are larger than available RAM. All
     core functions are parallelized to benefit from multicore machines.
-Authors@R: c(person("Dmitriy", "Selivanov", role = c("aut", "cre"),
-    email = "selivanov.dmitriy@gmail.com"))
+Authors@R: c(person("Dmitriy", "Selivanov", role = c("aut", "cre", "cph"),
+    email = "selivanov.dmitriy@gmail.com"), 
+    person("Qing", "Wang", role = c("aut", "cph"),
+    email = "selivanov.dmitriy@gmail.com", 
+    comment = "Author of the WaprLDA C++ code"))
 Maintainer: Dmitriy Selivanov <selivanov.dmitriy@gmail.com>
 Encoding: UTF-8
 SystemRequirements: GNU make, C++11
