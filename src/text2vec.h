@@ -29,33 +29,16 @@
 #include <unordered_set>
 #include <RcppParallel.h>
 
-// #include <stdarg.h>
-// namespace spp {
-// int fprintf(std::FILE* stream, const char* fmt, ...) {
-//   int nchar = -1;
-//   va_list argp;
-//   va_start(argp, fmt);
-//   if(stream == stderr) {
-//     ::REprintf(fmt, argp);
-//   }
-//   else if(stream == stdout) {
-//     ::Rprintf(fmt, argp);
-//   } else {
-//     vfprintf(stream, fmt, argp);
-//   }
-//   va_end(argp);
-//   return nchar;
-// }
-// }
-
 // spp has calls to 'exit' on failure, which upsets R CMD check.
 // We won't bump into them during normal test execution so just override
 // it in the spp namespace before we include 'sparsepp'.
 //https://github.com/hadley/testthat/blob/c7e8330867645c174f9a286d00eb0036cea78b0c/inst/include/testthat/testthat.h#L44-L50
+//https://stackoverflow.com/questions/43263880/no-ambiguous-reference-error-even-after-using-namespace-directive/43294812
 namespace spp {
   inline void exit(int status) throw() {}
 }
-#include <sparsepp.h>
+
+#include <sparsepp/spp.h>
 
 using namespace std;
 using namespace Rcpp;

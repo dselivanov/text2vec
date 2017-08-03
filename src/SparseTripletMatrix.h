@@ -19,7 +19,7 @@
 #include <vector>
 
 #define SPP_MIX_HASH
-#include <sparsepp.h>
+#include <sparsepp/spp.h>
 
 #include "text2vec.h"
 

@@ -1,9 +1,8 @@
 ## Release summary
 
-* This is resubmission. I removed usage of unexported `print.data.table` as was asked by CRAN team.
-* Not sure how to reduce checking time 
-    - on my machine cheking takes ~1 min
-    - package uses a lot of compiled code (heavy tempated libraries like RcppParallel, Rcpp, sparsepp)
+This is resubmission. 
+* Set `Sys.setenv("R_TESTS" = "")` to avoid weird issue with tests in 32-bit windows machine
+* Add Qing Wang to authors
 
 ## Test environments
 
@@ -13,7 +12,7 @@
 
 ## R CMD check results
 
-commit 19ee0ff1
+commit 0135075
 
 0 ERRORs | 0 WARNING | 3 NOTEs
 
