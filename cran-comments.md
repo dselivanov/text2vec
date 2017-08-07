@@ -1,8 +1,7 @@
 ## Release summary
 
 This is resubmission. 
-* Set `Sys.setenv("R_TESTS" = "")` to avoid weird issue with tests in 32-bit windows machine
-* Add Qing Wang to authors
+* Resolved issue with note on usage of "stderr" - updated `sparsepp` usage.
 
 ## Test environments
 
@@ -12,16 +11,12 @@ This is resubmission.
 
 ## R CMD check results
 
-commit 0135075
+commit 798d429e
 
-0 ERRORs | 0 WARNING | 3 NOTEs
+0 ERRORs | 0 WARNING | 2 NOTEs
 
 * checking installed package size ... NOTE. 
     - Data was not touched since previous release. Vignettes were improved, 
     but have same size as in previous release.
 * checking for GNU extensions in Makefiles ... NOTE
     - GNU make needed for RcppParallel
-* checking compiled code ... NOTE: *Found ‘___stderrp’, possibly from ‘stderr’ (C)*
-    - This is from header-only `sparsepp` library I'm linking to. I already overrided
-    `exit` call in `sparsepp` namespace, but can't do the same for `fprintf` call
-    in `sparsepp` internals. It is out of my control since this is 3rd party library.
