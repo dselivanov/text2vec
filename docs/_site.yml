@@ -8,11 +8,6 @@ navbar:
     - text: "Vectorization"
       href: vectorization.html
     - text: "GloVe"
-      menu:
-        - text: "GloVe"
-          href: glove.html
-        - text: "GloVe-CLI"
-          href: glove-cli.html
       href: glove.html
     - text: "Collocations"
       href: collocations.html

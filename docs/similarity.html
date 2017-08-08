@@ -4,14 +4,14 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
 
 <meta name="author" content="Dmitriy Selivanov" />
 
-<meta name="date" content="2016-11-01" />
+<meta name="date" content="2017-08-08" />
 
 <title>Documents similarity</title>
 
@@ -24,6 +24,7 @@
 <script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 
@@ -178,7 +179,6 @@ $(document).ready(function () {
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
-<script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
@@ -204,7 +204,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
@@ -263,8 +263,9 @@ div.tocify {
 }
 
 .tocify-subheader .tocify-item {
-  font-size: 0.9em;
-  padding-left: 5px;
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -276,7 +277,6 @@ div.tocify {
 }
 .tocify-subheader .tocify-item {
   font-size: 0.95em;
-  padding-left: 10px;
 }
 
 </style>
@@ -311,20 +311,11 @@ div.tocify {
 <li>
   <a href="vectorization.html">Vectorization</a>
 </li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    GloVe
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="glove.html">GloVe</a>
-    </li>
-    <li>
-      <a href="glove-cli.html">GloVe-CLI</a>
-    </li>
-  </ul>
+<li>
+  <a href="glove.html">GloVe</a>
+</li>
+<li>
+  <a href="collocations.html">Collocations</a>
 </li>
 <li>
   <a href="topic_modeling.html">Topic modeling</a>
@@ -337,9 +328,25 @@ div.tocify {
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li>
+        <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-language"></span>
+     
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="http://text2vec.org/">English</a>
+    </li>
+    <li>
+      <a href="https://cndocr.github.io/text2vec-doc-cn/">Chinese</a>
+    </li>
+  </ul>
+</li>
+<li>
   <a href="https://github.com/dselivanov/text2vec">
-    <span class="fa fa-github fa-lg"></span>
+    <span class="fa fa-github"></span>
      
   </a>
 </li>
@@ -360,7 +367,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Documents similarity</h1>
 <h4 class="author"><em>Dmitriy Selivanov</em></h4>
-<h4 class="date"><em>2016-11-01</em></h4>
+<h4 class="date"><em>2017-08-08</em></h4>
 
 </div>
 
@@ -425,10 +432,10 @@ vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(v)
 <span class="co"># hash_vectorizer will also work fine</span>
 dtm1 =<span class="st"> </span><span class="kw">create_dtm</span>(it1, vectorizer)
 <span class="kw">dim</span>(dtm1)</code></pre></div>
-<pre><code>## [1]  300 2339</code></pre>
+<pre><code>## [1]  300 2338</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dtm2 =<span class="st"> </span><span class="kw">create_dtm</span>(it2, vectorizer)
 <span class="kw">dim</span>(dtm2)</code></pre></div>
-<pre><code>## [1]  200 2339</code></pre>
+<pre><code>## [1]  200 2338</code></pre>
 <p>Once we have representation of documents in vector space we are almost done. One thing remains - call <code>sim2()</code>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_jac_sim =<span class="st"> </span><span class="kw">sim2</span>(dtm1, dtm2, <span class="dt">method =</span> <span class="st">&quot;jaccard&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;none&quot;</span>)</code></pre></div>
 <p>Check result:</p>
@@ -438,7 +445,7 @@ dtm1 =<span class="st"> </span><span class="kw">create_dtm</span>(it1, vectorize
 <pre><code>## 2 x 5 sparse Matrix of class &quot;dgCMatrix&quot;
 ##            1 2          3           4          5
 ## 1 0.02142857 . 0.02362205 0.007575758 0.02597403
-## 2 0.01204819 . 0.02898551 0.013698630 0.02061856</code></pre>
+## 2 0.01219512 . 0.02941176 0.013888889 0.02083333</code></pre>
 <p>Also we can comptute <em>“parallel”</em> similarity - similarity between corresponding rows of matrices (matrices should have identical shapes):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dtm1_2 =<span class="st"> </span>dtm1[<span class="dv">1</span>:<span class="dv">200</span>, ]
 dtm2_2 =<span class="st"> </span>dtm2[<span class="dv">1</span>:<span class="dv">200</span>, ]
@@ -460,7 +467,7 @@ d1_d2_jac_psim =<span class="st"> </span><span class="kw">psim2</span>(dtm1_2, d
 <pre><code>## 2 x 5 sparse Matrix of class &quot;dgCMatrix&quot;
 ##            1 2          3           4          5
 ## 1 0.02703999 . 0.05063299 0.009500143 0.02753954
-## 2 0.02440658 . 0.06528840 0.034299717 0.03977196</code></pre>
+## 2 0.02455143 . 0.06567587 0.034503278 0.04000800</code></pre>
 <div id="cosine-similarity-with-tf-idf" class="section level3">
 <h3>Cosine similarity with Tf-Idf</h3>
 <p>It can be useful to measure similarity not on vanilla bag-of-words matrix, but on transformed one. One choice is to apply tf-idf transformation. First let’t create tf-idf model:</p>
@@ -472,8 +479,8 @@ dtm_tfidf =<span class="st"> </span><span class="kw">fit_transform</span>(dtm, t
 d1_d2_tfidf_cos_sim[<span class="dv">1</span>:<span class="dv">2</span>, <span class="dv">1</span>:<span class="dv">5</span>]</code></pre></div>
 <pre><code>## 2 x 5 sparse Matrix of class &quot;dgCMatrix&quot;
 ##             1           2          3          4          5
-## 1 1.000000000 0.007850872 0.02380155 0.02864296 0.01510648
-## 2 0.007850872 1.000000000 0.01115547 .          .</code></pre>
+## 1 1.000000000 0.007885415 0.02380155 0.02864296 0.01510648
+## 2 0.007885415 1.000000000 0.01120455 .          .</code></pre>
 </div>
 <div id="cosine-similarity-with-lsa" class="section level3">
 <h3>Cosine similarity with LSA</h3>
@@ -483,15 +490,15 @@ dtm_tfidf_lsa =<span class="st"> </span><span class="kw">fit_transform</span>(dt
 <p>Calculate similarities between all rows of <code>dtm_tfidf_lsa</code> matrix:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_tfidf_cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> dtm_tfidf_lsa, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
 d1_d2_tfidf_cos_sim[<span class="dv">1</span>:<span class="dv">2</span>, <span class="dv">1</span>:<span class="dv">5</span>]</code></pre></div>
-<pre><code>##           1         2         3          4          5
-## 1 1.0000000 0.1699775 0.3688870 0.32099498 0.40136087
-## 2 0.1699775 1.0000000 0.2255526 0.03386678 0.05704895</code></pre>
+<pre><code>##           1         2         3           4          5
+## 1 1.0000000 0.1131078 0.2441785  0.22306293  0.2737060
+## 2 0.1131078 1.0000000 0.1196555 -0.02698341 -0.0475149</code></pre>
 <p>And “parallel” similarities:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">1</span>:<span class="dv">250</span>, ]
 y =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">251</span>:<span class="dv">500</span>, ]
 <span class="kw">head</span>(<span class="kw">psim2</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>))</code></pre></div>
 <pre><code>##          1          2          3          4          5          6 
-## 0.21685062 0.19825576 0.30503467 0.10040947 0.29249774 0.03675728</code></pre>
+## 0.11315322 0.12302464 0.19952480 0.07238329 0.18239954 0.02230496</code></pre>
 </div>
 </div>
 <div id="euclidean-distance" class="section level2">
@@ -537,8 +544,11 @@ m3 =<span class="st"> </span><span class="kw">dist2</span>(x, y, <span class="dt
 <script>
 
 // add bootstrap table styles to pandoc tables
-$(document).ready(function () {
+function bootstrapStylePandocTables() {
   $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
 });
 
 
@@ -549,7 +559,7 @@ $(document).ready(function () {
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>
