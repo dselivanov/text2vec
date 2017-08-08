@@ -25,22 +25,35 @@ See [Vectorization](vectorization.html) section for details.
 * `create_tcm()`;
 * `vocab_vectorizer()`, `hash_vectorizer()`.
     
-## I/O handling. 
+## I/O handling
+
 All functions from `create_*` family work with **iterators** over tokens as input. Good examples for creation of such iterators are: 
 
-* `itoken()` for creation iterator over tokens;
 * `ifiles()` for creation iterator over files. Note that text2vec doesn't handle I/O, users should provide their own reader function (`data.table::fread()` and functions from `readr` package usually are good choices).
+* `itoken()` for creation iterator over tokens;
 
 Once user needs some custom source (for example data stream from some RDBMS), he/she just needs to create correct iterator over tokens.
 
+### Easy parallel processing
+
+`text2vec` also provides convenient functions for **easy parallel processing** of text (many of tasks are emrassingly parallel).
+
+* `ifiles_parallel()` same as `ifiles()` above, but creates **parallel iterator** if parallel backend is registered (for example with `registerDoParallel`)
+* `itoken_parallel()` is the same as `itoken()` above but also creates **parallel iterator** if parallel backend is registered.
+
+Parallel `itoken` iterators can be used in `create_dtm()`, `create_tcm()` functions exatly the same way as sequential counterparts.
+
 ##  Models 
 
-text2vec provides unified interface for models, which is inspired by `scikit-learn` interface. Models in text2vec are mostly *transformers* - they transform Document-Term matrix. Models include:
+text2vec provides unified interface for models, which is inspired by `scikit-learn` interface. Models in text2vec are mostly *transformers* and *decompositions* - they transform Document-Term matrix or decompose into 2 low-rank matrices. 
+
+Models include:
 
 * Tf-idf reweighting. See [Tf-idf in vectorization](vectorization.html#tf-idf) section;
 * Global Vectors (**GloVe**) word embeddings. See [Word Embeddings](glove.html) section;
 * Latent Semantic Analysis (**LSA**). See [LSA](topic_modeling.html#latent_semantic_analysis) section;
 * Latent Dirichlet Allocation (**LDA**). See [LDA](topic_modeling.html#latent_dirichlet_allocation) section.
+* **Collocations**. Collocations model which can learn phrases from text is a bit separate from others and has a little bit different interface. It takes `itoken` iterator as input to `fit` method and learn model. After that user can pass another `itoken` iterator to `transform` method and receive another `itoken` iterator wich will produce tokens with phrases concatenated into single token.
 
 **All text2vec models are mutable! This means that `fit()` and `fit_transform()` methods change model which was provided as argument.**
 
@@ -49,9 +62,11 @@ text2vec provides unified interface for models, which is inspired by `scikit-lea
 All models have unified interface. User should only remember few verbs for models manipulation:
 
 * `model$new(...)` - create model object, set up initial parameters for model. This is model-specific. For example for LDA it can be number of topics $K$, alpha($\alpha$) and eta($\eta$) priors;
-* `model$fit(x, ...)` - fits model to data;
+* `model$partial_fit(x, ...)` - partially fits model to data (for online models);
 * `model$fit_transform(x, ...)` - fits model to data and then transforms data with fitted model;
 * `model$transform(x_new, ...)` - transforms new data with pretrained model.
+
+Decomposition models decompose matrix into 2 low rank matrices $X$ and $Y$. $X$ corresponds to item embeddings and $Y$ corresponds to feature embeddings. For example for `LDA`  $X$ will be document-topic assignements and $Y$ will be topic-word assignements. While `fit_transform` or `transform` methods gives you $X$, second, matrix $Y$ is available as `components` read-only field: `model$components`. Examples of "decomposition" models in `text2vec` are `LDA`, `LSA`, `GloVe`. Check documentation of these classes for additional information.
 
 ## Distances 
 

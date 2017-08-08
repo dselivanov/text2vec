@@ -9,22 +9,31 @@ navbar:
       href: vectorization.html
     - text: "GloVe"
       menu:
-        - text: "GloVe" 
+        - text: "GloVe"
           href: glove.html
         - text: "GloVe-CLI"
           href: glove-cli.html
       href: glove.html
+    - text: "Collocations"
+      href: collocations.html
     - text: "Topic modeling"
       href: topic_modeling.html
     - text: "Similarity"
       href: similarity.html
     - text: "API"
-      href: api.html      
+      href: api.html
   right:
-    - icon: fa-github fa-lg
+    - icon: fa-language
+      menu:
+        - text: "English"
+          href: http://text2vec.org/
+        - text: "Chinese"
+          href: https://cndocr.github.io/text2vec-doc-cn/
+    - icon: fa-github
       href: https://github.com/dselivanov/text2vec
     - icon: fa-stack-overflow
       href: http://stackoverflow.com/questions/tagged/text2vec
+
 output:
   html_document:
     toc: true

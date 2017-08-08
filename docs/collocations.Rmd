@@ -1,0 +1,162 @@
+---
+title: "Collocations"
+author: "Dmitriy Selivanov"
+date: "`r Sys.Date()`"
+---
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(eval = T, echo=TRUE, warning=FALSE, message=FALSE, cache = T)
+set.seed(2017L)
+```
+
+
+It this tutorial I will show how to extract phrases from text and how they can be used in downstream tasks. I will use `text8` dataset which is available for download [here](http://mattmahoney.net/dc/text8.zip). It consists of 100mb of texts from english wikipedia. 
+
+Fitting model is as easy as:
+
+```{r, message=FALSE, warning=FALSE}
+library(text2vec)
+model = Collocations$new(collocation_count_min = 50)
+txt = readLines("~/text8")
+it = itoken(txt)
+model$fit(it, n_iter = 3)
+```
+Now let us check what we got.  Learned collocations are kept in `collocation_stat` field of the model:
+```{r}
+model$collocation_stat
+```
+
+# How it works 
+
+Model goes through subsequent tokens and calculate some statstics - how frequently one token follows another, frequencies of tokens, etc. Based on this statistics model calculates several scores: [PMI](https://en.wikipedia.org/wiki/Pointwise_mutual_information), LFMD (see paper below), ["gensim"](https://radimrehurek.com/gensim/models/phrases.html). Scores are actually heuristics - model is unsupervised. For overview of performance of different approaches check [Automatic Extraction of Fixed Multiword Expressions](http://www.aclweb.org/anthology/I05-1050) paper.
+
+## Details
+
+There are several important parameters in the model. Let's take a closer look into constructor: 
+
+```{r, eval = FALSE}
+colloc = Collocations$new(vocabulary = NULL, collocation_count_min = 50, pmi_min = 5, gensim_min = 0, lfmd_min = -Inf, sep = "_")
+```
+
+* `vocabulary`(optional parameter) - instance of `text2vec` vocabulary. If provided, the model will search for collocations consisted of words from vocabulary. If not provided, first the model will make one pass over data and create it.
+* `collocation_count_min` - model will only consider set of words as phrase if it will observe it at least `collocation_count_min` time. For example if collocation *"new york"* was observed less than 50 times, model will treat *"new"* and *"york"* as separate words.
+* `pmi_min`, `gensim_min`, `lfmd_min` minimal values of corresponding scores for filtering out low-scored collocation candidates.
+
+Generally model need to make several iterations over the data. As mentioned apove on each pass it collects some statistics about adjacent word co-occurences. 
+
+## Example
+
+Let's consider example.
+
+1. Suppose at first pass model found that words *"new"* and *"york"* occurs 100 times together as *"new_york"* and each of words *"new"* and *"york"* occur 150 and 115 respectively. So intuitevely there is a very high chance that *"new_york"* is good phrase candidate (and it will have high `pmi`, `lfmd`, `gensim` scores). In contrast if we take a look at words *"it"*, *"is"* it can happen that *"it_is"* occurs 500 times, but words *"it"* and *"is"* separately occur 15000 and 17000 times. Intuitevely it is very unlikely that *"it_is"* represents good phrase. So after each pass over the data we prune phrase candidates by removing co-occurences with low `pmi`, `lfmd`, `gensim` scores.
+1. Suppose we have detected phrase *"new_york"* after first pass. During second pass model will scan tokens and if it finds words *"new"* and *"york"* in sequence it will concatenate them into "new_york" and treat as single token (if any other word follows *"new"* then model won't concatenate them and consider them as 2 separate tokens). Now imagine next token after *"new_york"* is *"city"*. Then model again
+will calculate co-occurence scores as in step 1 and decide whether to keep *"new_york_city"* as phrase/collocation or treat sequence *"new_york"* and *"city"* as separate tokens. So by repeating the process we can learn large multi-word phrases.
+
+As a result, in the end model will be able to concatenate collocations from tokens. Let's check how naive model trained on wikipedia will work:
+```{r}
+test_txt = c("i am living in a new apartment in new york city", 
+        "new york is the same as new york city", 
+        "san francisco is very expensive city", 
+        "who claimed that model works?")
+it = itoken(test_txt, n_chunks = 1, progressbar = FALSE)
+it_phrases = model$transform(it)
+it_phrases$nextElem()
+```
+As we can see results are pretty impressive but not ideal - we probably do not want to get *"claimed_that"* as collocation. One solution is to provide `vocabulary` without stopwords to the model constructor. But this won't solve most of the edge cases. Another solution is to keep tracking what model learned after each pass over the data. We can fit model incrementally with `partial_fit()` method and prune bad phrases after each iteration. 
+```{r}
+it = itoken(txt)
+v = create_vocabulary(it, stopwords = tokenizers::stopwords("en"))
+v = prune_vocabulary(v, term_count_min = 50)
+model2 = Collocations$new(vocabulary = v, collocation_count_min = 50, pmi_min = 0)
+model2$partial_fit(it)
+model2$collocation_stat
+```
+Since we set restriction to PMI scrore to 0 we got a lot of garbage collocations like *"when_its"*. Fortunately we can manually prune them and continue training. Let's filter by some thresholds:
+```{r}
+temp = model2$collocation_stat[pmi >= 8 & gensim >= 10 & lfmd >= -25, ]
+temp
+```
+If it looks reasonable we can prune learned collocations:
+```{r}
+model2$prune(pmi_min = 8, gensim_min = 10, lfmd_min = -25)
+identical(temp, model2$collocation_stat)
+```
+And continue training:
+```{r}
+model2$partial_fit(it)
+model2$prune(pmi_min = 8, gensim_min = 10, lfmd_min = -25)
+model2$collocation_stat
+```
+And so on until we will decide to stop process (for example if number of learned phrases between two passes remains the same).
+
+# Usage
+
+It is pretty interesting that we can extract collocation like *"george_washington"* or *"new_york_city"*, but it is even more exciting to use them in downstream tasks. Good examples could be **topic models** (phrases improves interpretability a lot!) and **word embeddings**.
+
+How to incorporate them into the model? This is simple - create vocabulary which contains words and phrases and then document-term matrix or term-co-occurence matrix.
+
+In order to do that we need to create `itoken` iterator which will concatenate collocations and then just pass it to any fucntion which consumes iterators.
+
+```{r}
+it_phrases = model2$transform(it)
+vocabulary_with_phrases = create_vocabulary(it_phrases, stopwords = tokenizers::stopwords("en"))
+vocabulary_with_phrases = prune_vocabulary(vocabulary_with_phrases, term_count_min = 10)
+vocabulary_with_phrases[startsWith(vocabulary_with_phrases$term, "new_"), ]
+```
+
+## Word embeddings with collocations
+
+Now we can create term-co-occurence matrix wich will contain both words and multi-word phrases (make sure you provide `itoken` iterator which generates phrases, not plain words):
+```{r}
+tcm = create_tcm(it_phrases, vocab_vectorizer(vocabulary_with_phrases))
+```
+
+And train word embeddings model:
+```{r}
+glove = GloVe$new(50, vocabulary = vocabulary_with_phrases, x_max = 50)
+wv_main = glove$fit_transform(tcm, 10)
+wv_context = glove$components
+wv = wv_main + t(wv_context)
+```
+
+```{r}
+cos_sim = sim2(x = wv, y = wv["new_zealand", , drop = FALSE], method = "cosine", norm = "l2")
+head(sort(cos_sim[,1], decreasing = TRUE), 5)
+```
+```{r}
+paris = wv["new_york", , drop = FALSE] - 
+  wv["usa", , drop = FALSE] + 
+  wv["france", , drop = FALSE]
+cos_sim = sim2(x = wv, y = paris, method = "cosine", norm = "l2")
+head(sort(cos_sim[,1], decreasing = TRUE), 5)
+```
+
+## Topic models with collocations
+
+Incorporating collocations into topic models is very straightforward - need just to create document-term matrix and pass it to LDA model.
+```{r}
+data("movie_review")
+prep_fun = function(x) {
+  stringr::str_replace_all(tolower(x), "[^[:alpha:]]", " ")
+}
+it = itoken(movie_review$review, preprocessor = prep_fun, tokenizer = word_tokenizer, 
+            ids = movie_review$id, progressbar = FALSE)
+it = model2$transform(it)
+v = create_vocabulary(it, stopwords = tokenizers::stopwords("en"))
+v = prune_vocabulary(v, term_count_min = 10, doc_proportion_min = 0.01)
+```
+Let's check how many phrases that we've learned from wikipedia we can find in `movie_review` dataset:
+```{r}
+word_count_per_token = sapply(strsplit(v$term, "_", T), length)
+v$term[word_count_per_token > 1]
+```
+Not many. Seems we may need to learn collocations from `movie_review` dataset itself or use other thresholds for scores. I leave this exercise for the reader.
+
+Anyway now we can create document-term matrix and run LDA:
+
+```{r, eval=FALSE}
+N_TOPICS = 20
+vectorizer = vocab_vectorizer(v)
+dtm = create_dtm(it, vectorizer)
+lda = LDA$new(N_TOPICS)
+doc_topic = lda$fit_transform(dtm)
+```

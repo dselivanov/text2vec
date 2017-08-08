@@ -5,7 +5,6 @@
 StopIteration = function(message="Iteration is complete", call = NULL, pb = NULL) {
   if(inherits(pb, "txtProgressBar")) {
     close(pb)
-    cat("\n")
   }
 
   class = c("StopIteration", "error", "condition")

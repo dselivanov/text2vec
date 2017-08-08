@@ -4,14 +4,14 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
 
 <meta name="author" content="Dmitriy Selivanov" />
 
-<meta name="date" content="2016-11-01" />
+<meta name="date" content="2017-07-06" />
 
 <title>GloVe Word Embeddings</title>
 
@@ -24,6 +24,7 @@
 <script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 
@@ -178,7 +179,6 @@ $(document).ready(function () {
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
-<script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
@@ -204,7 +204,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
@@ -263,8 +263,9 @@ div.tocify {
 }
 
 .tocify-subheader .tocify-item {
-  font-size: 0.9em;
-  padding-left: 5px;
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -276,7 +277,6 @@ div.tocify {
 }
 .tocify-subheader .tocify-item {
   font-size: 0.95em;
-  padding-left: 10px;
 }
 
 </style>
@@ -360,7 +360,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">GloVe Word Embeddings</h1>
 <h4 class="author"><em>Dmitriy Selivanov</em></h4>
-<h4 class="date"><em>2016-11-01</em></h4>
+<h4 class="date"><em>2017-07-06</em></h4>
 
 </div>
 
@@ -401,58 +401,54 @@ if (!<span class="kw">file.exists</span>(text8_file)) {
 wiki =<span class="st"> </span><span class="kw">readLines</span>(text8_file, <span class="dt">n =</span> <span class="dv">1</span>, <span class="dt">warn =</span> <span class="ot">FALSE</span>)</code></pre></div>
 <p>In the next step we will create a vocabulary, a set of words for which we want to learn word vectors. Note, that all of text2vec’s functions which operate on raw text data (<code>create_vocabulary</code>, <code>create_corpus</code>, <code>create_dtm</code>, <code>create_tcm</code>) have a streaming API and you should iterate over tokens as the first argument for these functions.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Create iterator over tokens</span>
-tokens &lt;-<span class="st"> </span><span class="kw">space_tokenizer</span>(wiki)
+tokens =<span class="st"> </span><span class="kw">space_tokenizer</span>(wiki)
 <span class="co"># Create vocabulary. Terms will be unigrams (simple words).</span>
 it =<span class="st"> </span><span class="kw">itoken</span>(tokens, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
-vocab &lt;-<span class="st"> </span><span class="kw">create_vocabulary</span>(it)</code></pre></div>
+vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it)</code></pre></div>
 <p>These words should not be too uncommon. Fot example we cannot calculate a meaningful word vector for a word which we saw only once in the entire corpus. Here we will take only words which appear at least five times. text2vec provides additional options to filter vocabulary (see <code>?prune_vocabulary</code>).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vocab &lt;-<span class="st"> </span><span class="kw">prune_vocabulary</span>(vocab, <span class="dt">term_count_min =</span> 5L)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vocab =<span class="st"> </span><span class="kw">prune_vocabulary</span>(vocab, <span class="dt">term_count_min =</span> 5L)</code></pre></div>
 <p>Now we have 71,290 terms in the vocabulary and are ready to construct term-co-occurence matrix (TCM).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Use our filtered vocabulary</span>
-vectorizer &lt;-<span class="st"> </span><span class="kw">vocab_vectorizer</span>(vocab, 
-                               <span class="co"># don&#39;t vectorize input</span>
-                               <span class="dt">grow_dtm =</span> <span class="ot">FALSE</span>, 
-                               <span class="co"># use window of 5 for context words</span>
-                               <span class="dt">skip_grams_window =</span> 5L)
-tcm &lt;-<span class="st"> </span><span class="kw">create_tcm</span>(it, vectorizer)</code></pre></div>
+vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(vocab)
+<span class="co"># use window of 5 for context words</span>
+tcm =<span class="st"> </span><span class="kw">create_tcm</span>(it, vectorizer, <span class="dt">skip_grams_window =</span> 5L)</code></pre></div>
 <p>Now we have a TCM matrix and can factorize it via the GloVe algorithm.<br />
 text2vec uses a parallel stochastic gradient descent algorithm. By default it will use all cores on your machine, but you can specify the number of cores if you wish. For example, to use 4 threads call <code>RcppParallel::setThreadOptions(numThreads = 4)</code>.</p>
 <p>Let’s fit our model. (It can take several minutes to fit!)</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">glove =<span class="st"> </span>GlobalVectors$<span class="kw">new</span>(<span class="dt">word_vectors_size =</span> <span class="dv">50</span>, <span class="dt">vocabulary =</span> vocab, <span class="dt">x_max =</span> <span class="dv">10</span>)
-glove$<span class="kw">fit</span>(tcm, <span class="dt">n_iter =</span> <span class="dv">20</span>)
-<span class="co"># 2016-10-03 10:09:14 - epoch 1, expected cost 0.0893</span>
-<span class="co"># 2016-10-03 10:09:17 - epoch 2, expected cost 0.0608</span>
-<span class="co"># 2016-10-03 10:09:19 - epoch 3, expected cost 0.0537</span>
-<span class="co"># 2016-10-03 10:09:22 - epoch 4, expected cost 0.0499</span>
-<span class="co"># 2016-10-03 10:09:25 - epoch 5, expected cost 0.0475</span>
-<span class="co"># 2016-10-03 10:09:28 - epoch 6, expected cost 0.0457</span>
-<span class="co"># 2016-10-03 10:09:30 - epoch 7, expected cost 0.0443</span>
-<span class="co"># 2016-10-03 10:09:33 - epoch 8, expected cost 0.0431</span>
-<span class="co"># 2016-10-03 10:09:36 - epoch 9, expected cost 0.0423</span>
-<span class="co"># 2016-10-03 10:09:39 - epoch 10, expected cost 0.0415</span>
-<span class="co"># 2016-10-03 10:09:42 - epoch 11, expected cost 0.0408</span>
-<span class="co"># 2016-10-03 10:09:44 - epoch 12, expected cost 0.0403</span>
-<span class="co"># 2016-10-03 10:09:47 - epoch 13, expected cost 0.0400</span>
-<span class="co"># 2016-10-03 10:09:50 - epoch 14, expected cost 0.0395</span>
-<span class="co"># 2016-10-03 10:09:53 - epoch 15, expected cost 0.0391</span>
-<span class="co"># 2016-10-03 10:09:56 - epoch 16, expected cost 0.0388</span>
-<span class="co"># 2016-10-03 10:09:59 - epoch 17, expected cost 0.0385</span>
-<span class="co"># 2016-10-03 10:10:02 - epoch 18, expected cost 0.0383</span>
-<span class="co"># 2016-10-03 10:10:05 - epoch 19, expected cost 0.0380</span>
-<span class="co"># 2016-10-03 10:10:08 - epoch 20, expected cost 0.0378</span></code></pre></div>
-<p>Alternatively we can train model with R’s <code>S3</code> interface (but keep in mind that all text2vec models are R6 classes and they are mutable! So <code>fit</code>, <code>fit_transform</code> methods modify models!):</p>
+wv_main =<span class="st"> </span>glove$<span class="kw">fit_transform</span>(tcm, <span class="dt">n_iter =</span> <span class="dv">10</span>, <span class="dt">convergence_tol =</span> <span class="fl">0.01</span>)</code></pre></div>
+<pre><code>## INFO [2017-07-06 12:38:24] 2017-07-06 12:38:24 - epoch 1, expected cost 0.0877
+## INFO [2017-07-06 12:38:27] 2017-07-06 12:38:27 - epoch 2, expected cost 0.0611
+## INFO [2017-07-06 12:38:30] 2017-07-06 12:38:30 - epoch 3, expected cost 0.0540
+## INFO [2017-07-06 12:38:32] 2017-07-06 12:38:32 - epoch 4, expected cost 0.0501
+## INFO [2017-07-06 12:38:35] 2017-07-06 12:38:35 - epoch 5, expected cost 0.0475
+## INFO [2017-07-06 12:38:38] 2017-07-06 12:38:38 - epoch 6, expected cost 0.0457
+## INFO [2017-07-06 12:38:40] 2017-07-06 12:38:40 - epoch 7, expected cost 0.0444
+## INFO [2017-07-06 12:38:43] 2017-07-06 12:38:43 - epoch 8, expected cost 0.0433
+## INFO [2017-07-06 12:38:46] 2017-07-06 12:38:46 - epoch 9, expected cost 0.0424
+## INFO [2017-07-06 12:38:48] 2017-07-06 12:38:48 - epoch 10, expected cost 0.0417</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(wv_main)</code></pre></div>
+<pre><code>## [1] 71290    50</code></pre>
+<p>Alternatively we can train model with R’s <code>S3</code> interface (but keep in mind that all text2vec models are R6 classes and they are mutable! So <code>fit_transform</code> methods modify models!):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">glove =<span class="st"> </span>GlobalVectors$<span class="kw">new</span>(<span class="dt">word_vectors_size =</span> <span class="dv">50</span>, <span class="dt">vocabulary =</span> vocab, <span class="dt">x_max =</span> <span class="dv">10</span>)
-<span class="co"># `glove` object will be modified by `fit()` call !</span>
-<span class="kw">fit</span>(tcm, glove, <span class="dt">n_iter =</span> <span class="dv">20</span>)</code></pre></div>
-<p>And now we get the word vectors:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">word_vectors &lt;-<span class="st"> </span>glove$<span class="kw">get_word_vectors</span>()</code></pre></div>
+<span class="co"># `glove` object will be modified by `fit_transform()` call !</span>
+wv_main =<span class="st"> </span><span class="kw">fit_transform</span>(tcm, glove, <span class="dt">n_iter =</span> <span class="dv">20</span>)</code></pre></div>
+<p>Note that model learns two sets of word vectors - main and context. Essentially they are the same since model is symmetric. From our experience learning two sets of word vectors leads to higher quality embeddings. GloVe model is “decomposition” model (inherits from <code>mlapiDecomposition</code> - generic class of models which decompose input matrix into two low-rank matrices). So on par with any other <code>mlapiDecomposition</code> model second low-rank matrix (context word vectors) is available in <code>components</code> field:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">wv_context =<span class="st"> </span>glove$components
+<span class="kw">dim</span>(wv_context)</code></pre></div>
+<pre><code>## [1]    50 71290</code></pre>
+<p>Note that as in all models which inherit from <code>mlapiDecomposition</code> transformed matrix will has <code>nrow = nrow(input)</code>, <code>ncol = rank</code> and second <code>component</code> matrix will has <code>nrow = rank</code>, <code>ncol = ncol(input)</code>.</p>
+<p>While both of word-vectors matrices can be used as result it usually better (idea from GloVe paper) to average or take a sum of main and context vector:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">word_vectors =<span class="st"> </span>wv_main +<span class="st"> </span><span class="kw">t</span>(wv_context)</code></pre></div>
 <p>We can find the closest word vectors for our <em>paris - france + germany</em> example:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">berlin &lt;-<span class="st"> </span>word_vectors[<span class="st">&quot;paris&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] -<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">berlin =<span class="st"> </span>word_vectors[<span class="st">&quot;paris&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] -<span class="st"> </span>
 <span class="st">  </span>word_vectors[<span class="st">&quot;france&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] +<span class="st"> </span>
 <span class="st">  </span>word_vectors[<span class="st">&quot;germany&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>]
 cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> word_vectors, <span class="dt">y =</span> berlin, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
-<span class="kw">head</span>(<span class="kw">sort</span>(cos_sim[,<span class="dv">1</span>], <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), <span class="dv">5</span>)
-<span class="co"># berlin     paris    munich    leipzig   germany </span>
+<span class="kw">head</span>(<span class="kw">sort</span>(cos_sim[,<span class="dv">1</span>], <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), <span class="dv">5</span>)</code></pre></div>
+<pre><code>##    berlin     paris    munich    august   germany 
+## 0.7699096 0.7378079 0.6501816 0.6437484 0.6177012</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># berlin     paris    munich    leipzig   germany </span>
 <span class="co"># 0.8015347 0.7623165 0.7013252 0.6616945 0.6540700 </span></code></pre></div>
 <p>You can achieve much better results by experimenting with <code>skip_grams_window</code> and the parameters of the <code>GloVe</code> class (including word vectors size and the number of iterations). For more details and large-scale experiments on wikipedia data see this <a href="http://dsnotes.com/blog/text2vec/2015/12/01/glove-enwiki/">old post</a> on my blog.</p>
 </div>
@@ -488,8 +484,11 @@ cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">
 <script>
 
 // add bootstrap table styles to pandoc tables
-$(document).ready(function () {
+function bootstrapStylePandocTables() {
   $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
 });
 
 
@@ -500,7 +499,7 @@ $(document).ready(function () {
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>
