@@ -8,6 +8,7 @@
 \alias{itoken_parallel}
 \alias{itoken_parallel.character}
 \alias{itoken_parallel.ifiles_parallel}
+\alias{itoken_parallel.list}
 \title{Iterators (and parallel iterators) over input objects}
 \usage{
 itoken(iterable, ...)
@@ -31,6 +32,9 @@ itoken_parallel(iterable, ...)
 
 \method{itoken_parallel}{ifiles_parallel}(iterable, preprocessor = identity,
   tokenizer = space_tokenizer, n_chunks = 1L, ...)
+
+\method{itoken_parallel}{list}(iterable,
+  n_chunks = foreach::getDoParWorkers(), ids = NULL, ...)
 }
 \arguments{
 \item{iterable}{an object from which to generate an iterator}

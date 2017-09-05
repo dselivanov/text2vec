@@ -110,7 +110,16 @@ itoken_character_R6 = R6::R6Class(
       new_counter = min(self$counter + self$chunk_size, self$length)
       ix = (self$counter + 1L):new_counter
       # FIXME - https://github.com/wch/R6/issues/94
-      tokens = self$preprocessor[[1]](self$iterable[ix])
+      iterable_val = self$iterable[ix]
+
+      # case for example when we pass integers or numeric values in sequence
+      for(j in seq_along(iterable_val)) {
+        if(!is.character(iterable_val[[j]])) {
+          iterable_val[[j]] = as.character(iterable_val[[j]])
+        }
+      }
+
+      tokens = self$preprocessor[[1]](iterable_val)
       tokens = self$tokenizer[[1]](tokens)
       #-----------------------------------------------
       ret = list(tokens = tokens, ids = self$ids[ix])
@@ -365,8 +374,10 @@ itoken.list = function(iterable,
                         n_chunks = 10,
                         progressbar = interactive(),
                         ids = NULL, ...) {
-
-  stopifnot( all( vapply(X = iterable, FUN = inherits, FUN.VALUE = FALSE, "character") ) )
+  flog.debug("checking whether `itoken` input is list of characrter vectors")
+  input_is_list_of_char_vec = all( vapply(X = iterable, FUN = inherits, FUN.VALUE = FALSE, "character") )
+  if(!input_is_list_of_char_vec)
+    flog.warn("input isn't a list of character vectors. Each element will be coerced to a character vector with as.character()")
   itoken_character_R6$new(iterable, n_chunks = n_chunks, progress = progressbar, ids = ids,
                           preprocessor_ = identity, tokenizer_ = identity)
 }
@@ -439,7 +450,7 @@ itoken_parallel.character = function(iterable,
   chunk_indices = split_into(seq_along(iterable), n_chunks)
   iter_list = lapply(chunk_indices, function(i) {
     ids_chunk = if(is.null(ids)) NULL else(ids[i])
-    itoken(iterable[i], preprocessor, tokenizer, n_chunks, ids = ids_chunk)
+    itoken(iterable[i], preprocessor, tokenizer, n_chunks = 1, ids = ids_chunk)
   })
   class(iter_list) = 'itoken_parallel'
   iter_list
@@ -459,6 +470,30 @@ itoken_parallel.ifiles_parallel = function(iterable,
   iter_list
 }
 
+
+#' @rdname itoken
+#' @export
+itoken_parallel.list = function(iterable,
+                                n_chunks = foreach::getDoParWorkers(),
+                                ids = NULL, ...) {
+  chunk_indices = split_into(seq_along(iterable), n_chunks)
+
+  if(is.null(ids)) {
+    ids = seq_along(iterable)
+    if(!is.null(names(iterable)))
+      ids = names(iterable)
+  } else {
+    stopifnot(length(ids) == length(iterable))
+    ids = as.character(ids)
+  }
+
+  iter_list = lapply(chunk_indices, function(i) {
+    ids_chunk = if(is.null(ids)) NULL else(ids[i])
+    itoken(iterable[i], n_chunks = 1, ids = ids_chunk, progressbar = FALSE)
+  })
+  class(iter_list) = 'itoken_parallel'
+  iter_list
+}
 
 
 # #' @name ilines
