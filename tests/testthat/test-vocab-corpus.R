@@ -13,10 +13,10 @@ it = itoken(tokens, progressbar = FALSE, ids = ids)
 test_that("Vocabulary pruning", {
   vocab = create_vocabulary(it)
   # Vocabulary stats
-  expect_equal(length(vocab$term), 18402)
+  expect_equal(length(vocab$term), 19297)
   expect_equal( vocab$term[ which.max(vocab$doc_count) ], 'the')
   expect_equal( max(vocab$doc_count), 992)
-  expect_equal( max(vocab$term_count), 13252)
+  expect_equal( max(vocab$term_count), 13224)
 
   COUNT_MAX = 5000L
   COUNT_MIN = 20L
@@ -35,7 +35,7 @@ test_that("Vocabulary pruning", {
   # same ngrams
   expect_identical(p_vocab$ngram, p_vocab$ngram)
   # number of terms in prunned vocab
-  expect_equal(nrow(p_vocab), 429L)
+  expect_equal(nrow(p_vocab), 428L)
 
   doc_count_min = 10L
   doc_count_max = 100L
@@ -83,7 +83,7 @@ test_that("Unigran Vocabulary Corpus construction", {
   m = create_dtm(it, vectorizer)
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab$term))
-  expect_equal( length(m@x), 141876L)
+  expect_equal( length(m@x), 141714L)
 
   # check classification accuracy
   # fit = glmnet::cv.glmnet(x = m, y = movie_review[['sentiment']][train_ind],
@@ -101,8 +101,8 @@ test_that("bi-gram Vocabulary Corpus construction", {
                       ngram = c('ngram_min' = 2L,
                                 'ngram_max' = 2L))
 
-  expect_equal(sum(grepl("_", vocab$term, fixed = T)), 120070L)
-  expect_equal(length(vocab$term), 120070L)
+  expect_equal(sum(grepl("_", vocab$term, fixed = T)), 121333L)
+  expect_equal(length(vocab$term), 121333L)
 
   vectorizer = vocab_vectorizer(vocab)
 
@@ -110,7 +110,7 @@ test_that("bi-gram Vocabulary Corpus construction", {
   m = create_dtm(it, vectorizer)
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab$term))
-  expect_equal( length(m@x), 223579L)
+  expect_equal( length(m@x), 220104L)
 })
 
 test_that("Unigram + Bigram Vocabulary Corpus construction", {
@@ -118,14 +118,14 @@ test_that("Unigram + Bigram Vocabulary Corpus construction", {
   vocab = create_vocabulary(it,
                       ngram = c('ngram_min' = 1L,
                                 'ngram_max' = 2L))
-  expect_equal(length(vocab$term), 138472L)
+  expect_equal(length(vocab$term), 140630L)
 
   vectorizer = vocab_vectorizer(vocab)
   # dtm
   m = create_dtm(it, vectorizer)
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], length(vocab$term))
-  expect_equal( length(m@x), 365455L)
+  expect_equal( length(m@x), 361818L)
 })
 
 test_that("create_dtm", {

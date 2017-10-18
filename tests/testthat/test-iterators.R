@@ -22,7 +22,7 @@ test_that("ifiles", {
   it = ifiles(c(temp_file_1, temp_file_2))
   it2 = itoken(it, preprocessor = tolower, tokenizer = word_tokenizer, progressbar = FALSE)
   v = create_vocabulary(it2)
-  expect_equal(nrow(v), 7261)
+  expect_equal(nrow(v), 7448)
   v2 = create_vocabulary(it2)
   expect_equal(v, v2)
   dtm = create_dtm(it2, hash_vectorizer())
@@ -35,7 +35,7 @@ test_that("ifiles_parallel", {
   it = ifiles_parallel(c(temp_file_1, temp_file_2))
   it2 = itoken_parallel(it, preprocessor = tolower, tokenizer = word_tokenizer, progressbar = FALSE)
   v = create_vocabulary(it2)
-  expect_equal(nrow(v), 7261)
+  expect_equal(nrow(v), 7448)
   v2 = create_vocabulary(it2)
   expect_equal(v, v2)
   dtm = create_dtm(it2, hash_vectorizer())
@@ -49,33 +49,26 @@ test_that("idir", {
   it = idir(path = tmp_dir)
   it2 = itoken(it, preprocessor = tolower, tokenizer = word_tokenizer, progressbar = FALSE)
   v = create_vocabulary(it2)
-  expect_equal(nrow(v), 7261)
+  expect_equal(nrow(v), 7448)
 })
-
-# test_that("ilines", {
-#   it = ilines(con = temp_file_1, n = 10)
-#   it2 = itoken(it, preprocessor = tolower, tokenizer = word_tokenizer)
-#   v = create_vocabulary(it2)
-#   expect_equal(nrow(v), 4464)
-# })
 
 test_that("itoken character", {
   it2 = itoken(txt_1, preprocessor = tolower, tokenizer = word_tokenizer, progressbar = FALSE)
   v = create_vocabulary(it2)
-  expect_equal(nrow(v), 4464)
+  expect_equal(nrow(v), 4562)
 })
 
 test_that("itoken character parallel", {
   it2 = itoken_parallel(txt_1, preprocessor = tolower, tokenizer = word_tokenizer)
   v = create_vocabulary(it2)
-  expect_equal(nrow(v), 4464)
+  expect_equal(nrow(v), 4562)
 })
 
 test_that("itoken list parallel", {
   tokens = word_tokenizer(tolower(txt_1))
   it2 = itoken_parallel(tokens)
   v = create_vocabulary(it2)
-  expect_equal(nrow(v), 4464)
+  expect_equal(nrow(v), 4562)
 })
 
 test_that("itoken list non-character", {

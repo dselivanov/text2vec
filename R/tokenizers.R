@@ -16,16 +16,13 @@
 
 #' @name tokenizers
 #' @title Simple tokenization functions for string splitting
-#' @description very thin wrappers around \code{base} regular expressions.
-#' \bold{For much more faster and functional tokenizers see \code{tokenizers} package:
-#' \url{https://cran.r-project.org/package=tokenizers}}.
-#' The reason for not including this to \code{text2vec} is to keep number of dependencies small.
-#' Also check \code{stringi::stri_split_*} and \code{stringr::str_split_*}.
+#' @description Few simple tokenization functions exported from \code{tokenizers} package:
+#' \url{https://cran.r-project.org/package=tokenizers}.
+#' Also check \code{stringi::stri_split_*}.
 #' @param strings \code{character} vector
-#' @param pattern \code{character} pattern symbol.
 #' @param xptr \code{logical} tokenize at C++ level - could speed-up by 15-50\%.
 #' @param sep \code{character}, \code{nchar(sep)} = 1 - split strings by this character.
-#' @param ... other parameters to \link{strsplit} function, which is used under the hood.
+#' @param ... other parameters (usually not used - see source code for details).
 #' @return \code{list} of \code{character} vectors. Each element of list contains vector of tokens.
 #' @examples
 #' doc = c("first  second", "bla, bla, blaa")
@@ -38,21 +35,16 @@
 #' @export
 word_tokenizer = function(strings, ...)
 {
-  strsplit(strings, "\\W", ...) %>% lapply(function(x) x[nchar(x) > 0])
-}
-
-#' @rdname tokenizers
-#' @export
-regexp_tokenizer = function(strings, pattern, ...)
-{
-  strsplit(strings, pattern, ...)
+  # strsplit(strings, "\\W", ...) %>% lapply(function(x) x[nchar(x) > 0])
+  tokenizers::tokenize_words(strings, lowercase = FALSE, ...)
 }
 
 #' @rdname tokenizers
 #' @export
 char_tokenizer = function(strings, ...)
 {
-  strsplit(strings, "", TRUE, ...)
+  tokenizers::tokenize_characters(strings, lowercase = FALSE, strip_non_alphanum = FALSE, simplify = FALSE)
+  # strsplit(strings, "", TRUE, ...)
 }
 
 #' @rdname tokenizers
@@ -61,7 +53,7 @@ space_tokenizer = function(strings, sep = " ", xptr = FALSE, ...)
 {
   stopifnot(nchar(sep) == 1)
   if(!xptr) {
-    strsplit(strings, sep, TRUE, ...)
+    stringi::stri_split_fixed(str = strings, pattern = sep, ...)
   } else {
     cpp_fixed_char_tokenizer(strings, sep)
   }

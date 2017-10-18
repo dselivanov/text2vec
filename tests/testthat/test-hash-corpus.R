@@ -16,7 +16,7 @@ test_that("Unigram Hash Corpus construction", {
 
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], h_size)
-  expect_equal( length(m@x), 140790L)
+  expect_equal( length(m@x), 140615L)
 
   # fit = glmnet::cv.glmnet(x = m, y = movie_review[['sentiment']][train_ind],
   #                          family = 'binomial',
@@ -34,5 +34,5 @@ test_that("trigram hash-corpus construction", {
 
   expect_equal( dim(m)[[1]], length(train_ind))
   expect_equal( dim(m)[[2]], h_size)
-  expect_equal( length(m@x), 599667L)
+  expect_equal( length(m@x), 591549L)
 })

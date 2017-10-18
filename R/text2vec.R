@@ -46,6 +46,13 @@ NULL
 #' @export
 magrittr::`%>%`
 
+#' @export
+mlapi::fit
+#' @export
+mlapi::fit_transform
+
+
+
 if (getRversion() >= "2.15.1") {
   trick_pass_r_cmd_check =
     c(".", "doc_count", "it", "pair", "term", "term_count", "tokens", "val", "batch", "x_remote")

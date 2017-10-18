@@ -1,3 +1,9 @@
+# text2vec 0.5.1
+
+1. 2017-10-18
+    * Now tokenization is based on [tokenizers](https://github.com/ropensci/tokenizers) and **THE** [stringi](https://github.com/gagolews/stringi) packages.
+    * models API follow [mlapi](https://github.com/dselivanov/mlapi) package. No API changes on `text2vec` side - we just put abstract `scikit-learn`-like classes to a separate package in order to make them more reusable.
+
 # text2vec 0.5.0
 
 1. 2017-06-12
