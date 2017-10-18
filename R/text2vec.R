@@ -34,6 +34,7 @@ NULL
 #' @import data.table
 #' @importFrom foreach foreach %do% %dopar%
 #' @importFrom R6 R6Class
+#' @import mlapi
 #' @importFrom RcppParallel RcppParallelLibs
 #' @importFrom magrittr %>%
 #' @importFrom utils txtProgressBar setTxtProgressBar

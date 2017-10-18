@@ -374,10 +374,10 @@ itoken.list = function(iterable,
                         n_chunks = 10,
                         progressbar = interactive(),
                         ids = NULL, ...) {
-  flog.debug("checking whether `itoken` input is list of characrter vectors")
-  input_is_list_of_char_vec = all( vapply(X = iterable, FUN = inherits, FUN.VALUE = FALSE, "character") )
-  if(!input_is_list_of_char_vec)
-    flog.warn("input isn't a list of character vectors. Each element will be coerced to a character vector with as.character()")
+  # flog.debug("checking whether `itoken` input is list of characrter vectors")
+  # input_is_list_of_char_vec = all( vapply(X = iterable, FUN = inherits, FUN.VALUE = FALSE, "character") )
+  # if(!input_is_list_of_char_vec)
+  #   flog.warn("input isn't a list of character vectors. Each element will be coerced to a character vector with as.character()")
   itoken_character_R6$new(iterable, n_chunks = n_chunks, progress = progressbar, ids = ids,
                           preprocessor_ = identity, tokenizer_ = identity)
 }

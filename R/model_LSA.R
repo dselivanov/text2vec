@@ -72,7 +72,7 @@ LatentSemanticAnalysis = R6::R6Class(
       private$svd_method = match.arg(method)
     },
     fit_transform = function(x, ...) {
-      x = super$check_convert_input(x, private$internal_matrix_formats)
+      x = super$check_convert_input(x)
       if(private$svd_method == "irlba") {
         # http://stackoverflow.com/questions/7028385/can-i-remove-an-element-in-dot-dot-dot-and-pass-it-on
         # remove "y" from S3 call

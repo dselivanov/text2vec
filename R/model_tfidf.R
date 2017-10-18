@@ -56,7 +56,7 @@
 #' dtm_tfidf = model_tfidf$fit_transform(dtm)
 TfIdf = R6::R6Class(
   classname = c("TfIdf"),
-  inherit = mlapiTransformer,
+  inherit = mlapiTransformation,
   public = list(
     #----------------------------------------------------------------------------
     # methods
@@ -91,7 +91,7 @@ TfIdf = R6::R6Class(
     smooth_idf = TRUE,
     fitted = FALSE,
     prepare_x = function(x) {
-      x_internal = super$check_convert_input(x, private$internal_matrix_formats)
+      x_internal = super$check_convert_input(x)
       if(private$sublinear_tf)
         x_internal@x = 1 + log(x_internal@x)
       normalize(x_internal, private$norm)

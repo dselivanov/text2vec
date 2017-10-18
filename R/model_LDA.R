@@ -318,7 +318,7 @@ LatentDirichletAllocation = R6::R6Class(
     # },
     #--------------------------------------------------------------
     init_model_dtm = function(x, ptr = private$ptr) {
-      x = super$check_convert_input(x, private$internal_matrix_formats)
+      x = super$check_convert_input(x)
       # Document-term matrix should have column names - vocabulary
       stopifnot(!is.null(colnames(x)))
 
@@ -414,7 +414,6 @@ LatentDirichletAllocationDistributed = R6::R6Class(
                              progressbar = interactive(), ...) {
 
       stopifnot(inherits(x, "RowDistributedMatrix"))
-      # x = super$check_convert_input(x, private$internal_matrix_formats)
       stopifnot(is.logical(progressbar))
       # OUT_FILE = "~/lda.txt"
       # sun_counts = function(...) do.call(`+`, ...)

@@ -21,8 +21,8 @@ test_that("LDA, perplexity", {
 
   model = LDA$new(n_topic, doc_topic_prior = 0.1, topic_word_prior = 0.01)
 
-  expect_error(model$components)
-  expect_error(model$topic_word_distribution)
+  expect_warning(model$components)
+  expect_error(suppressWarnings(model$topic_word_distribution))
   expect_null(model$doc_topic_distribution)
 
   set.seed(1)
