@@ -1,24 +1,24 @@
-# @name get_dtm
-# @title Extract document-term matrix
-# @description This function extracts a document-term matrix from a
+#' @name get_dtm
+#' @title Extract document-term matrix
+#' @description This function extracts a document-term matrix from a
 #   \code{Corpus} object.
-# @param corpus \code{HashCorpus} or \code{VocabCorpus} object. See
+#' @param corpus \code{HashCorpus} or \code{VocabCorpus} object. See
 #    for details.
-# @param type character, one of \code{c("dgCMatrix", "dgTMatrix")}.
-# @examples
-# N = 1000
-# tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
-# it = itoken(tokens)
-# v = create_vocabulary(it)
-# '
-# #remove very common and uncommon words
-# pruned_vocab = prune_vocabulary(v, term_count_min = 10,
-#  doc_proportion_max = 0.8, doc_proportion_min = 0.001,
-#  vocab_term_max = 10000)
-# '
-# vectorizer = vocab_vectorizer(v)
-# it = itoken(tokens)
-# dtm = create_dtm(it, vectorizer)
+#' @param type character, one of \code{c("dgCMatrix", "dgTMatrix")}.
+#' @examples
+#' N = 1000
+#' tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
+#' it = itoken(tokens)
+#' v = create_vocabulary(it)
+#'
+#' #remove very common and uncommon words
+#' pruned_vocab = prune_vocabulary(v, term_count_min = 10,
+#'  doc_proportion_max = 0.8, doc_proportion_min = 0.001,
+#'  vocab_term_max = 10000)
+#'
+#' vectorizer = vocab_vectorizer(v)
+#' it = itoken(tokens)
+#' dtm = create_dtm(it, vectorizer)
 
 get_dtm = function(corpus_ptr) {
   if(class(corpus_ptr) == "HashCorpus")
