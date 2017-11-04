@@ -169,7 +169,7 @@ Collocations = R6::R6Class(
       # where N is the total vocabulary size.
       dt[ , gensim := (n_ij - private$collocation_count_min) * nword / (as.numeric(n_i) * n_j)]
       # Dunning's LLR
-      L_func = function(k, n, p) { k * log(p) + (n - k) * log(1 - p) }
+      L_func = function(k, n, p) { k * log(p + (p == 0)) + (n - k) * log(1 - p + (1 - p == 0)) }
       dt[ , logLik := L_func(n_ij, n_i, n_j / nword) + L_func(n_j - n_ij, nword - n_i, n_j / nword) -
             L_func(n_ij, n_i, n_ij/n_i) - L_func(n_j - n_ij, nword - n_i, (n_j - n_ij) / (nword - n_i))
           ]
