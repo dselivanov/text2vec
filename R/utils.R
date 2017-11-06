@@ -71,3 +71,15 @@ malloc_trim_finalizer = function(e) {
   }
   res
 }
+
+# @details This is the natural log of the discrete binomial probability mass function scaled
+# by the inverse binomial coefficient with special care taken to avoid negative infinity
+# resulting from log(0). A slightly slower but more intuitive way of writing this would be
+# \code{function(k, n, p) {
+#   out <- dbinom(k, n, p, log = TRUE) - log(choose(n, k))
+#   replace(out, out == -Inf, 0)
+# }}
+# This is used to create a log-likelihood ratio with 1 degree of freedom for bi-gram analysis
+L_func = function(k, n, p) { 
+	k * log(p + (p == 0)) + (n - k) * log(1 - p + (1 - p == 0))
+}	
