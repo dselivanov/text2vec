@@ -42,7 +42,6 @@ prepare_analogy_questions = function(questions_file_path, vocab_terms) {# nocov 
   questions_number = sum(sapply(q, nrow))
 
   flog.info("%d full questions found out of %d total",
-            as.character(Sys.time()),
             questions_number,
             length(lines) - length(section_name_ind))
 
