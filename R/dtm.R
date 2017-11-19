@@ -28,7 +28,13 @@ get_dtm = function(corpus_ptr) {
 
   if (length(dtm@x) == 0)
     warning("dtm has 0 rows. Empty iterator?", immediate. = TRUE)
-  dtm@Dimnames[[1]] = attr(corpus_ptr, 'ids')
+
+  rn = attr(corpus_ptr, 'ids')
+  cn = dtm@Dimnames[[2]]
+
+  if(length(cn) != ncol(dtm))
+    cn = NULL
+  dtm@Dimnames = list(rn, cn)
   dtm
 }
 
