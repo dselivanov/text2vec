@@ -82,7 +82,7 @@ Collocations = R6::R6Class(
     sep = NULL,
     phrases = NULL,
     phrases_ptr = NULL,
-    v = NULL,
+    vocabulary = NULL,
     collocation_count_min = NULL,
     pmi_min = NULL,
     gensim_min = NULL,
@@ -101,7 +101,7 @@ Collocations = R6::R6Class(
       if(is.null(vocabulary)) {
         flog.debug("got NULL as vocabulary - so it will be built from training data iterator later")
       } else if(inherits(vocabulary, "text2vec_vocabulary")) {
-        private$v = copy(vocabulary)
+        private$vocabulary = copy(vocabulary)
       } else {
         stop("'vocabulary' shold be object of class 'text2vec_vocabulary' or NULL")
       }
@@ -122,14 +122,17 @@ Collocations = R6::R6Class(
     },
     partial_fit = function(it, ...) {
       stopifnot(inherits(it, "itoken") || inherits(it, "itoken_parallel"))
-      if(is.null(private$v)) {
+      if(is.null(private$vocabulary)) {
         flog.debug("building vocabulary for Collocations model")
-        private$v = create_vocabulary(it)
-        private$v = prune_vocabulary(private$v, term_count_min = private$collocation_count_min)
-        flog.debug("vocabulary construction done - %d terms", nrow(private$v))
+        private$vocabulary = create_vocabulary(it, ...)
+        private$vocabulary = prune_vocabulary(private$vocabulary, term_count_min = private$collocation_count_min)
+        flog.debug("vocabulary construction done - %d terms", nrow(private$vocabulary))
       }
       if(!is.null(self$collocation_stat)) {
-        private$v = create_vocabulary(unique(c(private$phrases, private$v$term)), sep_ngram = private$sep )
+        private$vocabulary = create_vocabulary(it = unique(c(private$phrases, private$vocabulary$term)),
+                                               ngram = attr(private$vocabulary, "ngram", TRUE),
+                                               stopwords =  attr(private$vocabulary, "stopwords", TRUE),
+                                               sep_ngram = private$sep)
         it_internal = self$transform(it)
       }
       else {
@@ -140,7 +143,7 @@ Collocations = R6::R6Class(
         } else
           it_internal = it$clone(deep = TRUE)
       }
-      vectorizer = vocab_vectorizer(private$v)
+      vectorizer = vocab_vectorizer(private$vocabulary)
       tcm = create_tcm(it_internal, vectorizer, skip_grams_window = 1L,
                        skip_grams_window_context = "right")
       # flog.debug("tcm done dim = %d * %d", nrow(tcm), ncol(tcm))
@@ -212,8 +215,13 @@ Collocations = R6::R6Class(
       # if pointer is invalid - init it
       if(is_invalid_ptr(private$phrases_ptr))
         private$phrases_ptr = create_xptr_unordered_set(private$phrases)
+      stopwords = attr(private$vocabulary, "stopwords", TRUE)
+      stopifnot(is.character(stopwords))
+      stopwords_ptr = create_xptr_unordered_set(stopwords)
+      collapse_collocations = function(x) {
+        collapse_collocations_cpp(x$tokens, private$phrases_ptr, stopwords_ptr, private$sep)
+      }
 
-      collapse_collocations = function(x) collapse_collocations_cpp(x$tokens, private$phrases_ptr, private$sep)
       if(inherits(it, "itoken_parallel")) {
         flog.debug("clonning itoken_parallel")
         it_transformed = lapply(it, function(x) {

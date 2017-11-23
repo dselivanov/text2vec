@@ -14,19 +14,27 @@ SEXP create_xptr_unordered_set(CharacterVector x) {
 
 // [[Rcpp::export]]
 ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVector> &docs,
-                                                  SEXP xptr_unordered_set,
+                                                  SEXP xptr_unordered_set_phrases,
+                                                  SEXP xptr_unordered_set_stopwords,
                                                   const String r_sep) {
   const std::string sep = r_sep;
   size_t input_size = docs.size();
   List res(input_size);
-  // std::unordered_set<std::string> collocations;
-  Rcpp::XPtr<std::unordered_set<std::string>> collocations(xptr_unordered_set);
-  std::unordered_set<std::string>::iterator it_collocations;
+  Rcpp::XPtr<std::unordered_set<std::string>> collocations(xptr_unordered_set_phrases);
+  Rcpp::XPtr<std::unordered_set<std::string>> stopwords(xptr_unordered_set_stopwords);
+
+  std::vector<std::string> terms;
   // loop through documents
   for (uint32_t i = 0; i < input_size; i++) {
     checkUserInterrupt();
-
-    CharacterVector terms = docs[i];
+    CharacterVector termsR = docs[i];
+    terms.clear();
+    terms.reserve(termsR.size());
+    for (auto it: termsR) {
+      std::string term = as<std::string>(it);
+      if(stopwords->find(term) == stopwords->end())
+        terms.push_back(term);
+    }
     size_t tsize = terms.size();
 
     std::vector<std::string> out_terms(tsize);
@@ -40,13 +48,12 @@ ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVe
     if(tsize > 0) {
       // k = 1;
       uint32_t j = 1;
-      std::string w1 = as<std::string>(terms[j - 1]);
+      std::string w1 = terms[j - 1];
       // out_terms[k - 1] = w1;
       while(j < tsize) {
-        w2 = as<std::string>(terms[j]);
+        w2 = terms[j];
         collocation_candidate = w1 + sep + w2;
-        it_collocations = collocations->find(collocation_candidate);
-        if(it_collocations != collocations->end()) {
+        if(collocations->find(collocation_candidate) != collocations->end()) {
           // found collactaion in our collocations set
           w1 = collocation_candidate;
         } else {

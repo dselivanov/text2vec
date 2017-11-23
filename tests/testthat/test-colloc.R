@@ -26,11 +26,12 @@ v2 = prune_vocabulary(v2, term_count_min = 5)
 test_that("collocations internalfunctions", {
   sep = "_"
   ptr = text2vec:::create_xptr_unordered_set(c("c_te", "d_ivoire", "c_te_d_ivoire"))
-  x = text2vec:::collapse_collocations_cpp(list(c("c", "te", "d", "2", "2")), ptr, sep)[[1]]
+  ptr_sw = text2vec:::create_xptr_unordered_set(character(0))
+  x = text2vec:::collapse_collocations_cpp(list(c("c", "te", "d", "2", "2")), ptr, ptr_sw, sep)[[1]]
   expect_equal(c("c_te", "d", "2", "2" ), x)
-  x = text2vec:::collapse_collocations_cpp(list(c("c", "te", "d", "ivoire", "2")), ptr, sep)[[1]]
+  x = text2vec:::collapse_collocations_cpp(list(c("c", "te", "d", "ivoire", "2")), ptr, ptr_sw, sep)[[1]]
   expect_equal(c("c_te_d_ivoire", "2" ), x)
-  x = text2vec:::collapse_collocations_cpp(list(c("c", "te", "d", "ivoire")), ptr, sep)[[1]]
+  x = text2vec:::collapse_collocations_cpp(list(c("c", "te", "d", "ivoire")), ptr, ptr_sw, sep)[[1]]
   expect_equal(c("c_te_d_ivoire"), x)
 
   expect_equal(length(setdiff(v2$term, v$term)), 44L)

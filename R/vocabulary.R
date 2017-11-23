@@ -83,7 +83,8 @@ create_vocabulary.character = function(it, ngram = c("ngram_min" = 1L, "ngram_ma
 
   res = data.frame("term" = it,
                    "term_count" = rep(NA_integer_, vocab_length),
-                   "doc_count" = rep(NA_integer_, vocab_length))
+                   "doc_count" = rep(NA_integer_, vocab_length),
+                   stringsAsFactors = FALSE)
   res = res[order(res$term_count), ]
 
   setattr(res, "ngram", c("ngram_min" = ngram_min, "ngram_max" = ngram_max))
