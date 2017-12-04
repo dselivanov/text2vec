@@ -43,6 +43,7 @@ First of all let's split out dataset into two parts - *train* and *test*. We wil
 ```{r, loading-data, eval=TRUE, message=FALSE}
 library(text2vec)
 library(data.table)
+library(magrittr)
 data("movie_review")
 setDT(movie_review)
 setkey(movie_review, id)

@@ -36,7 +36,6 @@ NULL
 #' @importFrom R6 R6Class
 #' @import mlapi
 #' @importFrom RcppParallel RcppParallelLibs
-#' @importFrom magrittr %>%
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' @importFrom methods as
 #' @importFrom futile.logger flog.debug flog.info flog.warn flog.error

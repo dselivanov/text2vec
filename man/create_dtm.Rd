@@ -16,7 +16,7 @@ create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix"), ...)
   ...)
 
 \method{create_dtm}{itoken_parallel}(it, vectorizer, type = c("dgCMatrix",
-  "dgTMatrix"), distributed = FALSE, ...)
+  "dgTMatrix"), ...)
 }
 \arguments{
 \item{it}{\link{itoken} iterator or \code{list} of \code{itoken} iterators.}
@@ -28,9 +28,6 @@ create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix"), ...)
 
 \item{...}{arguments to the \link{foreach} function which is used to iterate
 over \code{it}.}
-
-\item{distributed}{whether to keep matrix row-distributed.
-Row-distributed matrices can be used in distributed LDA.}
 }
 \value{
 A document-term matrix
