@@ -95,7 +95,7 @@ it = itoken(txt, tolower, word_tokenizer, n_chunks = 10)
 it = itoken(txt, tolower, word_tokenizer, n_chunks = 10, ids = ids)
 # Example of stemming tokenizer
 # stem_tokenizer =function(x) {
-#   word_tokenizer(x) \%>\% lapply(SnowballC::wordStem, language="en")
+#   lapply(word_tokenizer(x), SnowballC::wordStem, language="en")
 # }
 #------------------------------------------------
 # PARALLEL iterators

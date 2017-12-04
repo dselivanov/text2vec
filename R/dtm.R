@@ -7,7 +7,7 @@
 # @param type character, one of \code{c("dgCMatrix", "dgTMatrix")}.
 # @examples
 # N = 1000
-# tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
+# tokens = word_tokenizer(tolower(movie_review$review[1:N]))
 # it = itoken(tokens)
 # v = create_vocabulary(it)
 # '

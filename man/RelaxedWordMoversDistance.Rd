@@ -63,11 +63,9 @@ rwmd$pdist2(x, y)
 \examples{
 \dontrun{
 data("movie_review")
-tokens = movie_review$review \%>\%
-  tolower \%>\%
-  word_tokenizer
-v = create_vocabulary(itoken(tokens)) \%>\%
-  prune_vocabulary(term_count_min = 5, doc_proportion_max = 0.5)
+tokens = word_tokenizer(tolower(movie_review$review))
+v = create_vocabulary(itoken(tokens))
+v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.5)
 it = itoken(tokens)
 vectorizer = vocab_vectorizer(v)
 dtm = create_dtm(it, vectorizer)

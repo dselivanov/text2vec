@@ -65,10 +65,10 @@ library(text2vec)
 data("movie_review")
 
 preprocessor = function(x) {
-  tolower(x) \%>\% gsub("[^[:alnum:]\\\\s]", replacement = " ", .)
+  gsub("[^[:alnum:]\\\\s]", replacement = " ", tolower(x))
 }
 sample_ind = 1:100
-tokens = movie_review$review[sample_ind] \%>\% preprocessor \%>\% word_tokenizer
+tokens = word_tokenizer(preprocessor(movie_review$review[sample_ind]))
 it = itoken(tokens, ids = movie_review$id[sample_ind])
 system.time(v <- create_vocabulary(it))
 v = prune_vocabulary(v, term_count_min = 5)

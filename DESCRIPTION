@@ -27,14 +27,11 @@ Imports:
     digest (>= 0.6.8),
     foreach(>= 1.4.3),
     data.table(>= 1.9.6),
-    magrittr (>= 1.5),
     irlba (>= 2.2.1),
     R6 (>= 2.1.2), 
     uuid (>= 0.1-2), 
     futile.logger (>= 1.4.3), 
-    stringi (>= 1.1.5), 
-    tokenizers (>= 0.1.4), 
-    mlapi
+    stringi (>= 1.1.5)
 Remotes:
     dselivanov/mlapi
 LinkingTo: Rcpp,
@@ -48,7 +45,9 @@ Suggests:
     knitr,
     rmarkdown,
     glmnet,
-    parallel
+    parallel, 
+    tokenizers, 
+    magrittr
 URL: http://text2vec.org
 BugReports: https://github.com/dselivanov/text2vec/issues
 VignetteBuilder: knitr

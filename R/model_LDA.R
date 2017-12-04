@@ -29,11 +29,11 @@ TopicModel = R6::R6Class(
     doc_topic_matrix = NULL,
 
     topic_word_distribution_with_prior = function() {
-      (self$components + private$topic_word_prior) %>% normalize("l1")
+      normalize((self$components + private$topic_word_prior), "l1")
     },
     doc_topic_distribution_with_prior = function() {
       if (is.null(private$doc_topic_matrix)) stop("LDA model was not fitted yet!")
-      (private$doc_topic_matrix + private$doc_topic_prior) %>% normalize("l1")
+      normalize((private$doc_topic_matrix + private$doc_topic_prior), "l1")
     },
     doc_topic_distribution = function() {
       res = NULL
@@ -41,7 +41,7 @@ TopicModel = R6::R6Class(
       if (is.null(private$doc_topic_matrix))
         stop("LDA model was not fitted yet!")
       else
-        res = (private$doc_topic_matrix) %>% normalize("l1")
+        res = normalize(private$doc_topic_matrix, "l1")
 
       attributes(res) = attributes(private$doc_topic_matrix)
       res
@@ -61,10 +61,11 @@ TopicModel = R6::R6Class(
         lambda * log(topic_word_distribution) +
         (1 - lambda) * log(t(t(topic_word_distribution) / (colSums(self$components) / sum(self$components)) ))
 
-      lapply(topic_number, function(tn) {
+      res = lapply(topic_number, function(tn) {
         word_by_freq = sort(topic_word_freq[tn, ], decreasing = TRUE, method = "radix")
         names(word_by_freq)[seq_len(n)]
-      }) %>% do.call(cbind, .)
+      })
+      do.call(cbind, res)
     },
     plot = function(lambda.step = 0.1, reorder.topics = FALSE, doc_len = private$doc_len, ...) {
       if("LDAvis" %in% rownames(installed.packages())) {
@@ -97,7 +98,7 @@ TopicModel = R6::R6Class(
     topic_word_distribution = function(value) {
       if (!missing(value)) stop("Sorry this is a read-only field")
       # self$components is topic word count
-      else (self$components) %>% normalize("l1")
+      else normalize(self$components, "l1")
     }
   )
 )
@@ -170,10 +171,10 @@ TopicModel = R6::R6Class(
 #' library(text2vec)
 #' data("movie_review")
 #' N = 500
-#' tokens = movie_review$review[1:N] %>% tolower %>% word_tokenizer
+#' tokens = word_tokenizer(tolower(movie_review$review[1:N]))
 #' it = itoken(tokens, ids = movie_review$id[1:N])
-#' v = create_vocabulary(it) %>%
-#'   prune_vocabulary(term_count_min = 5, doc_proportion_max = 0.2)
+#' v = create_vocabulary(it)
+#' v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.2)
 #' dtm = create_dtm(it, vocab_vectorizer(v))
 #' lda_model = LDA$new(n_topics = 10)
 #' doc_topic_distr = lda_model$fit_transform(dtm, n_iter = 20)
@@ -250,7 +251,7 @@ LatentDirichletAllocation = R6::R6Class(
                                        n_check_convergence = n_check_convergence,
                                        update_topics = FALSE, progressbar = progressbar)
       # add priors and normalize to get distribution
-      doc_topic_distr = (doc_topic_matrix + private$doc_topic_prior) %>% text2vec::normalize("l1")
+      doc_topic_distr = text2vec::normalize((doc_topic_matrix + private$doc_topic_prior), "l1")
       attributes(doc_topic_distr) = attributes(doc_topic_matrix)
       rownames(doc_topic_distr) = rownames(x)
       doc_topic_distr
@@ -460,10 +461,10 @@ LatentDirichletAllocationDistributed = R6::R6Class(
                     list(ll = ll, local_counts = local_counts)
                   }
         # aggregate local counts - sync across single models
-        global_counts = lapply(iter_data, function(x) x[["local_counts"]]) %>%
-          Reduce(`+`,  ., init = global_counts)
+        global_counts = lapply(iter_data, function(x) x[["local_counts"]])
+        global_counts = Reduce(`+`, global_counts, init = global_counts)
         if(i %% n_check_convergence == 0) {
-          ll = lapply(iter_data, function(x) x[["ll"]]) %>% do.call(sum, .)
+          ll = do.call(sum, lapply(iter_data, function(x) x[["ll"]]))
           futile.logger::flog.info("iter %d loglikelihood = %.3f", i, ll)
         }
       }

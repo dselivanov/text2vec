@@ -17,12 +17,12 @@
 #' n_iter = 10
 #' train_ind = 1:200
 #' ids = movie_review$id[train_ind]
-#' txt = movie_review[['review']][train_ind] %>% tolower
+#' txt = tolower(movie_review[['review']][train_ind])
 #' names(txt) = ids
 #' tokens = word_tokenizer(txt)
 #' it = itoken(tokens, progressbar = FALSE, ids = ids)
-#' vocab = create_vocabulary(it) %>%
-#'   prune_vocabulary(term_count_min = 5, doc_proportion_min = 0.02)
+#' vocab = create_vocabulary(it)
+#' vocab = prune_vocabulary(vocab, term_count_min = 5, doc_proportion_min = 0.02)
 #' dtm = create_dtm(it, vectorizer = vocab_vectorizer(vocab))
 #' n_topic = 10
 #' model = LDA$new(n_topic, doc_topic_prior = 0.1, topic_word_prior = 0.01)

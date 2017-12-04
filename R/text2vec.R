@@ -44,9 +44,6 @@ NULL
 NULL
 
 #' @export
-magrittr::`%>%`
-
-#' @export
 mlapi::fit
 #' @export
 mlapi::fit_transform

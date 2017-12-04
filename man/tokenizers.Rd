@@ -26,7 +26,7 @@ space_tokenizer(strings, sep = " ", xptr = FALSE, ...)
 \code{list} of \code{character} vectors. Each element of list contains vector of tokens.
 }
 \description{
-Few simple tokenization functions exported from \code{tokenizers} package:
+Few simple tokenization functions. For more comprehensive list see \code{tokenizers} package:
 \url{https://cran.r-project.org/package=tokenizers}.
 Also check \code{stringi::stri_split_*}.
 }

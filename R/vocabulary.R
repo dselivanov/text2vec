@@ -190,17 +190,16 @@ create_vocabulary.itoken_parallel = function(it, ngram = c("ngram_min" = 1L, "ng
 }
 
 combine_vocabulary = function(...) {
-  vocab_list = list(...) %>% lapply(setDT)
+  vocab_list = lapply(list(...), setDT)
   ngram = attr(vocab_list[[1]], "ngram", exact = TRUE)
   # extract vocabulary stats data.frame and rbind them
-  res = vocab_list %>%
-    lapply(function(x) x[, .(term_count, doc_count, term)]) %>%
-    rbindlist
+  res = lapply(vocab_list, function(x) x[, .(term_count, doc_count, term)])
+  res = rbindlist(res)
 
   # reduce by terms
   res = res[, .("term_count" = sum(term_count),
-                                       "doc_count" = sum(doc_count)),
-                                   by = term]
+                "doc_count" = sum(doc_count)),
+            by = term]
   setcolorder(res, c("term", "term_count", "doc_count"))
 
   combined_document_count = 0
@@ -296,8 +295,8 @@ prune_vocabulary = function(vocabulary,
 
 detect_ngrams = function(vocab, ...) {
   stopifnot(inherits(vocab, "text2vec_vocabulary"))
-  strsplit(vocab$term, attr(vocab, "sep_ngram", TRUE), fixed = TRUE, ...) %>%
-    vapply(length, 0L)
+  res = strsplit(vocab$term, attr(vocab, "sep_ngram", TRUE), fixed = TRUE, ...)
+  vapply(res, length, 0L)
 }
 
 

@@ -54,7 +54,7 @@ tfidf$transform(x)
 \examples{
 data("movie_review")
 N = 100
-tokens = movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
+tokens = word_tokenizer(tolower(movie_review$review[1:N]))
 dtm = create_dtm(itoken(tokens), hash_vectorizer())
 model_tfidf = TfIdf$new()
 dtm_tfidf = model_tfidf$fit_transform(dtm)

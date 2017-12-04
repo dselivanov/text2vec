@@ -95,10 +95,10 @@ lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
 library(text2vec)
 data("movie_review")
 N = 500
-tokens = movie_review$review[1:N] \%>\% tolower \%>\% word_tokenizer
+tokens = word_tokenizer(tolower(movie_review$review[1:N]))
 it = itoken(tokens, ids = movie_review$id[1:N])
-v = create_vocabulary(it) \%>\%
-  prune_vocabulary(term_count_min = 5, doc_proportion_max = 0.2)
+v = create_vocabulary(it)
+v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.2)
 dtm = create_dtm(it, vocab_vectorizer(v))
 lda_model = LDA$new(n_topics = 10)
 doc_topic_distr = lda_model$fit_transform(dtm, n_iter = 20)

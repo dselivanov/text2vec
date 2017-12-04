@@ -98,8 +98,8 @@ temp = tempfile()
 download.file('http://mattmahoney.net/dc/text8.zip', temp)
 text8 = readLines(unz(temp, "text8"))
 it = itoken(text8)
-vocabulary = create_vocabulary(it) \%>\%
-  prune_vocabulary(term_count_min = 5)
+vocabulary = create_vocabulary(it)
+vocabulary = prune_vocabulary(vocabulary, term_count_min = 5)
 v_vect = vocab_vectorizer(vocabulary)
 tcm = create_tcm(it, v_vect, skip_grams_window = 5L)
 glove_model = GloVe$new(word_vectors_size = 50,

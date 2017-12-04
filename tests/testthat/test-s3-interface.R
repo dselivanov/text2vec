@@ -14,7 +14,7 @@ dtm = create_dtm(it, vocab_vectorizer(vocab))
 
 test_that("S3 LSA", {
   lsa = LatentSemanticAnalysis$new(n_topics)
-  d1 = dtm %>% fit_transform(lsa)
+  d1 =  fit_transform(dtm, lsa)
   expect_equal(rownames(d1), ids)
 })
 
@@ -22,14 +22,14 @@ test_that("S3 LDA", {
   convergence_tol = -1
   n_iter = 10
   lda = LDA$new(n_topics)
-  d2 = dtm %>% fit_transform(lda, n_iter = n_iter, convergence_tol = convergence_tol, progressbar = FALSE)
+  d2 = fit_transform(dtm, lda, n_iter = n_iter, convergence_tol = convergence_tol, progressbar = FALSE)
   expect_equal(rownames(d2), ids)
   expect_equal(dim(d2), c(N, n_topics))
 })
 
 test_that("S3 tf-idf", {
   tfidf = TfIdf$new()
-  d2 = dtm %>% fit_transform(tfidf)
+  d2 = fit_transform(dtm, tfidf)
   expect_equal(rownames(d2), ids)
   expect_equal(dim(d2), dim(dtm))
   expect_equal(dimnames(d2), dimnames(dtm))

@@ -19,21 +19,20 @@ prepare_analogy_questions = function(questions_file_path, vocab_terms) {# nocov 
   section_end_ind = c(section_name_ind[ -1 ] - 1, length(lines))
   # construct question matrices by category
   q = Map(
-    function(i1, i2, quetsions)
+    function(i1, i2, quetsions) {
       # take questions strings
-      quetsions[i1:i2] %>%
+      res = quetsions[i1:i2]
       # make character matrix
-      (function(x) do.call(rbind, x)) %>%
+      res = do.call(rbind, res)
       # detect word_vectors rows corresponding to words in question
-      match(vocab_terms) %>%
+      res = match(res, vocab_terms)
       # make character matrix
-      matrix(ncol = 4) %>%
+      res = matrix(res, ncol = 4)
       # detect whether vocabulary contains all words from question
       # filter out question if vocabulary does not contain all words
-      (function(x) {
-        any_na_ind = apply(x, 1, anyNA)
-        x[!any_na_ind, ]
-      }),
+      any_na_ind = apply(res, 1, anyNA)
+      res[!any_na_ind, ]
+    },
     section_start_ind,
     section_end_ind,
     MoreArgs = list(quetsions = lines)

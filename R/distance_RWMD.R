@@ -67,11 +67,9 @@ text2vec_dist = R6::R6Class(
 #' @examples
 #' \dontrun{
 #' data("movie_review")
-#' tokens = movie_review$review %>%
-#'   tolower %>%
-#'   word_tokenizer
-#' v = create_vocabulary(itoken(tokens)) %>%
-#'   prune_vocabulary(term_count_min = 5, doc_proportion_max = 0.5)
+#' tokens = word_tokenizer(tolower(movie_review$review))
+#' v = create_vocabulary(itoken(tokens))
+#' v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.5)
 #' it = itoken(tokens)
 #' vectorizer = vocab_vectorizer(v)
 #' dtm = create_dtm(it, vectorizer)
@@ -96,11 +94,10 @@ RelaxedWordMoversDistance = R6::R6Class(
       private$internal_matrix_format = 'RsparseMatrix'
       private$method = match.arg(method)
       self$progressbar = progressbar
-      # private$wv = t(wv / sqrt(rowSums(wv ^ 2)))# %>% as.matrix
       # make shure  that word vectors are L2 normalized
       # and transpose them for faster column subsetting
       # R stores matrices in column-major format
-      private$wv = t(normalize(wv, "l2") %>% as.matrix)
+      private$wv = t(as.matrix(normalize(wv, "l2")))
     },
     dist2 = function(x, y) {
       stopifnot( inherits(x, "sparseMatrix") && inherits(y, "sparseMatrix"))
@@ -111,13 +108,11 @@ RelaxedWordMoversDistance = R6::R6Class(
       terms = setdiff(terms, "")
       wv_internal = private$wv[, terms, drop = FALSE]
       # convert matrices in row-major format
-      x_csr = x[, terms, drop = FALSE] %>%
-        normalize("l1") %>%
-        as(private$internal_matrix_format)
+      x_csr =  normalize(x[, terms, drop = FALSE], "l1")
+      x_csr =  as(x_csr, private$internal_matrix_format)
 
-      y_csr = y[, terms, drop = FALSE] %>%
-        normalize("l1") %>%
-        as(private$internal_matrix_format)
+      y_csr = normalize(y[, terms, drop = FALSE], "l1")
+      y_csr = as(y_csr, private$internal_matrix_format)
 
       if (self$progressbar)
         pb = txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)
@@ -156,12 +151,12 @@ RelaxedWordMoversDistance = R6::R6Class(
       terms = setdiff(terms, "")
       wv_internal = private$wv[, terms, drop = FALSE]
 
-      x_csr = x[, terms, drop = FALSE] %>%
-        normalize("l1") %>%
-        as(private$internal_matrix_format)
-      y_csr = y[, terms, drop = FALSE] %>%
-        normalize("l1") %>%
-        as(private$internal_matrix_format)
+      x_csr = normalize(x[, terms, drop = FALSE], "l1")
+      x_csr = as(x_csr, private$internal_matrix_format)
+
+      y_csr = normalize(y[, terms, drop = FALSE], "l1")
+      y_csr = as(y_csr, private$internal_matrix_format)
+
 
       if (self$progressbar)
         pb = txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)

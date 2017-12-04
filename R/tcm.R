@@ -82,7 +82,7 @@ get_tcm = function(corpus_ptr) {
 #'
 #' # single thread
 #'
-#' tokens = movie_review$review %>% tolower %>% word_tokenizer
+#' tokens = word_tokenizer(tolower(movie_review$review))
 #' it = itoken(tokens)
 #' v = create_vocabulary(jobs)
 #' vectorizer = vocab_vectorizer(v)

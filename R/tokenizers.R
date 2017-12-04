@@ -16,7 +16,7 @@
 
 #' @name tokenizers
 #' @title Simple tokenization functions for string splitting
-#' @description Few simple tokenization functions exported from \code{tokenizers} package:
+#' @description Few simple tokenization functions. For more comprehensive list see \code{tokenizers} package:
 #' \url{https://cran.r-project.org/package=tokenizers}.
 #' Also check \code{stringi::stri_split_*}.
 #' @param strings \code{character} vector
@@ -35,16 +35,18 @@
 #' @export
 word_tokenizer = function(strings, ...)
 {
-  # strsplit(strings, "\\W", ...) %>% lapply(function(x) x[nchar(x) > 0])
-  tokenizers::tokenize_words(strings, lowercase = FALSE, ...)
+  res = stringi::stri_split_boundaries(strings, type = "word", skip_word_none = TRUE)
+  names(res) = names(strings)
+  res
 }
 
 #' @rdname tokenizers
 #' @export
 char_tokenizer = function(strings, ...)
 {
-  tokenizers::tokenize_characters(strings, lowercase = FALSE, strip_non_alphanum = FALSE, simplify = FALSE)
-  # strsplit(strings, "", TRUE, ...)
+  res = stringi::stri_split_boundaries(strings, type = "character")
+  names(res) = names(strings)
+  res
 }
 
 #' @rdname tokenizers
@@ -53,7 +55,7 @@ space_tokenizer = function(strings, sep = " ", xptr = FALSE, ...)
 {
   stopifnot(nchar(sep) == 1)
   if(!xptr) {
-    stringi::stri_split_fixed(str = strings, pattern = sep, ...)
+    stringi::stri_split_fixed(strings, pattern = sep, ...)
   } else {
     cpp_fixed_char_tokenizer(strings, sep)
   }
