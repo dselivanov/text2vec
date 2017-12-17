@@ -31,9 +31,7 @@ Imports:
     R6 (>= 2.1.2), 
     futile.logger (>= 1.4.3), 
     stringi (>= 1.1.5), 
-    mlapi
-Remotes:
-    dselivanov/mlapi
+    mlapi (>= 0.1.0)
 LinkingTo: Rcpp,
     RcppParallel,
     digest,
