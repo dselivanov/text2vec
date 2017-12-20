@@ -133,7 +133,7 @@ void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int contex
             this->tcm.add(context_term_index, term_index, increment);
             break;
           default:
-            stop("call to insert_terms with context !in [0,1, -1]");
+            ::Rf_error("call to insert_terms with context !in [0,1, -1]");
           }
           // j2++;
         }

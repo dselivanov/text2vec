@@ -53,7 +53,7 @@ NumericVector rowMaxs(const NumericMatrix x) {
 // [[Rcpp::export]]
 NumericMatrix euclidean_dist(const NumericMatrix x, const NumericMatrix y) {
   if(x.nrow() != y.nrow())
-    stop("Matrices should have same number of rows");
+    ::Rf_error("Matrices should have same number of rows");
   NumericMatrix res(x.ncol(), y.ncol());
   double tmp = 0.0;
   double diff;

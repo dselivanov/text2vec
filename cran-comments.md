@@ -1,17 +1,14 @@
 ## Release summary
 
-This is resubmission. 
-* Resolved issue with note on usage of "stderr" - updated `sparsepp` usage.
+* Resumbission - chenged `stop()` c++ calls to `Rf_error`
 
 ## Test environments
 
-* local OS X install, R 3.4.0
+* local OS X install, R 3.4.2
 * ubuntu 12.04.5 (on travis-ci), R 3.4.1
 * win-builder
 
 ## R CMD check results
-
-commit 798d429e
 
 0 ERRORs | 0 WARNING | 2 NOTEs
 

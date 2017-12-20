@@ -87,7 +87,7 @@ Collocations = R6::R6Class(
     pmi_min = NULL,
     gensim_min = NULL,
     lfmd_min = NULL,
-    conf_level = NULL
+    log_lik_min = NULL
   ),
   public = list(
     collocation_stat = NULL,
@@ -96,7 +96,7 @@ Collocations = R6::R6Class(
                           pmi_min = 5,
                           gensim_min = 0,
                           lfmd_min = -Inf,
-                          conf_level = 0.95,
+                          log_lik_min = 0.95,
                           sep = "_") {
       if(is.null(vocabulary)) {
         flog.debug("got NULL as vocabulary - so it will be built from training data iterator later")
@@ -111,7 +111,7 @@ Collocations = R6::R6Class(
       private$pmi_min = pmi_min
       private$gensim_min = gensim_min
       private$lfmd_min = lfmd_min
-      private$conf_level = conf_level
+      private$log_lik_min = log_lik_min
     },
     fit = function(it, n_iter = 1, ...) {
       for(i in seq_len(n_iter)) {
@@ -172,7 +172,7 @@ Collocations = R6::R6Class(
       # where N is the total vocabulary size.
       dt[ , gensim := (n_ij - private$collocation_count_min) * nword / (as.numeric(n_i) * n_j)]
       # Dunning's LLR
-      dt[ , logLik := L_func(n_ij, n_i, n_j / nword) + L_func(n_j - n_ij, nword - n_i, n_j / nword) -
+      dt[ , log_lik := L_func(n_ij, n_i, n_j / nword) + L_func(n_j - n_ij, nword - n_i, n_j / nword) -
             L_func(n_ij, n_i, n_ij/n_i) - L_func(n_j - n_ij, nword - n_i, (n_j - n_ij) / (nword - n_i))
           ]
       # remove duplicates
@@ -192,18 +192,18 @@ Collocations = R6::R6Class(
       self$collocation_stat[, rank_pmi := frank(-pmi, ties.method = "first")]
       self$collocation_stat[, rank_lfmd := frank(-lfmd, ties.method = "first")]
       self$collocation_stat[, rank_gensim := frank(-gensim, ties.method = "first")]
-      self$collocation_stat[, rank_logLik := frank(2*logLik, ties.method = "first")]
-      self$collocation_stat = self$collocation_stat[order(rank_pmi + rank_lfmd + rank_gensim + rank_logLik)]
+      self$collocation_stat[, rank_log_lik := frank(2 * log_lik, ties.method = "first")]
+      self$collocation_stat = self$collocation_stat[order(rank_pmi + rank_lfmd + rank_gensim + rank_log_lik)]
       setkey(self$collocation_stat, rank_pmi)
 
       invisible(self$collocation_stat)
     },
     prune = function(pmi_min = private$pmi_min, gensim_min = private$gensim_min, lfmd_min = private$lfmd_min,
-                     conf_level = private$conf_level) {
+                     log_lik_min = private$log_lik_min) {
       ii = self$collocation_stat$pmi >= pmi_min &
         self$collocation_stat$gensim >= gensim_min &
         self$collocation_stat$lfmd >= lfmd_min &
-        -2 * self$collocation_stat$logLik >= qchisq(conf_level, 1)
+        -2 * self$collocation_stat$log_lik >= qchisq(log_lik_min, 1)
       self$collocation_stat = self$collocation_stat[ii, ]
 
       private$phrases = paste(self$collocation_stat$prefix, self$collocation_stat$suffix, sep = private$sep)
@@ -213,7 +213,7 @@ Collocations = R6::R6Class(
     },
     transform = function(it) {
       # if pointer is invalid - init it
-      if(is_invalid_ptr(private$phrases_ptr))
+      if(is.null(private$phrases_ptr) || is_invalid_ptr(private$phrases_ptr))
         private$phrases_ptr = create_xptr_unordered_set(private$phrases)
       stopwords = attr(private$vocabulary, "stopwords", TRUE)
       stopifnot(is.character(stopwords))
