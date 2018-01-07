@@ -26,7 +26,10 @@
 #'@param ngram \code{integer} vector. The lower and upper boundary of the range
 #'  of n-values for different n-grams to be extracted. All values of \code{n}
 #'  such that ngram_min <= n <= ngram_max will be used.
-#'@param stopwords \code{character} vector of stopwords to filter out
+#'@param stopwords \code{character} vector of stopwords to filter out. \bold{NOTE} that
+#' stopwords will be used "as is". This means that if preprocessing function in \link{itoken} does some
+#' text modification (like stemming), then this preprocessing need to be applied to stopwrods before passing them here.
+#' See \url{https://github.com/dselivanov/text2vec/issues/228} for example.
 #'@param sep_ngram \code{character} a character string to concatenate words in ngrams
 #'@return \code{text2vec_vocabulary} object, which is actually a \code{data.frame}
 #'  with following columns:
