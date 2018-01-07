@@ -80,6 +80,7 @@ malloc_trim_finalizer = function(e) {
 #   replace(out, out == -Inf, 0)
 # }}
 # This is used to create a log-likelihood ratio with 1 degree of freedom for bi-gram analysis
-L_func = function(k, n, p) { 
+# L_func = function(k, n, p) {
+L_func = function(p, n, k) {
 	k * log(p + (p == 0)) + (n - k) * log(1 - p + (1 - p == 0))
-}	
+}

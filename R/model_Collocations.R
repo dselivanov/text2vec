@@ -4,17 +4,19 @@
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
-#' model = Collocations$new(vocabulary = NULL, collocation_count_min = 50, pmi_min = 5, gensim_min = 0, lfmd_min = -Inf, sep = "_")
+#' model = Collocations$new(vocabulary = NULL, collocation_count_min = 50, pmi_min = 5, gensim_min = 0,
+#'                          lfmd_min = -Inf, llr_min = 0, sep = "_")
 #' model$partial_fit(it, ...)
 #' model$fit(it, n_iter = 1, ...)
 #' model$transform(it)
-#' model$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf)
+#' model$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf, llr_min = 0)
 #' model$collocation_stat
 #' }
 #' @format \code{\link{R6Class}} object.
 #' @section Methods:
 #' \describe{
-#'   \item{\code{$new(vocabulary = NULL, collocation_count_min = 50, sep = "_")}}{Constructor for Collocations model.For description of arguments see \bold{Arguments} section.}
+#'   \item{\code{$new(vocabulary = NULL, collocation_count_min = 50, sep = "_")}}{Constructor for Collocations model.
+#'   For description of arguments see \bold{Arguments} section.}
 #'   \item{\code{$fit(it, n_iter = 1, ...)}}{fit Collocations model to input iterator \code{it}.
 #'   Iterating over input iterator \code{it} \code{n_iter} times, so hierarchically can learn multi-word phrases.
 #'   Invisibly returns \code{collocation_stat}.}
@@ -23,7 +25,7 @@
 #'   \item{\code{$transform(it)}}{transforms input iterator using learned collocations model.
 #'   Result of the transformation is new \code{itoken} or \code{itoken_parallel} iterator which will
 #'   produce tokens with phrases collapsed into single token.}
-#'   \item{\code{$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf)}}{
+#'   \item{\code{$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf, llr_min = 0)}}{
 #'   filter out non-relevant phrases with low score. User can do it directly by modifying \code{collocation_stat} object.}
 #'}
 #' @field collocation_stat \code{data.table} with collocations(phrases) statistics.
@@ -32,8 +34,17 @@
 #' \describe{
 #'  \item{model}{A \code{Collocation} model object}
 #'  \item{n_iter}{number of iteration over data}
-#'  \item{pmi_min, gensim_min, lfmd_min}{minimal scores of the corresponding statistics in order to collapse tokens into collocation
-#'  see data in \code{model$collocation_stat} for better understanding}
+#'  \item{pmi_min, gensim_min, lfmd_min, llr_min}{minimal scores of the corresponding
+#'  statistics in order to collapse tokens into collocation:
+#'  \itemize{
+#'   \item pointwise mutual information
+#'   \item "gensim" scores - \url{https://radimrehurek.com/gensim/models/phrases.html} adapted from word2vec paper
+#'   \item log-frequency biased mutual dependency
+#'   \item Dunning's  logarithm of the ratio between the likelihoods of the hypotheses of dependence and independence
+#'  }
+#'  See \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.11.8101&rep=rep1&type=pdf},
+#'  \url{http://www.aclweb.org/anthology/I05-1050} for details.
+#'  Also see data in \code{model$collocation_stat} for better intuition}
 #'  \item{it}{An input \code{itoken} or \code{itoken_parallel} iterator}
 #'  \item{vocabulary}{\code{text2vec_vocabulary} - if provided will look for collocations consisted of only from vocabulary}
 #' }
@@ -87,7 +98,7 @@ Collocations = R6::R6Class(
     pmi_min = NULL,
     gensim_min = NULL,
     lfmd_min = NULL,
-    log_lik_min = NULL
+    llr_min = NULL
   ),
   public = list(
     collocation_stat = NULL,
@@ -96,7 +107,7 @@ Collocations = R6::R6Class(
                           pmi_min = 5,
                           gensim_min = 0,
                           lfmd_min = -Inf,
-                          log_lik_min = 0.95,
+                          llr_min = 0,
                           sep = "_") {
       if(is.null(vocabulary)) {
         flog.debug("got NULL as vocabulary - so it will be built from training data iterator later")
@@ -111,7 +122,7 @@ Collocations = R6::R6Class(
       private$pmi_min = pmi_min
       private$gensim_min = gensim_min
       private$lfmd_min = lfmd_min
-      private$log_lik_min = log_lik_min
+      private$llr_min = llr_min
     },
     fit = function(it, n_iter = 1, ...) {
       for(i in seq_len(n_iter)) {
@@ -172,9 +183,11 @@ Collocations = R6::R6Class(
       # where N is the total vocabulary size.
       dt[ , gensim := (n_ij - private$collocation_count_min) * nword / (as.numeric(n_i) * n_j)]
       # Dunning's LLR
-      dt[ , log_lik := L_func(n_ij, n_i, n_j / nword) + L_func(n_j - n_ij, nword - n_i, n_j / nword) -
-            L_func(n_ij, n_i, n_ij/n_i) - L_func(n_j - n_ij, nword - n_i, (n_j - n_ij) / (nword - n_i))
-          ]
+      dt[ , llr := -2 * (  L_func(n_j / nword, n_i, n_ij) +
+                               L_func(n_j / nword, nword - n_i, n_j - n_ij) -
+                               L_func(n_ij / n_i, n_i, n_ij) -
+                               L_func((n_j - n_ij) / (nword - n_i), nword - n_i, n_j - n_ij)
+                             )]
       # remove duplicates
       # Not sure where they coming from... - should not happen
       # FIXME
@@ -192,18 +205,18 @@ Collocations = R6::R6Class(
       self$collocation_stat[, rank_pmi := frank(-pmi, ties.method = "first")]
       self$collocation_stat[, rank_lfmd := frank(-lfmd, ties.method = "first")]
       self$collocation_stat[, rank_gensim := frank(-gensim, ties.method = "first")]
-      self$collocation_stat[, rank_log_lik := frank(2 * log_lik, ties.method = "first")]
-      self$collocation_stat = self$collocation_stat[order(rank_pmi + rank_lfmd + rank_gensim + rank_log_lik)]
+      self$collocation_stat[, rank_llr := frank(-llr, ties.method = "first")]
+      self$collocation_stat = self$collocation_stat[order(rank_pmi + rank_lfmd + rank_gensim + rank_llr)]
       setkey(self$collocation_stat, rank_pmi)
 
       invisible(self$collocation_stat)
     },
     prune = function(pmi_min = private$pmi_min, gensim_min = private$gensim_min, lfmd_min = private$lfmd_min,
-                     log_lik_min = private$log_lik_min) {
+                     llr_min = private$llr_min) {
       ii = self$collocation_stat$pmi >= pmi_min &
         self$collocation_stat$gensim >= gensim_min &
         self$collocation_stat$lfmd >= lfmd_min &
-        -2 * self$collocation_stat$log_lik >= qchisq(log_lik_min, 1)
+        self$collocation_stat$llr >= llr_min
       self$collocation_stat = self$collocation_stat[ii, ]
 
       private$phrases = paste(self$collocation_stat$prefix, self$collocation_stat$suffix, sep = private$sep)
