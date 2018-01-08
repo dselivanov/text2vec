@@ -97,7 +97,7 @@ BNS = R6::R6Class(
 
       bns = qnorm(tpr) - qnorm(fpr)
 
-      data.table(term = colnames(dtm), bns = abs(bns), posiive = bns > 0)
+      data.table(term = colnames(dtm), bns = abs(bns), positive = bns > 0)
     }
   )
 )
