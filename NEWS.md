@@ -1,5 +1,9 @@
-# text2vec 0.5.1
+# text2vec 0.5.0.11
 
+1. 2018-01-09
+    * Added Bi-Normal Separation transformation, thanks to Pavel Shashkin (@pshashk)
+    * Added Dunning's log-likelihood ratio for collocations, thanks to Chris Lee (@Chrisss93)
+    * Early stopping for collocations learning
 1. 2017-12-18
     * fixed several bugs #219 #217 #205
     * decreased number of dependencies - no more `magrittr`, `uuid`, `tokenizers`
