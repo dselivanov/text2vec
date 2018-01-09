@@ -6,6 +6,7 @@ train_ind = 1:N
 txt = tolower(movie_review[['review']][train_ind])
 txt = word_tokenizer(txt)
 ids = movie_review[['id']][train_ind]
+y = movie_review[['sentiment']][train_ind]
 it = itoken(txt, ids = ids, progressbar = FALSE)
 vocab = create_vocabulary(it)
 vocab = prune_vocabulary(vocab, term_count_min = 5, doc_proportion_max = 0.5)
@@ -33,4 +34,14 @@ test_that("S3 tf-idf", {
   expect_equal(rownames(d2), ids)
   expect_equal(dim(d2), dim(dtm))
   expect_equal(dimnames(d2), dimnames(dtm))
+})
+
+test_that("S3 bns", {
+  bns = BNS$new()
+  d2 = fit_transform(dtm, bns, y)
+  expect_equal(rownames(d2), ids)
+  expect_equal(dim(d2), dim(dtm))
+  expect_equal(dimnames(d2), dimnames(dtm))
+  expect_equal(bns$bns_stat$term, vocab$term)
+  expect_true(all(is.finite(bns$bns_stat$bns)))
 })
