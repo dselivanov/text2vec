@@ -124,10 +124,17 @@ Collocations = R6::R6Class(
       private$lfmd_min = lfmd_min
       private$llr_min = llr_min
     },
-    fit = function(it, n_iter = 1, ...) {
+    fit = function(it, n_iter = 1L, ...) {
+      n_colloc_last = -1L
       for(i in seq_len(n_iter)) {
         self$partial_fit(it, ...)
-        flog.info("iteration %d - found %d collocations", i, nrow(self$collocation_stat))
+        if(nrow(self$collocation_stat) > n_colloc_last) {
+          flog.info("iteration %d - found %d collocations", i, nrow(self$collocation_stat))
+          n_colloc_last = nrow(self$collocation_stat)
+        } else {
+          flog.info("iteration %d - converged", i)
+          break()
+        }
       }
       invisible(self$collocation_stat)
     },
