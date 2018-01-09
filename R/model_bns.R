@@ -22,9 +22,9 @@
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
-#' tfidf = BNS$new(treshold = 0.0005)
-#' tfidf$fit_transform(x, y)
-#' tfidf$transform(x)
+#' bns = BNS$new(treshold = 0.0005)
+#' bns$fit_transform(x, y)
+#' bns$transform(x)
 #' }
 #' @section Methods:
 #' \describe{
@@ -37,7 +37,7 @@
 #' Useful for feature selection.
 #' @section Arguments:
 #' \describe{
-#'  \item{tfidf}{A \code{TfIdf} object}
+#'  \item{bns}{A \code{BNS} object}
 #'  \item{x}{An input document term matrix. Preferably in \code{dgCMatrix} format}
 #'  \item{y}{Binary target variable coercible to logical.}
 #'  \item{treshold}{Clipping treshold to avoid infinities in quantile function.}
