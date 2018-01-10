@@ -209,12 +209,7 @@ Collocations = R6::R6Class(
       # private$phrases = paste(self$collocation_stat$prefix, self$collocation_stat$suffix, sep = private$sep)
       private$phrases_ptr = create_xptr_unordered_set(private$phrases)
 
-      self$collocation_stat[, rank_pmi := frank(-pmi, ties.method = "first")]
-      self$collocation_stat[, rank_lfmd := frank(-lfmd, ties.method = "first")]
-      self$collocation_stat[, rank_gensim := frank(-gensim, ties.method = "first")]
-      self$collocation_stat[, rank_llr := frank(-llr, ties.method = "first")]
-      self$collocation_stat = self$collocation_stat[order(rank_pmi + rank_lfmd + rank_gensim + rank_llr)]
-      setkey(self$collocation_stat, rank_pmi)
+      self$collocation_stat = self$collocation_stat[order(self$collocation_stat$pmi, decreasing = TRUE)]
 
       invisible(self$collocation_stat)
     },
