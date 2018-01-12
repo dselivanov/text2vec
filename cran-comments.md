@@ -1,10 +1,12 @@
 ## Release summary
 
-* Resumbission - chenged `stop()` c++ calls to `Rf_error`
+* clarification - I confirm that I've fixed UBSAN warnings (checked with https://github.com/rocker-org/r-devel-san-clang)
+* fixed 2017->2018 year in description
 
 ## Test environments
 
 * local OS X install, R 3.4.2
+* r-devel-ubsan-clang, R 3.4.1
 * ubuntu 12.04.5 (on travis-ci), R 3.4.1
 * win-builder
 
