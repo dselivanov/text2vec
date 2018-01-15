@@ -117,7 +117,7 @@ public:
 		if(csc_index_.size() == 0)
 			return;
 		// Sum up
-		for(auto c=0; c+1<csc_index_.size(); c++)
+		for(size_t c=0; c+1<csc_index_.size(); c++)
 			csc_index_[c+1] += csc_index_[c];
 		auto nz = csr_col_index_.size();
 		csc_row_index_.resize(nz);

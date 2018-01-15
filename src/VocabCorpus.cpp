@@ -24,7 +24,7 @@ VocabCorpus::VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t
   //this->window_size = window_size;
   init(vocab_R, n_min, n_max, stopwords_R, delim);
   word_count.resize(vocab_R.size());
-};
+}
 //-----------------------------------------------------------------
 void VocabCorpus::init(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max,
                        const CharacterVector stopwords_R, const String delim) {

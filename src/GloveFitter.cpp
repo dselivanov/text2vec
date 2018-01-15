@@ -86,7 +86,7 @@ AdaGradIter::AdaGradIter(GloveFit &fit):
   x_icol(IntegerVector(0)),
   x_val(NumericVector(0)),
   iter_order(IntegerVector(0)),
-  fit(fit) {};
+  fit(fit) {}
 
 
 AdaGradIter::AdaGradIter(const IntegerVector &x_irowR,

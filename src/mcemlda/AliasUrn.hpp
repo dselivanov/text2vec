@@ -46,7 +46,7 @@ public:
 		const size_t K = prob.size();
 		double thres = 1.0f/K;
 		// Split into small and large
-		for(auto i=0; i<prob.size(); i++) {
+		for(size_t i=0; i < prob.size(); i++) {
 			if(prob[i]/s >= thres)
 				large.emplace_back(i,prob[i]/s);
 			else

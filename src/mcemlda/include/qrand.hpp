@@ -72,5 +72,5 @@ void shuffle(RNG& rng, T* bgn, const T* end) {
 		std::swap(it[0], it[rng.sample() % (end-it)]);
 }
 
-}; // namespace qlib
+} // namespace qlib
 

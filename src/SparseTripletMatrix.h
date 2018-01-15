@@ -44,10 +44,10 @@ class SparseTripletMatrix {
 public:
   // constructor for sparse matrix
   SparseTripletMatrix():
-    nrow(0), ncol(0) {};
+    nrow(0), ncol(0), nnz(0) {};
 
   SparseTripletMatrix(uint32_t nrow, uint32_t ncol):
-    nrow(nrow), ncol(ncol) {};
+    nrow(nrow), ncol(ncol), nnz(0) {};
 
   inline void increment_nrows() {this->nrow++;};
   inline void increment_ncols() {this->ncol++;};

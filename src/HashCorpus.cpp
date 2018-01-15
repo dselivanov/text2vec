@@ -60,7 +60,7 @@ HashCorpus::HashCorpus(uint32_t size,
   dtm = SparseTripletMatrix<int>(0, size);
   tcm = SparseTripletMatrix<float>(size, size);
   word_count.resize(size);
-};
+}
 //-----------------------------------------------------------------
 // int context = 0 means symmetric context for co-occurence - matrix will be symmetric
 // So we will keep only right upper-diagonal elements

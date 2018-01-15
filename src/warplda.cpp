@@ -131,12 +131,12 @@ public:
   }
 
   void set_c_global(const IntegerVector &r_c_all) {
-    for(auto i = 0; i < r_c_all.size(); i++)
+    for(int i = 0; i < r_c_all.size(); i++)
       C_all[i] = r_c_all[i];
   }
 
   void reset_local_diff() {
-    for(auto i = 0; i < C_local_diff.size(); i++)
+    for(size_t i = 0; i < C_local_diff.size(); i++)
       C_local_diff[i] = 0;
   }
 };
