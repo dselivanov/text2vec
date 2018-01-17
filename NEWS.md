@@ -1,3 +1,8 @@
+# text2vec 0.5.1.*
+
+1. 2018-01-17
+    * more numerically robust PMI, LFMD - thanks to @andland. Also adds iteration number `iter` to `collocation_stat`. `iter` shows iteration number when collocation stats (and counters) were calculated.
+
 # text2vec 0.5.1 [2018-01-10]
 
 1. 2018-01-10

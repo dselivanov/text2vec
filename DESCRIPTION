@@ -1,7 +1,7 @@
 Package: text2vec
 Type: Package
-Version: 0.5.1.1
-Date: 2018-01-15
+Version: 0.5.1.2
+Date: 2018-01-17
 Title: Modern Text Mining Framework for R
 License: GPL (>= 2) | file LICENSE
 Description: Fast and memory-friendly tools for text vectorization, topic

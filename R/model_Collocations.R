@@ -90,6 +90,7 @@
 #' @export
 Collocations = R6::R6Class(
   private = list(
+    iter = NULL,
     sep = NULL,
     phrases = NULL,
     phrases_ptr = NULL,
@@ -118,6 +119,7 @@ Collocations = R6::R6Class(
       }
 
       private$sep = sep
+      private$iter = 0L
       private$collocation_count_min = collocation_count_min
       private$pmi_min = pmi_min
       private$gensim_min = gensim_min
@@ -125,11 +127,13 @@ Collocations = R6::R6Class(
       private$llr_min = llr_min
     },
     fit = function(it, n_iter = 1L, ...) {
+      private$iter = 0L
       n_colloc_last = -1L
       for(i in seq_len(n_iter)) {
         self$partial_fit(it, ...)
         if(nrow(self$collocation_stat) > n_colloc_last) {
           flog.info("iteration %d - found %d collocations", i, nrow(self$collocation_stat))
+          flog.debug("iteration %d - n_words = %d", i, attr(self$collocation_stat, "nword"))
           n_colloc_last = nrow(self$collocation_stat)
         } else {
           flog.info("iteration %d - converged", i)
@@ -183,8 +187,15 @@ Collocations = R6::R6Class(
         n_ij = as.integer(tcm@x)
       )
       # see http://www.lrec-conf.org/proceedings/lrec2002/pdf/128.pdf for details about PMI and LFMD
-      dt[ , pmi :=  log2( (n_ij / nword) / ((n_i / nword) * (n_j / nword))) ]
-      dt[ , lfmd := log2( (n_ij / nword) ^ 2 / ((n_i / nword) * (n_j / nword))) + log2(n_ij / nword)]
+      # dt[ , pmi :=  log2( (n_ij / nword) / ((n_i / nword) * (n_j / nword))) ]
+      # dt[ , lfmd := log2( (n_ij / nword) ^ 2 / ((n_i / nword) * (n_j / nword))) + log2(n_ij / nword)]
+
+      # more numerically robust approach of above expressions
+      # suggested by @andland - https://github.com/dselivanov/text2vec/issues/236
+      # derived by just openin all log2 epxressions simplifing them
+      dt[ , pmi :=  log2( n_ij ) - log2( n_i ) - log2( n_j ) + log2( nword )]
+      dt[ , lfmd := 3 * log2( n_ij ) - log2( n_i ) - log2( n_j ) - log2( nword )]
+
       # https://radimrehurek.com/gensim/models/phrases.html#gensim.models.phrases.Phrases
       # A phrase of words a and b is accepted if (cnt(a, b) - min_count) * N / (cnt(a) * cnt(b)) > threshold
       # where N is the total vocabulary size.
@@ -202,6 +213,9 @@ Collocations = R6::R6Class(
              dt$suffix %in% self$collocation_stat$suffix
       dt = dt[!dups, ]
 
+      private$iter = private$iter + 1L
+      dt[, iter := private$iter]
+
       self$collocation_stat = rbindlist(list(self$collocation_stat, dt), use.names = TRUE, fill = TRUE)
       # self$collocation_stat = self$collocation_stat[, .SD[1, ], by = .(prefix, suffix)]
       self$prune()
@@ -210,7 +224,7 @@ Collocations = R6::R6Class(
       private$phrases_ptr = create_xptr_unordered_set(private$phrases)
 
       self$collocation_stat = self$collocation_stat[order(self$collocation_stat$pmi, decreasing = TRUE)]
-
+      attr(self$collocation_stat, "nword") = nword
       invisible(self$collocation_stat)
     },
     prune = function(pmi_min = private$pmi_min, gensim_min = private$gensim_min, lfmd_min = private$lfmd_min,
