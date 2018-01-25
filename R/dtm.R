@@ -123,18 +123,12 @@ create_dtm.list = function(it, vectorizer,
   check_itoken = sapply(it, inherits, 'itoken', USE.NAMES = FALSE)
   stopifnot(all( check_itoken ))
   type = match.arg(type)
-  combine_fun = function(...) {
-    flog.debug("got results from workers, call combine ...")
-    rbind_dgTMatrix(...)
-  }
 
-  res = foreach(batch = it, .combine = combine_fun,
+  res = foreach(batch = it, .combine = rbind_dgTMatrix,
                 .multicombine = TRUE,
                 # user already made split for jobs
                 # preschedule = FALSE is much more memory efficient
-                .options.multicore = list(preschedule = FALSE),
-                ...) %dopar%
-        {
+                .options.multicore = list(preschedule = FALSE)) %dopar% {
           create_dtm(batch, vectorizer, "dgTMatrix", ...)
         }
   as(res, type)
@@ -147,18 +141,14 @@ create_dtm.itoken_parallel = function(it, vectorizer,
                            type = c("dgCMatrix", "dgTMatrix"),
                            ...) {
   type = match.arg(type)
-  combine_fun = function(...) {
-      rbind_dgTMatrix(...)
-  }
 
   res =
     foreach(batch = it,
-            .combine = combine_fun,
+            .combine = rbind_dgTMatrix,
             .multicombine = TRUE,
             # user already made split for jobs
             # preschedule = FALSE is much more memory efficient
-            .options.multicore = list(preschedule = FALSE),
-            ...) %dopar% {
+            .options.multicore = list(preschedule = FALSE)) %dopar% {
               create_dtm(batch, vectorizer, "dgTMatrix")
             }
   as(res, type)
