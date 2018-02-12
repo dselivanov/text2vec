@@ -1,6 +1,7 @@
 
 
 #TODO DOC: short explanation of implemented coherence measures
+#TODO maybe remove comb_idxs / improve names if kept
 
 #' Calculation of various coherence measures for topic models
 #'
@@ -67,7 +68,7 @@ coherence <-  function( top_term_matrix
   #     creating, e.g., one any subsets requires to store one index against a list of indices, hence, formulas need
   #     adaption, e.g., something like tcm[unlist(wi), unlist(wj)] might work
   #(iii)Currently indices of subsets are stored in memory, this might be turned to dynamic creation of indices to spare memory usage
-  #     the lines topic_coherence[,tcm_idxs := split(match... would have to be incorporated into create_wiwj_set
+  #     the lines topic_coherence[,tcm_idxs := split(match... would have to be incorporated into word_index_combinations
 
 #CREDITS / REFERENCES -------------------------------------------------
   #The following paper is the main theoretical basis for this code
@@ -158,31 +159,31 @@ coherence <-  function( top_term_matrix
   coh_funs <- list(
     #LOG-RATIO
     logratio_UMass = structure(function(wi, wj, ndocs_tcm, tcm, log_smooth_constant) {log(log_smooth_constant + tcm[wi,wj]) - log(log_smooth_constant + tcm[wj,wj])}
-                         ,set_type = "one_pre_topic_order"
+                         ,comb_type = "one_pre_topic_order"
                          ,aggr_fun = "function(x) sum(x, na.rm = T)")
     #smoothing parameter = 1 resembles UMAss, .01 resembles stm package, default as in paper by Röder, i.e. .1e-12
     ,logratio = structure(function(wi, wj, ndocs_tcm, tcm, log_smooth_constant) {log(log_smooth_constant + tcm[wi,wj]) - log(log_smooth_constant + tcm[wj,wj])}
-                         ,set_type = "one_pre"
+                         ,comb_type = "one_pre"
                          ,aggr_fun = "function(x) sum(x, na.rm = T)")
     ,prob_logratio = structure(function(wi, wj, ndocs_tcm, tcm, log_smooth_constant)  {log(log_smooth_constant + (tcm[wi,wj]/ndocs_tcm)) - log(tcm[wj,wj]/ndocs_tcm)}
-                               ,set_type = "one_pre"
+                               ,comb_type = "one_pre"
                                ,aggr_fun = "function(x) mean(x, na.rm = T)")
     #PMI
     #format of PMI formula proposed by @andland - https://github.com/dselivanov/text2vec/issues/236
     ,pmi = structure(function(wi, wj, ndocs_tcm, tcm, log_smooth_constant)  {log2((tcm[wi,wj]/ndocs_tcm) + log_smooth_constant) - log2(tcm[wi,wi]/ndocs_tcm) - log2(tcm[wj,wj]/ndocs_tcm)}
-                     ,set_type = "one_pre"
+                     ,comb_type = "one_pre"
                      ,aggr_fun = "function(x) mean(x, na.rm = T)")
     #NORMALIZED PMI
     #again, in contrast, to other implementations, only intrinsic NPMI as in PMIM (for implementation with sliding window see, e.g., Bouma, 2009)
     ,npmi = structure(function(wi, wj, ndocs_tcm, tcm, log_smooth_constant) {(log2((tcm[wi,wj]/ndocs_tcm) + log_smooth_constant) - log2(tcm[wi,wi]/ndocs_tcm) - log2(tcm[wj,wj]/ndocs_tcm)) /  -log2((tcm[wi,wj]/ndocs_tcm) + log_smooth_constant)}
-                      ,set_type = "one_pre"
+                      ,comb_type = "one_pre"
                       ,aggr_fun = "function(x) mean(x, na.rm = T)")
     #DIFFERENCE
     #assuming we use ordered tcm it follows that p(wi)>p(wj)
     #to set bounds of the measures [-1,1] (1 is good)  wi/wj are switched in formula
     #this is similar (not exactly the same) to the measure of textmineR package https://github.com/TommyJones/textmineR/issues/35
     ,prob_dif = structure(function(wi, wj, ndocs_tcm, tcm, log_smooth_constant) {tcm[wj,wi]/tcm[wj,wj] - (tcm[wj,wj]/ndocs_tcm)}
-                          ,set_type = "one_suc"
+                          ,comb_type = "one_suc"
                           ,aggr_fun = "function(x) mean(x, na.rm = T)")
   )
 
@@ -200,7 +201,7 @@ coherence <-  function( top_term_matrix
     #select coherence function from the ones availble
     coh_fun <- coh_funs[[coh_measure]]
     #define the wi wj set
-    coh <- as.data.table(create_wiwj_set(idxs, set_type = attr(coh_fun, "set_type"), alternative_order = alternative_order))
+    coh <- as.data.table(word_index_combinations(idxs, comb_type = attr(coh_fun, "comb_type"), alternative_order = alternative_order))
     #calculate score for each pair of wi wj
     coh[, coh_res:= mapply(function(x,y) coh_fun(x,y, tcm = tcm, ndocs_tcm = ndocs_tcm, log_smooth_constant = log_smooth_constant),wi, wj)]
     #aggregate
