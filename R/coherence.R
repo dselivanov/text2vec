@@ -32,7 +32,7 @@
 #' dtm_top_terms[dtm_top_terms > 1] <- 1
 #' tcm_top_terms <- crossprod(dtm_top_terms)
 #'
-#' calc_coherence( tcm = tcm_top_terms
+#' coherence( tcm = tcm_top_terms
 #'                , top_term_matrix = top_term_mat
 #'                , ndocs = nrow(dtm))
 #' # Topic logratio_UMass logratio prob_logratio    pmi    npmi prob_dif
@@ -41,11 +41,10 @@
 #' # 3:    T3        -0.4055  -0.4055       -0.4055  0.737  0.5575      0.6
 
 
-calc_coherence <-  function( top_term_matrix
+coherence <-  function( top_term_matrix
                             ,tcm
                             ,ndocs_tcm = NULL
                             ,log_smooth_constant = .1e-12
-                            ,average_over_topics = FALSE
                             ) {
 
 #GENERAL LOGIC--------------------------------------------------------
@@ -124,7 +123,7 @@ calc_coherence <-  function( top_term_matrix
   }
   tcm <- tcm[prob_order, prob_order]
   restore_topic_order <- match(top_unq, colnames(tcm))
-  #TODO ?
+
   #when (input) tcm is a (larger) sparse matrix the code is quite slow
   #speed of frequent subsetting of sparse tcm is the bottleneck, example:
   # m <- cbind(A = c(1,0,0,0), B = c(1,0,0,0), C = c(0,0,0,1))
@@ -155,30 +154,6 @@ calc_coherence <-  function( top_term_matrix
   topic_coherence[,tcm_idxs := split(match(top, colnames(tcm))
                                      , rep(1:ntopics, each=nterms))]
 
-#FUNCTION TO CREATE SETS OF wi/wj------------------------------------------------------------
-  #order of indices in S_one_pre and S_one_suc matters for asymmetric measures
-  #S_one_pre follows the logic SUM(from i=2 to N)SUM(from j=1 to i-1)
-  #S_one_suc follows the logic: SUM(from i=1 to N-1)SUM(from j=i+1 to N)
-  #Note that there are two options for sets:
-  #(i) sets that build on the original order of terms per topic
-  #(ii) sets that build on the terms per topic, however, ordered by probability
-
-  create_wiwj_set <- function(idxs, set_type = "one_suc",  alternative_order) {
-    if (set_type == "one_pre") {
-    wiwj <- t(combn(idxs,2, FUN = function(x) sort(x, decreasing = TRUE)))
-    } else if (set_type == "one_suc") {
-    wiwj <- t(combn(idxs,2, FUN = function(x) sort(x, decreasing = FALSE)))
-    } else if (set_type == "one_pre_topic_order") {
-      #for asymmetric sets the original order of words (hence, indexes of tcm) has to be restored
-      reorder <- order(match(idxs, alternative_order), decreasing = TRUE)
-      idxs <- idxs[reorder]
-      #in contrast to the other subsets, no additional reordering of indices at this point
-      #to maintain original topic order
-      wiwj <- t(combn(idxs,2))
-    }
-    colnames(wiwj) <- c("wi", "wj")
-    return(wiwj)
-  }
 
 #DEFINITION OF COHERENCE MEASURES------------------------------------------------------------
   #TODO
@@ -250,10 +225,6 @@ calc_coherence <-  function( top_term_matrix
   }
 
   topic_coherence[, tcm_idxs := NULL]
-
-  if (average_over_topics == TRUE) {
-    topic_coherence <- topic_coherence[, lapply(.SD, function(x) round(mean(x, na.rm = T), d = 4)), .SDcols = setdiff(names(topic_coherence), "Topic")]
-  }
   return(topic_coherence[])
 }
 

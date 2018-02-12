@@ -84,3 +84,74 @@ malloc_trim_finalizer = function(e) {
 L_func = function(p, n, k) {
 	k * log(p + (p == 0)) + (n - k) * log(1 - p + (1 - p == 0))
 }
+
+
+#' @name comb_idxs
+#' Create combinations of indices for subsetting upper triangle (incl. diag) of a matrix
+#'
+#'Function serves for subsetting a reference "term document-co-occurrence matrix"
+#'to calculate coherence scores for topics. Under the hood the function customizes the output of utils::combn.
+#'Following assumptions are made about the matrix:
+#'- only upper triangle is considered,
+#'  matrix is assumed to be of symmetric nature (not necessarily its actual appearance,
+#'  actual entries in lower triangle may be filled with zeros)
+#'- diagonal of matrix contains total document occurrence of terms (or marginal probability).
+#'- diagonal is decreasingly ordered from left to right
+#'
+#' @param x Integer vector containing indices to combine
+#' @param comb_type Type of combinations to create.
+#'                  one_idx-preceeding_idxs:
+#'                  Follows the logic for coherence scores of SUM(from i=2 to N)SUM(from j=1 to i-1)
+#'                  one_idx-succeeding_idxs:
+#'                  Follows the logic for coherence scores of SUM(from i=1 to N-1)SUM(from j=i+1 to N)
+#'                  one_idx-preceeding_idxs-topic_order:
+#'                  Same as one_idx-preceeding_idxs, but using an the original topic order that has to be specified.
+#'                  This is used to create indices required for UMass coherence measure.
+#'
+#' @param topic_order Integer vector of alternative topic order of indices to be assumed for matrix,
+#'                    in contrast to an ordered diagonal for restoring original order of top terms per topic.
+#'                    Alternative topic order may be created, e.g., via:
+#'                    match(terms_in_desired_order, colnames(tcm))
+#'
+#' @return A two column matrix containing desired combinations of indices in each row.
+#'
+#' @examples
+#' #'
+#' idxs <- c(1,2,3) #e.g. as in tcm ordered by diagonal
+#' idxs_as_in_topic <- c(2,1,3) #order of indices (corresponding terms) in topic
+#'
+#' comb_idxs(idxs, comb_type = "one_idx-succeeding_idxs")
+#' #       [,1] [,2]
+#' # [1,]    1    2
+#' # [2,]    1    3
+#' # [3,]    2    3
+#'
+#' comb_idxs(idxs, comb_type = "one_idx-preceeding_idxs", )
+#' #       [,1] [,2]
+#' # [1,]    2    1
+#' # [2,]    3    1
+#' # [3,]    3    2
+#'
+#' comb_idxs(idxs, comb_type = "one_idx-preceeding_idxs-topic_order"
+#'           , topic_order = match(idxs_as_in_topic, idxs))
+#' #       [,1] [,2]
+#' # [1,]    3    1
+#' # [2,]    3    2
+#' # [3,]    1    2
+#'
+
+comb_idxs <- function(x, comb_type = "one_idx-succeeding_idxs",  topic_order = NULL) {
+  if (comb_type == "one_idx-preceeding_idxs") {
+    idxs <- t(combn(x,2, FUN = function(y) sort(y, decreasing = TRUE)))
+  } else if (comb_type == "one_idx-succeeding_idxs") {
+    idxs <- t(combn(x,2, FUN = function(y) sort(y, decreasing = FALSE)))
+  } else if (comb_type == "one_idx-preceeding_idxs-topic_order") {
+    #for asymmetric sets the original order of words (hence, indexes of tcm) has to be restored
+    reorder <- order(match(x, topic_order), decreasing = TRUE)
+    x <- x[reorder]
+    #in contrast to the other subsets, no additional reordering of indices in combn at this point
+    #to maintain original topic order
+    idxs <- t(combn(x,2))
+  }
+  return(idxs)
+}
