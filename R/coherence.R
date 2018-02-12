@@ -109,21 +109,10 @@ coherence <-  function( top_term_matrix
           For individial topics coherence scores would be based on incomplete word sets.
           Please adapt top term matrix or tcm to ensure full intersection of terms.")
   }
-  #reduce tcm to top word space (makes tcm symmetric)
+  #reduce tcm to top word space (creates same order in cols and rows)
   tcm <- tcm[top_unq, top_unq]
-  #order tcm by term probability (entries in diagonal)
-  #from left to right the probability of terms follows the rule p(tcm[i,i]) > p(tcm[i+1,i+1])
-  #ordering tcm is relevant for asymmetric measures that require a certain order
-  #some asymmetric measures require the original order in the topic (e.g. UMass),
-  #which is therefore also stored for re-mapping indices of tcm to this order
-  if ("Matrix" %in% unlist(attributes(class(tcm)))) { #TODO? require sparseMatrix as input
-    prob_order <- order(Matrix::diag(tcm),  decreasing = TRUE)
-  } else {
-    prob_order <- order(diag(tcm),  decreasing = TRUE)
-  }
-  tcm <- tcm[prob_order, prob_order]
-  restore_topic_order <- match(top_unq, colnames(tcm))
-
+  #change class for faster subsetting, see following comments on change of class
+  tcm <- as.matrix(tcm)
   #when (input) tcm is a (larger) sparse matrix the code is quite slow
   #speed of frequent subsetting of sparse tcm is the bottleneck, example:
   # m <- cbind(A = c(1,0,0,0), B = c(1,0,0,0), C = c(0,0,0,1))
@@ -133,10 +122,9 @@ coherence <-  function( top_term_matrix
   #   m.sp[3,3]
   # )
   # Unit: nanoseconds
-  # expr    min       lq      mean median     uq    max neval
-  # m[3, 3]    790    791.0   1492.89   1579   1580  13817   100
+  #      expr     min       lq      mean median     uq    max neval
+  # m[3, 3]       790    791.0   1492.89   1579   1580  13817   100
   # m.sp[3, 3] 144480 147637.5 152647.01 148822 150401 367514   100
-
   #since tcm is limited on top n word space its size is usually not incredibly large at this point
   #example: 1000 topics with top 20 words would be about 1 Mb
   # format(object.size(
@@ -146,8 +134,16 @@ coherence <-  function( top_term_matrix
   #       })
   #     })
   #   ), units = "Mb")
-  #hence, workaround using base::matrix for faster subsetting instead of sparseMatrix seems acceptable
-  tcm <- as.matrix(tcm)
+  #hence, using base::matrix class seems acceptable for faster subsetting instead of potential sparseMatrix input class
+
+  #order tcm by term probability (entries in diagonal)
+  #from left to right the probability of terms follows the rule p(tcm[i,i]) > p(tcm[i+1,i+1])
+  #ordering tcm is relevant for asymmetric measures that require a certain order
+  #some asymmetric measures require the original order in the topic (e.g. UMass),
+  #which is therefore also stored for re-mapping indices of tcm to this order
+  prob_order <- order(diag(tcm),  decreasing = TRUE)
+  tcm <- tcm[prob_order, prob_order]
+  restore_topic_order <- match(top_unq, colnames(tcm))
 
 #GET REFERENCE INDICES OF TOP TERMS IN TCM FOR EACH TOPIC---------------------------
   #credits for this approach of getting indices go to authors of stm package
