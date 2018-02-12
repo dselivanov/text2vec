@@ -98,7 +98,7 @@ L_func = function(p, n, k) {
 #'- diagonal of matrix contains total document occurrence of terms (or marginal probability).
 #'- diagonal is decreasingly ordered from left to right
 #'
-#' @param word_indices Integer vector containing indices to combine
+#' @param term_indices Integer vector containing indices to combine
 #' @param comb_type Type of combinations to create.
 #'                  one_idx-preceeding_idxs:
 #'                  Follows the logic for coherence scores of SUM(from i=2 to N)SUM(from j=1 to i-1)
@@ -140,18 +140,18 @@ L_func = function(p, n, k) {
 #' # [3,]    1    2
 #'
 
-word_index_combinations <- function(word_indices, comb_type = "one_idx-succeeding_idxs",  topic_order = NULL) {
+term_index_combinations <- function(term_indices, comb_type = "one_idx-succeeding_idxs",  topic_order = NULL) {
   if (comb_type == "one_idx-preceeding_idxs") {
-    w_idx_combs <- t(combn(word_indices,2, FUN = function(y) sort(y, decreasing = TRUE)))
+    idx_combs <- t(combn(term_indices,2, FUN = function(y) sort(y, decreasing = TRUE)))
   } else if (comb_type == "one_idx-succeeding_idxs") {
-    w_idx_combs <- t(combn(word_indices,2, FUN = function(y) sort(y, decreasing = FALSE)))
+    idx_combs <- t(combn(term_indices,2, FUN = function(y) sort(y, decreasing = FALSE)))
   } else if (comb_type == "one_idx-preceeding_idxs-topic_order") {
     #for asymmetric sets the original order of words (hence, indexes of tcm) has to be restored
-    reorder <- order(match(word_indices, topic_order), decreasing = TRUE)
-    word_indices <- word_indices[reorder]
+    reorder <- order(match(term_indices, topic_order), decreasing = TRUE)
+    term_indices <- term_indices[reorder]
     #in contrast to the other subsets, no additional reordering of indices in combn at this point
     #to maintain original topic order
-    w_idx_combs <- t(combn(word_indices,2))
+    idx_combs <- t(combn(term_indices,2))
   }
-  return(w_idx_combs)
+  return(idx_combs)
 }
