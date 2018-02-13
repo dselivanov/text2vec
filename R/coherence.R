@@ -154,11 +154,11 @@ coherence =  function( top_term_matrix
   #e.g. by defining them as reference/S6 class, this would also allow more flexible definition of additional measures by user
   coh_funs = list(
     #LOG-RATIO
-    logratio_UMass = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant) {log(log_smooth_constant + tcm[wi,wj]) - log(log_smooth_constant + tcm[wj,wj])}
+    logratio_UMass = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant) {log(log_smooth_constant + tcm[wi,wj]) - log(tcm[wj,wj])}
                          ,comb_type = "one_pre_topic_order"
                          ,aggr_fun = "function(x) sum(x, na.rm = T)")
     #smoothing parameter = 1 resembles UMAss, .01 resembles stm package, default as in paper by Röder, i.e. .1e-12
-    ,logratio = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant) {log(log_smooth_constant + tcm[wi,wj]) - log(log_smooth_constant + tcm[wj,wj])}
+    ,logratio = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant) {log(log_smooth_constant + tcm[wi,wj]) - log(tcm[wj,wj])}
                          ,comb_type = "one_pre"
                          ,aggr_fun = "function(x) sum(x, na.rm = T)")
     ,prob_logratio = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant)  {log(log_smooth_constant + (tcm[wi,wj]/n_tcm_windows)) - log(tcm[wj,wj]/n_tcm_windows)}
