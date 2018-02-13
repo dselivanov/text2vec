@@ -97,11 +97,8 @@ coherence =  function( top_term_matrix
   coherence = data.table(Topic = paste0("T", 1:n_topics))
 
 #PREPARE TCM------------------------------------------------------------------------
-  #check if input tcm really contains the same elements in rows and columns
-  if ( !all.equal(rownames(tcm)[order(rownames(tcm))], colnames(tcm)[order(colnames(tcm))]) ) {
-    stop("There is a difference between the terms in rows and columns of the tcm.
-         Please check tcm, the sets of the terms have to be the same (they do not necessarily have to be in the same order).")
-  }
+  #some basic checks on the input
+  stopifnot( setequal(colnames(tcm),rownames(tcm)), ncol(tcm) == nrow(tcm))
   #check if tcm includes all top terms
   if ( !(length(intersect(top_terms_unique, colnames(tcm))) == length(top_terms_unique)) ) {
     stop("Not all terms of top_term_matrix are included in tcm.
