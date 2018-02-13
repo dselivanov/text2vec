@@ -100,13 +100,13 @@ coherence =  function( top_term_matrix
   #some basic checks on the input
   stopifnot( setequal(colnames(tcm),rownames(tcm)), ncol(tcm) == nrow(tcm))
   #check if tcm includes all top terms
-  if ( !(length(intersect(top_terms_unique, colnames(tcm))) == length(top_terms_unique)) ) {
-    stop("Not all terms of top_term_matrix are included in tcm.
-          For individial topics coherence scores would be based on incomplete word sets.
-          Please adapt top term matrix or tcm to ensure full intersection of terms.")
+  if ( !(setequal(intersect(top_terms_unique, colnames(tcm)), top_terms_unique)) {
+    warning("Not all terms of top_term_matrix are included in tcm.
+             Coherence scores for individual topics will be based on incomplete word sets and are only partially valid.
+             Please consider a thorough check of results before further downstream analysis.")
   }
-  #reduce tcm to top word space (creates same order in cols and rows)
-  tcm = tcm[top_terms_unique, top_terms_unique]
+  #reduce tcm to top word space
+  tcm = tcm[rownames(tcm) %in% top_terms_unique,colnames(tcm) %in% top_terms_unique]
   #change class for faster subsetting, see following comments on change of class
   tcm = as.matrix(tcm)
   #when (input) tcm is a (larger) sparse matrix the code is quite slow
@@ -132,11 +132,12 @@ coherence =  function( top_term_matrix
   #   ), units = "Mb")
   #hence, using base::matrix class seems acceptable for faster subsetting instead of potential sparseMatrix input class
 
-  #order tcm by term probability (entries in diagonal)
+  #make matrix symmetric and order tcm by term probability (entries in diagonal)
   #from left to right the probability of terms follows the rule p(tcm[i,i]) > p(tcm[i+1,i+1])
   #ordering tcm is relevant for asymmetric measures that require a certain order
   #some asymmetric measures require the original order in the topic (e.g. UMass),
   #which is therefore also stored for re-mapping indices of tcm to this order
+  tcm = tcm[match(rownames(tcm), colnames(tcm)), ]
   probability_order = order(diag(tcm),  decreasing = TRUE)
   tcm = tcm[probability_order, probability_order]
   restore_topic_order = match(top_terms_unique, colnames(tcm))
@@ -195,13 +196,20 @@ coherence =  function( top_term_matrix
                          ) {
     #select coherence function from the ones availble
     coh_fun = coh_funs[[coh_measure]]
+    #remove NA values from idxs (remember not all top_terms_unique are necessarily included in tcm)
+    #and check if more than one index remains since minimum of two terms is required for coherence calculation
+    idxs <- idxs[!is.na(idxs)]
+    if (length(idxs) < 2) {
+      return(NA)
+    } else {
     #define the wi wj set
     coh = as.data.table(word_index_combinations(idxs, comb_type = attr(coh_fun, "comb_type"), alternative_order = alternative_order))
     #calculate score for each pair of wi wj
     coh[, coh_res:= mapply(function(x,y) coh_fun(x,y, tcm = tcm, n_tcm_windows = n_tcm_windows, log_smooth_constant = log_smooth_constant),wi, wj)]
     #aggregate
     aggr_fun = eval(parse(text = attr(coh_fun, "aggr_fun")))
-    coh[, round(aggr_fun(coh_res), d = 4)]
+    return(coh[, round(aggr_fun(coh_res), d = 4)])
+    }
   }
 
 #CALCULATE COHERENCE----------------------------------------------------------------
