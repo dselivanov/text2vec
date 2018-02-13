@@ -165,78 +165,184 @@ coherence =  function( top_term_matrix
   #remove NA values from term idxs (not all top_terms_unique are necessarily included in tcm)
   coherence[, tcm_term_idxs := lapply(tcm_term_idxs, function(x) x[!is.na(x)])]
 
+# If flexible definition of coherence scores is to be implemented the following sections might be a start
+# currently each measure is calculated by copy paste like commands to create data.table columns (see below)
+# DEFINITION OF COHERENCE MEASURES
+# WRAPPER FUNCTION TO CALCULATE COHERENCE
+
 #DEFINITION OF COHERENCE MEASURES------------------------------------------------------------
-  #TODO
-  #more convenient interface for defintion of coherence functions might be established
-  #e.g. by defining them as reference/S6 class, this would also allow more flexible definition of additional measures by user
-  coh_funs = list(
-    #LOG-RATIO
-    logratio_UMass = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant) {log(log_smooth_constant + tcm[wi,wj]) - log(tcm[wj,wj])}
-                         ,comb_type = "one_pre_topic_order"
-                         ,aggr_fun = "function(x) sum(x, na.rm = T)")
-    #smoothing parameter = 1 resembles UMAss, .01 resembles stm package, default as in paper by Röder, i.e. .1e-12
-    ,logratio = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant) {log(log_smooth_constant + tcm[wi,wj]) - log(tcm[wj,wj])}
-                         ,comb_type = "one_pre"
-                         ,aggr_fun = "function(x) sum(x, na.rm = T)")
-    ,prob_logratio = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant)  {log(log_smooth_constant + (tcm[wi,wj]/n_tcm_windows)) - log(tcm[wj,wj]/n_tcm_windows)}
-                               ,comb_type = "one_pre"
-                               ,aggr_fun = "function(x) mean(x, na.rm = T)")
-    #PMI
-    #format of PMI formula proposed by @andland - https://github.com/dselivanov/text2vec/issues/236
-    ,pmi = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant)  {log2((tcm[wi,wj]/n_tcm_windows) + log_smooth_constant) - log2(tcm[wi,wi]/n_tcm_windows) - log2(tcm[wj,wj]/n_tcm_windows)}
-                     ,comb_type = "one_pre"
-                     ,aggr_fun = "function(x) mean(x, na.rm = T)")
-    #NORMALIZED PMI
-    #again, in contrast, to other implementations, only intrinsic NPMI as in PMIM (for implementation with sliding window see, e.g., Bouma, 2009)
-    ,npmi = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant) {(log2((tcm[wi,wj]/n_tcm_windows) + log_smooth_constant) - log2(tcm[wi,wi]/n_tcm_windows) - log2(tcm[wj,wj]/n_tcm_windows)) /  -log2((tcm[wi,wj]/n_tcm_windows) + log_smooth_constant)}
-                      ,comb_type = "one_pre"
-                      ,aggr_fun = "function(x) mean(x, na.rm = T)")
-    #DIFFERENCE
-    #assuming we use ordered tcm it follows that p(wi)>p(wj)
-    #to set bounds of the measures [-1,1] (1 is good)  wi/wj are switched in formula
-    #this is similar (not exactly the same) to the measure of textmineR package https://github.com/TommyJones/textmineR/issues/35
-    ,prob_dif = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant) {tcm[wj,wi]/tcm[wj,wj] - (tcm[wj,wj]/n_tcm_windows)}
-                          ,comb_type = "one_suc"
-                          ,aggr_fun = "function(x) mean(x, na.rm = T)")
-  )
+  # #more convenient interface for defintion of coherence functions might be established
+  # #e.g. by defining them as reference/S6 class, this would also allow more flexible definition of additional measures by user
+  # coh_funs = list(
+  #   #LOG-RATIO
+  #   logratio_UMass = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant) {log(log_smooth_constant + tcm[wi,wj]) - log(tcm[wj,wj])}
+  #                        ,comb_type = "one_pre_topic_order"
+  #                        ,aggr_fun = "function(x) sum(x, na.rm = T)")
+  #   #smoothing parameter = 1 resembles UMAss, .01 resembles stm package, default as in paper by Röder, i.e. .1e-12
+  #   ,logratio = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant) {log(log_smooth_constant + tcm[wi,wj]) - log(tcm[wj,wj])}
+  #                        ,comb_type = "one_pre"
+  #                        ,aggr_fun = "function(x) sum(x, na.rm = T)")
+  #   ,prob_logratio = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant)  {log(log_smooth_constant + (tcm[wi,wj]/n_tcm_windows)) - log(tcm[wj,wj]/n_tcm_windows)}
+  #                              ,comb_type = "one_pre"
+  #                              ,aggr_fun = "function(x) mean(x, na.rm = T)")
+  #   #PMI
+  #   #format of PMI formula proposed by @andland - https://github.com/dselivanov/text2vec/issues/236
+  #   ,pmi = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant)  {log2((tcm[wi,wj]/n_tcm_windows) + log_smooth_constant) - log2(tcm[wi,wi]/n_tcm_windows) - log2(tcm[wj,wj]/n_tcm_windows)}
+  #                    ,comb_type = "one_pre"
+  #                    ,aggr_fun = "function(x) mean(x, na.rm = T)")
+  #   #NORMALIZED PMI
+  #   #again, in contrast, to other implementations, only intrinsic NPMI as in PMIM (for implementation with sliding window see, e.g., Bouma, 2009)
+  #   ,npmi = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant) {(log2((tcm[wi,wj]/n_tcm_windows) + log_smooth_constant) - log2(tcm[wi,wi]/n_tcm_windows) - log2(tcm[wj,wj]/n_tcm_windows)) /  -log2((tcm[wi,wj]/n_tcm_windows) + log_smooth_constant)}
+  #                     ,comb_type = "one_pre"
+  #                     ,aggr_fun = "function(x) mean(x, na.rm = T)")
+  #   #DIFFERENCE
+  #   #assuming we use ordered tcm it follows that p(wi)>p(wj)
+  #   #to set bounds of the measures [-1,1] (1 is good)  wi/wj are switched in formula
+  #   #this is similar (not exactly the same) to the measure of textmineR package https://github.com/TommyJones/textmineR/issues/35
+  #   ,prob_dif = structure(function(wi, wj, n_tcm_windows, tcm, log_smooth_constant) {tcm[wj,wi]/tcm[wj,wj] - (tcm[wj,wj]/n_tcm_windows)}
+  #                         ,comb_type = "one_suc"
+  #                         ,aggr_fun = "function(x) mean(x, na.rm = T)")
+  # )
 
 #WRAPPER FUNCTION TO CALCULATE COHERENCE-------------------------------------------------------
-  #TODO coh_funs and other args need to be passed to the function as argument,
-  #later steps would be less verbose when fetching several or the arguments,e.g., tcm, from the function environment -> scoping
-  calc_coh = function( idxs
-                       , tcm
-                       , coh_funs = coh_funs
-                       , n_tcm_windows
-                       , coh_measure
-                       , log_smooth_constant = log_smooth_constant
-                       , alternative_order
-                         ) {
-    #select coherence function from the ones availble
-    coh_fun = coh_funs[[coh_measure]]
-    if (length(idxs) < 2) {
-      return(NA)
-    } else {
-    #define the wi wj set
-    coh = as.data.table(word_index_combinations(idxs, comb_type = attr(coh_fun, "comb_type"), alternative_order = alternative_order))
-    #calculate score for each pair of wi wj
-    coh[, coh_res:= mapply(function(x,y) coh_fun(x,y, tcm = tcm, n_tcm_windows = n_tcm_windows, log_smooth_constant = log_smooth_constant),wi, wj)]
-    #aggregate
-    aggr_fun = eval(parse(text = attr(coh_fun, "aggr_fun")))
-    return(coh[, round(aggr_fun(coh_res), d = 4)])
-    }
-  }
+  #
+  # #TODO coh_funs and other args need to be passed to the function as argument,
+  # #later steps would be less verbose when fetching several or the arguments,e.g., tcm, from the function environment -> scoping
+  # calc_coh = function( idxs
+  #                      , tcm
+  #                      , coh_funs = coh_funs
+  #                      , n_tcm_windows
+  #                      , coh_measure
+  #                      , log_smooth_constant = log_smooth_constant
+  #                      , alternative_order
+  #                        ) {
+  #   #select coherence function from the ones availble
+  #   coh_fun = coh_funs[[coh_measure]]
+  #   if (length(idxs) < 2) {
+  #     return(NA)
+  #   } else {
+  #   #define the wi wj set
+  #   coh = as.data.table(word_index_combinations(idxs, comb_type = attr(coh_fun, "comb_type"), alternative_order = alternative_order))
+  #   #calculate score for each pair of wi wj
+  #   coh[, coh_res:= mapply(function(x,y) coh_fun(x,y, tcm = tcm, n_tcm_windows = n_tcm_windows, log_smooth_constant = log_smooth_constant),wi, wj)]
+  #   #aggregate
+  #   aggr_fun = eval(parse(text = attr(coh_fun, "aggr_fun")))
+  #   return(coh[, round(aggr_fun(coh_res), d = 4)])
+  #   }
+  # }
 
 #CALCULATE COHERENCE----------------------------------------------------------------
-  for (i in names(coh_funs)) {
-    coherence[,(i):= lapply(tcm_term_idxs, function(x) {
-                                     calc_coh( idxs = x, coh_measure = i
-                                    , tcm = tcm
-                                    , coh_funs = coh_funs
-                                    , n_tcm_windows = n_tcm_windows
-                                    , log_smooth_constant = log_smooth_constant
-                                    , alternative_order = restore_topic_order)})
-                    , by = Topic]
-  }
+
+  # potential starting point for definition of flexible implementation of coherence measures
+  # for (i in names(coh_funs)) {
+  #   coherence[,(i):= lapply(tcm_term_idxs, function(x) {
+  #                                    calc_coh( idxs = x, coh_measure = i
+  #                                   , tcm = tcm
+  #                                   , coh_funs = coh_funs
+  #                                   , n_tcm_windows = n_tcm_windows
+  #                                   , log_smooth_constant = log_smooth_constant
+  #                                   , alternative_order = restore_topic_order)})
+  #                   , by = Topic]
+  # }
+
+
+  #Type 1
+  #sum(..., na.rm = T) for aggregation
+  #one_pre_topic_order as term indices
+    coherence[,sum_logratio_UMass:= lapply(tcm_term_idxs, function(x) {
+      if (length(idxs) < 2) {
+        return(NA)
+      } else {
+        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre_topic_order", topic_order = restore_topic_order))
+        coh[, score:= mapply(function(x,y) {log(1 + tcm[x,y]) - log(tcm[y,y])}
+                             ,V1, V2)]
+        return(coh[, round(sum(score, na.rm = T), d = 4)])
+      }
+      ]
+
+    coherence[,sum_logratio_stm_pckg:= lapply(tcm_term_idxs, function(x) {
+      if (length(idxs) < 2) {
+        return(NA)
+      } else {
+        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre_topic_order", topic_order = restore_topic_order))
+        coh[, score:= mapply(function(x,y) {log(.01 + tcm[x,y]) - log(tcm[y,y])}
+                             ,V1, V2)]
+        return(coh[, round(sum(score, na.rm = T), d = 4)])
+      }
+      ]
+
+    #Type 2
+    #mean(..., na.rm = T) for aggregation
+    #one_pre_topic_order or one_pre as term indices
+    coherence[,mean_prob_logratio:= lapply(tcm_term_idxs, function(x) {
+      if (length(idxs) < 2) {
+        return(NA)
+      } else {
+        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre"))
+        coh[, score:= mapply(function(x,y) {log(log_smooth_constant + tcm[x,y]) - log(tcm[y,y])}
+                             ,V1, V2)]
+        return(coh[, round(mean(score, na.rm = T), d = 4)])
+      }
+      ]
+
+    coherence[,mean_prob_logratio_Torder:= lapply(tcm_term_idxs, function(x) {
+      if (length(idxs) < 2) {
+        return(NA)
+      } else {
+        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre_topic_order", topic_order = restore_topic_order))
+        coh[, score:= mapply(function(x,y) {log(log_smooth_constant + tcm[x,y]) - log(tcm[y,y])}
+                             ,V1, V2)]
+        return(coh[, round(mean(score, na.rm = T), d = 4)])
+      }
+      ]
+
+    coherence[,mean_pmi:= lapply(tcm_term_idxs, function(x) {
+      if (length(idxs) < 2) {
+        return(NA)
+      } else {
+        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre"))
+        coh[, score:= mapply(function(x,y)  {log2((tcm[x,y]/n_tcm_windows) + log_smooth_constant) - log2(tcm[x,x]/n_tcm_windows) - log2(tcm[y,y]/n_tcm_windows)}
+                             ,V1, V2)]
+        return(coh[, round(mean(score, na.rm = T), d = 4)])
+      }
+      ]
+
+    coherence[,mean_pmi_Torder:= lapply(tcm_term_idxs, function(x) {
+      if (length(idxs) < 2) {
+        return(NA)
+      } else {
+        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre_topic_order", topic_order = restore_topic_order))
+        coh[, score:= mapply(function(x,y)  {log2((tcm[x,y]/n_tcm_windows) + log_smooth_constant) - log2(tcm[x,x]/n_tcm_windows) - log2(tcm[y,y]/n_tcm_windows)}
+                             ,V1, V2)]
+        return(coh[, round(mean(score, na.rm = T), d = 4)])
+      }
+      ]
+
+    coherence[,mean_npmi:= lapply(tcm_term_idxs, function(x) {
+      if (length(idxs) < 2) {
+        return(NA)
+      } else {
+        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre"))
+        coh[, score:= mapply(function(x,y)   {(log2((tcm[x,y]/n_tcm_windows) + log_smooth_constant) - log2(tcm[x,x]/n_tcm_windows) - log2(tcm[y,y]/n_tcm_windows)) /  -log2((tcm[x,y]/n_tcm_windows) + log_smooth_constant)}
+                             ,V1, V2)]
+        return(coh[, round(mean(score, na.rm = T), d = 4)])
+      }
+      ]
+
+    #Type 3
+    #mean(..., na.rm = T) for aggregation
+    #one_suc as term indices
+    coherence[,mean_prob_diff:= lapply(tcm_term_idxs, function(x) {
+      if (length(idxs) < 2) {
+        return(NA)
+      } else {
+        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_suc"))
+        coh[, score:= mapply(function(x,y)  {tcm[y,x]/tcm[y,y] - (tcm[y,y]/n_tcm_windows)}
+                             ,V1, V2)]
+        return(coh[, round(mean(score, na.rm = T), d = 4)])
+      }
+      ]
+
 
   coherence[, tcm_term_idxs := NULL]
   return(coherence[])
