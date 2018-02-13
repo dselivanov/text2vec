@@ -258,7 +258,7 @@ coherence =  function( top_term_matrix
                                                ,V1, V2)]
                           return(coh[, round(sum(score, na.rm = T), d = 4)])
                         }
-    }]
+    })]
 
     coherence[,sum_logratio_stm_pckg:= lapply(tcm_term_idxs, function(x) {
                       if (length(idxs) < 2) {
@@ -269,7 +269,7 @@ coherence =  function( top_term_matrix
                                              ,V1, V2)]
                         return(coh[, round(sum(score, na.rm = T), d = 4)])
                       }
-    }]
+    })]
 
     #Type 2
     #mean(..., na.rm = T) for aggregation
@@ -283,7 +283,7 @@ coherence =  function( top_term_matrix
                                            ,V1, V2)]
                       return(coh[, round(mean(score, na.rm = T), d = 4)])
                     }
-    }]
+    })]
 
     coherence[,mean_prob_logratio_Torder:= lapply(tcm_term_idxs, function(x) {
                     if (length(idxs) < 2) {
@@ -294,7 +294,7 @@ coherence =  function( top_term_matrix
                                            ,V1, V2)]
                       return(coh[, round(mean(score, na.rm = T), d = 4)])
                     }
-      }]
+      })]
 
     coherence[,mean_pmi:= lapply(tcm_term_idxs, function(x) {
                     if (length(idxs) < 2) {
@@ -305,7 +305,7 @@ coherence =  function( top_term_matrix
                                            ,V1, V2)]
                       return(coh[, round(mean(score, na.rm = T), d = 4)])
                     }
-      }]
+      })]
 
     coherence[,mean_pmi_Torder:= lapply(tcm_term_idxs, function(x) {
                     if (length(idxs) < 2) {
@@ -316,7 +316,7 @@ coherence =  function( top_term_matrix
                                            ,V1, V2)]
                       return(coh[, round(mean(score, na.rm = T), d = 4)])
                     }
-      }]
+      })]
 
     coherence[,mean_npmi:= lapply(tcm_term_idxs, function(x) {
                     if (length(idxs) < 2) {
@@ -327,7 +327,7 @@ coherence =  function( top_term_matrix
                                            ,V1, V2)]
                       return(coh[, round(mean(score, na.rm = T), d = 4)])
                     }
-      }]
+      })]
 
     #Type 3
     #mean(..., na.rm = T) for aggregation
@@ -341,7 +341,7 @@ coherence =  function( top_term_matrix
                                            ,V1, V2)]
                       return(coh[, round(mean(score, na.rm = T), d = 4)])
                     }
-      }]
+      })]
 
   coherence[, tcm_term_idxs := NULL]
   return(coherence[])
