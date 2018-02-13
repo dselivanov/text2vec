@@ -66,7 +66,7 @@ coherence =  function( top_term_matrix
   #     creating, e.g., one any subsets requires to store one index against a list of indices, hence, formulas need
   #     adaption, e.g., something like tcm[unlist(wi), unlist(wj)] might work
   #(iii)Currently indices of subsets are stored in memory, this might be turned to dynamic creation of indices to spare memory usage
-  #     the lines coherence[,tcm_subset_idxs := split(match... would have to be incorporated into word_index_combinations
+  #     the lines coherence[,tcm_term_idxs := split(match... would have to be incorporated into word_index_combinations
 
 #CREDITS / REFERENCES -------------------------------------------------
   #The following paper is the main theoretical basis for this code
@@ -159,9 +159,11 @@ coherence =  function( top_term_matrix
 
 #GET REFERENCE INDICES OF TOP TERMS IN TCM FOR EACH TOPIC---------------------------
   #credits for this approach of getting indices go to authors of stm package
-  coherence[,tcm_subset_idxs := split(match(top_terms, colnames(tcm))
+  coherence[,tcm_term_idxs := split(match(top_terms, colnames(tcm))
                                      , rep(1:n_topics, each=n_terms))]
 
+  #remove NA values from term idxs (not all top_terms_unique are necessarily included in tcm)
+  coherence[, tcm_term_idxs := lapply(tcm_term_idxs, function(x) x[!is.na(x)])]
 
 #DEFINITION OF COHERENCE MEASURES------------------------------------------------------------
   #TODO
@@ -211,9 +213,6 @@ coherence =  function( top_term_matrix
                          ) {
     #select coherence function from the ones availble
     coh_fun = coh_funs[[coh_measure]]
-    #remove NA values from idxs (remember not all top_terms_unique are necessarily included in tcm)
-    #and check if more than one index remains since minimum of two terms is required for coherence calculation
-    idxs <- idxs[!is.na(idxs)]
     if (length(idxs) < 2) {
       return(NA)
     } else {
@@ -229,7 +228,7 @@ coherence =  function( top_term_matrix
 
 #CALCULATE COHERENCE----------------------------------------------------------------
   for (i in names(coh_funs)) {
-    coherence[,(i):= lapply(tcm_subset_idxs, function(x) {
+    coherence[,(i):= lapply(tcm_term_idxs, function(x) {
                                      calc_coh( idxs = x, coh_measure = i
                                     , tcm = tcm
                                     , coh_funs = coh_funs
@@ -239,7 +238,7 @@ coherence =  function( top_term_matrix
                     , by = Topic]
   }
 
-  coherence[, tcm_subset_idxs := NULL]
+  coherence[, tcm_term_idxs := NULL]
   return(coherence[])
 }
 
