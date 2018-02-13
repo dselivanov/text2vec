@@ -250,101 +250,99 @@ coherence =  function( top_term_matrix
   #sum(..., na.rm = T) for aggregation
   #one_pre_topic_order as term indices
     coherence[,sum_logratio_UMass:= lapply(tcm_term_idxs, function(x) {
-      if (length(idxs) < 2) {
-        return(NA)
-      } else {
-        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre_topic_order", topic_order = restore_topic_order))
-        coh[, score:= mapply(function(x,y) {log(1 + tcm[x,y]) - log(tcm[y,y])}
-                             ,V1, V2)]
-        return(coh[, round(sum(score, na.rm = T), d = 4)])
-      }
-      ]
+                        if (length(idxs) < 2) {
+                          return(NA)
+                        } else {
+                          coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre_topic_order", topic_order = restore_topic_order))
+                          coh[, score:= mapply(function(x,y) {log(1 + tcm[x,y]) - log(tcm[y,y])}
+                                               ,V1, V2)]
+                          return(coh[, round(sum(score, na.rm = T), d = 4)])
+                        }
+    }]
 
     coherence[,sum_logratio_stm_pckg:= lapply(tcm_term_idxs, function(x) {
-      if (length(idxs) < 2) {
-        return(NA)
-      } else {
-        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre_topic_order", topic_order = restore_topic_order))
-        coh[, score:= mapply(function(x,y) {log(.01 + tcm[x,y]) - log(tcm[y,y])}
-                             ,V1, V2)]
-        return(coh[, round(sum(score, na.rm = T), d = 4)])
-      }
-      ]
+                      if (length(idxs) < 2) {
+                        return(NA)
+                      } else {
+                        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre_topic_order", topic_order = restore_topic_order))
+                        coh[, score:= mapply(function(x,y) {log(.01 + tcm[x,y]) - log(tcm[y,y])}
+                                             ,V1, V2)]
+                        return(coh[, round(sum(score, na.rm = T), d = 4)])
+                      }
+    }]
 
     #Type 2
     #mean(..., na.rm = T) for aggregation
     #one_pre_topic_order or one_pre as term indices
     coherence[,mean_prob_logratio:= lapply(tcm_term_idxs, function(x) {
-      if (length(idxs) < 2) {
-        return(NA)
-      } else {
-        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre"))
-        coh[, score:= mapply(function(x,y) {log(log_smooth_constant + tcm[x,y]) - log(tcm[y,y])}
-                             ,V1, V2)]
-        return(coh[, round(mean(score, na.rm = T), d = 4)])
-      }
-      ]
+                    if (length(idxs) < 2) {
+                      return(NA)
+                    } else {
+                      coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre"))
+                      coh[, score:= mapply(function(x,y) {log(log_smooth_constant + tcm[x,y]) - log(tcm[y,y])}
+                                           ,V1, V2)]
+                      return(coh[, round(mean(score, na.rm = T), d = 4)])
+                    }
+    }]
 
     coherence[,mean_prob_logratio_Torder:= lapply(tcm_term_idxs, function(x) {
-      if (length(idxs) < 2) {
-        return(NA)
-      } else {
-        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre_topic_order", topic_order = restore_topic_order))
-        coh[, score:= mapply(function(x,y) {log(log_smooth_constant + tcm[x,y]) - log(tcm[y,y])}
-                             ,V1, V2)]
-        return(coh[, round(mean(score, na.rm = T), d = 4)])
-      }
-      ]
+                    if (length(idxs) < 2) {
+                      return(NA)
+                    } else {
+                      coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre_topic_order", topic_order = restore_topic_order))
+                      coh[, score:= mapply(function(x,y) {log(log_smooth_constant + tcm[x,y]) - log(tcm[y,y])}
+                                           ,V1, V2)]
+                      return(coh[, round(mean(score, na.rm = T), d = 4)])
+                    }
+      }]
 
     coherence[,mean_pmi:= lapply(tcm_term_idxs, function(x) {
-      if (length(idxs) < 2) {
-        return(NA)
-      } else {
-        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre"))
-        coh[, score:= mapply(function(x,y)  {log2((tcm[x,y]/n_tcm_windows) + log_smooth_constant) - log2(tcm[x,x]/n_tcm_windows) - log2(tcm[y,y]/n_tcm_windows)}
-                             ,V1, V2)]
-        return(coh[, round(mean(score, na.rm = T), d = 4)])
-      }
-      ]
+                    if (length(idxs) < 2) {
+                      return(NA)
+                    } else {
+                      coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre"))
+                      coh[, score:= mapply(function(x,y)  {log2((tcm[x,y]/n_tcm_windows) + log_smooth_constant) - log2(tcm[x,x]/n_tcm_windows) - log2(tcm[y,y]/n_tcm_windows)}
+                                           ,V1, V2)]
+                      return(coh[, round(mean(score, na.rm = T), d = 4)])
+                    }
+      }]
 
     coherence[,mean_pmi_Torder:= lapply(tcm_term_idxs, function(x) {
-      if (length(idxs) < 2) {
-        return(NA)
-      } else {
-        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre_topic_order", topic_order = restore_topic_order))
-        coh[, score:= mapply(function(x,y)  {log2((tcm[x,y]/n_tcm_windows) + log_smooth_constant) - log2(tcm[x,x]/n_tcm_windows) - log2(tcm[y,y]/n_tcm_windows)}
-                             ,V1, V2)]
-        return(coh[, round(mean(score, na.rm = T), d = 4)])
-      }
-      ]
+                    if (length(idxs) < 2) {
+                      return(NA)
+                    } else {
+                      coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre_topic_order", topic_order = restore_topic_order))
+                      coh[, score:= mapply(function(x,y)  {log2((tcm[x,y]/n_tcm_windows) + log_smooth_constant) - log2(tcm[x,x]/n_tcm_windows) - log2(tcm[y,y]/n_tcm_windows)}
+                                           ,V1, V2)]
+                      return(coh[, round(mean(score, na.rm = T), d = 4)])
+                    }
+      }]
 
     coherence[,mean_npmi:= lapply(tcm_term_idxs, function(x) {
-      if (length(idxs) < 2) {
-        return(NA)
-      } else {
-        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre"))
-        coh[, score:= mapply(function(x,y)   {(log2((tcm[x,y]/n_tcm_windows) + log_smooth_constant) - log2(tcm[x,x]/n_tcm_windows) - log2(tcm[y,y]/n_tcm_windows)) /  -log2((tcm[x,y]/n_tcm_windows) + log_smooth_constant)}
-                             ,V1, V2)]
-        return(coh[, round(mean(score, na.rm = T), d = 4)])
-      }
-      ]
+                    if (length(idxs) < 2) {
+                      return(NA)
+                    } else {
+                      coh = as.data.table(term_index_combinations(idxs, comb_type = "one_pre"))
+                      coh[, score:= mapply(function(x,y)   {(log2((tcm[x,y]/n_tcm_windows) + log_smooth_constant) - log2(tcm[x,x]/n_tcm_windows) - log2(tcm[y,y]/n_tcm_windows)) /  -log2((tcm[x,y]/n_tcm_windows) + log_smooth_constant)}
+                                           ,V1, V2)]
+                      return(coh[, round(mean(score, na.rm = T), d = 4)])
+                    }
+      }]
 
     #Type 3
     #mean(..., na.rm = T) for aggregation
     #one_suc as term indices
     coherence[,mean_prob_diff:= lapply(tcm_term_idxs, function(x) {
-      if (length(idxs) < 2) {
-        return(NA)
-      } else {
-        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_suc"))
-        coh[, score:= mapply(function(x,y)  {tcm[y,x]/tcm[y,y] - (tcm[y,y]/n_tcm_windows)}
-                             ,V1, V2)]
-        return(coh[, round(mean(score, na.rm = T), d = 4)])
-      }
-      ]
-
+                    if (length(idxs) < 2) {
+                      return(NA)
+                    } else {
+                      coh = as.data.table(term_index_combinations(idxs, comb_type = "one_suc"))
+                      coh[, score:= mapply(function(x,y)  {tcm[y,x]/tcm[y,y] - (tcm[y,y]/n_tcm_windows)}
+                                           ,V1, V2)]
+                      return(coh[, round(mean(score, na.rm = T), d = 4)])
+                    }
+      }]
 
   coherence[, tcm_term_idxs := NULL]
   return(coherence[])
 }
-
