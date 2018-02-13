@@ -132,12 +132,27 @@ coherence =  function( top_term_matrix
   #   ), units = "Mb")
   #hence, using base::matrix class seems acceptable for faster subsetting instead of potential sparseMatrix input class
 
-  #make matrix symmetric and order tcm by term probability (entries in diagonal)
+  #make matrix symmetric, input tcm might not be symmetric in terms of (i) order of terms in cols/rows and (ii) their values
+  tcm = tcm[match(rownames(tcm), colnames(tcm)), ]
+  if(!isSymmetric(tcm)) {
+      if (any((sign(tcm[upper.tri(tcm, diag = F)]) + sign(t(tcm)[upper.tri(tcm, diag = F)])) > 1)) {
+            stop("Input tcm is not symmetric or not coercible to symmetric matrix.
+                  Entries of upper and lower triangle, e.g., tcm[x,y] and tcm[y,x], both are >1
+                  where one of the entries should be zero for converting to symmetric matrix.")
+      }
+      #fill missing values of upper triangle with the entries of the lower triangle and vice versa
+      #NOTE, it would suffice to work with one of the triangles only
+      #turning to full symmetric matrix just done for not concerning about logic of index subsetting with regard to upper/lower triangle
+      #since matrix is dense at this point anyway, this sould be irrelevant from memory footprint perspective
+      tcm[upper.tri(tcm, diag = F)] <- tcm[upper.tri(tcm, diag = F)] + t(tcm)[upper.tri(tcm, diag = F)]
+      tcm[lower.tri(tcm, diag = F)] <-  t(tcm)[lower.tri(tcm, diag = F)]
+  }
+
+  #order tcm by term probability (entries in diagonal)
   #from left to right the probability of terms follows the rule p(tcm[i,i]) > p(tcm[i+1,i+1])
   #ordering tcm is relevant for asymmetric measures that require a certain order
   #some asymmetric measures require the original order in the topic (e.g. UMass),
   #which is therefore also stored for re-mapping indices of tcm to this order
-  tcm = tcm[match(rownames(tcm), colnames(tcm)), ]
   probability_order = order(diag(tcm),  decreasing = TRUE)
   tcm = tcm[probability_order, probability_order]
   restore_topic_order = match(top_terms_unique, colnames(tcm))
