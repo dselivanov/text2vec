@@ -100,7 +100,7 @@ coherence =  function( top_term_matrix
   #some basic checks on the input
   stopifnot( setequal(colnames(tcm),rownames(tcm)), ncol(tcm) == nrow(tcm))
   #check if tcm includes all top terms
-  if ( !(setequal(intersect(top_terms_unique, colnames(tcm)), top_terms_unique)) {
+  if ( !(setequal(intersect(top_terms_unique, colnames(tcm)), top_terms_unique)) ) {
     warning("Not all terms of top_term_matrix are included in tcm.
              Coherence scores for individual topics will be based on incomplete word sets and are only partially valid.
              Please consider a thorough check of results before further downstream analysis.")
