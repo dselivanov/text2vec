@@ -43,7 +43,6 @@
 coherence =  function( top_term_matrix
                             ,tcm
                             ,n_tcm_windows = NULL
-                            ,log_smooth_constant = .1e-12
                             ) {
 
 #GENERAL LOGIC--------------------------------------------------------
@@ -94,6 +93,7 @@ coherence =  function( top_term_matrix
   top_terms_unique = unique(top_terms)
   n_topics = ncol(top_term_matrix)
   n_terms = nrow(top_term_matrix)
+  log_smooth_constant = .1e-12
   coherence = data.table(Topic = paste0("T", 1:n_topics))
 
 #PREPARE TCM------------------------------------------------------------------------
@@ -249,6 +249,7 @@ coherence =  function( top_term_matrix
   #Type 1
   #sum(..., na.rm = T) for aggregation
   #one_pre_topic_order as term indices
+  #note the adapted log_smooth_constant to comply original UMass and its implementation in stm package
     coherence[,sum_logratio_UMass:= lapply(tcm_term_idxs, function(x) {
                         if (length(idxs) < 2) {
                           return(NA)
