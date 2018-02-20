@@ -34,9 +34,9 @@
 # })
 # #term window co-occurrence matrix based on binary co-occurrence of terms in window (here full document)
 # #intrinsic since same dtm is used as for fitting LDA model
-# twcm_int <- Matrix::crossprod(sign(dtm))
-# diag(twcm_int) <- v$term_count
-# coherence_scores <- lapply(top_terms, function(x) {
+# twcm_int = Matrix::crossprod(sign(dtm))
+# diag(twcm_int) = v$term_count
+# coherence_scores = lapply(top_terms, function(x) {
 #   coherence(top_term_matrix = x
 #             ,twcm = twcm_int
 #             ,n_twcm_windows = nrow(dtm)
@@ -45,7 +45,7 @@
 #
 # #for finding the model with regard to number of topics the mean over coherence scores may be used
 # #and a comparison of scaled values may be done
-# coherence_scores_mean <- lapply(coherence_scores, function(x) {
+# coherence_scores_mean = lapply(coherence_scores, function(x) {
 #   x[, lapply(.SD, mean), .SDcols = setdiff(names(x), "Topic")]
 # })
 # plot_data = rbindlist(coherence_scores_mean)
@@ -164,8 +164,8 @@ coherence =  function( top_term_matrix
       #NOTE, it would suffice to work with one of the triangles only
       #turning to full symmetric matrix just done for not concerning about logic of index subsetting with regard to upper/lower triangle
       #since matrix is dense at this point anyway, this sould be irrelevant from memory footprint perspective
-      twcm[upper.tri(twcm, diag = F)] <- twcm[upper.tri(twcm, diag = F)] + t(twcm)[upper.tri(twcm, diag = F)]
-      twcm[lower.tri(twcm, diag = F)] <-  t(twcm)[lower.tri(twcm, diag = F)]
+      twcm[upper.tri(twcm, diag = F)] = twcm[upper.tri(twcm, diag = F)] + t(twcm)[upper.tri(twcm, diag = F)]
+      twcm[lower.tri(twcm, diag = F)] =  t(twcm)[lower.tri(twcm, diag = F)]
   }
 
   #order twcm by term probability (entries in diagonal)
@@ -223,8 +223,8 @@ coherence =  function( top_term_matrix
       if (length(idxs) < 2) {
         return(NA)
       } else {
-        reorder <- order(match(idxs, restore_topic_order), decreasing = TRUE)
-        idxs <- idxs[reorder]
+        reorder = order(match(idxs, restore_topic_order), decreasing = TRUE)
+        idxs = idxs[reorder]
         res = twcm[idxs, idxs] + .01
         res = apply(res, 2, function(x) x/(diag(res)))
         res = log(res[upper.tri(res)])
@@ -236,8 +236,8 @@ coherence =  function( top_term_matrix
       if (length(idxs) < 2) {
         return(NA)
       } else {
-        reorder <- order(match(idxs, restore_topic_order), decreasing = TRUE)
-        idxs <- idxs[reorder]
+        reorder = order(match(idxs, restore_topic_order), decreasing = TRUE)
+        idxs = idxs[reorder]
         res = twcm[idxs, idxs]
         res = apply(res, 2, function(x) x/(diag(res)+.01))
         res = log(.01 + res[lower.tri(res)])

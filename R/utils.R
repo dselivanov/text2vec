@@ -76,7 +76,7 @@ malloc_trim_finalizer = function(e) {
 # by the inverse binomial coefficient with special care taken to avoid negative infinity
 # resulting from log(0). A slightly slower but more intuitive way of writing this would be
 # \code{function(k, n, p) {
-#   out <- dbinom(k, n, p, log = TRUE) - log(choose(n, k))
+#   out = dbinom(k, n, p, log = TRUE) - log(choose(n, k))
 #   replace(out, out == -Inf, 0)
 # }}
 # This is used to create a log-likelihood ratio with 1 degree of freedom for bi-gram analysis
@@ -117,8 +117,8 @@ L_func = function(p, n, k) {
 #'
 #' @examples
 #' #'
-#' idxs <- c(1,2,3) #e.g. as in tcm ordered by diagonal
-#' idxs_as_in_topic <- c(2,1,3) #order of indices (corresponding terms) in topic
+#' idxs = c(1,2,3) #e.g. as in tcm ordered by diagonal
+#' idxs_as_in_topic = c(2,1,3) #order of indices (corresponding terms) in topic
 #'
 #' word_index_combinations(idxs, comb_type = "one_idx-succeeding_idxs")
 #' #       [,1] [,2]
@@ -140,18 +140,18 @@ L_func = function(p, n, k) {
 #' # [3,]    1    2
 #'
 
-term_index_combinations <- function(term_indices, comb_type = "one_idx-succeeding_idxs",  topic_order = NULL) {
+term_index_combinations = function(term_indices, comb_type = "one_idx-succeeding_idxs",  topic_order = NULL) {
   if (comb_type == "one_idx-preceeding_idxs") {
-    idx_combs <- t(combn(term_indices,2, FUN = function(y) sort(y, decreasing = TRUE)))
+    idx_combs = t(combn(term_indices,2, FUN = function(y) sort(y, decreasing = TRUE)))
   } else if (comb_type == "one_idx-succeeding_idxs") {
-    idx_combs <- t(combn(term_indices,2, FUN = function(y) sort(y, decreasing = FALSE)))
+    idx_combs = t(combn(term_indices,2, FUN = function(y) sort(y, decreasing = FALSE)))
   } else if (comb_type == "one_idx-preceeding_idxs-topic_order") {
     #for asymmetric sets the original order of words (hence, indexes of tcm) has to be restored
-    reorder <- order(match(term_indices, topic_order), decreasing = TRUE)
-    term_indices <- term_indices[reorder]
+    reorder = order(match(term_indices, topic_order), decreasing = TRUE)
+    term_indices = term_indices[reorder]
     #in contrast to the other subsets, no additional reordering of indices in combn at this point
     #to maintain original topic order
-    idx_combs <- t(combn(term_indices,2))
+    idx_combs = t(combn(term_indices,2))
   }
   idx_combs
 }

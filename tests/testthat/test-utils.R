@@ -74,40 +74,40 @@ test_that("as.lda_c ", {
 #TODO test with some numbers from data and different orderings...
 #see http://pydoc.net/gensim/3.2.0/gensim.topic_coherence.segmentation/
 #assuming ordered diagonal
-m <- matrix(rbind(c(40, 1, 2, 3),
+m = matrix(rbind(c(40, 1, 2, 3),
                   c(0, 30, 4, 5),
                   c(0,  0,20, 6),
                   c(0,  0, 0,10)), ncol = 4)
-m[lower.tri(m)] <- t(m)[lower.tri(m)]
+m[lower.tri(m)] = t(m)[lower.tri(m)]
 
-idxs <- c(1,2,3,4) #e.g. as in tcm ordered by diagonal
-idxs_as_in_topic <- c(2,1,3,4) #order of indices (corresponding terms) in topic
+idxs = c(1,2,3,4) #e.g. as in tcm ordered by diagonal
+idxs_as_in_topic = c(2,1,3,4) #order of indices (corresponding terms) in topic
 
-a <- term_index_combinations(idxs, comb_type = "one_idx-succeeding_idxs")
-colnames(a) <- c("x", "y")
-values <- t(mapply(function(x, y) {c(v_x = m[x,x], v_y = m[y,y], v_xy = m[x,y], v_xy_div_y = m[x,y]/m[y,y])},
+a = term_index_combinations(idxs, comb_type = "one_idx-succeeding_idxs")
+colnames(a) = c("x", "y")
+values = t(mapply(function(x, y) {c(v_x = m[x,x], v_y = m[y,y], v_xy = m[x,y], v_xy_div_y = m[x,y]/m[y,y])},
                    a[,1], a[,2]))
-a <- cbind(a, values)
+a = cbind(a, values)
 
-test <- m/diag(m)
+test = m/diag(m)
 sum(test[lower.tri(test)]) == sum(a[,"v_xy_div_y"])
 
-b <- term_index_combinations(idxs, comb_type = "one_idx-preceeding_idxs")
-colnames(b) <- c("x", "y")
-values <- t(mapply(function(x, y) {c(v_x = m[x,x], v_y = m[y,y], v_xy = m[x,y], v_xy_div_y = m[x,y]/m[y,y])},
+b = term_index_combinations(idxs, comb_type = "one_idx-preceeding_idxs")
+colnames(b) = c("x", "y")
+values = t(mapply(function(x, y) {c(v_x = m[x,x], v_y = m[y,y], v_xy = m[x,y], v_xy_div_y = m[x,y]/m[y,y])},
                    b[,1], b[,2]))
-b <- cbind(b, values)
+b = cbind(b, values)
 
-test <- m/diag(m)
+test = m/diag(m)
 sum(test[upper.tri(test)]) == sum(b[,"v_xy_div_y"])
 
 
-c <- term_index_combinations(idxs, comb_type = "one_idx-preceeding_idxs-topic_order")
-colnames(c) <- c("x", "y")
-values <- t(mapply(function(x, y) {c(v_x = m[x,x], v_y = m[y,y], v_xy = m[x,y], v_xy_div_y = m[x,y]/m[y,y])},
+c = term_index_combinations(idxs, comb_type = "one_idx-preceeding_idxs-topic_order")
+colnames(c) = c("x", "y")
+values = t(mapply(function(x, y) {c(v_x = m[x,x], v_y = m[y,y], v_xy = m[x,y], v_xy_div_y = m[x,y]/m[y,y])},
                    c[,1], c[,2]))
-c <- cbind(c, values)
+c = cbind(c, values)
 
-test <- m/diag(m)
+test = m/diag(m)
 sum(test[lower.tri(test)]) == sum(c[,"v_xy_div_y"])
 
