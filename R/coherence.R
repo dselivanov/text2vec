@@ -2,15 +2,12 @@
 #' Calculation of various coherence measures for topic models
 #'
 #'
+#' Internally the function uses a smoothing constant to avoid logarithm of zero as proposed by Röder et al., i.e., \code{.1e-12}.
 #'
 #' @param top_term_matrix A character matrix with the top terms (entries = words) ranked starting with row 1 per topic (columnnames = topics). e.g.,
 #'                        For example, the output of text2vec::get_top_words(...).
-#' @param twcm A term co-occurrence matrix that serves as reference to calculate coherence scores for the terms in \code{top_term_matrix}.
-#' @param n_twcm_windows The number of documents that served to create the \code{twcm} to calculate probabilities from counts in the\code{twcm} used as input to some coherence measures.
-#' @param log_smooth_constant Smoothing constant to avoid logarithm of zero in calcualtions, for example, \code{log(log_smooth_constant + 0)}.
-#'                            By default \code{.1e-12} as used by Röder et al. (palmetto).
-#'                            Use \code{1} for UMass logratio as used by Mimno.
-#'                            Use \code{.01} for logratio as used in stm package.
+#' @param twcm A term window co-occurrence matrix that serves as reference to calculate coherence scores for the terms in \code{top_term_matrix}.
+#' @param n_twcm_windows The number of windows that served to create the \code{twcm}. Needed to calculate probabilities from counts in the\code{twcm} required by some measures.
 #'
 #' @return A \code{data.table} showing the various coherence scores per topic (or average over all topics).
 #' @export
