@@ -153,5 +153,5 @@ term_index_combinations <- function(term_indices, comb_type = "one_idx-succeedin
     #to maintain original topic order
     idx_combs <- t(combn(term_indices,2))
   }
-  return(idx_combs)
+  idx_combs
 }
