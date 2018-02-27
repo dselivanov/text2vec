@@ -23,6 +23,7 @@
 #' @return normalized matrix
 #' @export
 normalize = function(m, norm = c("l1", "l2", "none")) {
+  stopifnot(inherits(m, "matrix") || inherits(m, "sparseMatrix"))
   norm = match.arg(norm)
 
   if (norm == "none")

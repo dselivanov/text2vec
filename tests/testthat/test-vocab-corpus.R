@@ -128,9 +128,13 @@ test_that("Unigram + Bigram Vocabulary Corpus construction", {
   expect_equal( length(m@x), 361818L)
 })
 
-test_that("create_dtm", {
+test_that("hash dtm & normalize", {
   n_hash = 2**10
   dtm = create_dtm(it, hash_vectorizer(n_hash))
   expect_equal(ncol(dtm), n_hash)
   expect_equal(nrow(dtm), length(train_ind))
+
+  expect_equivalent(rowSums(normalize(dtm, "l1")), rep(1, nrow(dtm)))
+  expect_equivalent(rowSums(normalize(as.matrix(dtm), "l1")), rep(1, nrow(dtm)))
+  expect_error(rowSums(normalize(data.frame(i = 1, j = 2, x = 3), "l1")))
 })
