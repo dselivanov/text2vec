@@ -305,8 +305,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_vocab_create
-SEXP cpp_vocab_create(uint32_t ngram_min, uint32_t ngram_max, const CharacterVector stopwords_R, const String delim);
-RcppExport SEXP _text2vec_cpp_vocab_create(SEXP ngram_minSEXP, SEXP ngram_maxSEXP, SEXP stopwords_RSEXP, SEXP delimSEXP) {
+SEXP cpp_vocab_create(uint32_t ngram_min, uint32_t ngram_max, const CharacterVector stopwords_R, const String delim, int window_size);
+RcppExport SEXP _text2vec_cpp_vocab_create(SEXP ngram_minSEXP, SEXP ngram_maxSEXP, SEXP stopwords_RSEXP, SEXP delimSEXP, SEXP window_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -314,7 +314,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< uint32_t >::type ngram_max(ngram_maxSEXP);
     Rcpp::traits::input_parameter< const CharacterVector >::type stopwords_R(stopwords_RSEXP);
     Rcpp::traits::input_parameter< const String >::type delim(delimSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_vocab_create(ngram_min, ngram_max, stopwords_R, delim));
+    Rcpp::traits::input_parameter< int >::type window_size(window_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_vocab_create(ngram_min, ngram_max, stopwords_R, delim, window_size));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -524,7 +525,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_text2vec_cpp_vocabulary_corpus_insert_document_batch", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_insert_document_batch, 6},
     {"_text2vec_cpp_vocabulary_corpus_get_tcm", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_get_tcm, 1},
     {"_text2vec_cpp_vocabulary_corpus_get_dtm", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_get_dtm, 1},
-    {"_text2vec_cpp_vocab_create", (DL_FUNC) &_text2vec_cpp_vocab_create, 4},
+    {"_text2vec_cpp_vocab_create", (DL_FUNC) &_text2vec_cpp_vocab_create, 5},
     {"_text2vec_cpp_vocabulary_insert_document_batch", (DL_FUNC) &_text2vec_cpp_vocabulary_insert_document_batch, 2},
     {"_text2vec_cpp_vocabulary_insert_document_batch_xptr", (DL_FUNC) &_text2vec_cpp_vocabulary_insert_document_batch_xptr, 2},
     {"_text2vec_cpp_get_vocab_statistics", (DL_FUNC) &_text2vec_cpp_get_vocab_statistics, 1},

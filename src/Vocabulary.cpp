@@ -20,8 +20,9 @@
 SEXP cpp_vocab_create(uint32_t ngram_min,
                   uint32_t ngram_max,
                   const CharacterVector stopwords_R,
-                  const String delim) {
-  Vocabulary *v = new Vocabulary(ngram_min, ngram_max, stopwords_R, delim);
+                  const String delim,
+                  int window_size) {
+  Vocabulary *v = new Vocabulary(ngram_min, ngram_max, stopwords_R, delim, window_size);
   XPtr< Vocabulary> ptr(v, true);
   return ptr;
 }

@@ -31,6 +31,10 @@
 #' text modification (like stemming), then this preprocessing need to be applied to stopwrods before passing them here.
 #' See \url{https://github.com/dselivanov/text2vec/issues/228} for example.
 #'@param sep_ngram \code{character} a character string to concatenate words in ngrams
+#'@param window_size \code{integer} (0 by default). If \code{window_size > 0} than vocabulary will
+#'be created from pseudo-documents which are obtained by virtually splitting each documents into
+#'chunks of the length \code{window_size} by going with sliding window through them.
+#'This is useful for creating special statistics which are used for coherence estimation in topic models.
 #'@return \code{text2vec_vocabulary} object, which is actually a \code{data.frame}
 #'  with following columns:
 #'  \item{\code{term}       }{ \code{character} vector of unique terms}
@@ -54,10 +58,11 @@
 #' doc_proportion_min = 0.001, vocab_term_max = 20000)
 #'@export
 create_vocabulary = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
-                       stopwords = character(0), sep_ngram = "_") {
+                       stopwords = character(0), sep_ngram = "_", window_size = 0L) {
   stopifnot(is.numeric(ngram) && length(ngram) == 2 && ngram[[2]] >= ngram[[1]])
   stopifnot(is.character(stopwords))
   stopifnot(is.character(sep_ngram) && nchar(sep_ngram) == 1L)
+  stopifnot(is.numeric(window_size) && length(window_size) == 1L)
   e = environment()
   reg.finalizer(e, malloc_trim_finalizer)
   UseMethod("create_vocabulary")
@@ -66,16 +71,16 @@ create_vocabulary = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
 #' @rdname create_vocabulary
 #' @export
 vocabulary = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
-                       stopwords = character(0), sep_ngram = "_") {
+                       stopwords = character(0), sep_ngram = "_", window_size = 0L) {
   .Deprecated("create_vocabulary")
-  create_vocabulary(it, ngram, stopwords)
+  create_vocabulary(it, ngram, stopwords, sep_ngram, window_size)
 }
 #' @describeIn create_vocabulary creates \code{text2vec_vocabulary} from predefined
 #' character vector. Terms will be inserted \bold{as is}, without any checks
 #' (ngrams number, ngram delimiters, etc.).
 #' @export
 create_vocabulary.character = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
-                                 stopwords = character(0), sep_ngram = "_") {
+                                 stopwords = character(0), sep_ngram = "_", window_size = 0L) {
 
   ngram_min = as.integer( ngram[[1]] )
   ngram_max = as.integer( ngram[[2]] )
@@ -112,7 +117,7 @@ vocabulary_insert_document_batch_generic = function(ptr, x) {
 #' @describeIn create_vocabulary collects unique terms and corresponding statistics from object.
 #' @export
 create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
-                              stopwords = character(0), sep_ngram = "_") {
+                              stopwords = character(0), sep_ngram = "_", window_size = 0L) {
   if (inherits(it, "R6"))
     it = it$clone(deep = TRUE)
   else {
@@ -122,8 +127,7 @@ create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" 
 
   ngram_min = as.integer( ngram[[1]] )
   ngram_max = as.integer( ngram[[2]] )
-  # vocab_module = new(VocabularyBuilder, ngram_min, ngram_max, stopwords, sep_ngram)
-  vocab_ptr = cpp_vocab_create(ngram_min, ngram_max, stopwords, sep_ngram)
+  vocab_ptr = cpp_vocab_create(ngram_min, ngram_max, stopwords, sep_ngram, window_size)
 
   foreach(tokens = it) %do% {
     vocabulary_insert_document_batch_generic(vocab_ptr, tokens$tokens)
@@ -152,7 +156,7 @@ create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" 
 #'   registered, it will build vocabulary in parallel using \link{foreach}.
 #' @export
 create_vocabulary.list = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
-                            stopwords = character(0), sep_ngram = "_", ...) {
+                            stopwords = character(0), sep_ngram = "_", window_size = 0L, ...) {
   .Deprecated("create_vocabulary.itoken_parallel()")
   stopifnot( all( vapply(X = it, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
   res =
@@ -176,7 +180,7 @@ create_vocabulary.list = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 
 #' @param ... additional arguments to \link{foreach} function.
 #' @export
 create_vocabulary.itoken_parallel = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
-                                  stopwords = character(0), sep_ngram = "_", ...) {
+                                  stopwords = character(0), sep_ngram = "_", window_size = 0L, ...) {
   stopifnot( all( vapply(X = it, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
   res =
     foreach(it = it,

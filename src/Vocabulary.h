@@ -39,13 +39,13 @@ public:
 class Vocabulary {
 public:
   Vocabulary();
-  // Vocabulary(uint32_t ngram_min,uint32_t ngram_max, const CharacterVector stopwords_R, const String delim);
   Vocabulary(uint32_t ngram_min,
                          uint32_t ngram_max,
                          const CharacterVector stopwords_R,
-                         const String delim):
+                         const String delim,
+                         int window_size_):
     ngram_min(ngram_min), ngram_max(ngram_max),
-    document_count(0), token_count(0) {
+    document_count(0), token_count(0), window_size(window_size_) {
     ngram_delim = delim;
     for(auto it:stopwords_R)
       stopwords.insert(as<string>(it));
@@ -74,27 +74,38 @@ public:
   void insert_terms (const vector< string> &terms) {
     typename sparse_hash_map < string, uint32_t > :: iterator term_iterator;
     int term_id;
-    this->temp_document_word_set.clear();
-    for (auto it:terms) {
-      this->temp_document_word_set.insert(it);
-      term_iterator = this->vocab.find(it);
-      if(term_iterator == this->vocab.end()) {
-        term_id = this->vocab.size();
-        // insert term into vocabulary
-        this->vocab.insert(make_pair(it, term_id ));
-        vocab_statistics.push_back(TermStat( term_id ) );
+    int window_size_ = this->window_size;
+    int terms_size = terms.size();
+    if(window_size_ <= 0 || window_size_ > terms_size)
+      window_size_ = terms_size;
+
+    int index_window_start = 0;
+    while(index_window_start + window_size_ <= terms_size) {
+      this->temp_document_word_set.clear();
+      vector< string >::const_iterator it;
+      for (it = terms.begin() + index_window_start; it != terms.begin() + index_window_start + window_size_; it++) {
+        this->temp_document_word_set.insert(*it);
+        term_iterator = this->vocab.find(*it);
+        if(term_iterator == this->vocab.end()) {
+          term_id = this->vocab.size();
+          // insert term into vocabulary
+          this->vocab.insert(make_pair(*it, term_id ));
+          vocab_statistics.push_back(TermStat( term_id ) );
+        }
+        else {
+          vocab_statistics[term_iterator->second].term_global_count++;
+        }
+        this->token_count++;
       }
-      else {
-        vocab_statistics[term_iterator->second].term_global_count++;
+      for ( auto it: this->temp_document_word_set) {
+        term_iterator = vocab.find(it);
+        if(term_iterator != vocab.end())
+          this->vocab_statistics[term_iterator->second].document_term_count++;
       }
-      this->token_count++;
+      this->document_count++;
+      index_window_start++;
     }
-    for ( auto it: this->temp_document_word_set) {
-      term_iterator = vocab.find(it);
-      if(term_iterator != vocab.end())
-        this->vocab_statistics[term_iterator->second].document_term_count++;
-    }
-    this->document_count++;
+
   }
 
   void insert_document_batch(const ListOf<const CharacterVector> document_batch) {
@@ -132,6 +143,7 @@ private:
   string ngram_delim;
   int document_count;
   uint32_t token_count;
+  size_t window_size = 0;
   // used for count word-document statistsics in vocab_statistics.
   // keep words set for document which is currently we processing
   unordered_set< string > temp_document_word_set;

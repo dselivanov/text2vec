@@ -101,8 +101,8 @@ cpp_vocabulary_corpus_get_dtm <- function(ptr) {
     .Call(`_text2vec_cpp_vocabulary_corpus_get_dtm`, ptr)
 }
 
-cpp_vocab_create <- function(ngram_min, ngram_max, stopwords_R, delim) {
-    .Call(`_text2vec_cpp_vocab_create`, ngram_min, ngram_max, stopwords_R, delim)
+cpp_vocab_create <- function(ngram_min, ngram_max, stopwords_R, delim, window_size) {
+    .Call(`_text2vec_cpp_vocab_create`, ngram_min, ngram_max, stopwords_R, delim, window_size)
 }
 
 cpp_vocabulary_insert_document_batch <- function(ptr, document_batch) {

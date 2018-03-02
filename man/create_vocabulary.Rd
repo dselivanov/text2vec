@@ -10,22 +10,23 @@
 \title{Creates a vocabulary of unique terms}
 \usage{
 create_vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
-  stopwords = character(0), sep_ngram = "_")
+  stopwords = character(0), sep_ngram = "_", window_size = 0L)
 
 vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
-  stopwords = character(0), sep_ngram = "_")
+  stopwords = character(0), sep_ngram = "_", window_size = 0L)
 
 \method{create_vocabulary}{character}(it, ngram = c(ngram_min = 1L, ngram_max
-  = 1L), stopwords = character(0), sep_ngram = "_")
+  = 1L), stopwords = character(0), sep_ngram = "_", window_size = 0L)
 
 \method{create_vocabulary}{itoken}(it, ngram = c(ngram_min = 1L, ngram_max =
-  1L), stopwords = character(0), sep_ngram = "_")
+  1L), stopwords = character(0), sep_ngram = "_", window_size = 0L)
 
 \method{create_vocabulary}{list}(it, ngram = c(ngram_min = 1L, ngram_max =
-  1L), stopwords = character(0), sep_ngram = "_", ...)
+  1L), stopwords = character(0), sep_ngram = "_", window_size = 0L, ...)
 
 \method{create_vocabulary}{itoken_parallel}(it, ngram = c(ngram_min = 1L,
-  ngram_max = 1L), stopwords = character(0), sep_ngram = "_", ...)
+  ngram_max = 1L), stopwords = character(0), sep_ngram = "_",
+  window_size = 0L, ...)
 }
 \arguments{
 \item{it}{iterator over a \code{list} of \code{character} vectors,
@@ -44,6 +45,11 @@ text modification (like stemming), then this preprocessing need to be applied to
 See \url{https://github.com/dselivanov/text2vec/issues/228} for example.}
 
 \item{sep_ngram}{\code{character} a character string to concatenate words in ngrams}
+
+\item{window_size}{\code{integer} (0 by default). If \code{window_size > 0} than vocabulary will
+be created from pseudo-documents which are obtained by virtually splitting each documents into
+chunks of the length \code{window_size} by going with sliding window through them.
+This is useful for creating special statistics which are used for coherence estimation in topic models.}
 
 \item{...}{additional arguments to \link{foreach} function.}
 }
