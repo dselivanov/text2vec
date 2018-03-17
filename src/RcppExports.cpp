@@ -5,31 +5,6 @@
 
 using namespace Rcpp;
 
-// create_xptr_unordered_set
-SEXP create_xptr_unordered_set(CharacterVector x);
-RcppExport SEXP _text2vec_create_xptr_unordered_set(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(create_xptr_unordered_set(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// collapse_collocations_cpp
-ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVector>& docs, SEXP xptr_unordered_set_phrases, SEXP xptr_unordered_set_stopwords, const String r_sep);
-RcppExport SEXP _text2vec_collapse_collocations_cpp(SEXP docsSEXP, SEXP xptr_unordered_set_phrasesSEXP, SEXP xptr_unordered_set_stopwordsSEXP, SEXP r_sepSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const ListOf<const CharacterVector>& >::type docs(docsSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type xptr_unordered_set_phrases(xptr_unordered_set_phrasesSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type xptr_unordered_set_stopwords(xptr_unordered_set_stopwordsSEXP);
-    Rcpp::traits::input_parameter< const String >::type r_sep(r_sepSEXP);
-    rcpp_result_gen = Rcpp::wrap(collapse_collocations_cpp(docs, xptr_unordered_set_phrases, xptr_unordered_set_stopwords, r_sep));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cpp_glove_create
 SEXP cpp_glove_create(const List& params);
 RcppExport SEXP _text2vec_cpp_glove_create(SEXP paramsSEXP) {
@@ -162,6 +137,143 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_vocabulary_corpus_create
+SEXP cpp_vocabulary_corpus_create(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, const CharacterVector stopwords_R, const String delim);
+RcppExport SEXP _text2vec_cpp_vocabulary_corpus_create(SEXP vocab_RSEXP, SEXP n_minSEXP, SEXP n_maxSEXP, SEXP stopwords_RSEXP, SEXP delimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterVector >::type vocab_R(vocab_RSEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type n_min(n_minSEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type n_max(n_maxSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector >::type stopwords_R(stopwords_RSEXP);
+    Rcpp::traits::input_parameter< const String >::type delim(delimSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_vocabulary_corpus_create(vocab_R, n_min, n_max, stopwords_R, delim));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_vocabulary_corpus_insert_document_batch
+void cpp_vocabulary_corpus_insert_document_batch(SEXP ptr, const ListOf<const CharacterVector>& docs_batch, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights, int flag_binary_cooccurence);
+RcppExport SEXP _text2vec_cpp_vocabulary_corpus_insert_document_batch(SEXP ptrSEXP, SEXP docs_batchSEXP, SEXP grow_dtmSEXP, SEXP contextSEXP, SEXP window_sizeSEXP, SEXP weightsSEXP, SEXP flag_binary_cooccurenceSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< const ListOf<const CharacterVector>& >::type docs_batch(docs_batchSEXP);
+    Rcpp::traits::input_parameter< int >::type grow_dtm(grow_dtmSEXP);
+    Rcpp::traits::input_parameter< int >::type context(contextSEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type window_size(window_sizeSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< int >::type flag_binary_cooccurence(flag_binary_cooccurenceSEXP);
+    cpp_vocabulary_corpus_insert_document_batch(ptr, docs_batch, grow_dtm, context, window_size, weights, flag_binary_cooccurence);
+    return R_NilValue;
+END_RCPP
+}
+// cpp_vocabulary_corpus_get_tcm
+S4 cpp_vocabulary_corpus_get_tcm(SEXP ptr);
+RcppExport SEXP _text2vec_cpp_vocabulary_corpus_get_tcm(SEXP ptrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_vocabulary_corpus_get_tcm(ptr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_vocabulary_corpus_get_dtm
+S4 cpp_vocabulary_corpus_get_dtm(SEXP ptr);
+RcppExport SEXP _text2vec_cpp_vocabulary_corpus_get_dtm(SEXP ptrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_vocabulary_corpus_get_dtm(ptr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_vocab_create
+SEXP cpp_vocab_create(uint32_t ngram_min, uint32_t ngram_max, const CharacterVector stopwords_R, const String delim, int window_size);
+RcppExport SEXP _text2vec_cpp_vocab_create(SEXP ngram_minSEXP, SEXP ngram_maxSEXP, SEXP stopwords_RSEXP, SEXP delimSEXP, SEXP window_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< uint32_t >::type ngram_min(ngram_minSEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type ngram_max(ngram_maxSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector >::type stopwords_R(stopwords_RSEXP);
+    Rcpp::traits::input_parameter< const String >::type delim(delimSEXP);
+    Rcpp::traits::input_parameter< int >::type window_size(window_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_vocab_create(ngram_min, ngram_max, stopwords_R, delim, window_size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_vocabulary_insert_document_batch
+void cpp_vocabulary_insert_document_batch(SEXP ptr, const ListOf<const CharacterVector> document_batch);
+RcppExport SEXP _text2vec_cpp_vocabulary_insert_document_batch(SEXP ptrSEXP, SEXP document_batchSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< const ListOf<const CharacterVector> >::type document_batch(document_batchSEXP);
+    cpp_vocabulary_insert_document_batch(ptr, document_batch);
+    return R_NilValue;
+END_RCPP
+}
+// cpp_vocabulary_insert_document_batch_xptr
+void cpp_vocabulary_insert_document_batch_xptr(SEXP ptr, SEXP document_batch_ptr);
+RcppExport SEXP _text2vec_cpp_vocabulary_insert_document_batch_xptr(SEXP ptrSEXP, SEXP document_batch_ptrSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type document_batch_ptr(document_batch_ptrSEXP);
+    cpp_vocabulary_insert_document_batch_xptr(ptr, document_batch_ptr);
+    return R_NilValue;
+END_RCPP
+}
+// cpp_get_vocab_statistics
+DataFrame cpp_get_vocab_statistics(SEXP ptr);
+RcppExport SEXP _text2vec_cpp_get_vocab_statistics(SEXP ptrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_get_vocab_statistics(ptr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_get_document_count
+int cpp_get_document_count(SEXP ptr);
+RcppExport SEXP _text2vec_cpp_get_document_count(SEXP ptrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_get_document_count(ptr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// create_xptr_unordered_set
+SEXP create_xptr_unordered_set(CharacterVector x);
+RcppExport SEXP _text2vec_create_xptr_unordered_set(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(create_xptr_unordered_set(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// collapse_collocations_cpp
+ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVector>& docs, SEXP xptr_unordered_set_phrases, SEXP xptr_unordered_set_stopwords, const String r_sep);
+RcppExport SEXP _text2vec_collapse_collocations_cpp(SEXP docsSEXP, SEXP xptr_unordered_set_phrasesSEXP, SEXP xptr_unordered_set_stopwordsSEXP, SEXP r_sepSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const ListOf<const CharacterVector>& >::type docs(docsSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type xptr_unordered_set_phrases(xptr_unordered_set_phrasesSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type xptr_unordered_set_stopwords(xptr_unordered_set_stopwordsSEXP);
+    Rcpp::traits::input_parameter< const String >::type r_sep(r_sepSEXP);
+    rcpp_result_gen = Rcpp::wrap(collapse_collocations_cpp(docs, xptr_unordered_set_phrases, xptr_unordered_set_stopwords, r_sep));
+    return rcpp_result_gen;
+END_RCPP
+}
 // colMins
 NumericVector colMins(const NumericMatrix x);
 RcppExport SEXP _text2vec_colMins(SEXP xSEXP) {
@@ -249,117 +361,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< char >::type delim(delimSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_fixed_char_tokenizer(x, delim));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_vocabulary_corpus_create
-SEXP cpp_vocabulary_corpus_create(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max, const CharacterVector stopwords_R, const String delim);
-RcppExport SEXP _text2vec_cpp_vocabulary_corpus_create(SEXP vocab_RSEXP, SEXP n_minSEXP, SEXP n_maxSEXP, SEXP stopwords_RSEXP, SEXP delimSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const CharacterVector >::type vocab_R(vocab_RSEXP);
-    Rcpp::traits::input_parameter< uint32_t >::type n_min(n_minSEXP);
-    Rcpp::traits::input_parameter< uint32_t >::type n_max(n_maxSEXP);
-    Rcpp::traits::input_parameter< const CharacterVector >::type stopwords_R(stopwords_RSEXP);
-    Rcpp::traits::input_parameter< const String >::type delim(delimSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_vocabulary_corpus_create(vocab_R, n_min, n_max, stopwords_R, delim));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_vocabulary_corpus_insert_document_batch
-void cpp_vocabulary_corpus_insert_document_batch(SEXP ptr, const ListOf<const CharacterVector>& docs_batch, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights);
-RcppExport SEXP _text2vec_cpp_vocabulary_corpus_insert_document_batch(SEXP ptrSEXP, SEXP docs_batchSEXP, SEXP grow_dtmSEXP, SEXP contextSEXP, SEXP window_sizeSEXP, SEXP weightsSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    Rcpp::traits::input_parameter< const ListOf<const CharacterVector>& >::type docs_batch(docs_batchSEXP);
-    Rcpp::traits::input_parameter< int >::type grow_dtm(grow_dtmSEXP);
-    Rcpp::traits::input_parameter< int >::type context(contextSEXP);
-    Rcpp::traits::input_parameter< uint32_t >::type window_size(window_sizeSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type weights(weightsSEXP);
-    cpp_vocabulary_corpus_insert_document_batch(ptr, docs_batch, grow_dtm, context, window_size, weights);
-    return R_NilValue;
-END_RCPP
-}
-// cpp_vocabulary_corpus_get_tcm
-S4 cpp_vocabulary_corpus_get_tcm(SEXP ptr);
-RcppExport SEXP _text2vec_cpp_vocabulary_corpus_get_tcm(SEXP ptrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_vocabulary_corpus_get_tcm(ptr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_vocabulary_corpus_get_dtm
-S4 cpp_vocabulary_corpus_get_dtm(SEXP ptr);
-RcppExport SEXP _text2vec_cpp_vocabulary_corpus_get_dtm(SEXP ptrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_vocabulary_corpus_get_dtm(ptr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_vocab_create
-SEXP cpp_vocab_create(uint32_t ngram_min, uint32_t ngram_max, const CharacterVector stopwords_R, const String delim, int window_size);
-RcppExport SEXP _text2vec_cpp_vocab_create(SEXP ngram_minSEXP, SEXP ngram_maxSEXP, SEXP stopwords_RSEXP, SEXP delimSEXP, SEXP window_sizeSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< uint32_t >::type ngram_min(ngram_minSEXP);
-    Rcpp::traits::input_parameter< uint32_t >::type ngram_max(ngram_maxSEXP);
-    Rcpp::traits::input_parameter< const CharacterVector >::type stopwords_R(stopwords_RSEXP);
-    Rcpp::traits::input_parameter< const String >::type delim(delimSEXP);
-    Rcpp::traits::input_parameter< int >::type window_size(window_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_vocab_create(ngram_min, ngram_max, stopwords_R, delim, window_size));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_vocabulary_insert_document_batch
-void cpp_vocabulary_insert_document_batch(SEXP ptr, const ListOf<const CharacterVector> document_batch);
-RcppExport SEXP _text2vec_cpp_vocabulary_insert_document_batch(SEXP ptrSEXP, SEXP document_batchSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    Rcpp::traits::input_parameter< const ListOf<const CharacterVector> >::type document_batch(document_batchSEXP);
-    cpp_vocabulary_insert_document_batch(ptr, document_batch);
-    return R_NilValue;
-END_RCPP
-}
-// cpp_vocabulary_insert_document_batch_xptr
-void cpp_vocabulary_insert_document_batch_xptr(SEXP ptr, SEXP document_batch_ptr);
-RcppExport SEXP _text2vec_cpp_vocabulary_insert_document_batch_xptr(SEXP ptrSEXP, SEXP document_batch_ptrSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type document_batch_ptr(document_batch_ptrSEXP);
-    cpp_vocabulary_insert_document_batch_xptr(ptr, document_batch_ptr);
-    return R_NilValue;
-END_RCPP
-}
-// cpp_get_vocab_statistics
-DataFrame cpp_get_vocab_statistics(SEXP ptr);
-RcppExport SEXP _text2vec_cpp_get_vocab_statistics(SEXP ptrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_get_vocab_statistics(ptr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_get_document_count
-int cpp_get_document_count(SEXP ptr);
-RcppExport SEXP _text2vec_cpp_get_document_count(SEXP ptrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_get_document_count(ptr));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -500,8 +501,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_text2vec_create_xptr_unordered_set", (DL_FUNC) &_text2vec_create_xptr_unordered_set, 1},
-    {"_text2vec_collapse_collocations_cpp", (DL_FUNC) &_text2vec_collapse_collocations_cpp, 4},
     {"_text2vec_cpp_glove_create", (DL_FUNC) &_text2vec_cpp_glove_create, 1},
     {"_text2vec_cpp_glove_get_word_vectors", (DL_FUNC) &_text2vec_cpp_glove_get_word_vectors, 1},
     {"_text2vec_cpp_glove_set_cost_zero", (DL_FUNC) &_text2vec_cpp_glove_set_cost_zero, 1},
@@ -513,6 +512,17 @@ static const R_CallMethodDef CallEntries[] = {
     {"_text2vec_cpp_hash_corpus_insert_document_batch", (DL_FUNC) &_text2vec_cpp_hash_corpus_insert_document_batch, 6},
     {"_text2vec_cpp_hash_corpus_get_tcm", (DL_FUNC) &_text2vec_cpp_hash_corpus_get_tcm, 1},
     {"_text2vec_cpp_hash_corpus_get_dtm", (DL_FUNC) &_text2vec_cpp_hash_corpus_get_dtm, 1},
+    {"_text2vec_cpp_vocabulary_corpus_create", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_create, 5},
+    {"_text2vec_cpp_vocabulary_corpus_insert_document_batch", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_insert_document_batch, 7},
+    {"_text2vec_cpp_vocabulary_corpus_get_tcm", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_get_tcm, 1},
+    {"_text2vec_cpp_vocabulary_corpus_get_dtm", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_get_dtm, 1},
+    {"_text2vec_cpp_vocab_create", (DL_FUNC) &_text2vec_cpp_vocab_create, 5},
+    {"_text2vec_cpp_vocabulary_insert_document_batch", (DL_FUNC) &_text2vec_cpp_vocabulary_insert_document_batch, 2},
+    {"_text2vec_cpp_vocabulary_insert_document_batch_xptr", (DL_FUNC) &_text2vec_cpp_vocabulary_insert_document_batch_xptr, 2},
+    {"_text2vec_cpp_get_vocab_statistics", (DL_FUNC) &_text2vec_cpp_get_vocab_statistics, 1},
+    {"_text2vec_cpp_get_document_count", (DL_FUNC) &_text2vec_cpp_get_document_count, 1},
+    {"_text2vec_create_xptr_unordered_set", (DL_FUNC) &_text2vec_create_xptr_unordered_set, 1},
+    {"_text2vec_collapse_collocations_cpp", (DL_FUNC) &_text2vec_collapse_collocations_cpp, 4},
     {"_text2vec_colMins", (DL_FUNC) &_text2vec_colMins, 1},
     {"_text2vec_colMaxs", (DL_FUNC) &_text2vec_colMaxs, 1},
     {"_text2vec_rowMins", (DL_FUNC) &_text2vec_rowMins, 1},
@@ -521,15 +531,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_text2vec_malloc_trim", (DL_FUNC) &_text2vec_malloc_trim, 1},
     {"_text2vec_is_invalid_ptr", (DL_FUNC) &_text2vec_is_invalid_ptr, 1},
     {"_text2vec_cpp_fixed_char_tokenizer", (DL_FUNC) &_text2vec_cpp_fixed_char_tokenizer, 2},
-    {"_text2vec_cpp_vocabulary_corpus_create", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_create, 5},
-    {"_text2vec_cpp_vocabulary_corpus_insert_document_batch", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_insert_document_batch, 6},
-    {"_text2vec_cpp_vocabulary_corpus_get_tcm", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_get_tcm, 1},
-    {"_text2vec_cpp_vocabulary_corpus_get_dtm", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_get_dtm, 1},
-    {"_text2vec_cpp_vocab_create", (DL_FUNC) &_text2vec_cpp_vocab_create, 5},
-    {"_text2vec_cpp_vocabulary_insert_document_batch", (DL_FUNC) &_text2vec_cpp_vocabulary_insert_document_batch, 2},
-    {"_text2vec_cpp_vocabulary_insert_document_batch_xptr", (DL_FUNC) &_text2vec_cpp_vocabulary_insert_document_batch_xptr, 2},
-    {"_text2vec_cpp_get_vocab_statistics", (DL_FUNC) &_text2vec_cpp_get_vocab_statistics, 1},
-    {"_text2vec_cpp_get_document_count", (DL_FUNC) &_text2vec_cpp_get_document_count, 1},
     {"_text2vec_warplda_create", (DL_FUNC) &_text2vec_warplda_create, 3},
     {"_text2vec_warplda_init_dtm", (DL_FUNC) &_text2vec_warplda_init_dtm, 4},
     {"_text2vec_warplda_set_topic_word_count", (DL_FUNC) &_text2vec_warplda_set_topic_word_count, 2},

@@ -71,6 +71,9 @@ get_tcm = function(corpus_ptr) {
 #' @param weights weights for context/distant words during co-occurence statistics calculation.
 #' By default we are setting \code{weight = 1 / distance_from_current_word}.
 #' Should have length equal to skip_grams_window.
+#' @param binary_cooccurence \code{FALSE} by default. If set to \code{TRUE} then function only counts first
+#' appearence of the context word and remaining occurrence are ignored. Useful when creating TCM for evaluation
+#' of coherence of topic models.
 #' \code{"symmetric"} by default - take into account \code{skip_grams_window} left and right.
 #' @param ... arguments to \link{foreach} function which is used to iterate over
 #'   \code{it}.
@@ -104,7 +107,7 @@ get_tcm = function(corpus_ptr) {
 #' @export
 create_tcm = function(it, vectorizer, skip_grams_window = 5L,
                       skip_grams_window_context = c("symmetric", "right", "left"),
-                      weights = 1 / seq_len(skip_grams_window), ...) {
+                      weights = 1 / seq_len(skip_grams_window), binary_cooccurence = FALSE, ...) {
   stopifnot(length(weights) == skip_grams_window)
   stopifnot(class(weights) %in% c("numeric", "integer"))
   e = environment()
@@ -118,10 +121,10 @@ create_tcm = function(it, vectorizer, skip_grams_window = 5L,
 #' @export
 create_tcm.itoken = function(it, vectorizer, skip_grams_window = 5L,
                              skip_grams_window_context = c("symmetric", "right", "left"),
-                             weights = 1 / seq_len(skip_grams_window), ...) {
+                             weights = 1 / seq_len(skip_grams_window), binary_cooccurence = FALSE, ...) {
   skip_grams_window_context = match.arg(skip_grams_window_context)
   corp = vectorizer(it, grow_dtm = FALSE, skip_grams_window_context = skip_grams_window_context,
-                    window_size = skip_grams_window, weights = weights)
+                    window_size = skip_grams_window, weights = weights, binary_cooccurence)
   # get it in triplet form - fastest and most
   # memory efficient way because internally it
   # kept in triplet form
@@ -137,7 +140,7 @@ create_tcm.itoken = function(it, vectorizer, skip_grams_window = 5L,
 create_tcm.itoken_parallel = function(it, vectorizer,
                            skip_grams_window = 5L,
                            skip_grams_window_context = c("symmetric", "right", "left"),
-                           weights = 1 / seq_len(skip_grams_window), ...) {
+                           weights = 1 / seq_len(skip_grams_window), binary_cooccurence = FALSE, ...) {
   # see ?mclapply
   # Prior to R 3.4.0 and on a 32-bit platform, the serialized result from each forked process is
   # limited to 2^31 - 1 bytes. (Returning very large results via serialization is inefficient and should be avoided.)

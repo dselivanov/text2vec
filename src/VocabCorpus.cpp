@@ -65,7 +65,8 @@ void VocabCorpus::init(const CharacterVector vocab_R, uint32_t n_min, uint32_t n
 // So we will keep only right upper-diagonal elements
 // int context = 1 means right words context only
 // int context = -1 means left words context only
-void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights) {
+void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int context, uint32_t window_size,
+                                const NumericVector& weights, int flag_binary_cooccurence) {
 
   uint32_t term_index, context_term_index;
   size_t K = terms.size();
@@ -73,7 +74,7 @@ void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int contex
   float increment = 0.0;
 
   typename unordered_map < string, uint32_t > :: const_iterator term_iterator, context_term_iterator;
-
+  unordered_set<uint32_t> context_terms_seen;
   for(auto term:terms) {
     this->token_count++;
 
@@ -93,49 +94,55 @@ void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int contex
       // and set window_size = 0 if not
       // will not go into this loop if window_size == 0
       // for (uint32_t j = 1; j <= this->window_size; j++) {
-
-      // uint32_t j2 = 1;
+      context_terms_seen.clear();
+      // int context_term_seen;
       uint32_t j = 1;
       while(j <= window_size && i + j < K) {
+        // context_term_seen = 0;
         // check doc bounds
         context_term_iterator = this->vocab.find((terms[i + j]) );
         // if context word in vocab
         if(context_term_iterator != this->vocab.end()) {
           // get context word index from vocab
           context_term_index = context_term_iterator->second;
-          // calculate cooccurence increment for particular position j of context word
-          increment = weights[j - 1];
-          // increment = weighting_fun(j2);
-          // int context = 0 means symmetric context for co-occurence - matrix will be symmetric
-          // So we will keep only right upper-diagonal elements
-          // int context = 1 means right words context only
-          // int context = -1 means left words context only
-          switch(context) {
-          // handle symmetric context
-          case 0:
-            // map stores only elements above diagonal because our matrix is symmetrical
-            if(term_index < context_term_index)
+
+          if(flag_binary_cooccurence && context_terms_seen.find(context_term_index) != context_terms_seen.end()) {
+            //do nothing
+          } else {
+            context_terms_seen.insert(context_term_index);
+            // calculate cooccurence increment for particular position j of context word
+            increment = weights[j - 1];
+            // increment = weighting_fun(j2);
+            // int context = 0 means symmetric context for co-occurence - matrix will be symmetric
+            // So we will keep only right upper-diagonal elements
+            // int context = 1 means right words context only
+            // int context = -1 means left words context only
+            switch(context) {
+            // handle symmetric context
+            case 0:
+              // map stores only elements above diagonal because our matrix is symmetrical
+              if(term_index < context_term_index)
+                this->tcm.add(term_index, context_term_index, increment);
+              else {
+                // also we are not interested in context words equal to main word
+                // diagonal elememts will be zeros
+                // if(term_index != context_term_index)
+                // commented out because experiments showed that it is better to have diagonal elements
+                this->tcm.add(context_term_index, term_index, increment);
+              }
+              break;
+              // handle right context
+            case 1:
               this->tcm.add(term_index, context_term_index, increment);
-            else {
-              // also we are not interested in context words equal to main word
-              // diagonal elememts will be zeros
-              // if(term_index != context_term_index)
-              // commented out because experiments showed that it is better to have diagonal elements
+              break;
+              // handle left context
+            case -1:
               this->tcm.add(context_term_index, term_index, increment);
+              break;
+            default:
+              ::Rf_error("call to insert_terms with context !in [0,1, -1]");
             }
-            break;
-            // handle right context
-          case 1:
-            this->tcm.add(term_index, context_term_index, increment);
-            break;
-            // handle left context
-          case -1:
-            this->tcm.add(context_term_index, term_index, increment);
-            break;
-          default:
-            ::Rf_error("call to insert_terms with context !in [0,1, -1]");
           }
-          // j2++;
         }
         j++;
       }
@@ -145,21 +152,23 @@ void VocabCorpus::insert_terms (vector< string> &terms, int grow_dtm, int contex
 }
 //-----------------------------------------------------------------
 void VocabCorpus::insert_document(const CharacterVector doc, int grow_dtm, int context,
-                                  uint32_t window_size, const NumericVector& weights) {
+                                  uint32_t window_size, const NumericVector& weights,
+                                  int flag_binary_cooccurence) {
   checkUserInterrupt();
   std::vector<std::string> std_string_vec = charvec2stdvec(doc);
   std::vector<std::string> ngram_vec
     = generate_ngrams(std_string_vec, this->ngram_min, this->ngram_max, this->stopwords, this->ngram_delim);
 
-  this->insert_terms(ngram_vec, grow_dtm, context, window_size, weights);
+  this->insert_terms(ngram_vec, grow_dtm, context, window_size, weights, flag_binary_cooccurence);
   this->dtm.increment_nrows();
   this->doc_count++;
 }
 //-----------------------------------------------------------------
 void VocabCorpus::insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm,
-                                        int context, uint32_t window_size, const NumericVector& weights) {
+                                        int context, uint32_t window_size, const NumericVector& weights,
+                                        int flag_binary_cooccurence) {
   for (auto it:docs_batch) {
-    insert_document(it, grow_dtm, context, window_size, weights);
+    this->insert_document(it, grow_dtm, context, window_size, weights, flag_binary_cooccurence);
   }
 }
 
@@ -206,9 +215,10 @@ void cpp_vocabulary_corpus_insert_document_batch(SEXP ptr,
                                                   int grow_dtm,
                                                   int context,
                                                   uint32_t window_size,
-                                                  const NumericVector& weights) {
+                                                  const NumericVector& weights,
+                                                  int flag_binary_cooccurence = 0) {
   Rcpp::XPtr<VocabCorpus> vc(ptr);
-  vc->insert_document_batch(docs_batch, grow_dtm, context, window_size, weights);
+  vc->insert_document_batch(docs_batch, grow_dtm, context, window_size, weights, flag_binary_cooccurence);
 }
 
 // [[Rcpp::export]]

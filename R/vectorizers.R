@@ -22,11 +22,12 @@ encode_context = function(context_string_name = c("symmetric", "right", "left"))
          left = -1L)
 }
 
-corpus_insert_generic = function(corpus_ptr, tokens, grow_dtm, skip_grams_window_context, window_size, weights) {
+corpus_insert_generic = function(corpus_ptr, tokens, grow_dtm, skip_grams_window_context, window_size, weights,
+                                 binary_cooccurence) {
   if(inherits(corpus_ptr, "HashCorpus")) {
     cpp_hash_corpus_insert_document_batch(corpus_ptr, tokens, grow_dtm, skip_grams_window_context, window_size, weights)
   } else if(inherits(corpus_ptr, "VocabCorpus")) {
-    cpp_vocabulary_corpus_insert_document_batch(corpus_ptr, tokens, grow_dtm, skip_grams_window_context, window_size, weights)
+    cpp_vocabulary_corpus_insert_document_batch(corpus_ptr, tokens, grow_dtm, skip_grams_window_context, window_size, weights, binary_cooccurence)
   } else {
     stop("can't recognize corpus - neither HashCorpus or VocabCorpus")
   }
@@ -36,7 +37,7 @@ corpus_insert_generic = function(corpus_ptr, tokens, grow_dtm, skip_grams_window
   TRUE
 }
 
-corpus_insert = function(corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights) {
+corpus_insert = function(corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights, binary_cooccurence) {
   skip_grams_window_context_code = force(encode_context(skip_grams_window_context))
   if (inherits(iterator, "R6"))
     it = iterator$clone(deep = TRUE)
@@ -45,7 +46,7 @@ corpus_insert = function(corpus_ptr, iterator, grow_dtm, skip_grams_window_conte
     it = iterator
   }
   ids = foreach(val = it, .combine = c, .multicombine = TRUE ) %do% {
-    res = corpus_insert_generic(corpus_ptr, val$tokens, grow_dtm, skip_grams_window_context_code, window_size, weights)
+    res = corpus_insert_generic(corpus_ptr, val$tokens, grow_dtm, skip_grams_window_context_code, window_size, weights, binary_cooccurence)
     if(!res) stop("something went wrong during insert into corpus")
     val$ids
   }
@@ -86,7 +87,7 @@ corpus_insert = function(corpus_ptr, iterator, grow_dtm, skip_grams_window_conte
 #' @export
 vocab_vectorizer = function(vocabulary) {
   force(vocabulary)
-  vectorizer = function(iterator, grow_dtm, skip_grams_window_context, window_size, weights) {
+  vectorizer = function(iterator, grow_dtm, skip_grams_window_context, window_size, weights, binary_cooccurence = FALSE) {
     vocab_corpus_ptr = cpp_vocabulary_corpus_create(vocabulary$term,
                                                     attr(vocabulary, "ngram")[[1]],
                                                     attr(vocabulary, "ngram")[[2]],
@@ -94,7 +95,7 @@ vocab_vectorizer = function(vocabulary) {
                                                     attr(vocabulary, "sep_ngram"))
     setattr(vocab_corpus_ptr, "ids", character(0))
     setattr(vocab_corpus_ptr, "class", "VocabCorpus")
-    corpus_insert(vocab_corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights)
+    corpus_insert(vocab_corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights, binary_cooccurence)
   }
   vectorizer
 }

@@ -8,15 +8,15 @@
 \usage{
 create_tcm(it, vectorizer, skip_grams_window = 5L,
   skip_grams_window_context = c("symmetric", "right", "left"),
-  weights = 1/seq_len(skip_grams_window), ...)
+  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE, ...)
 
 \method{create_tcm}{itoken}(it, vectorizer, skip_grams_window = 5L,
   skip_grams_window_context = c("symmetric", "right", "left"),
-  weights = 1/seq_len(skip_grams_window), ...)
+  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE, ...)
 
 \method{create_tcm}{itoken_parallel}(it, vectorizer, skip_grams_window = 5L,
   skip_grams_window_context = c("symmetric", "right", "left"),
-  weights = 1/seq_len(skip_grams_window), ...)
+  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE, ...)
 }
 \arguments{
 \item{it}{\code{list} of iterators over tokens from \link{itoken}.
@@ -36,7 +36,11 @@ which context words to use when count co-occurence statistics.}
 
 \item{weights}{weights for context/distant words during co-occurence statistics calculation.
 By default we are setting \code{weight = 1 / distance_from_current_word}.
-Should have length equal to skip_grams_window.
+Should have length equal to skip_grams_window.}
+
+\item{binary_cooccurence}{\code{FALSE} by default. If set to \code{TRUE} then function only counts first
+appearence of the context word and remaining occurrence are ignored. Useful when creating TCM for evaluation
+of coherence of topic models.
 \code{"symmetric"} by default - take into account \code{skip_grams_window} left and right.}
 
 \item{...}{arguments to \link{foreach} function which is used to iterate over

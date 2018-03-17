@@ -28,9 +28,9 @@ public:
   // contructor with window_size for term cooccurence matrix
   VocabCorpus(const CharacterVector vocab_R, uint32_t n_min, uint32_t n_max,
               const CharacterVector stopwords_R, const String delim);
-  void insert_terms (vector< string> &terms, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights);
-  void insert_document(const CharacterVector doc, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights);
-  void insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights);
+  void insert_terms (vector< string> &terms, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights, int flag_binary_cooccurence = 0);
+  void insert_document(const CharacterVector doc, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights, int flag_binary_cooccurence = 0);
+  void insert_document_batch(const ListOf<const CharacterVector> docs_batch, int grow_dtm, int context, uint32_t window_size, const NumericVector& weights, int flag_binary_cooccurence = 0);
   // total number of tokens in corpus
   int get_token_count() {return this -> token_count;};
   int get_doc_count() { return this -> doc_count; };
