@@ -88,6 +88,7 @@ LatentSemanticAnalysis = R6::R6Class(
 
       documents = svd_fit$u %*% diag(x = svd_fit$d)
       private$components_ = t(svd_fit$v %*% diag(x = svd_fit$d))
+      private$vt = svd_fit$v
       rm(svd_fit)
       rownames(documents) = rownames(x)
       colnames(private$components_) = colnames(x)
@@ -98,9 +99,9 @@ LatentSemanticAnalysis = R6::R6Class(
     transform = function(x, ...) {
       if (private$fitted) {
         stopifnot(ncol(x) == ncol(private$components_))
-        lhs = tcrossprod(private$components_)
-        rhs = as.matrix(tcrossprod(private$components_, x))
-        t(solve(lhs, rhs))
+        temp = x %*% private$vt
+        rownames(temp) = rownames(x)
+        as.matrix(temp)
       }
       else
         stop("Fit the model first woth model$fit_transform()!")
@@ -123,7 +124,8 @@ LatentSemanticAnalysis = R6::R6Class(
     n_topics = NULL,
     components_ = NULL,
     fitted = FALSE,
-    svd_method = NULL
+    svd_method = NULL,
+    vt = NULL
   )
 )
 
