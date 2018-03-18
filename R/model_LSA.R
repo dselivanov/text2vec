@@ -86,8 +86,8 @@ LatentSemanticAnalysis = R6::R6Class(
       }
       svd_fit = fit_svd(...)
 
-      documents = svd_fit$u %*% diag(x = sqrt(svd_fit$d))
-      private$components_ = t(svd_fit$v %*% diag(x = sqrt(svd_fit$d)))
+      documents = svd_fit$u %*% diag(x = svd_fit$d)
+      private$components_ = t(svd_fit$v %*% diag(x = svd_fit$d))
       rm(svd_fit)
       rownames(documents) = rownames(x)
       colnames(private$components_) = colnames(x)
