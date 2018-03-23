@@ -25,7 +25,7 @@
 # v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.2)
 # dtm = create_dtm(it, vocab_vectorizer(v))
 # #create models with different number of topics and get top terms per topic
-# #in reality, probably run in parallel with more potential numbers of topics while sotring models on disk
+# #in reality, probably run in parallel with more potential numbers of topics while storing models on disk
 # n_topics = c(5,10, 25, 50)
 # top_terms = lapply(n_topics, function(n) {
 #   lda_model = text2vec::LDA$new(n_topics = n)
@@ -63,6 +63,8 @@
 coherence =  function( top_term_matrix
                             ,twcm
                             ,n_twcm_windows = NULL
+                            #TODO
+                            #,measure = c("all") or, e.g. c("npmi", "pmi", ...)
                             ) {
 
 #GENERAL LOGIC--------------------------------------------------------
@@ -86,6 +88,8 @@ coherence =  function( top_term_matrix
   #     adaption, e.g., something like twcm[unlist(wi), unlist(wj)] might work
   #(iii)Currently indices of subsets are stored in memory, this might be turned to dynamic creation of indices to spare memory usage
   #     the lines coherence[,twcm_term_idxs := split(match... would have to be incorporated into word_index_combinations
+  #()   vectorize all calculations / check results
+  #()   introduce option to select which measures shall be calculated
 
 #CREDITS / REFERENCES -------------------------------------------------
   #The following paper is the main theoretical basis for this code
@@ -154,7 +158,7 @@ coherence =  function( top_term_matrix
 
   #make matrix symmetric, input twcm might not be symmetric in terms of (i) order of terms in cols/rows and (ii) their values
   twcm = twcm[match(rownames(twcm), colnames(twcm)), ]
-  if(!isSymmetric(twcm)) {
+  if (!isSymmetric(twcm)) {
       if (any((sign(twcm[upper.tri(twcm, diag = F)]) + sign(t(twcm)[upper.tri(twcm, diag = F)])) > 1)) {
             stop("Input twcm is not symmetric or not coercible to symmetric matrix.
                   Entries of upper and lower triangle, e.g., twcm[x,y] and twcm[y,x], both are >1
@@ -192,74 +196,88 @@ coherence =  function( top_term_matrix
 
 #CALCULATE COHERENCE----------------------------------------------------------------
 
+
+
   #Type 1
   #sum(..., na.rm = T) for aggregation
   #one_pre_topic_order as term indices
   #note the adapted log_smooth_constant to comply original UMass and its implementation in stm package
-    coherence[,sum_logratio_UMass:= sapply(twcm_term_idxs, function(idxs) {
-                        if (length(idxs) < 2) {
-                          return(NA)
-                        } else {
-                          coh = as.data.table(term_index_combinations(idxs, comb_type = "one_idx-preceeding_idxs-topic_order", topic_order = restore_topic_order))
-                          coh[, score:= mapply(function(x,y) {log(1 + twcm[x,y]) - log(twcm[y,y])}
-                                               ,V1, V2)]
-                          return(coh[, round(sum(score, na.rm = T), d = 4)])
-                        }
-    })]
+#if ("UMass" %in% measure | measure == "all") {
+    # coherence[,sum_logratio_UMass:= sapply(twcm_term_idxs, function(idxs) {
+    #                     if (length(idxs) < 2) {
+    #                       return(NA)
+    #                     } else {
+    #                       coh = as.data.table(term_index_combinations(idxs, comb_type = "one_idx-preceeding_idxs-topic_order", topic_order = restore_topic_order))
+    #                       coh[, score:= mapply(function(x,y) {log(1 + twcm[x,y]) - log(twcm[y,y])}
+    #                                            ,V1, V2)]
+    #                       return(coh[, round(sum(score, na.rm = T), d = 4)])
+    #                     }
+    # })]
+#}
 
-    #note in text2vec implementation the smoothing constant is not added in the denominator
-    coherence[,sum_logratio_stm_pckg:= sapply(twcm_term_idxs, function(idxs) {
-                      if (length(idxs) < 2) {
-                        return(NA)
-                      } else {
-                        coh = as.data.table(term_index_combinations(idxs, comb_type = "one_idx-preceeding_idxs-topic_order", topic_order = restore_topic_order))
-                        coh[, score:= mapply(function(x,y) {log(.01 + twcm[x,y]) - log(.01 +twcm[y,y])}
-                                             ,V1, V2)]
-                        return(coh[, round(sum(score, na.rm = T), d = 4)])
-                      }
-    })]
+#if ("UMass_stm" %in% measure | measure == "all") {
+   # note in text2vec implementation the smoothing constant is not added in the denominator
+    # coherence[,sum_logratio_stm_pckg:= sapply(twcm_term_idxs, function(idxs) {
+    #                   if (length(idxs) < 2) {
+    #                     return(NA)
+    #                   } else {
+    #                     coh = as.data.table(term_index_combinations(idxs, comb_type = "one_idx-preceeding_idxs-topic_order", topic_order = restore_topic_order))
+    #                     coh[, score:= mapply(function(x,y) {log(.01 + twcm[x,y]) - log(.01 +twcm[y,y])}
+    #                                          ,V1, V2)]
+    #                     return(coh[, round(sum(score, na.rm = T), d = 4)])
+    #                   }
+    # })]
+#}
 
-    coherence[,sum_logratio_stmlike_uppertri:= sapply(twcm_term_idxs, function(idxs) {
-      if (length(idxs) < 2) {
-        return(NA)
-      } else {
-        reorder = order(match(idxs, restore_topic_order), decreasing = TRUE)
-        idxs = idxs[reorder]
-        res = twcm[idxs, idxs] + .01
-        res = apply(res, 2, function(x) x/(diag(res)))
-        res = log(res[upper.tri(res)])
-        return(round(sum(res, na.rm = T), d = 4))
-      }
-    })]
+#if ("UMass_stm_like_uppertri" %in% measure | measure == "all") {
+    # coherence[,sum_logratio_stmlike_uppertri:= sapply(twcm_term_idxs, function(idxs) {
+    #   if (length(idxs) < 2) {
+    #     return(NA)
+    #   } else {
+    #     reorder = order(match(idxs, restore_topic_order), decreasing = TRUE)
+    #     idxs = idxs[reorder]
+    #     res = twcm[idxs, idxs] + .01
+    #     res = apply(res, 2, function(x) x/(diag(res)))
+    #     res = log(res[upper.tri(res)])
+    #     return(round(sum(res, na.rm = T), d = 4))
+    #   }
+    # })]
+#}
 
-    coherence[,sum_logratio_stmlike_lowertri:= sapply(twcm_term_idxs, function(idxs) {
-      if (length(idxs) < 2) {
-        return(NA)
-      } else {
-        reorder = order(match(idxs, restore_topic_order), decreasing = TRUE)
-        idxs = idxs[reorder]
-        res = twcm[idxs, idxs]
-        res = apply(res, 2, function(x) x/(diag(res)+.01))
-        res = log(.01 + res[lower.tri(res)])
-        return(round(sum(res, na.rm = T), d = 4))
-      }
-    })]
+
+#if ("UMass_stm_like_lowertri" %in% measure | measure == "all") {
+    # coherence[,sum_logratio_stmlike_lowertri:= sapply(twcm_term_idxs, function(idxs) {
+    #   if (length(idxs) < 2) {
+    #     return(NA)
+    #   } else {
+    #     reorder = order(match(idxs, restore_topic_order), decreasing = TRUE)
+    #     idxs = idxs[reorder]
+    #     res = twcm[idxs, idxs]
+    #     res = apply(res, 2, function(x) x/(diag(res)+.01))
+    #     res = log(.01 + res[lower.tri(res)])
+    #     return(round(sum(res, na.rm = T), d = 4))
+    #   }
+    # })]
+#}
 
 
     #Type 2
     #mean(..., na.rm = T) for aggregation
     #one_pre_topic_order as term indices
-    coherence[,mean_prob_logratio_Torder:= sapply(twcm_term_idxs, function(idxs) {
-                    if (length(idxs) < 2) {
-                      return(NA)
-                    } else {
-                      coh = as.data.table(term_index_combinations(idxs, comb_type = "one_idx-preceeding_idxs-topic_order", topic_order = restore_topic_order))
-                      coh[, score:= mapply(function(x,y) {log(log_smooth_constant + twcm[x,y]) - log(twcm[y,y])}
-                                           ,V1, V2)]
-                      return(coh[, round(mean(score, na.rm = T), d = 4)])
-                    }
-      })]
+#if ( "UMass_Torder" %in% measure | measure == "all") {
+    # coherence[,mean_prob_logratio_Torder:= sapply(twcm_term_idxs, function(idxs) {
+    #                 if (length(idxs) < 2) {
+    #                   return(NA)
+    #                 } else {
+    #                   coh = as.data.table(term_index_combinations(idxs, comb_type = "one_idx-preceeding_idxs-topic_order", topic_order = restore_topic_order))
+    #                   coh[, score:= mapply(function(x,y) {log(log_smooth_constant + twcm[x,y]) - log(twcm[y,y])}
+    #                                        ,V1, V2)]
+    #                   return(coh[, round(mean(score, na.rm = T), d = 4)])
+    #                 }
+    #   })]
+#}
 
+# #if ( "pmi" %in% measure | measure == "all") {
     coherence[,mean_pmi:= sapply(twcm_term_idxs, function(idxs) {
                     if (length(idxs) < 2) {
                       return(NA)
@@ -270,35 +288,47 @@ coherence =  function( top_term_matrix
                       return(coh[, round(mean(score, na.rm = T), d = 4)])
                     }
       })]
+# #}
 
-    coherence[,mean_pmi_uppertri:= sapply(twcm_term_idxs, function(idxs) {
+
+     #vectorized approach for calculation of pmi
+    coherence[,mean_pmi_vectorized:= sapply(twcm_term_idxs, function(idxs) {
       if (length(idxs) < 2) {
         return(NA)
       } else {
         idxs = sort(idxs)
         res = log_smooth_constant  + (twcm[idxs, idxs]/n_twcm_windows)
-        res = res/diag(res)
-        res = t(res)/diag(res)
+        #divide each entry by values of p[wi,wi] and p[wj, wj], i.e., the entries in the diagonal
+        res = res/(diag(res)*rev(diag(res)))
         res = res[upper.tri(res)]
         res = log2(res)
         return(round(mean(res, na.rm = T), d = 4))
       }
     })]
 
-    coherence[,mean_pmi_lowertri:= sapply(twcm_term_idxs, function(idxs) {
-      if (length(idxs) < 2) {
-        return(NA)
-      } else {
-        idxs = sort(idxs)
-        res = log_smooth_constant  + (twcm[idxs, idxs]/n_twcm_windows)
-        res = res/diag(res)
-        res = t(res)/diag(res)
-        res = res[lower.tri(res)]
-        res = log2(res)
-        return(round(mean(res, na.rm = T), d = 4))
-      }
-    })]
 
+          # start <- proc.time()["elapsed"]
+          # coherence[,mean_pmi_vectorized2:= function(twcm_term_idxs) {
+          #
+          #   res = log_smooth_constant  + (twcm/n_twcm_windows)
+          #   res = res/(diag(res)*rev(diag(res)))
+          #
+          #   out <- sapply(twcm_term_idxs, function(idxs) {
+          #   if (length(idxs) < 2) {
+          #     return(NA)
+          #   } else {
+          #     idxs = sort(idxs)
+          #     r <- res[idxs, idxs]
+          #     r = r[upper.tri(r)]
+          #     r = log2(r)
+          #     return(round(mean(r, na.rm = T), d = 4))
+          #   }
+          # })
+          #   return(out)
+          #   }]
+          # print(paste0("mean_pmi_vectorized_2 time: " , round(proc.time()["elapsed"]-start, d = 1)))
+          #
+#if ( "npmi" %in% measure | measure == "all") {
     coherence[,mean_npmi:= sapply(twcm_term_idxs, function(idxs) {
                     if (length(idxs) < 2) {
                       return(NA)
@@ -309,11 +339,32 @@ coherence =  function( top_term_matrix
                       return(coh[, round(mean(score, na.rm = T), d = 4)])
                     }
       })]
+# #}
+#
+#     #vectorized approach for npmi
+    coherence[,mean_npmi_vectorized:= sapply(twcm_term_idxs, function(idxs) {
+      if (length(idxs) < 2) {
+        return(NA)
+      } else {
+        #coh = as.data.table(term_index_combinations(idxs, comb_type = "one_idx-preceeding_idxs"))
+        #combine one idx with every other index
+        res = log_smooth_constant  + (twcm[idxs, idxs]/n_twcm_windows)
+        denominator <-  -log2(res[upper.tri(res)] + log_smooth_constant)
+        res = res/(diag(res)*rev(diag(res)))
+        res <- res[upper.tri(res)]
+        res = log2(res)
+        #normalize
+        res <- res/denominator
+        return(round(mean(res, na.rm = T), d = 4))
+      }
+    })]
+
 
 
     #Type 3
     #mean(..., na.rm = T) for aggregation
     #one_suc as term indices
+#if ( "prob_diff" %in% measure | measure == "all") {
     coherence[,mean_prob_diff:= sapply(twcm_term_idxs, function(idxs) {
                     if (length(idxs) < 2) {
                       return(NA)
@@ -322,6 +373,39 @@ coherence =  function( top_term_matrix
                       coh[, score:= mapply(function(x,y)  {twcm[y,x]/twcm[y,y] - (twcm[y,y]/n_twcm_windows)}
                                            ,V1, V2)]
                       return(coh[, round(mean(score, na.rm = T), d = 4)])
+                    }
+      })]
+
+# #}
+#
+# #if ("prob_diff2" %in% measure | measure == "all") {
+    # coherence[,mean_prob_diff2:= sapply(twcm_term_idxs, function(idxs) {
+    #   if (length(idxs) < 2) {
+    #     return(NA)
+    #   } else {
+    #     coh = as.data.table(term_index_combinations(idxs, comb_type = "one_idx-succeeding_idxs"))
+    #     coh[, score:= mapply(function(x,y)  {twcm[y,x]/twcm[x,x] - (twcm[x,x]/n_twcm_windows)}
+    #                          ,V1, V2)]
+    #     return(coh[, round(mean(score, na.rm = T), d = 4)])
+    #   }
+    # })]
+# #}
+
+    coherence[,mean_cosim_npmi:= sapply(twcm_term_idxs, function(idxs) {
+                    if (length(idxs) < 2) {
+                      return(NA)
+                    } else {
+                      #coh = as.data.table(term_index_combinations(idxs, comb_type = "one_idx-preceeding_idxs"))
+                      #combine one idx with every other index
+                      res = log_smooth_constant  + (twcm[idxs, idxs]/n_twcm_windows)
+                      denominator <-  -log2(res + log_smooth_constant)
+                      res = res/(diag(res)*rev(diag(res)))
+                      res = log2(res)
+                      #normalize
+                      res <- res/denominator
+                      res_compare <- t(matrix(rep(colSums(res), nrow(res)), nrow = nrow(res)))
+                      res <- psim2(res, res_compare, method = "cosine", norm = "l2")
+                      return(round(mean(res, na.rm = T), d = 4))
                     }
       })]
 
