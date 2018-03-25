@@ -92,6 +92,13 @@ LatentSemanticAnalysis = R6::R6Class(
       rm(svd_fit)
       rownames(documents) = rownames(x)
       colnames(private$components_) = colnames(x)
+      
+      calculate_col_var = function(x) {
+        colMeans(x * x) - colMeans(x) ^ 2
+      }
+      
+      private$explained_variance = calculate_col_var(documents)
+      private$explained_variance_ratio = private$explained_variance / sum(calculate_col_var(x))
 
       private$fitted = TRUE
       documents
@@ -118,6 +125,20 @@ LatentSemanticAnalysis = R6::R6Class(
     ),
     get_word_vectors = function() {
       .Deprecated("model$components")
+    },
+    get_explained_variance = function(){
+      if (private$fitted){
+        private$explained_variance
+      } else {
+        stop("Fit the model first with model$fit_transform()")
+      }
+    },
+    get_explained_variance_ratio = function(){
+      if (private$fitted){
+        private$explained_variance_ratio
+      } else {
+        stop("Fit the model first with model$fit_transform()")
+      }
     }
   ),
   private = list(
@@ -125,7 +146,9 @@ LatentSemanticAnalysis = R6::R6Class(
     components_ = NULL,
     fitted = FALSE,
     svd_method = NULL,
-    vt = NULL
+    vt = NULL,
+    explained_variance = NULL,
+    explained_variance_ratio = NULL
   )
 )
 
