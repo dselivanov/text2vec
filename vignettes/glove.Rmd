@@ -50,7 +50,7 @@ Now let's examine how GloVe embeddings works. As commonly known, word2vec word v
 
 $$vector("paris") - vector("france") + vector("germany")$$ 
 
-the resulting vector will be close to the vector for "rome."
+the resulting vector will be close to the vector for "berlin".
 
 Let's download the same Wikipedia data used as a demo by word2vec:
 

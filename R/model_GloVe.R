@@ -167,6 +167,7 @@ GlobalVectors = R6::R6Class(
     },
     fit_transform = function(x, n_iter = 10L, convergence_tol = -1, n_check_convergence = 1L,
                    n_threads = RcppParallel::defaultNumThreads(), ...) {
+      RcppParallel::setThreadOptions(n_threads)
       # convert to internal native format
       x = super$check_convert_input(x)
 
