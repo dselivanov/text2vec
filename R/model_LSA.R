@@ -86,11 +86,19 @@ LatentSemanticAnalysis = R6::R6Class(
       }
       svd_fit = fit_svd(...)
 
-      documents = svd_fit$u %*% diag(x = sqrt(svd_fit$d))
-      private$components_ = t(svd_fit$v %*% diag(x = sqrt(svd_fit$d)))
+      documents = svd_fit$u %*% diag(x = svd_fit$d)
+      private$components_ = t(svd_fit$v %*% diag(x = svd_fit$d))
+      private$vt = svd_fit$v
       rm(svd_fit)
       rownames(documents) = rownames(x)
       colnames(private$components_) = colnames(x)
+      
+      calculate_col_var = function(x) {
+        colMeans(x * x) - colMeans(x) ^ 2
+      }
+      
+      private$explained_variance = calculate_col_var(documents)
+      private$explained_variance_ratio = private$explained_variance / sum(calculate_col_var(x))
 
       private$fitted = TRUE
       documents
@@ -98,9 +106,9 @@ LatentSemanticAnalysis = R6::R6Class(
     transform = function(x, ...) {
       if (private$fitted) {
         stopifnot(ncol(x) == ncol(private$components_))
-        lhs = tcrossprod(private$components_)
-        rhs = as.matrix(tcrossprod(private$components_, x))
-        t(solve(lhs, rhs))
+        temp = x %*% private$vt
+        rownames(temp) = rownames(x)
+        as.matrix(temp)
       }
       else
         stop("Fit the model first woth model$fit_transform()!")
@@ -117,13 +125,30 @@ LatentSemanticAnalysis = R6::R6Class(
     ),
     get_word_vectors = function() {
       .Deprecated("model$components")
+    },
+    get_explained_variance = function(){
+      if (private$fitted){
+        private$explained_variance
+      } else {
+        stop("Fit the model first with model$fit_transform()")
+      }
+    },
+    get_explained_variance_ratio = function(){
+      if (private$fitted){
+        private$explained_variance_ratio
+      } else {
+        stop("Fit the model first with model$fit_transform()")
+      }
     }
   ),
   private = list(
     n_topics = NULL,
     components_ = NULL,
     fitted = FALSE,
-    svd_method = NULL
+    svd_method = NULL,
+    vt = NULL,
+    explained_variance = NULL,
+    explained_variance_ratio = NULL
   )
 )
 
