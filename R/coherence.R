@@ -16,58 +16,58 @@
 #'
 
 
-library(text2vec)
-data("movie_review")
-N = 500
-tokens = word_tokenizer(tolower(movie_review$review[1:N]))
-it = itoken(tokens, progressbar = F)
-v = create_vocabulary(it)
-v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.2)
-dtm = create_dtm(it, vocab_vectorizer(v))
-#create models with different number of topics and get top terms per topic
-#in reality, probably run in parallel with more potential numbers of topics while storing models on disk
-n_topics = c(5,10,25,50,75,100)
-top_terms = lapply(n_topics, function(n) {
-  lda_model = text2vec::LDA$new(n_topics = n)
-  fitted = lda_model$fit_transform(dtm, n_iter = 20)
-  lda_model$get_top_words(n = 10, topic_number = 1L:n, lambda = 1)
-})
-#term window co-occurrence matrix based on binary co-occurrence of terms in window (here full document)
-#intrinsic since same dtm is used as for fitting LDA model
-twcm_int = Matrix::crossprod(sign(dtm))
-diag(twcm_int) = v$term_count
-coherence_scores = lapply(top_terms, function(x) {
-  coherence(top_term_matrix = x
-            ,twcm = twcm_int
-            ,n_twcm_windows = nrow(dtm)
-            ,measure = c("all", "npmi_nonvectorized", "pmi_nonvectorized")
-  )
-})
-
-#for finding the model with regard to number of topics the mean over coherence scores may be used
-#and a comparison of scaled values may be done
-coherence_scores_mean = lapply(coherence_scores, function(x) {
-  x[, lapply(.SD, mean), .SDcols = setdiff(names(x), "Topic")]
-})
-plot_data = rbindlist(coherence_scores_mean)
-#scale scores between 0 and 1
-plot_data[, names(plot_data):=lapply(.SD, function(x){(x-min(x))/(max(x)-min(x))})]
-#plot values of each coherence measure
-plot_colors <- c("black", "red", "orange", "blue", "purple", "darkgreen", "brown", "darkred", "darkblue")
-plot(x = 1:length(n_topics), unlist(plot_data[,1]), xlab = "n_topics", ylab = "coherence", type = "l", col = plot_colors[1],  xaxt = "n")
-axis(1, at = 1:length(n_topics), labels = n_topics)
-for (i in 2:ncol(plot_data)) {
-  lines(plot_data[,i, with = F], col = plot_colors[i])
-}
-#mark the vectorized versions with points
-colnames(plot_data)
-#pmi
-points(plot_data[,3, with = F], col = plot_colors[3]) #vectorized
-lines(plot_data[,2, with = F], col = plot_colors[2]) #non vectorized
-#npmi
-points(plot_data[,5, with = F], col = plot_colors[4]) #vectorized
-points(plot_data[,4, with = F], col = plot_colors[4]) #non vectorized
-legend(x = "bottomright", legend = colnames(plot_data), text.col = plot_colors, cex = 0.75)
+# library(text2vec)
+# data("movie_review")
+# N = 500
+# tokens = word_tokenizer(tolower(movie_review$review[1:N]))
+# it = itoken(tokens, progressbar = F)
+# v = create_vocabulary(it)
+# v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.2)
+# dtm = create_dtm(it, vocab_vectorizer(v))
+# #create models with different number of topics and get top terms per topic
+# #in reality, probably run in parallel with more potential numbers of topics while storing models on disk
+# n_topics = c(5,10,25,50,75,100)
+# top_terms = lapply(n_topics, function(n) {
+#   lda_model = text2vec::LDA$new(n_topics = n)
+#   fitted = lda_model$fit_transform(dtm, n_iter = 20)
+#   lda_model$get_top_words(n = 10, topic_number = 1L:n, lambda = 1)
+# })
+# #term window co-occurrence matrix based on binary co-occurrence of terms in window (here full document)
+# #intrinsic since same dtm is used as for fitting LDA model
+# twcm_int = Matrix::crossprod(sign(dtm))
+# diag(twcm_int) = v$term_count
+# coherence_scores = lapply(top_terms, function(x) {
+#   coherence(top_term_matrix = x
+#             ,twcm = twcm_int
+#             ,n_twcm_windows = nrow(dtm)
+#             ,measure = c("all", "npmi_nonvectorized", "pmi_nonvectorized")
+#   )
+# })
+#
+# #for finding the model with regard to number of topics the mean over coherence scores may be used
+# #and a comparison of scaled values may be done
+# coherence_scores_mean = lapply(coherence_scores, function(x) {
+#   x[, lapply(.SD, mean), .SDcols = setdiff(names(x), "Topic")]
+# })
+# plot_data = rbindlist(coherence_scores_mean)
+# #scale scores between 0 and 1
+# plot_data[, names(plot_data):=lapply(.SD, function(x){(x-min(x))/(max(x)-min(x))})]
+# #plot values of each coherence measure
+# plot_colors <- c("black", "red", "orange", "blue", "purple", "darkgreen", "brown", "darkred", "darkblue")
+# plot(x = 1:length(n_topics), unlist(plot_data[,1]), xlab = "n_topics", ylab = "coherence", type = "l", col = plot_colors[1],  xaxt = "n")
+# axis(1, at = 1:length(n_topics), labels = n_topics)
+# for (i in 2:ncol(plot_data)) {
+#   lines(plot_data[,i, with = F], col = plot_colors[i])
+# }
+# #mark the vectorized versions with points
+# colnames(plot_data)
+# #pmi
+# points(plot_data[,3, with = F], col = plot_colors[3]) #vectorized
+# lines(plot_data[,2, with = F], col = plot_colors[2]) #non vectorized
+# #npmi
+# points(plot_data[,5, with = F], col = plot_colors[4]) #vectorized
+# points(plot_data[,4, with = F], col = plot_colors[4]) #non vectorized
+# legend(x = "bottomright", legend = colnames(plot_data), text.col = plot_colors, cex = 0.75)
 
 
 coherence =  function( top_term_matrix

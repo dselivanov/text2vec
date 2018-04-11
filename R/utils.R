@@ -76,7 +76,7 @@ malloc_trim_finalizer = function(e) {
 # by the inverse binomial coefficient with special care taken to avoid negative infinity
 # resulting from log(0). A slightly slower but more intuitive way of writing this would be
 # \code{function(k, n, p) {
-#   out = dbinom(k, n, p, log = TRUE) - log(choose(n, k))
+#   out <- dbinom(k, n, p, log = TRUE) - log(choose(n, k))
 #   replace(out, out == -Inf, 0)
 # }}
 # This is used to create a log-likelihood ratio with 1 degree of freedom for bi-gram analysis
