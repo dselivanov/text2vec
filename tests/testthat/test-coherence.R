@@ -13,19 +13,19 @@ tcm = matrix(rbind(c(40, 1, 2, 3),
 #simply take all indices
 idxs = c(1,2,3,4)
 #one index with preceeding indidces combinations
-idxs_combis <- t(combn(idxs,2, FUN = function(x) sort(x, decreasing = TRUE)))
+idxs_combis = t(combn(idxs,2, FUN = function(x) sort(x, decreasing = TRUE)))
 pmi = mapply(function(x,y) {log2((tcm[x,y]) + 1e-12) - log2(tcm[x,x]) - log2(tcm[y,y])} ,idxs_combis[,1], idxs_combis[,2])
 # [1] -10.228819  -8.643856  -7.058894
 # [4]  -7.228819  -5.906891  -5.058894
 
 #pmi vectorized
-res <- tcm
+res = tcm
 res[upper.tri(res)] = res[upper.tri(res)] + 1e-12
 d = diag(res)
 res = res/d
 res = t(apply(res, 1, function(x) x/d))
 res = res[upper.tri(res)]
-pmi_vect <- log2(res)
+pmi_vect = log2(res)
 # [1] -10.228819  -8.643856  -7.228819
 # [4]  -7.058894  -5.906891  -5.058894
 
@@ -173,7 +173,7 @@ set.seed(42)
 lda_model = text2vec::LDA$new(n_topics = n_topics)
 fitted = lda_model$fit_transform(dtm)
 top_terms = lda_model$get_top_words(n = n_top_terms, topic_number = 1L:n_topics)
-topic_word_distribution <- lda_model$topic_word_distribution
+topic_word_distribution = lda_model$topic_word_distribution
 
 #create reference intrinsic reference tcm from corpus as used in the other packages
 tcm_intrinsic = Matrix::crossprod(sign(dtm))

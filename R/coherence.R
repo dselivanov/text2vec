@@ -109,7 +109,7 @@
 #' iterator_ext = itoken(tokens_ext, progressbar = F)
 #' v_ext = create_vocabulary(iterator_ext)
 #' for rasons of efficiency vocabulary may be reudced to the terms that are matched in the original corpus
-#' v_ext<- v_ext[v_ext$term %in% v$term,]
+#' v_ext= v_ext[v_ext$term %in% v$term,]
 #' # external vocabulary may be pruned depending on the use case
 #' v_ext = prune_vocabulary(v_ext, term_count_min = 5, doc_proportion_max = 0.2)
 #' vectorizer_ext = vocab_vectorizer(v_ext)
@@ -124,10 +124,10 @@
 #'                       ,binary_cooccurence = TRUE
 #'                      )
 #' #add marginal probabilities in diagonal (by default only upper triangle of tcm is created)
-#' diag(tcm_ext) <- attributes(tcm_ext)$word_count
+#' diag(tcm_ext) = attributes(tcm_ext)$word_count
 #'
 #' # get number of slding windows that serve as virtual documents, i.e. n_doc_tcm argument
-#' get_n_skip_gram_windows <- function(tokens, window_size) {
+#' get_n_skip_gram_windows = function(tokens, window_size) {
 #'   sum(sapply(tokens, function(x) {
 #'     #first window
 #'     n_windows = 1
