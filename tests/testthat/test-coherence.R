@@ -183,7 +183,7 @@ coherence_text2vec = coherence(x = top_terms ,tcm = tcm_intrinsic, n_doc_tcm = n
                                ,metrics = c("mean_difference", "mean_logratio"))
 
 #calculate coherence scores with other packages
-install.packages("slam")
+install.packages("slam", repos="http://stat.ethz.ch/CRAN/")
 library(slam) #needs to be loaded to format dtm as required by stm package
 logratio_stm_adapted = semCoh1beta_adapted(mat = as.simple_triplet_matrix(dtm), M = n_top_terms, beta = topic_word_distribution)
 mean_difference_textmineR = CalcProbCoherence(phi = topic_word_distribution, dtm = as.matrix(dtm), M =  n_top_terms)
