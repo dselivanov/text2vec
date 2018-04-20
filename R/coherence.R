@@ -108,7 +108,7 @@
 #' tokens_ext = word_tokenizer(external_reference_corpus)
 #' iterator_ext = itoken(tokens_ext, progressbar = F)
 #' v_ext = create_vocabulary(iterator_ext)
-#' for rasons of efficiency vocabulary may be reudced to the terms that are matched in the original corpus
+#' for reasons of efficiency vocabulary may be reudced to the terms that are matched in the original corpus
 #' v_ext= v_ext[v_ext$term %in% v$term,]
 #' # external vocabulary may be pruned depending on the use case
 #' v_ext = prune_vocabulary(v_ext, term_count_min = 5, doc_proportion_max = 0.2)
@@ -278,3 +278,70 @@ coherence_mean_difference = function(term_indices, tcm, smooth, n_doc_tcm, ...) 
 }
   return(res)
 }
+
+# coherence_mean_npmi = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
+#   #given suitably ordered pairs of indices stored in two column matrix "indices" a non-vectorized calculation would be something like
+#   #mapply(function(x, y)  {(log2((tcm[x,y]/n_doc_tcm) + smooth) - log2(tcm[x,x]/n_doc_tcm) - log2(tcm[y,y]/n_doc_tcm)) / -log2((tcm[x,y]/n_doc_tcm) + smooth)}}
+#   #                        , indices[,1], indices[,2])
+#   stopifnot(n_doc_tcm > 0L)
+#   res = NA
+#   if(length(term_indices) >= 2) {
+#     res = tcm[term_indices, term_indices] / n_doc_tcm
+#     res[upper.tri(res)] = res[upper.tri(res)] + smooth
+#     #interim storage of denominator
+#     denominator =  res[upper.tri(res)]
+#     d = diag(res)
+#     res = res/d
+#     res = t(apply(res, 1, function(x) x/d))
+#     res = res[upper.tri(res)]
+#     res = log2(res) / -log2(denominator)
+#     res = mean(res, na.rm = T)
+#   }
+#   return(res)
+# }
+#
+# coherence_mean_npmi_cosim = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
+#   #TODO
+#   #example of nonvectorized calculation
+#   stopifnot(n_doc_tcm > 0L)
+#   res = NA
+#   if(length(term_indices) >= 2) {
+#     res = tcm[term_indices, term_indices] / n_doc_tcm
+#     res[upper.tri(res)] = res[upper.tri(res)] + smooth
+#     #interim storage of denominator
+#     denominator =  res[upper.tri(res)]
+#     d = diag(res)
+#     res = res/d
+#     res = t(apply(res, 1, function(x) x/d))
+#     res = res[upper.tri(res)]
+#     res = log2(res) / -log2(denominator)
+#     #create values for cosine similarity check, for this metric: the sum of all npmi values
+#     res_compare = t(matrix(rep(colSums(res), nrow(res)), nrow = nrow(res)))
+#     res = psim2(res, res_compare, method = "cosine", norm = "l2")
+#     res = mean(res, na.rm = T)
+#   }
+#   return(res)
+# }
+#
+# coherence_mean_npmi_cosim2 = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
+#   #TODO
+#   #example of nonvectorized calculation
+#   stopifnot(n_doc_tcm > 0L)
+#   res = NA
+#   if(length(term_indices) >= 2) {
+#     res = tcm[term_indices, term_indices] / n_doc_tcm
+#     res[upper.tri(res)] = res[upper.tri(res)] + smooth
+#     #interim storage of denominator
+#     denominator =  res[upper.tri(res)]
+#     d = diag(res)
+#     res = res/d
+#     res = t(apply(res, 1, function(x) x/d))
+#     res = res[upper.tri(res)]
+#     res = log2(res) / -log2(denominator)
+#     #the following returns symmetric matrix of similarities between each row with each row -> subset triangle
+#     res = sim2(res, method = "cosine", norm = "l2")
+#     res = res[upper.tri(res)]
+#     res = mean(res, na.rm = T)
+#   }
+#   return(res)
+# }
