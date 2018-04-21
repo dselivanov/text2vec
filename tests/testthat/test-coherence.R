@@ -1,11 +1,12 @@
 context("coherence")
 
-#load additional packages
+# load additional packages ------------------------
 #slam needs to be loaded to format dtm as required by stm package for the test "Coherence results of text2vec vs other packages"
 install.packages("slam", repos="http://stat.ethz.ch/CRAN/")
 library(slam)
+# -------------------------------------------------
 
-# generation of test data ------------------
+# generation of test data -------------------------
 #library(text2vec)
 #data("movie_review")
 N = 500
@@ -16,31 +17,39 @@ v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.2)
 dtm = create_dtm(it, vocab_vectorizer(v))
 n_topics = 100
 n_top_terms = 10
-set.seed(42)
 lda_model = text2vec::LDA$new(n_topics = n_topics)
 fitted = lda_model$fit_transform(dtm)
 top_terms = lda_model$get_top_words(n = n_top_terms, topic_number = 1L:n_topics)
 topic_word_distribution = lda_model$topic_word_distribution
+# -------------------------------------------------
 
-test_that("General functionality of coherence", {
+test_that("coherence, general functionality", {
 
-# intrinsic reference tcm from corpus for testing purposes
+# intrinsic reference tcm from corpus for testing general functionality
   tcm_intrinsic = Matrix::crossprod(sign(dtm))
-
   coherence_res = coherence(x = top_terms ,tcm = tcm_intrinsic, n_doc_tcm = nrow(dtm))
-
   expect_equal(class(coherence_res), "matrix")
   expect_equal(typeof(coherence_res), "double")
-  expect_equal(colnames(coherence_res), c("mean_logratio", "mean_pmi", "mean_difference"))
+  expect_true(all(colnames(coherence_res) %in% c("mean_logratio", "mean_pmi", "mean_difference")))
   expect_equal(nrow(coherence_res), n_topics)
-  expect_false(any(is.na(coherence_res)))
 
+# different smoothing constants
   coherence_res_adapted_smooth = coherence(x = top_terms ,tcm = tcm_intrinsic, n_doc_tcm = nrow(dtm), smooth = .01)
-
   expect_false(sum(as.vector(coherence_res)) == sum(as.vector(coherence_res_adapted_smooth)))
+
+# incomplete input
+  tcm_err = tcm_intrinsic[1:2,1:2]
+  tcm_err[1,2] = 0
+  tcm_err[2,1] = 0
+  expect_warning({coherence_err = coherence(x = top_terms, tcm = tcm_err, n_doc_tcm = nrow(dtm))})
+  expect_true(all(is.na(coherence_err)))
+
+# erronerous input (non-symmetric tcm)
+  rownames(tcm_err) <- rev(rownames(tcm_err))
+  expect_error(coherence(x = top_terms, tcm = tcm_err, n_doc_tcm = nrow(dtm)))
 })
 
-test_that("vectorized vs. mapply loop calculation of PMI", {
+test_that("coherence, vectorized vs. mapply loop calculation of PMI", {
 
   #1. some simple toy data----------------------------
   tcm = matrix(rbind(c(40, 1, 2, 3),
@@ -90,7 +99,7 @@ test_that("vectorized vs. mapply loop calculation of PMI", {
   }
 })
 
-test_that("Coherence results of text2vec vs other packages", {
+test_that("coherence, results of text2vec vs other packages", {
 
   #textmineR: difference metric via function CalcProbCoherence: https://github.com/bstewart/stm/blob/master/R/semanticCoherence.R
   #stm: adapted UMass via the function semCoh1beta: https://github.com/bstewart/stm/blob/master/R/semanticCoherence.R
