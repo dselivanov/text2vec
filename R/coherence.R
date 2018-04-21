@@ -8,11 +8,11 @@
 #' a starting point is given in the reference section.
 #'
 #' The currently implemented coherence \code{metrics} are described below including a description of the
-#' content type of the \code{tcm} that showed good performance in combination with a specific metric.
-#' For details on how to create \code{tcm} see the example section.
+#' content type of the \code{tcm} that showed good performance in combination with a specific metric.  \cr
+#' For details on how to create \code{tcm} see the example section.  \cr
 #' For details on performance of metrics see the resources in the reference section
-#' that served for definition of standard settings for individual metrics.
-#' Note that depending on the use case, still, different settings than the standard settings for creation of \code{tcm} may be reasonable.
+#' that served for definition of standard settings for individual metrics.  \cr
+#' Note that depending on the use case, still, different settings than the standard settings for creation of \code{tcm} may be reasonable.  \cr
 #' Note that for all currently implemented metrics the \code{tcm} is reduced to the top word space on basis of the terms in \code{x}.
 #'
 #' Considering the use case of finding the optimum number of topics among several models with different metrics,
@@ -20,37 +20,42 @@
 #' might be considered for direct comparison.
 #'
 #' Implemented metrics:
-#'   "mean_logratio": The logarithmic ratio is calculated as
-#'                    \code{log(smooth + tcm[x,y]) - log(tcm[y,y])},
-#'                    where x and y are term index pairs from a "preceeding" term index combination.
-#'                    Given the indices c(1,2,3), combinations are \code{list(c(2,1), c(3,1), c(3,2))}.
-#'
+#' \itemize{
+#'   \item "mean_logratio"  \cr
+#'                    The logarithmic ratio is calculated as \cr
+#'                    \code{log(smooth + tcm[x,y]) - log(tcm[y,y])},  \cr
+#'                    where x and y are term index pairs from a "preceeding" term index combination.  \cr
+#'                    Given the indices c(1,2,3), combinations are \code{list(c(2,1), c(3,1), c(3,2))}.  \cr
+#' \cr
 #'                    The \code{tcm} should represent the boolean term co-occurrence (internally the actual counts are used)
-#'                    in the original documents and, therefore, is an intrinsic metric in the standard use case.
-#'
+#'                    in the original documents and, therefore, is an intrinsic metric in the standard use case.  \cr
+#' \cr
 #'                    This metric is similar to the UMass metric, however, with a smaller smoothing constant by default
-#'                    and using the mean for aggregation instead of the sum.
+#'                    and using the mean for aggregation instead of the sum.  \cr
 #'
-#'        "mean_pmi": The pointwise mutual information is calucalted as
-#'                    {log2((tcm[x,y]/n_doc_tcm) + smooth) - log2(tcm[x,x]/n_doc_tcm) - log2(tcm[y,y]/n_doc_tcm)},
-#'                    where x and y are term index pairs from an arbitrary term index combination
-#'                    that subsets the lower or upper triangle of \code{tcm}, e.g. "preceeding".
-#'
+#'   \item "mean_pmi" \cr
+#'                    The pointwise mutual information is calucalted as  \cr
+#'                    \code{log2((tcm[x,y]/n_doc_tcm) + smooth) - log2(tcm[x,x]/n_doc_tcm) - log2(tcm[y,y]/n_doc_tcm)},  \cr
+#'                    where x and y are term index pairs from an arbitrary term index combination  \cr
+#'                    that subsets the lower or upper triangle of \code{tcm}, e.g. "preceeding".  \cr
+#' \cr
 #'                    The \code{tcm} should represent term co-occurrences within a boolean sliding window of size 10 (internally probabilities are used)
-#'                    in an external reference corpus and, therefore, is an extrinsic metric in the standard use case.
-#'
+#'                    in an external reference corpus and, therefore, is an extrinsic metric in the standard use case.  \cr
+#' \cr
 #'                    This metric is similar to the UCI metric, however, with a smaller smoothing constant by default
 #'                    and using the mean for aggregation instead of the sum.
 #'
-#' "mean_difference": The difference is calculated as
-#'                    \code{tcm[x,y]/twcm[x,x] - (tcm[y,y]/n_tcm_windows)},
-#'                    where x and y are term index pairs from a "preceeding" term index combination.
-#'                    Given the indices c(1,2,3), combinations are \code{list(c(1,2), c(1,3), c(2,3))}.
-#'
+#'   \item "mean_difference" \cr
+#'                    The difference is calculated as  \cr
+#'                    \code{tcm[x,y]/twcm[x,x] - (tcm[y,y]/n_tcm_windows)},  \cr
+#'                    where x and y are term index pairs from a "preceeding" term index combination.  \cr
+#'                    Given the indices c(1,2,3), combinations are \code{list(c(1,2), c(1,3), c(2,3))}.  \cr
+#' \cr
 #'                    The \code{tcm} should represent the boolean term co-occurrence (internally probabilities are used)
 #'                    in the original documents and, therefore, is an intrinsic metric in the standard use case.
+#'}
 #'
-#' @param x A character \code{matrix} with the top terms per topic (each column represents one topic),
+#' @param x A \code{character matrix} with the top terms per topic (each column represents one topic),
 #'          e.g., as created by \code{get_top_words()}.
 #'          Terms of \code{x} have to be ranked per topic starting with rank 1 in row 1.
 #' @param tcm The term co-occurrence matrix, e.g, a \code{Matrix::sparseMatrix} or \code{base::matrix},
@@ -64,16 +69,16 @@
 #'                  \code{n_doc_tcm} is used to calculate term probabilities from term counts as required for several metrics.
 #' @return A \code{numeric matrix} with the coherence scores of the specified \code{metrics} per topic.
 #' @references
-#' Below mentioned paper is the main theoretical basis for this code.
-#' Currently only a selection of metrics stated in this paper is included in this R implementation.
-#' Authors: Roeder, Michael; Both, Andreas; Hinneburg, Alexander (2015)
-#' Title: Exploring the Space of Topic Coherence Measures.
-#' In: Xueqi Cheng, Hang Li, Evgeniy Gabrilovich und Jie Tang (Eds.):
-#' Proceedings of the Eighth ACM International Conference on Web Search and Data Mining - WSDM '15.
-#' the Eighth ACM International Conference. Shanghai, China, 02.02.2015 - 06.02.2015.
-#' New York, USA: ACM Press, p. 399-408.
-#' https://dl.acm.org/citation.cfm?id=2685324
-#' This paper has been implemented by above listed authors as the Java program "palmetto".
+#' Below mentioned paper is the main theoretical basis for this code. \cr
+#' Currently only a selection of metrics stated in this paper is included in this R implementation. \cr
+#' Authors: Roeder, Michael; Both, Andreas; Hinneburg, Alexander (2015) \cr
+#' Title: Exploring the Space of Topic Coherence Measures. \cr
+#' In: Xueqi Cheng, Hang Li, Evgeniy Gabrilovich und Jie Tang (Eds.): \cr
+#' Proceedings of the Eighth ACM International Conference on Web Search and Data Mining - WSDM '15. \cr
+#' the Eighth ACM International Conference. Shanghai, China, 02.02.2015 - 06.02.2015. \cr
+#' New York, USA: ACM Press, p. 399-408. \cr
+#' https://dl.acm.org/citation.cfm?id=2685324 \cr
+#' This paper has been implemented by above listed authors as the Java program "palmetto". \cr
 #' See https://github.com/dice-group/Palmetto or http://aksw.org/Projects/Palmetto.html.
 #'
 #' @examples
@@ -108,7 +113,7 @@
 #' tokens_ext = word_tokenizer(external_reference_corpus)
 #' iterator_ext = itoken(tokens_ext, progressbar = F)
 #' v_ext = create_vocabulary(iterator_ext)
-#' for reasons of efficiency vocabulary may be reudced to the terms that are matched in the original corpus
+#' for reasons of efficiency vocabulary may be reduced to the terms that are matched in the original corpus
 #' v_ext= v_ext[v_ext$term %in% v$term,]
 #' # external vocabulary may be pruned depending on the use case
 #' v_ext = prune_vocabulary(v_ext, term_count_min = 5, doc_proportion_max = 0.2)
@@ -279,69 +284,69 @@ coherence_mean_difference = function(term_indices, tcm, smooth, n_doc_tcm, ...) 
   return(res)
 }
 
-# coherence_mean_npmi = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
-#   #given suitably ordered pairs of indices stored in two column matrix "indices" a non-vectorized calculation would be something like
-#   #mapply(function(x, y)  {(log2((tcm[x,y]/n_doc_tcm) + smooth) - log2(tcm[x,x]/n_doc_tcm) - log2(tcm[y,y]/n_doc_tcm)) / -log2((tcm[x,y]/n_doc_tcm) + smooth)}}
-#   #                        , indices[,1], indices[,2])
-#   stopifnot(n_doc_tcm > 0L)
-#   res = NA
-#   if(length(term_indices) >= 2) {
-#     res = tcm[term_indices, term_indices] / n_doc_tcm
-#     res[upper.tri(res)] = res[upper.tri(res)] + smooth
-#     #interim storage of denominator
-#     denominator =  res[upper.tri(res)]
-#     d = diag(res)
-#     res = res/d
-#     res = t(apply(res, 1, function(x) x/d))
-#     res = res[upper.tri(res)]
-#     res = log2(res) / -log2(denominator)
-#     res = mean(res, na.rm = T)
-#   }
-#   return(res)
-# }
-#
-# coherence_mean_npmi_cosim = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
-#   #TODO
-#   #example of nonvectorized calculation
-#   stopifnot(n_doc_tcm > 0L)
-#   res = NA
-#   if(length(term_indices) >= 2) {
-#     res = tcm[term_indices, term_indices] / n_doc_tcm
-#     res[upper.tri(res)] = res[upper.tri(res)] + smooth
-#     #interim storage of denominator
-#     denominator =  res[upper.tri(res)]
-#     d = diag(res)
-#     res = res/d
-#     res = t(apply(res, 1, function(x) x/d))
-#     res = res[upper.tri(res)]
-#     res = log2(res) / -log2(denominator)
-#     #create values for cosine similarity check, for this metric: the sum of all npmi values
-#     res_compare = t(matrix(rep(colSums(res), nrow(res)), nrow = nrow(res)))
-#     res = psim2(res, res_compare, method = "cosine", norm = "l2")
-#     res = mean(res, na.rm = T)
-#   }
-#   return(res)
-# }
-#
-# coherence_mean_npmi_cosim2 = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
-#   #TODO
-#   #example of nonvectorized calculation
-#   stopifnot(n_doc_tcm > 0L)
-#   res = NA
-#   if(length(term_indices) >= 2) {
-#     res = tcm[term_indices, term_indices] / n_doc_tcm
-#     res[upper.tri(res)] = res[upper.tri(res)] + smooth
-#     #interim storage of denominator
-#     denominator =  res[upper.tri(res)]
-#     d = diag(res)
-#     res = res/d
-#     res = t(apply(res, 1, function(x) x/d))
-#     res = res[upper.tri(res)]
-#     res = log2(res) / -log2(denominator)
-#     #the following returns symmetric matrix of similarities between each row with each row -> subset triangle
-#     res = sim2(res, method = "cosine", norm = "l2")
-#     res = res[upper.tri(res)]
-#     res = mean(res, na.rm = T)
-#   }
-#   return(res)
-# }
+coherence_mean_npmi = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
+  #given suitably ordered pairs of indices stored in two column matrix "indices" a non-vectorized calculation would be something like
+  #mapply(function(x, y)  {(log2((tcm[x,y]/n_doc_tcm) + smooth) - log2(tcm[x,x]/n_doc_tcm) - log2(tcm[y,y]/n_doc_tcm)) / -log2((tcm[x,y]/n_doc_tcm) + smooth)}}
+  #                        , indices[,1], indices[,2])
+  stopifnot(n_doc_tcm > 0L)
+  res = NA
+  if(length(term_indices) >= 2) {
+    res = tcm[term_indices, term_indices] / n_doc_tcm
+    res[upper.tri(res)] = res[upper.tri(res)] + smooth
+    #interim storage of denominator
+    denominator =  res[upper.tri(res)]
+    d = diag(res)
+    res = res/d
+    res = t(apply(res, 1, function(x) x/d))
+    res = res[upper.tri(res)]
+    res = log2(res) / -log2(denominator)
+    res = mean(res, na.rm = T)
+  }
+  return(res)
+}
+
+coherence_mean_npmi_cosim = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
+  #TODO
+  #example of nonvectorized calculation
+  stopifnot(n_doc_tcm > 0L)
+  res = NA
+  if(length(term_indices) >= 2) {
+    res = tcm[term_indices, term_indices] / n_doc_tcm
+    res[upper.tri(res)] = res[upper.tri(res)] + smooth
+    #interim storage of denominator
+    denominator =  res[upper.tri(res)]
+    d = diag(res)
+    res = res/d
+    res = t(apply(res, 1, function(x) x/d))
+    res = res[upper.tri(res)]
+    res = log2(res) / -log2(denominator)
+    #create values for cosine similarity check, for this metric: the sum of all npmi values
+    res_compare = t(matrix(rep(colSums(res), nrow(res)), nrow = nrow(res)))
+    res = psim2(res, res_compare, method = "cosine", norm = "l2")
+    res = mean(res, na.rm = T)
+  }
+  return(res)
+}
+
+coherence_mean_npmi_cosim2 = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
+  #TODO
+  #example of nonvectorized calculation
+  stopifnot(n_doc_tcm > 0L)
+  res = NA
+  if(length(term_indices) >= 2) {
+    res = tcm[term_indices, term_indices] / n_doc_tcm
+    res[upper.tri(res)] = res[upper.tri(res)] + smooth
+    #interim storage of denominator
+    denominator =  res[upper.tri(res)]
+    d = diag(res)
+    res = res/d
+    res = t(apply(res, 1, function(x) x/d))
+    res = res[upper.tri(res)]
+    res = log2(res) / -log2(denominator)
+    #the following returns symmetric matrix of similarities between each row with each row -> subset triangle
+    res = sim2(res, method = "cosine", norm = "l2")
+    res = res[upper.tri(res)]
+    res = mean(res, na.rm = T)
+  }
+  return(res)
+}
