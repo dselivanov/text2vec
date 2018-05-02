@@ -125,8 +125,8 @@ warplda_create <- function(n_topics, doc_topic_prior, topic_word_prior) {
     .Call(`_text2vec_warplda_create`, n_topics, doc_topic_prior, topic_word_prior)
 }
 
-warplda_init_dtm <- function(ptr, m, z_old, z_new) {
-    invisible(.Call(`_text2vec_warplda_init_dtm`, ptr, m, z_old, z_new))
+warplda_init_dtm <- function(ptr, m, z_old, z_new, seeds) {
+    invisible(.Call(`_text2vec_warplda_init_dtm`, ptr, m, z_old, z_new, seeds))
 }
 
 warplda_set_topic_word_count <- function(ptr, topic_word_count) {

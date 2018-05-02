@@ -23,9 +23,9 @@ using namespace Rcpp;
 class R_LDA:public LDA {
 public:
 
-  void init(const IntegerVector &z_old, const IntegerVector &z_new) {
+  void init(const IntegerVector &z_old, const IntegerVector &z_new, const IntegerVector &seeds) {
 
-    rng.seed((uint64_t)R::runif(1, pow(2.0, 32)), (uint64_t)R::runif(1, pow(2.0, 32)) );
+    rng.seed((uint64_t)seeds[0], (uint64_t)seeds[1]);
     C_doc.resize(corpus.n_row_expected, n_topic);
     C_word.resize(corpus.n_col_expected, n_topic);
     C_all.resize(n_topic);
@@ -156,10 +156,11 @@ SEXP warplda_create(int n_topics, double doc_topic_prior, double topic_word_prio
 }
 
 // [[Rcpp::export]]
-void warplda_init_dtm(SEXP ptr, const S4 &m, const IntegerVector &z_old, const IntegerVector &z_new) {
+void warplda_init_dtm(SEXP ptr, const S4 &m, const IntegerVector &z_old, const IntegerVector &z_new,
+                      const IntegerVector &seeds) {
   Rcpp::XPtr<R_LDA> lda_model(ptr);
   lda_model->r_read_corpus(m);
-  lda_model->init(z_old, z_new);
+  lda_model->init(z_old, z_new, seeds);
 }
 
 // [[Rcpp::export]]

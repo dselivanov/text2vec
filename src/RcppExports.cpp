@@ -378,15 +378,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // warplda_init_dtm
-void warplda_init_dtm(SEXP ptr, const S4& m, const IntegerVector& z_old, const IntegerVector& z_new);
-RcppExport SEXP _text2vec_warplda_init_dtm(SEXP ptrSEXP, SEXP mSEXP, SEXP z_oldSEXP, SEXP z_newSEXP) {
+void warplda_init_dtm(SEXP ptr, const S4& m, const IntegerVector& z_old, const IntegerVector& z_new, const IntegerVector& seeds);
+RcppExport SEXP _text2vec_warplda_init_dtm(SEXP ptrSEXP, SEXP mSEXP, SEXP z_oldSEXP, SEXP z_newSEXP, SEXP seedsSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
     Rcpp::traits::input_parameter< const S4& >::type m(mSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type z_old(z_oldSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type z_new(z_newSEXP);
-    warplda_init_dtm(ptr, m, z_old, z_new);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type seeds(seedsSEXP);
+    warplda_init_dtm(ptr, m, z_old, z_new, seeds);
     return R_NilValue;
 END_RCPP
 }
@@ -532,7 +533,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_text2vec_is_invalid_ptr", (DL_FUNC) &_text2vec_is_invalid_ptr, 1},
     {"_text2vec_cpp_fixed_char_tokenizer", (DL_FUNC) &_text2vec_cpp_fixed_char_tokenizer, 2},
     {"_text2vec_warplda_create", (DL_FUNC) &_text2vec_warplda_create, 3},
-    {"_text2vec_warplda_init_dtm", (DL_FUNC) &_text2vec_warplda_init_dtm, 4},
+    {"_text2vec_warplda_init_dtm", (DL_FUNC) &_text2vec_warplda_init_dtm, 5},
     {"_text2vec_warplda_set_topic_word_count", (DL_FUNC) &_text2vec_warplda_set_topic_word_count, 2},
     {"_text2vec_run_one_iter_doc", (DL_FUNC) &_text2vec_run_one_iter_doc, 2},
     {"_text2vec_run_one_iter_word", (DL_FUNC) &_text2vec_run_one_iter_word, 2},

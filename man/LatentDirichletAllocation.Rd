@@ -4,15 +4,12 @@
 \name{LatentDirichletAllocation}
 \alias{LatentDirichletAllocation}
 \alias{LDA}
-\alias{LatentDirichletAllocationDistributed}
 \title{Creates Latent Dirichlet Allocation model.}
 \format{\code{\link{R6Class}} object.}
 \usage{
 LatentDirichletAllocation
 
 LDA
-
-LatentDirichletAllocationDistributed
 }
 \description{
 Creates Latent Dirichlet Allocation model.
@@ -83,7 +80,9 @@ lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
    Also knows as \bold{alpha}}
  \item{topic_word_prior}{\code{numeric} prior for topic-word multinomial distribution.
    Also knows as \bold{eta}}
- \item{n_iter}{\code{integer} number of sampling iterations}
+ \item{n_iter}{\code{integer} number of sampling iterations while fitting model}
+ \item{n_iter_inference}{\code{integer} number iterations used when sampling from converged model for inference.
+ In other words number of samples from distribution after burn-in.}
  \item{n_check_convergence}{ defines how often calculate score to check convergence }
  \item{convergence_tol}{{\code{numeric = -1} defines early stopping strategy. We stop fitting
     when one of two following conditions will be satisfied: (a) we have used
