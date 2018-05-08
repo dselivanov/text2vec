@@ -69,7 +69,7 @@ test_that("coherence, vectorized vs. mapply loop calculation of PMI", {
   res[upper.tri(res)] = res[upper.tri(res)] + 1e-12
   d = diag(res)
   res = res/d
-  res = t(apply(res, 1, function(x) x/d))
+  res = res %*% diag(1 / d)
   res = res[upper.tri(res)]
   pmi_vect = log2(res)
 
