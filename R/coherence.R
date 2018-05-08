@@ -131,7 +131,7 @@
 #' #add marginal probabilities in diagonal (by default only upper triangle of tcm is created)
 #' diag(tcm_ext) = attributes(tcm_ext)$word_count
 #'
-#' # get number of slding windows that serve as virtual documents, i.e. n_doc_tcm argument
+#' # get number of sliding windows that serve as virtual documents, i.e. n_doc_tcm argument
 #' get_n_skip_gram_windows = function(tokens, window_size) {
 #'   sum(sapply(tokens, function(x) {
 #'     #first window
@@ -188,7 +188,7 @@ coherence = function(x, tcm, metrics = c("mean_logratio", "mean_pmi", "mean_diff
 #stm (Molly Roberts, Brandon Stewart and Dustin Tingley) https://github.com/bstewart/stm/blob/master/R/semanticCoherence.R
 #textmineR (Tommy Jones): https://github.com/TommyJones/textmineR/blob/master/R/CalcProbCoherence.R
 
-implemented_metrics = c("mean_logratio", "mean_pmi", "mean_difference", "sum_logratio_smooth.1")
+implemented_metrics = c("mean_logratio", "mean_pmi", "mean_npmi", "mean_difference", "mean_npmi_cosim", "mean_npmi_cosim2")
 stopifnot(all(metrics %in% implemented_metrics))
 n_metrics = length(metrics)
 top_terms = as.vector(x)
@@ -228,7 +228,10 @@ calc_coherence = function(metric, term_indices, tcm, smooth, ...) {
   switch(metric,
          "mean_logratio" =         coherence_mean_logratio         (term_indices, tcm, smooth, ...),
          "mean_pmi" =              coherence_mean_pmi              (term_indices, tcm, smooth, ...),
+         "mean_npmi" =             coherence_mean_npmi              (term_indices, tcm, smooth, ...),
          "mean_difference" =       coherence_mean_difference       (term_indices, tcm, smooth, ...),
+         "mean_npmi_cosim" =       coherence_mean_npmi_cosim       (term_indices, tcm, smooth, ...),
+         "mean_npmi_cosim2" =      coherence_mean_npmi_cosim2      (term_indices, tcm, smooth, ...),
          stop(sprintf("don't know how to calculate metric '%s'", metric))
   )
 }
@@ -242,8 +245,9 @@ coherence_mean_logratio = function(term_indices, tcm, smooth, ...) {
     res = tcm[term_indices, term_indices]
     res[upper.tri(res)] = res[upper.tri(res)] + smooth
     d = diag(res)
-    res = t(apply(res, 1, function(x) x/d))
-    res = res[upper.tri(res)]
+    res = t(res)
+    res = res / d
+    res = res[lower.tri(res)]
     res = log(res)
     res = mean(res, na.rm = T)
   }
@@ -260,7 +264,7 @@ coherence_mean_pmi = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
     res[upper.tri(res)] = res[upper.tri(res)] + smooth
     d = diag(res)
     res = res/d
-    res = t(apply(res, 1, function(x) x/d))
+    res = res %*% diag(1 / d)
     res = res[upper.tri(res)]
     res = log2(res)
     res = mean(res, na.rm = T)
@@ -277,8 +281,8 @@ coherence_mean_difference = function(term_indices, tcm, smooth, n_doc_tcm, ...) 
     res = tcm[term_indices, term_indices] / n_doc_tcm
     d = diag(res)
     res = res/d
-    res = t(apply(res, 1, function(x) x-d))
-    res = res[upper.tri(res)]
+    res = t(res) - d
+    res = res[lower.tri(res)]
     res = mean(res, na.rm = T)
 }
   return(res)
@@ -297,7 +301,7 @@ coherence_mean_npmi = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
     denominator =  res[upper.tri(res)]
     d = diag(res)
     res = res/d
-    res = t(apply(res, 1, function(x) x/d))
+    res = res %*% diag(1 / d)
     res = res[upper.tri(res)]
     res = log2(res) / -log2(denominator)
     res = mean(res, na.rm = T)
@@ -312,13 +316,13 @@ coherence_mean_npmi_cosim = function(term_indices, tcm, smooth, n_doc_tcm, ...) 
   res = NA
   if(length(term_indices) >= 2) {
     res = tcm[term_indices, term_indices] / n_doc_tcm
-    res[upper.tri(res)] = res[upper.tri(res)] + smooth
+    res = res + smooth
+    diag(res) = diag(res) - smooth
     #interim storage of denominator
-    denominator =  res[upper.tri(res)]
+    denominator =  res
     d = diag(res)
     res = res/d
-    res = t(apply(res, 1, function(x) x/d))
-    res = res[upper.tri(res)]
+    res = res %*% diag(1 / d)
     res = log2(res) / -log2(denominator)
     #create values for cosine similarity check, for this metric: the sum of all npmi values
     res_compare = t(matrix(rep(colSums(res), nrow(res)), nrow = nrow(res)))
@@ -335,13 +339,13 @@ coherence_mean_npmi_cosim2 = function(term_indices, tcm, smooth, n_doc_tcm, ...)
   res = NA
   if(length(term_indices) >= 2) {
     res = tcm[term_indices, term_indices] / n_doc_tcm
-    res[upper.tri(res)] = res[upper.tri(res)] + smooth
+    res = res + smooth
+    diag(res) = diag(res) - smooth
     #interim storage of denominator
-    denominator =  res[upper.tri(res)]
+    denominator =  res
     d = diag(res)
     res = res/d
-    res = t(apply(res, 1, function(x) x/d))
-    res = res[upper.tri(res)]
+    res = res %*% diag(1 / d)
     res = log2(res) / -log2(denominator)
     #the following returns symmetric matrix of similarities between each row with each row -> subset triangle
     res = sim2(res, method = "cosine", norm = "l2")
