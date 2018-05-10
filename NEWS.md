@@ -1,5 +1,7 @@
 # text2vec 0.5.1.*
 
+1. 2018-05-10
+    * Added `coherence()` function for comprehensive coherence metrics. Thanks to Manuel Bickel ( @manuelbickel ) for conrtibution.
 1. 2018-05-02
     * Fixed bug LSA model - document embeddings calculated as left singular vectors multiplied by singular values (not square root of values as before). Thanks to Sloane Simmons ( @singularperturbation )
     * Now `fit_transform` and `transform` methods in LDA model produce same results. Thanks to @jiunsiew for reporting. Also now LDA has `n_iter_inference` parameter. It controls number of the samples from converged distribution for document-topic inference. This leads to more robust document-topic probabilities (reduced variance). Default value is 10.
