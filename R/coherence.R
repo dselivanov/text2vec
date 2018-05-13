@@ -87,7 +87,7 @@
 #' @param tcm The term co-occurrence matrix, e.g, a \code{Matrix::sparseMatrix} or \code{base::matrix},
 #'            serving as the reference to calculate coherence metrics.
 #'            Please note that a memory efficient version of the \code{tcm} is assumed as input
-#'            with all entries in the lower triangle (excluding diagonal) set to zero.
+#'            with all entries in the lower triangle (excluding diagonal) set to zero (see, e.g., \code{create_tcm}).
 #'            Please also note that some efforts during any pre-processing steps might be skipped since the \code{tcm}
 #'            is internally reduced to the top word space, i.e., all unique terms of \code{x}.
 #' @param metrics Character vector specifying the metrics to be calculated. Currently the following metrics are implemented:
