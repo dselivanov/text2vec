@@ -333,7 +333,7 @@ coherence_mean_npmi_cosim = function(term_indices, tcm, smooth, n_doc_tcm, ...) 
   res = NA
   if(length(term_indices) >= 2) {
     res = tcm[term_indices, term_indices] / n_doc_tcm
-    res[lower.tri(res, diag = F)] <- t(res)[lower.tri(res, diag = F)]
+    res[lower.tri(res, diag = F)] = t(res)[lower.tri(res, diag = F)]
     res = res + smooth
     diag(res) = diag(res) - smooth
     #interim storage of denominator
@@ -357,7 +357,7 @@ coherence_mean_npmi_cosim2 = function(term_indices, tcm, smooth, n_doc_tcm, ...)
   res = NA
   if(length(term_indices) >= 2) {
     res = tcm[term_indices, term_indices] / n_doc_tcm
-    res[lower.tri(res, diag = F)] <- t(res)[lower.tri(res, diag = F)]
+    res[lower.tri(res, diag = F)] = t(res)[lower.tri(res, diag = F)]
     res = res + smooth
     diag(res) = diag(res) - smooth
     #interim storage of denominator
