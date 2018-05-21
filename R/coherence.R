@@ -1,9 +1,9 @@
 #' Coherence metrics for topic models
 #'
 #' Given a topic model with topics represented as ordered term lists, the coherence may be used to assess the quality of individual topics.
-#' This function is an implmentation of several of the numerous possible metrics for such kind of assessments.
+#' This function is an implementation of several of the numerous possible metrics for such kind of assessments.
 #' Coherence calculation is sensitive to the content of the reference \code{tcm} that is used for evaluation
-#' and that may be created with different parameter settings. Please refer to the details section (or refrence section) for information
+#' and that may be created with different parameter settings. Please refer to the details section (or reference section) for information
 #' on typical combinations of metric and type of \code{tcm}. For more general information on measuring coherence
 #' a starting point is given in the reference section.
 #'
@@ -27,7 +27,7 @@
 #'   \item "mean_logratio"  \cr
 #'                    The logarithmic ratio is calculated as \cr
 #'                    \code{log(smooth + tcm[x,y]) - log(tcm[y,y])},  \cr
-#'                    where x and y are term index pairs from a "preceeding" term index combination.  \cr
+#'                    where x and y are term index pairs from a "preceding" term index combination.  \cr
 #'                    Given the indices c(1,2,3), combinations are \code{list(c(2,1), c(3,1), c(3,2))}.  \cr
 #' \cr
 #'                    The \code{tcm} should represent the boolean term co-occurrence (internally the actual counts are used)
@@ -37,12 +37,12 @@
 #'                    and using the mean for aggregation instead of the sum.  \cr
 #'
 #'   \item "mean_pmi" \cr
-#'                    The pointwise mutual information is calucalted as  \cr
+#'                    The pointwise mutual information is calculated as  \cr
 #'                    \code{log2((tcm[x,y]/n_doc_tcm) + smooth) - log2(tcm[x,x]/n_doc_tcm) - log2(tcm[y,y]/n_doc_tcm)},  \cr
 #'                    where x and y are term index pairs from an arbitrary term index combination  \cr
-#'                    that subsets the lower or upper triangle of \code{tcm}, e.g. "preceeding".  \cr
+#'                    that subsets the lower or upper triangle of \code{tcm}, e.g. "preceding".  \cr
 #' \cr
-#'                    The \code{tcm} should represent term co-occurrences within a boolean sliding window of size 10 (internally probabilities are used)
+#'                    The \code{tcm} should represent term co-occurrences within a boolean sliding window of size \code{10} (internally probabilities are used)
 #'                    in an external reference corpus and, therefore, is an extrinsic metric in the standard use case.  \cr
 #' \cr
 #'                    This metric is similar to the UCI metric, however, with a smaller smoothing constant by default
@@ -50,26 +50,26 @@
 #'
 #'   \item "mean_npmi" \cr
 #'                    Similar (in terms of all parameter settings, etc.) to "mean_pmi" metric
-#'                    but using the normalized pmi instead, which is calucalated as \cr
+#'                    but using the normalized pmi instead, which is calculated as \cr
 #'                    \code{(log2((tcm[x,y]/n_doc_tcm) + smooth) - log2(tcm[x,x]/n_doc_tcm) - log2(tcm[y,y]/n_doc_tcm)) / -log2((tcm[x,y]/n_doc_tcm) + smooth)},  \cr
 #' \cr
 #'                    This metric may perform better than the simpler pmi metric.
 #'
 #'   \item "mean_difference" \cr
 #'                    The difference is calculated as  \cr
-#'                    \code{tcm[x,y]/twcm[x,x] - (tcm[y,y]/n_tcm_windows)},  \cr
-#'                    where x and y are term index pairs from a "preceeding" term index combination.  \cr
+#'                    \code{tcm[x,y]/tcm[x,x] - (tcm[y,y]/n_tcm_windows)},  \cr
+#'                    where x and y are term index pairs from a "preceding" term index combination.  \cr
 #'                    Given the indices c(1,2,3), combinations are \code{list(c(1,2), c(1,3), c(2,3))}.  \cr
 #' \cr
 #'                    The \code{tcm} should represent the boolean term co-occurrence (internally probabilities are used)
 #'                    in the original documents and, therefore, is an intrinsic metric in the standard use case.
 #'
 #'   \item "mean_npmi_cosim" \cr
-#'                    First, the npmi of an individual top word with each of the top words is calculated as in "mean_mpmi". \cr
-#'                    This resulta in a vector of npmi values for each top word. \cr
+#'                    First, the npmi of an individual top word with each of the top words is calculated as in "mean_npmi". \cr
+#'                    This result in a vector of npmi values for each top word. \cr
 #'                    On this basis, the cosine similarity between each pair of vectors is calculated. \cr
 #' \cr
-#'                    The \code{tcm} should represent term co-occurrences within a boolean sliding window of size 5 (internally probabilities are used)
+#'                    The \code{tcm} should represent term co-occurrences within a boolean sliding window of size \code{5} (internally probabilities are used)
 #'                    in an external reference corpus and, therefore, is an extrinsic metric in the standard use case.  \cr
 #'
 #'   \item "mean_npmi_cosim2" \cr
@@ -77,7 +77,7 @@
 #'                    On this basis, the cosine similarity between each vector and the sum of all vectors is calculated
 #'                    (instead of the similarity between each pair). \cr
 #' \cr
-#'                    The \code{tcm} should represent term co-occurrences within a boolean sliding window of size 110 (internally probabilities are used)
+#'                    The \code{tcm} should represent term co-occurrences within a boolean sliding window of size \code{110} (internally probabilities are used)
 #'                    in an external reference corpus and, therefore, is an extrinsic metric in the standard use case.  \cr
 #'}
 #'
@@ -86,7 +86,10 @@
 #'          Terms of \code{x} have to be ranked per topic starting with rank 1 in row 1.
 #' @param tcm The term co-occurrence matrix, e.g, a \code{Matrix::sparseMatrix} or \code{base::matrix},
 #'            serving as the reference to calculate coherence metrics.
-#'            Please note that the \code{tcm} is internally reduced to the top word space, i.e., all unique terms of \code{x}.
+#'            Please note that a memory efficient version of the \code{tcm} is assumed as input
+#'            with all entries in the lower triangle (excluding diagonal) set to zero (see, e.g., \code{create_tcm}).
+#'            Please also note that some efforts during any pre-processing steps might be skipped since the \code{tcm}
+#'            is internally reduced to the top word space, i.e., all unique terms of \code{x}.
 #' @param metrics Character vector specifying the metrics to be calculated. Currently the following metrics are implemented:
 #'                \code{c("mean_logratio", "mean_pmi", "mean_npmi", "mean_difference", "mean_npmi_cosim", "mean_npmi_cosim2")}.
 #'                Please refer to the details section for more information on the metrics.
@@ -158,19 +161,7 @@
 #' diag(tcm_ext) = attributes(tcm_ext)$word_count
 #'
 #' # get number of sliding windows that serve as virtual documents, i.e. n_doc_tcm argument
-#' get_n_skip_gram_windows = function(tokens, window_size) {
-#'   sum(sapply(tokens, function(x) {
-#'     #first window
-#'     n_windows = 1
-#'     #additional windows
-#'     add = length(x) - window_size
-#'     if (add > 0) {
-#'       n_windows =  n_windows + add
-#'     }
-#'     return(n_windows)
-#'   }))
-#' }
-#' n_skip_gram_windows = get_n_skip_gram_windows(tokens = tokens_ext, window_size = window_size)
+#' n_skip_gram_windows = sum(sapply(tokens, function(x) {length(x)}))
 #'
 #' @export
 
@@ -184,14 +175,14 @@ coherence = function(x, tcm, metrics = c("mean_logratio", "mean_pmi", "mean_npmi
 
 #Considering a loop approach (used by other packages) for creating term index combinations for the calculation,
 #different subsets of indices may be built and accessed (see, e.g., textmineR::CalcProbCoherence)
-#E.g. one index with all succeeding indices or with all preceeding indices.
+#E.g. one index with all succeeding indices or with all preceding indices.
 #For c(1,2,3,4) succeeding combinations would be c(1,2), (1,3), c(1,4), c(2,3), c(2,4), c(3,4)
-#and preceeding combinations would be c(2,1), c(3, 2), c(3, 1), c(4, 3), c(4, 2), c(4, 1)
+#and preceding combinations would be c(2,1), c(3, 2), c(3, 1), c(4, 3), c(4, 2), c(4, 1)
 #Using a vectorized approach, these combinations represent the lower or upper triangle of the tcm.
 #At the first sight, combinations look all the same since tcm is symmetric.
 #However, when, e.g., starting to divide by diagonal values (marginal probability),
 #it makes a difference if we take the first index as leading index and do
-#p[c(1,2)]/p[1,1] for succeeding subset or p[c(2,1)]/p[2,2] for preceeding subset.
+#p[c(1,2)]/p[1,1] for succeeding subset or p[c(2,1)]/p[2,2] for preceding subset.
 
 #The following general considerations are important for vectorized calculations:
 #diagonal of tcm represents marginal probabilities, hence, the expression that might be used in a loop approach
@@ -203,7 +194,7 @@ coherence = function(x, tcm, metrics = c("mean_logratio", "mean_pmi", "mean_npmi
 #Considering the type of index subsets, hence, which subset of tcm is taken our current understanding is that
 #tcm should be left as is after reducing to top word space and then
 #for succeeding subset: do calculations with top term indices as is and take upper.triangle
-#for preceeding subset: sort indices of top term indices decreasingly and take upper.triangle
+#for preceding subset: sort indices of top term indices decreasingly and take upper.triangle
 
 #After calculation of scores for individual term/index combinations, those are aggregated into a coherence score for one topic.
 
@@ -300,7 +291,7 @@ coherence_mean_pmi = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
 
 coherence_mean_difference = function(term_indices, tcm, smooth, n_doc_tcm, ...) {
   #given suitably ordered pairs of indices stored in two column matrix "indices" a non-vectorized calculation would be something like
-  #mapply(function(x,y)  {tcm[x,y]/twcm[x,x] - (tcm[y,y]/n_tcm_windows)}, indices[,1], indices[,2])
+  #mapply(function(x,y)  {tcm[x,y]/tcm[x,x] - (tcm[y,y]/n_tcm_windows)}, indices[,1], indices[,2])
   stopifnot(n_doc_tcm > 0L)
   res = NA
   if (length(term_indices) >= 2) {
@@ -342,6 +333,7 @@ coherence_mean_npmi_cosim = function(term_indices, tcm, smooth, n_doc_tcm, ...) 
   res = NA
   if(length(term_indices) >= 2) {
     res = tcm[term_indices, term_indices] / n_doc_tcm
+    res[lower.tri(res, diag = F)] = t(res)[lower.tri(res, diag = F)]
     res = res + smooth
     diag(res) = diag(res) - smooth
     #interim storage of denominator
@@ -365,6 +357,7 @@ coherence_mean_npmi_cosim2 = function(term_indices, tcm, smooth, n_doc_tcm, ...)
   res = NA
   if(length(term_indices) >= 2) {
     res = tcm[term_indices, term_indices] / n_doc_tcm
+    res[lower.tri(res, diag = F)] = t(res)[lower.tri(res, diag = F)]
     res = res + smooth
     diag(res) = diag(res) - smooth
     #interim storage of denominator
