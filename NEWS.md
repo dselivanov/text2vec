@@ -1,5 +1,6 @@
 # text2vec 0.5.1.*
-
+1. 2018-05-25
+    * Made `combine_vocabularies()` part of public API - see #260 for details.
 1. 2018-05-10
     * Added `coherence()` function for comprehensive coherence metrics. Thanks to Manuel Bickel ( @manuelbickel ) for conrtibution.
 1. 2018-05-02

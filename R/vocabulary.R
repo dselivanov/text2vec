@@ -89,11 +89,11 @@ create_vocabulary.character = function(it, ngram = c("ngram_min" = 1L, "ngram_ma
   it = setdiff(it, c(stopwords, ""))
   vocab_length = length(it)
 
-  res = data.frame("term" = it,
+  res = data.table("term" = it,
                    "term_count" = rep(NA_integer_, vocab_length),
-                   "doc_count" = rep(NA_integer_, vocab_length),
-                   stringsAsFactors = FALSE)
-  res = res[order(res$term_count), ]
+                   "doc_count" = rep(NA_integer_, vocab_length))
+  setkeyv(res, c("term_count", "term"))
+  setDF(res)
 
   setattr(res, "ngram", c("ngram_min" = ngram_min, "ngram_max" = ngram_max))
   setattr(res, "document_count", NA_integer_)
@@ -134,10 +134,11 @@ create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" 
   }
 
   res = cpp_get_vocab_statistics(vocab_ptr)
+  setDT(res)
   # don't allow empty stings
-  res = res[res$term != "", ]
-  res = res[order(res$term_count), ]
-
+  res = res[term != "", ]
+  setkeyv(res, c("term_count", "term"))
+  setDF(res)
   setattr(res, "ngram", c("ngram_min" = ngram_min, "ngram_max" = ngram_max))
   setattr(res, "document_count", cpp_get_document_count(vocab_ptr))
   setattr(res, "stopwords", stopwords)
@@ -161,15 +162,13 @@ create_vocabulary.list = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 
   stopifnot( all( vapply(X = it, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
   res =
     foreach(it = it,
-          .combine = combine_vocabulary,
+          .combine = combine_vocabularies,
           .inorder = FALSE,
           .multicombine = TRUE,
           ...) %dopar%
           {
             create_vocabulary(it, ngram, stopwords)
           }
-  setattr(res, "stopwords", stopwords)
-  setattr(res, "sep_ngram", sep_ngram)
   res
 }
 #------------------------------------------------------------------------------
@@ -184,19 +183,39 @@ create_vocabulary.itoken_parallel = function(it, ngram = c("ngram_min" = 1L, "ng
   stopifnot( all( vapply(X = it, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
   res =
     foreach(it = it,
-            .combine = combine_vocabulary,
+            .combine = combine_vocabularies,
             .inorder = FALSE,
             .multicombine = TRUE,
             ...) %dopar%
             {
               create_vocabulary(it, ngram, stopwords)
             }
-  setattr(res, "stopwords", stopwords)
-  setattr(res, "sep_ngram", sep_ngram)
   res
 }
 
-combine_vocabulary = function(...) {
+#'@name combine_vocabularies
+#'@title Combines multiple vocabularies into one
+#'@description Combines multiple vocabularies into one
+#'@param ... vocabulary objects created with \link{create_vocabulary}.
+#'@param combine_stopwords function to combine stopwords from input vocabularies.
+#'  By default we take a union of all stopwords.
+#'@param combine_ngram function to combine lower and upper boundary for n-grams
+#'  from input vocabularies. Usually these values should be the same, so we take this parameter
+#'  from first vocabulary.
+#'@param combine_sep_ngram function to combine stopwords from input vocabularies.
+#'  Usually these values should be the same, so we take this parameter
+#'  from first vocabulary.
+#'@return \code{text2vec_vocabulary} see details in \link{create_vocabulary}.
+#'@export
+combine_vocabularies = function(...,
+                                combine_stopwords = function(x) {
+                                  sw = unlist(lapply(x, attr, which = "stopwords"), use.names = FALSE)
+                                  unique(sw)
+                                },
+                                combine_ngram = function(x) attr(x[[1]], "ngram"),
+                                combine_sep_ngram = function(x) attr(x[[1]], "sep_ngram")) {
+
+  stopifnot(is.function(combine_stopwords) && is.function(combine_ngram) && is.function(combine_sep_ngram))
   vocab_list = lapply(list(...), setDT)
   ngram = attr(vocab_list[[1]], "ngram", exact = TRUE)
   # extract vocabulary stats data.frame and rbind them
@@ -206,20 +225,27 @@ combine_vocabulary = function(...) {
   # reduce by terms
   res = res[, .("term_count" = sum(term_count),
                 "doc_count" = sum(doc_count)),
-            by = term]
+            keyby = term]
   setcolorder(res, c("term", "term_count", "doc_count"))
 
   combined_document_count = 0
   for(v in vocab_list)
     combined_document_count = combined_document_count + attr(v, "document_count", TRUE)
 
+  setkeyv(res, c("term_count", "term"))
   setDF(res)
-  setattr(res, "ngram", ngram)
+  setattr(res, "ngram", combine_ngram(vocab_list))
   setattr(res, "document_count", combined_document_count)
-  setattr(res, "stopwords", character(0))
-  setattr(res, "sep_ngram", character(0))
+  setattr(res, "stopwords", combine_stopwords(vocab_list))
+  setattr(res, "sep_ngram", combine_sep_ngram(vocab_list))
   setattr(res, "class", c("text2vec_vocabulary", class(res)))
   res
+}
+
+combine_vocabulary = function(...) {
+  # even if it was not part of public API we raise a warning
+  .Deprecated("combine_vocabularies")
+  combine_vocabularies(...)
 }
 
 #' @name prune_vocabulary

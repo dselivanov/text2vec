@@ -7,9 +7,9 @@ get_test_iterator = function(txt, ids)
          ids = ids,
          progressbar = FALSE)
 
-train_ind = 1:1000
 N_WORKER = 4
 
+train_ind = 1:1000
 txt = movie_review[['review']][train_ind]
 ids = movie_review[['id']][train_ind]
 
@@ -30,4 +30,33 @@ test_that("Vocabulary with foreach", {
 
   expect_warning(dtm11 <- create_dtm(iterator_list, vocab_vectorizer(vocab_1)))
   expect_equal(create_dtm(iterator, vocab_vectorizer(vocab_1)), dtm11)
+})
+
+
+train_ind = 1:100
+txt = movie_review[['review']][train_ind]
+ids = movie_review[['id']][train_ind]
+
+train_ind_1 = 1:50
+txt_1 = movie_review[['review']][train_ind_1]
+ids_1 = movie_review[['id']][train_ind_1]
+
+train_ind_2 = 51:100
+txt_2 = movie_review[['review']][train_ind_2]
+ids_2 = movie_review[['id']][train_ind_2]
+
+test_that("combine vocabularies", {
+
+  iterator = get_test_iterator(txt, ids)
+  vocab = create_vocabulary(iterator, ngram = c(1, 2), stopwords = c("a", "the"), sep_ngram = "_")
+
+  iterator_1 = get_test_iterator(txt_1, ids_1)
+  vocab_1 = create_vocabulary(iterator_1, ngram = c(1, 2), stopwords = c("a", "the"), sep_ngram = "_")
+
+  iterator_2 = get_test_iterator(txt_2, ids_2)
+  vocab_2 = create_vocabulary(iterator_2, ngram = c(1, 2), stopwords = c("a", "the"), sep_ngram = "_")
+
+  vocab_combined = combine_vocabularies(vocab_1, vocab_2)
+
+  expect_equal(vocab_combined, vocab)
 })
