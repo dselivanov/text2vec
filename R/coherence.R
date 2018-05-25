@@ -142,8 +142,8 @@
 #' tokens_ext = word_tokenizer(external_reference_corpus)
 #' iterator_ext = itoken(tokens_ext, progressbar = FALSE)
 #' v_ext = create_vocabulary(iterator_ext)
-#' for reasons of efficiency vocabulary may be reduced to the terms matched in the original corpus
-#' v_ext= v_ext[v_ext$term %in% v$term,]
+#' # for reasons of efficiency vocabulary may be reduced to the terms matched in the original corpus
+#' v_ext= v_ext[v_ext$term %in% v$term, ]
 #' # external vocabulary may be pruned depending on the use case
 #' v_ext = prune_vocabulary(v_ext, term_count_min = 5, doc_proportion_max = 0.2)
 #' vectorizer_ext = vocab_vectorizer(v_ext)

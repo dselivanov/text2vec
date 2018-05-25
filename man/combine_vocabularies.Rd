@@ -4,9 +4,9 @@
 \alias{combine_vocabularies}
 \title{Combines multiple vocabularies into one}
 \usage{
-combine_vocabularies(..., combine_stopwords = function(x) {     sw =
-  unlist(lapply(x, attr, which = "stopwords"), use.names = FALSE)     unique(sw)
-  }, combine_ngram = function(x) attr(x[[1]], "ngram"),
+combine_vocabularies(..., combine_stopwords = function(x)
+  unique(unlist(lapply(x, attr, which = "stopwords"), use.names = FALSE)),
+  combine_ngram = function(x) attr(x[[1]], "ngram"),
   combine_sep_ngram = function(x) attr(x[[1]], "sep_ngram"))
 }
 \arguments{

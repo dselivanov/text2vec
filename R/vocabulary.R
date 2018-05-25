@@ -208,10 +208,7 @@ create_vocabulary.itoken_parallel = function(it, ngram = c("ngram_min" = 1L, "ng
 #'@return \code{text2vec_vocabulary} see details in \link{create_vocabulary}.
 #'@export
 combine_vocabularies = function(...,
-                                combine_stopwords = function(x) {
-                                  sw = unlist(lapply(x, attr, which = "stopwords"), use.names = FALSE)
-                                  unique(sw)
-                                },
+                                combine_stopwords = function(x) unique(unlist(lapply(x, attr, which = "stopwords"), use.names = FALSE)),
                                 combine_ngram = function(x) attr(x[[1]], "ngram"),
                                 combine_sep_ngram = function(x) attr(x[[1]], "sep_ngram")) {
 
