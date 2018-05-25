@@ -293,7 +293,7 @@ ifiles = function(file_paths, reader = readLines) {
 #' dir_files_iterator = idir(path = ".")
 #' @export
 idir = function(path, reader = readLines) {
-  fls = list.files(path, full.names = T)
+  fls = list.files(path, full.names = TRUE)
   return( ifiles(fls, reader = reader) )
 }
 

@@ -118,7 +118,7 @@
 #' data("movie_review")
 #' N = 500
 #' tokens = word_tokenizer(tolower(movie_review$review[1:N]))
-#' it = itoken(tokens, progressbar = F)
+#' it = itoken(tokens, progressbar = FALSE)
 #' v = create_vocabulary(it)
 #' v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.2)
 #' dtm = create_dtm(it, vocab_vectorizer(v))
@@ -140,7 +140,7 @@
 #' # example how to create TCM for extrinsic measures from an external corpus
 #' external_reference_corpus = tolower(movie_review$review[501:1000])
 #' tokens_ext = word_tokenizer(external_reference_corpus)
-#' iterator_ext = itoken(tokens_ext, progressbar = F)
+#' iterator_ext = itoken(tokens_ext, progressbar = FALSE)
 #' v_ext = create_vocabulary(iterator_ext)
 #' for reasons of efficiency vocabulary may be reduced to the terms matched in the original corpus
 #' v_ext= v_ext[v_ext$term %in% v$term,]
@@ -333,7 +333,7 @@ coherence_mean_npmi_cosim = function(term_indices, tcm, smooth, n_doc_tcm, ...) 
   res = NA
   if(length(term_indices) >= 2) {
     res = tcm[term_indices, term_indices] / n_doc_tcm
-    res[lower.tri(res, diag = F)] = t(res)[lower.tri(res, diag = F)]
+    res[lower.tri(res, diag = F)] = t(res)[lower.tri(res, diag = FALSE)]
     res = res + smooth
     diag(res) = diag(res) - smooth
     #interim storage of denominator
@@ -357,7 +357,7 @@ coherence_mean_npmi_cosim2 = function(term_indices, tcm, smooth, n_doc_tcm, ...)
   res = NA
   if(length(term_indices) >= 2) {
     res = tcm[term_indices, term_indices] / n_doc_tcm
-    res[lower.tri(res, diag = F)] = t(res)[lower.tri(res, diag = F)]
+    res[lower.tri(res, diag = F)] = t(res)[lower.tri(res, diag = FALSE)]
     res = res + smooth
     diag(res) = diag(res) - smooth
     #interim storage of denominator

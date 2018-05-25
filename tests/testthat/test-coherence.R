@@ -9,7 +9,7 @@ context("coherence")
 #data("movie_review")
 N = 500
 tokens = word_tokenizer(tolower(movie_review$review[1:N]))
-it = itoken(tokens, progressbar = F)
+it = itoken(tokens, progressbar = FALSE)
 v = create_vocabulary(it)
 v = prune_vocabulary(v, term_count_min = 5, doc_proportion_max = 0.2)
 dtm = create_dtm(it, vocab_vectorizer(v))

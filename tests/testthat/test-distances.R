@@ -10,9 +10,6 @@ tokens = word_tokenizer(tokens)
 it = itoken(tokens, progressbar = FALSE)
 v = create_vocabulary(it)
 v = prune_vocabulary(v, term_count_min = 3)
-# vv = vocab_vectorizer(v)
-#
-# temp = vv(iterator = it, grow_dtm = T, skip_grams_window_context = "symmetric", window_size = 0)
 
 dtm = create_dtm(it, vectorizer = vocab_vectorizer(v))
 tcm = create_tcm(it, vectorizer = vocab_vectorizer(v), skip_grams_window = 5)

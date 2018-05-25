@@ -153,8 +153,8 @@ create_tcm.itoken_parallel = function(it, vectorizer,
   res =
     foreach(batch = jobs,
             .combine = mc_triplet_sum,
-            .inorder = F,
-            .multicombine = T,
+            .inorder = FALSE,
+            .multicombine = TRUE,
             # .maxcombine = foreach::getDoParWorkers(),
             # user already made split for jobs
             # preschedule = FALSE is much more memory efficient

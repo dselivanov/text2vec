@@ -8,7 +8,7 @@ names(txt) = ids
 
 tokens = word_tokenizer(txt)
 
-it = itoken(tokens, progressbar = F, ids = ids)
+it = itoken(tokens, progressbar = FALSE, ids = ids)
 vocab = create_vocabulary(it)
 vocab = prune_vocabulary(vocab, term_count_min = 5, doc_proportion_min = 0.02)
 

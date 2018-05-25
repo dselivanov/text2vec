@@ -209,7 +209,7 @@ GlobalVectors = R6::R6Class(
       while (i <= n_iter) {
         # if shuffling is required, perform reordering at each iteration
         if ( self$shuffle )
-          iter_order = sample.int( n_nnz, replace = F )
+          iter_order = sample.int( n_nnz, replace = FALSE)
 
         cost = cpp_glove_partial_fit(private$glove_fitter, x@i, x@j, x@x, iter_order)
         if(IS_TRIANGULAR)

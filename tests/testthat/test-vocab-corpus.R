@@ -101,7 +101,7 @@ test_that("bi-gram Vocabulary Corpus construction", {
                       ngram = c('ngram_min' = 2L,
                                 'ngram_max' = 2L))
 
-  expect_equal(sum(grepl("_", vocab$term, fixed = T)), 121333L)
+  expect_equal(sum(grepl("_", vocab$term, fixed = TRUE)), 121333L)
   expect_equal(length(vocab$term), 121333L)
 
   vectorizer = vocab_vectorizer(vocab)

@@ -123,7 +123,7 @@ RelaxedWordMoversDistance = R6::R6Class(
         if (self$progressbar) setTxtProgressBar(pb, j)
         i1 = (x_csr@p[[j - 1]] + 1L):x_csr@p[[j]]
         j1 = x_csr@j[i1] + 1L
-        m_j1 = wv_internal[, j1, drop = F]
+        m_j1 = wv_internal[, j1, drop = FALSE]
         x1 = x_csr@x[i1]
 
         dist_matrix = dist_internal(m_j1, wv_internal, private$method)

@@ -6,7 +6,7 @@ txt = movie_review[['review']][train_ind]
 tokens = tolower(txt)
 tokens = word_tokenizer(tokens)
 
-it = itoken(tokens, progressbar = F)
+it = itoken(tokens, progressbar = FALSE)
 
 test_that("Unigram Hash Corpus construction", {
   h_size = 2 ^ 14;
