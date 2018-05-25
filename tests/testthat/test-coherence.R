@@ -2,8 +2,6 @@ context("coherence")
 
 # load additional packages ------------------------
 #slam needs to be loaded to format dtm as required by stm package for the test "Coherence results of text2vec vs other packages"
-install.packages("slam", repos="http://stat.ethz.ch/CRAN/")
-library(slam)
 # -------------------------------------------------
 
 # generation of test data -------------------------
@@ -30,7 +28,8 @@ test_that("coherence, general functionality", {
   coherence_res = coherence(x = top_terms ,tcm = tcm_intrinsic, n_doc_tcm = nrow(dtm))
   expect_equal(class(coherence_res), "matrix")
   expect_equal(typeof(coherence_res), "double")
-  expect_true(all(colnames(coherence_res) %in% c("mean_logratio", "mean_pmi", "mean_difference")))
+  expect_true(setequal(colnames(coherence_res),
+                       c("mean_logratio", "mean_pmi", "mean_npmi", "mean_difference", "mean_npmi_cosim", "mean_npmi_cosim2")))
   expect_equal(nrow(coherence_res), n_topics)
 
 # different smoothing constants

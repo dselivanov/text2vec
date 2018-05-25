@@ -47,7 +47,8 @@ Suggests:
     glmnet,
     parallel, 
     tokenizers, 
-    magrittr
+    magrittr, 
+    slam
 URL: http://text2vec.org
 BugReports: https://github.com/dselivanov/text2vec/issues
 VignetteBuilder: knitr
