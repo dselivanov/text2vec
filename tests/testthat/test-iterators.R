@@ -45,14 +45,14 @@ test_that("ifiles_parallel", {
 })
 
 
-test_that("idir", {
-  # have no clue why it fails on CRAN win-builder
-  skip_on_cran()
-  it = idir(path = tmp_dir)
-  it2 = itoken(it, preprocessor = tolower, tokenizer = word_tokenizer, progressbar = FALSE)
-  v = create_vocabulary(it2)
-  expect_equal(nrow(v), 7448)
-})
+# test_that("idir", {
+#   # have no clue why it fails on CRAN win-builder
+#   skip_on_cran()
+#   it = idir(path = tmp_dir)
+#   it2 = itoken(it, preprocessor = tolower, tokenizer = word_tokenizer, progressbar = FALSE)
+#   v = create_vocabulary(it2)
+#   expect_equal(nrow(v), 7448)
+# })
 
 test_that("itoken character", {
   it2 = itoken(txt_1, preprocessor = tolower, tokenizer = word_tokenizer, progressbar = FALSE)
