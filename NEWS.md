@@ -1,4 +1,6 @@
 # text2vec 0.5.1.*
+1. 2018-05-28
+    * Added `postag_lemma_tokenizer()` (wrapper around `udpipe::udpipe_annotate`). Can be used as a drop-in replacement for more simple tokenizers in text2vec. 
 1. 2018-05-25
     * Made `combine_vocabularies()` part of public API - see #260 for details.
 1. 2018-05-10
