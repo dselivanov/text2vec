@@ -50,8 +50,9 @@ mlapi::fit_transform
 
 
 if (getRversion() >= "2.15.1") {
+  # R CMD check complains because of data.table non-standard evaluation
   trick_pass_r_cmd_check =
-    c(".", "doc_count", "it", "pair", "term", "term_count", "tokens", "val", "batch", "x_remote")
+    c(".", "doc_count", "it", "pair", "term", "term_count", "tokens", "val", "batch", "x_remote", "lemma", "upos", "doc_id", "J", "token")
   utils::globalVariables(trick_pass_r_cmd_check)
 }
 

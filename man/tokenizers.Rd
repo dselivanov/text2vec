@@ -5,6 +5,7 @@
 \alias{word_tokenizer}
 \alias{char_tokenizer}
 \alias{space_tokenizer}
+\alias{postag_lemma_tokenizer}
 \title{Simple tokenization functions for string splitting}
 \usage{
 word_tokenizer(strings, ...)
@@ -12,6 +13,11 @@ word_tokenizer(strings, ...)
 char_tokenizer(strings, ...)
 
 space_tokenizer(strings, sep = " ", xptr = FALSE, ...)
+
+postag_lemma_tokenizer(strings, udpipe_model, tagger = "default",
+  tokenizer = "tokenizer", pos_keep = character(0),
+  pos_remove = c("PUNCT", "DET", "ADP", "SYM", "PART", "SCONJ", "CCONJ",
+  "AUX", "X", "INTJ"))
 }
 \arguments{
 \item{strings}{\code{character} vector}
@@ -21,6 +27,17 @@ space_tokenizer(strings, sep = " ", xptr = FALSE, ...)
 \item{sep}{\code{character}, \code{nchar(sep)} = 1 - split strings by this character.}
 
 \item{xptr}{\code{logical} tokenize at C++ level - could speed-up by 15-50\%.}
+
+\item{udpipe_model}{- udpipe model, can be loaded with \code{?udpipe::udpipe_load_model}}
+
+\item{tagger}{\code{"default"} - tagger parameter as per \code{?udpipe::udpipe_annotate} docs.}
+
+\item{tokenizer}{\code{"tokenizer"} - tokenizer parameter as per \code{?udpipe::udpipe_annotate} docs.}
+
+\item{pos_keep}{\code{character(0)} specifies which tokens to keep. \code{character(0)} means to keep all of them}
+
+\item{pos_remove}{\code{c("PUNCT", "DET", "ADP", "SYM", "PART", "SCONJ", "CCONJ", "AUX", "X", "INTJ")} - which tokens to remove.
+\code{character(0)} is equal to not remove any.}
 }
 \value{
 \code{list} of \code{character} vectors. Each element of list contains vector of tokens.

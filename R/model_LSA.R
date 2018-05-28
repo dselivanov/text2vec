@@ -50,8 +50,8 @@
 #' data("movie_review")
 #' N = 100
 #' tokens = word_tokenizer(tolower(movie_review$review[1:N]))
-#' dtm = create_dtm(itoken(tokens), hash_vectorizer())
-#' n_topics = 10
+#' dtm = create_dtm(itoken(tokens), hash_vectorizer(2**10))
+#' n_topics = 5
 #' lsa_1 = LatentSemanticAnalysis$new(n_topics)
 #' d1 = lsa_1$fit_transform(dtm)
 #' # the same, but wrapped with S3 methods
@@ -92,11 +92,11 @@ LatentSemanticAnalysis = R6::R6Class(
       rm(svd_fit)
       rownames(documents) = rownames(x)
       colnames(private$components_) = colnames(x)
-      
+
       calculate_col_var = function(x) {
         colMeans(x * x) - colMeans(x) ^ 2
       }
-      
+
       private$explained_variance = calculate_col_var(documents)
       private$explained_variance_ratio = private$explained_variance / sum(calculate_col_var(x))
 
