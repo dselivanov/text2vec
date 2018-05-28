@@ -1,9 +1,5 @@
 context("coherence")
 
-# load additional packages ------------------------
-#slam needs to be loaded to format dtm as required by stm package for the test "Coherence results of text2vec vs other packages"
-# -------------------------------------------------
-
 # generation of test data -------------------------
 #library(text2vec)
 #data("movie_review")
@@ -187,10 +183,10 @@ test_that("coherence, results of text2vec vs other packages", {
     top.words <- apply(beta, 1, order, decreasing=TRUE)[1:M,]
     wordlist <- unique(as.vector(top.words))
     mat <- mat[,wordlist]
-    mat$v <- ifelse(mat$v>1, 1,mat$v) #binarize
+    mat = sign(mat)
 
     #do the cross product to get co-occurences
-    cross <- slam::tcrossprod_simple_triplet_matrix(t(mat))
+    cross <- tcrossprod(t(mat))
 
     #create a list object with the renumbered words (so now it corresponds to the rows in the table)
     temp <- match(as.vector(top.words),wordlist)
@@ -230,7 +226,7 @@ coherence_text2vec = coherence(x = top_terms ,tcm = tcm_intrinsic, n_doc_tcm = n
                                ,metrics = c("mean_difference", "mean_logratio"))
 
 #calculate coherence scores with other packages
-logratio_stm_adapted = semCoh1beta_adapted(mat = slam::as.simple_triplet_matrix(dtm), M = n_top_terms, beta = topic_word_distribution)
+logratio_stm_adapted = semCoh1beta_adapted(mat = dtm, M = n_top_terms, beta = topic_word_distribution)
 mean_difference_textmineR = CalcProbCoherence(phi = topic_word_distribution, dtm = as.matrix(dtm), M =  n_top_terms)
 
 #compare results

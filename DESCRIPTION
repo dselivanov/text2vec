@@ -39,16 +39,14 @@ LinkingTo: Rcpp,
     digest,
     sparsepp (>= 0.2.0)
 Suggests:
+    parallel,
     doParallel,
+    glmnet,
+    udpipe (>= 0.6),
     testthat,
     covr,
     knitr,
-    rmarkdown,
-    glmnet,
-    parallel, 
-    tokenizers, 
-    magrittr, 
-    slam
+    rmarkdown
 URL: http://text2vec.org
 BugReports: https://github.com/dselivanov/text2vec/issues
 VignetteBuilder: knitr

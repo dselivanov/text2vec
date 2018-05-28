@@ -70,9 +70,7 @@ What was done here?
 Alternatively, we could create list of tokens and reuse it in further steps. Each element of the list should represent a document, and each element should be a character vector of tokens.
 
 ```{r}
-train_tokens = train$review %>% 
-  prep_fun %>% 
-  tok_fun
+train_tokens = tok_fun(prep_fun(train$review))
 it_train = itoken(train_tokens, 
                   ids = train$id,
                   # turn off progressbar because it won't look nice in rmd
@@ -129,12 +127,10 @@ We have successfully fit a model to our DTM. Now we can check the model's perfor
 Note that we use exactly the same functions from prepossessing and tokenization. Also we reuse/use the same `vectorizer` - function which maps terms to indices.
 ```{r, test_1, message=FALSE, warning=FALSE}
 # Note that most text2vec functions are pipe friendly!
-it_test = test$review %>% 
-  prep_fun %>% 
-  tok_fun %>% 
-  itoken(ids = test$id, 
-         # turn off progressbar because it won't look nice in rmd
-         progressbar = FALSE)
+it_test = tok_fun(prep_fun(test$review))
+it_test = itoken(it_test, ids = test$id, 
+                 # turn off progressbar because it won't look nice in rmd
+                 progressbar = FALSE)
 
 dtm_test = create_dtm(it_test, vectorizer)
 
@@ -189,8 +185,8 @@ t1 = Sys.time()
 vocab = create_vocabulary(it_train, ngram = c(1L, 2L))
 print(difftime(Sys.time(), t1, units = 'sec'))
 
-vocab = vocab %>% prune_vocabulary(term_count_min = 10, 
-                   doc_proportion_max = 0.5)
+vocab = prune_vocabulary(vocab, term_count_min = 10, 
+                         doc_proportion_max = 0.5)
 
 bigram_vectorizer = vocab_vectorizer(vocab)
 
@@ -288,8 +284,8 @@ tfidf = TfIdf$new()
 dtm_train_tfidf = fit_transform(dtm_train, tfidf)
 # tfidf modified by fit_transform() call!
 # apply pre-trained tf-idf transformation to test data
-dtm_test_tfidf  = create_dtm(it_test, vectorizer) %>% 
-  transform(tfidf)
+dtm_test_tfidf = create_dtm(it_test, vectorizer)
+dtm_test_tfidf = transform(dtm_test_tfidf, tfidf)
 ```
 
 Note that here we first time touched *model* object in *text2vec*. At this moment the user should remember several important things about *text2vec* models:

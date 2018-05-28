@@ -40,13 +40,12 @@ data("movie_review")
 # select 500 rows for faster running times
 movie_review = movie_review[1:500, ]
 prep_fun = function(x) {
-  x %>% 
     # make text lower case
-    str_to_lower %>% 
+    x = str_to_lower(x)
     # remove non-alphanumeric symbols
-    str_replace_all("[^[:alnum:]]", " ") %>% 
+    x = str_replace_all(x, "[^[:alnum:]]", " ")
     # collapse multiple spaces
-    str_replace_all("\\s+", " ")
+    str_replace_all(x, "\\s+", " ")
 }
 movie_review$review_clean = prep_fun(movie_review$review)
 ```
@@ -64,7 +63,8 @@ it2 = itoken(doc_set_2$review_clean, progressbar = FALSE)
 We will compare documents in a vector space. So we need to define common space and project documents to it. We will use vocabulary-based vectorization vectorization for better interpretability:
 ```{r}
 it = itoken(movie_review$review_clean, progressbar = FALSE)
-v = create_vocabulary(it) %>% prune_vocabulary(doc_proportion_max = 0.1, term_count_min = 5)
+v = create_vocabulary(it)
+v = prune_vocabulary(v, doc_proportion_max = 0.1, term_count_min = 5)
 vectorizer = vocab_vectorizer(v)
 ```
 

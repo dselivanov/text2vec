@@ -28,18 +28,17 @@ data("movie_review")
 movie_review_train = movie_review[1:700, ]
 movie_review_test = movie_review[701:1000, ]
 prep_fun = function(x) {
-  x %>% 
-    # make text lower case
-    str_to_lower %>% 
-    # remove non-alphanumeric symbols
-    str_replace_all("[^[:alpha:]]", " ") %>% 
-    # collapse multiple spaces
-    str_replace_all("\\s+", " ")
+  # make text lower case
+  x = str_to_lower(x)
+  # remove non-alphanumeric symbols
+  x = str_replace_all(x, "[^[:alpha:]]", " ")
+  # collapse multiple spaces
+  x = str_replace_all(x, "\\s+", " ")
 }
 movie_review_train$review = prep_fun(movie_review_train$review)
 it = itoken(movie_review_train$review, progressbar = FALSE)
-v = create_vocabulary(it) %>% 
-  prune_vocabulary(doc_proportion_max = 0.1, term_count_min = 5)
+v = create_vocabulary(it)
+v = prune_vocabulary(v, doc_proportion_max = 0.1, term_count_min = 5)
 vectorizer = vocab_vectorizer(v)
 dtm = create_dtm(it, vectorizer)
 ```
@@ -50,9 +49,8 @@ tfidf = TfIdf$new()
 lsa = LSA$new(n_topics = 10)
 
 # pipe friendly transformation
-doc_embeddings = dtm %>% 
-  fit_transform(tfidf) %>% 
-  fit_transform(lsa)
+doc_embeddings =  fit_transform(dtm, tfidf)
+doc_embeddings =  fit_transform(doc_embeddings, lsa)
 ```
 
 `doc_embeddings` contains matrix with document embeddings (document-topic matrix) and `lsa$components` contains topic-word matrix:
@@ -61,18 +59,16 @@ dim(doc_embeddings)
 dim(lsa$components)
 ```
 
-Usually we need not only analyze a fixed dataset, but also apply model to new data. For instance we may need to embed unseen documents into the same latent space in order to use their representation in some downstream task (for example classification). `text2vec` keep in mind such task from the very first days of development. We can elegantly **perform exactly the same transformation on the new data** with `transform()` method and "not-a-pipe" `%>%`:
+Usually we need not only analyze a fixed dataset, but also apply model to new data. For instance we may need to embed unseen documents into the same latent space in order to use their representation in some downstream task (for example classification). `text2vec` keep in mind such task from the very first days of development. We can elegantly **perform exactly the same transformation on the new data** with `transform()` method (and possibly with `%>%` pipe):
 
 ```{r}
 new_data = movie_review_test
-new_doc_embeddings = 
-  new_data$review %>% 
-  itoken(preprocessor = prep_fun, progressbar = FALSE) %>% 
-  create_dtm(vectorizer) %>% 
+it = itoken(new_data$review, preprocessor = prep_fun, progressbar = FALSE)
+new_doc_embeddings = create_dtm(it, vectorizer)
   # apply exaxtly same scaling wcich was used in train data
-  transform(tfidf) %>% 
+new_doc_embeddings = transform(new_doc_embeddings, tfidf)
   # embed into same space as was in train data
-  transform(lsa)
+new_doc_embeddings = transform(new_doc_embeddings, lsa)
 dim(new_doc_embeddings)
 ```
 
@@ -110,12 +106,12 @@ LDA in `text2vec` is implemented using iterative sampling algorithm - it improve
 Let us create topic model with `10` topics:
 
 ```{r, eval = TRUE}
-tokens = movie_review$review[1:4000] %>% 
-  tolower %>% 
-  word_tokenizer
+tokens = tolower(movie_review$review[1:4000])
+tokens = word_tokenizer(tokens)
 it = itoken(tokens, ids = movie_review$id[1:4000], progressbar = FALSE)
-v = create_vocabulary(it) %>% 
-  prune_vocabulary(term_count_min = 10, doc_proportion_max = 0.2)
+v = create_vocabulary(it)
+v = prune_vocabulary(v, term_count_min = 10, doc_proportion_max = 0.2)
+  
 vectorizer = vocab_vectorizer(v)
 dtm = create_dtm(it, vectorizer, type = "dgTMatrix")
 
@@ -153,8 +149,8 @@ lda_model$get_top_words(n = 10, topic_number = c(1L, 5L, 10L), lambda = 0.2)
 
 As with other decompositions we can apply model to new data and obtain document-topic distribution:
 ```{r}
-new_dtm = itoken(movie_review$review[4001:5000], tolower, word_tokenizer, ids = movie_review$id[4001:5000]) %>% 
-  create_dtm(vectorizer, type = "dgTMatrix")
+it = itoken(movie_review$review[4001:5000], tolower, word_tokenizer, ids = movie_review$id[4001:5000])
+new_dtm =  create_dtm(it, vectorizer, type = "dgTMatrix")
 new_doc_topic_distr = lda_model$transform(new_dtm)
 ```
 
