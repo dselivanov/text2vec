@@ -165,6 +165,7 @@ create_vocabulary.list = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 
           .combine = combine_vocabularies,
           .inorder = FALSE,
           .multicombine = TRUE,
+          .options.multicore = list(preschedule = FALSE),
           ...) %dopar%
           {
             create_vocabulary(it, ngram, stopwords)
@@ -186,6 +187,7 @@ create_vocabulary.itoken_parallel = function(it, ngram = c("ngram_min" = 1L, "ng
             .combine = combine_vocabularies,
             .inorder = FALSE,
             .multicombine = TRUE,
+            .options.multicore = list(preschedule = FALSE),
             ...) %dopar%
             {
               create_vocabulary(it, ngram, stopwords)
