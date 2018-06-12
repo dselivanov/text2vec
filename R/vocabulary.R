@@ -28,7 +28,7 @@
 #'  such that ngram_min <= n <= ngram_max will be used.
 #'@param stopwords \code{character} vector of stopwords to filter out. \bold{NOTE} that
 #' stopwords will be used "as is". This means that if preprocessing function in \link{itoken} does some
-#' text modification (like stemming), then this preprocessing need to be applied to stopwrods before passing them here.
+#' text modification (like stemming), then this preprocessing need to be applied to stopwords before passing them here.
 #' See \url{https://github.com/dselivanov/text2vec/issues/228} for example.
 #'@param sep_ngram \code{character} a character string to concatenate words in ngrams
 #'@param window_size \code{integer} (0 by default). If \code{window_size > 0} than vocabulary will
