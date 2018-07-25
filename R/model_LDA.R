@@ -67,7 +67,7 @@ TopicModel = R6::R6Class(
       })
       do.call(cbind, res)
     },
-    plot = function(lambda.step = 0.1, reorder.topics = FALSE, doc_len = private$doc_len, ...) {
+    plot = function(lambda.step = 0.1, reorder.topics = FALSE, doc_len = private$doc_len, mds.method = jsPCA_robust, ...) {
       if("LDAvis" %in% rownames(installed.packages())) {
         if (!is.null(self$components)) {
 
@@ -78,6 +78,7 @@ TopicModel = R6::R6Class(
                                     term.frequency = colSums(self$components),
                                     lambda.step = lambda.step,
                                     reorder.topics = reorder.topics,
+                                    mds.method = mds.method,
                                     ...)
           # modify global option - fixes #181
           # also we save user encoding and restore it after exit
