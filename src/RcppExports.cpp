@@ -331,13 +331,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // malloc_trim
-SEXP malloc_trim(SEXP keep);
-RcppExport SEXP _text2vec_malloc_trim(SEXP keepSEXP) {
+SEXP malloc_trim();
+RcppExport SEXP _text2vec_malloc_trim() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type keep(keepSEXP);
-    rcpp_result_gen = Rcpp::wrap(malloc_trim(keep));
+    rcpp_result_gen = Rcpp::wrap(malloc_trim());
     return rcpp_result_gen;
 END_RCPP
 }
@@ -529,7 +528,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_text2vec_rowMins", (DL_FUNC) &_text2vec_rowMins, 1},
     {"_text2vec_rowMaxs", (DL_FUNC) &_text2vec_rowMaxs, 1},
     {"_text2vec_euclidean_dist", (DL_FUNC) &_text2vec_euclidean_dist, 2},
-    {"_text2vec_malloc_trim", (DL_FUNC) &_text2vec_malloc_trim, 1},
+    {"_text2vec_malloc_trim", (DL_FUNC) &_text2vec_malloc_trim, 0},
     {"_text2vec_is_invalid_ptr", (DL_FUNC) &_text2vec_is_invalid_ptr, 1},
     {"_text2vec_cpp_fixed_char_tokenizer", (DL_FUNC) &_text2vec_cpp_fixed_char_tokenizer, 2},
     {"_text2vec_warplda_create", (DL_FUNC) &_text2vec_warplda_create, 3},

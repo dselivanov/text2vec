@@ -66,8 +66,8 @@ split_into = function(vec, n) {
 malloc_trim_finalizer = function(e) {
   res = NULL
   if(R.version$os == "linux-gnu") {
-    flog.debug("Calling malloc_trim(0L) to trigger glibc to release memory\n")
-    res = malloc_trim(0L)
+    flog.debug("Calling malloc_trim() to trigger glibc to release memory\n")
+    res = malloc_trim()
   }
   res
 }

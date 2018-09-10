@@ -109,8 +109,8 @@ euclidean_dist <- function(x, y) {
     .Call(`_text2vec_euclidean_dist`, x, y)
 }
 
-malloc_trim <- function(keep) {
-    .Call(`_text2vec_malloc_trim`, keep)
+malloc_trim <- function() {
+    .Call(`_text2vec_malloc_trim`)
 }
 
 is_invalid_ptr <- function(sexp_ptr) {

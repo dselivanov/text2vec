@@ -14,9 +14,9 @@
 // workaround for issue when glibc on ubuntu doesn't release memory
 // https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=14611
 // [[Rcpp::export]]
-SEXP malloc_trim(SEXP keep) {
+SEXP malloc_trim() {
 #ifdef __GLIBC__
-  return Rf_ScalarLogical(malloc_trim(Rf_asInteger(keep)));
+  return Rf_ScalarLogical(malloc_trim(0));
 #else
   return R_NilValue;
 #endif
