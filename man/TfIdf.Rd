@@ -10,8 +10,8 @@ TfIdf
 }
 \description{
 Creates TfIdf(Latent semantic analysis) model.
-The IDF is defined as follows: \code{idf = log(# documents in the corpus) /
-(# documents where the term appears + 1)}
+"smooth" IDF (default) is defined as follows: \code{idf = log(1 + (# documents in the corpus) / (# documents where the term appears) )}
+"non-smooth" IDF is defined as follows: \code{idf = log((# documents in the corpus) / (# documents where the term appears) )}
 }
 \details{
 Term Frequency Inverse Document Frequency
@@ -43,7 +43,7 @@ tfidf$transform(x)
  \item{x}{An input term-co-occurence matrix. Preferably in \code{dgCMatrix} format}
  \item{smooth_idf}{\code{TRUE} smooth IDF weights by adding one to document
   frequencies, as if an extra document was seen containing every term in the
-  collection exactly once. This prevents division by zero.}
+  collection exactly once.}
  \item{norm}{\code{c("l1", "l2", "none")} Type of normalization to apply to term vectors.
   \code{"l1"} by default, i.e., scale by the number of words in the document. }
  \item{sublinear_tf}{\code{FALSE} Apply sublinear term-frequency scaling, i.e.,
