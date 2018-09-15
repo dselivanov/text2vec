@@ -235,7 +235,7 @@ GlobalVectors = R6::R6Class(
 
         # check convergence
         if ( i > 1 && (private$cost_history[[i - 1]] / private$cost_history[[i]] - 1) < convergence_tol) {
-          flog.info("Success: early stopping. Improvement at iterartion %d is less then convergence_tol", i)
+          flog.info("Success: early stopping. Improvement at iteration %d is less then convergence_tol", i)
           break;
         }
         # write word vectors history
