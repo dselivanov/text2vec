@@ -106,7 +106,7 @@ str(dtm, list.len = 5)
 
 # Multicore machines
 
-For many tasks `text2vec` allows to take the advantage of multicore machines. The functions `create_dtm()`, `create_tcm()`, and `create_vocabulary()` are good example. In contrast to GloVe fitting which uses low-level thread parallelism via `RcppParallel`, these functions use standard high-level R parallelizatin  provided by the `foreach` package. They are flexible and can use diffrent parallel backends, such as `doParallel()` or `doRedis()`. But remember that such high-level parallelism might involve significant overhead.
+For many tasks `text2vec` allows to take the advantage of multicore machines. The functions `create_dtm()`, `create_tcm()`, and `create_vocabulary()` are good example. In contrast to GloVe fitting which uses low-level thread parallelism via OpenMP, these functions use standard high-level R parallelizatin  provided by the `foreach` package. They are flexible and can use diffrent parallel backends, such as `doParallel()` or `doRedis()`. But remember that such high-level parallelism might involve significant overhead.
 
 The user must do two things manually to take advantage of a multicore machine: 
 

@@ -90,7 +90,7 @@ tcm <- create_tcm(it, vectorizer, skip_grams_window = 5L)
 ```
 
 Now we have a TCM matrix and can factorize it via the GloVe algorithm.  
-text2vec uses a parallel stochastic gradient descent algorithm. By default it will use all cores on your machine, but you can specify the number of cores if you wish. For example, to use 4 threads call `RcppParallel::setThreadOptions(numThreads = 4)`. 
+text2vec uses a parallel stochastic gradient descent algorithm. By default it will use all cores on your machine, but you can specify the number of cores if you wish.
 
 Let's fit our model. (It can take several minutes to fit!)
 

@@ -11,7 +11,7 @@
 
 <meta name="author" content="Dmitriy Selivanov" />
 
-<meta name="date" content="2017-08-08" />
+<meta name="date" content="2018-12-21" />
 
 <title>Topic modeling</title>
 
@@ -367,7 +367,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Topic modeling</h1>
 <h4 class="author"><em>Dmitriy Selivanov</em></h4>
-<h4 class="date"><em>2017-08-08</em></h4>
+<h4 class="date"><em>2018-12-21</em></h4>
 
 </div>
 
@@ -376,7 +376,7 @@ div.tocify {
 <div id="latent-semantic-analysis" class="section level1">
 <h1>Latent Semantic Analysis</h1>
 <p>Latent Semantic Analysis is the oldest among topic modeling techniques. It decomposes Document-Term matrix into a product of 2 <strong>low rank</strong> matrices <span class="math inline">\(X \approx D \times T\)</span>. Goal of LSA is to receive approximation with a <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition#Low-rank_matrix_approximation">respect to minimize Frobenious norm</a>: <span class="math inline">\(error = \left\lVert X - D \times T \right\rVert _F\)</span>. Turns out this can be done with <strong>truncated SVD</strong> decomposition.</p>
-<p><code>text2vec</code> borrows SVD from very efficient <a href="https://cran.r-project.org/package=irlba">irlba</a> package and adds convenient interface with an ability to fit model and apply it to new data.</p>
+<p><code>text2vec</code> borrows SVD from <a href="https://github.com/dselivanov/rsparse">rsparse</a> package and adds convenient interface with an ability to fit model and apply it to new data.</p>
 <div id="example" class="section level2">
 <h2>Example</h2>
 <p>As usual we will use built-in <code>text2vec::moview_review</code> dataset. Let’s clean it a bit and create DTM:</p>
@@ -384,46 +384,59 @@ div.tocify {
 <span class="kw">library</span>(text2vec)
 <span class="kw">data</span>(<span class="st">&quot;movie_review&quot;</span>)
 <span class="co"># select 1000 rows for faster running times</span>
-movie_review_train =<span class="st"> </span>movie_review[<span class="dv">1</span>:<span class="dv">700</span>, ]
-movie_review_test =<span class="st"> </span>movie_review[<span class="dv">701</span>:<span class="dv">1000</span>, ]
-prep_fun =<span class="st"> </span>function(x) {
-  x %&gt;%<span class="st"> </span>
-<span class="st">    </span><span class="co"># make text lower case</span>
-<span class="st">    </span>str_to_lower %&gt;%<span class="st"> </span>
-<span class="st">    </span><span class="co"># remove non-alphanumeric symbols</span>
-<span class="st">    </span><span class="kw">str_replace_all</span>(<span class="st">&quot;[^[:alpha:]]&quot;</span>, <span class="st">&quot; &quot;</span>) %&gt;%<span class="st"> </span>
-<span class="st">    </span><span class="co"># collapse multiple spaces</span>
-<span class="st">    </span><span class="kw">str_replace_all</span>(<span class="st">&quot;</span><span class="ch">\\</span><span class="st">s+&quot;</span>, <span class="st">&quot; &quot;</span>)
+movie_review_train =<span class="st"> </span>movie_review[<span class="dv">1</span><span class="op">:</span><span class="dv">700</span>, ]
+movie_review_test =<span class="st"> </span>movie_review[<span class="dv">701</span><span class="op">:</span><span class="dv">1000</span>, ]
+prep_fun =<span class="st"> </span><span class="cf">function</span>(x) {
+  <span class="co"># make text lower case</span>
+  x =<span class="st"> </span><span class="kw">str_to_lower</span>(x)
+  <span class="co"># remove non-alphanumeric symbols</span>
+  x =<span class="st"> </span><span class="kw">str_replace_all</span>(x, <span class="st">&quot;[^[:alpha:]]&quot;</span>, <span class="st">&quot; &quot;</span>)
+  <span class="co"># collapse multiple spaces</span>
+  x =<span class="st"> </span><span class="kw">str_replace_all</span>(x, <span class="st">&quot;</span><span class="ch">\\</span><span class="st">s+&quot;</span>, <span class="st">&quot; &quot;</span>)
 }
-movie_review_train$review =<span class="st"> </span><span class="kw">prep_fun</span>(movie_review_train$review)
-it =<span class="st"> </span><span class="kw">itoken</span>(movie_review_train$review, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
-v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">prune_vocabulary</span>(<span class="dt">doc_proportion_max =</span> <span class="fl">0.1</span>, <span class="dt">term_count_min =</span> <span class="dv">5</span>)
+movie_review_train<span class="op">$</span>review =<span class="st"> </span><span class="kw">prep_fun</span>(movie_review_train<span class="op">$</span>review)
+it =<span class="st"> </span><span class="kw">itoken</span>(movie_review_train<span class="op">$</span>review, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it)
+v =<span class="st"> </span><span class="kw">prune_vocabulary</span>(v, <span class="dt">doc_proportion_max =</span> <span class="fl">0.1</span>, <span class="dt">term_count_min =</span> <span class="dv">5</span>)
 vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(v)
 dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer)</code></pre></div>
 <p>Now we will perform tf-idf scaling and fit LSA model:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tfidf =<span class="st"> </span>TfIdf$<span class="kw">new</span>()
-lsa =<span class="st"> </span>LSA$<span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">10</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tfidf =<span class="st"> </span>TfIdf<span class="op">$</span><span class="kw">new</span>()
+lsa =<span class="st"> </span>LSA<span class="op">$</span><span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">10</span>)
 
 <span class="co"># pipe friendly transformation</span>
-doc_embeddings =<span class="st"> </span>dtm %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">fit_transform</span>(tfidf) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">fit_transform</span>(lsa)</code></pre></div>
+doc_embeddings =<span class="st">  </span><span class="kw">fit_transform</span>(dtm, tfidf)
+doc_embeddings =<span class="st">  </span><span class="kw">fit_transform</span>(doc_embeddings, lsa)</code></pre></div>
+<pre><code>## INFO [2018-12-21 20:44:49] soft_als: iter 001, frobenious norm change 1.986
+## INFO [2018-12-21 20:44:49] soft_als: iter 002, frobenious norm change 1.658
+## INFO [2018-12-21 20:44:49] soft_als: iter 003, frobenious norm change 0.115
+## INFO [2018-12-21 20:44:49] soft_als: iter 004, frobenious norm change 0.042
+## INFO [2018-12-21 20:44:49] soft_als: iter 005, frobenious norm change 0.022
+## INFO [2018-12-21 20:44:49] soft_als: iter 006, frobenious norm change 0.013
+## INFO [2018-12-21 20:44:49] soft_als: iter 007, frobenious norm change 0.008
+## INFO [2018-12-21 20:44:49] soft_als: iter 008, frobenious norm change 0.005
+## INFO [2018-12-21 20:44:49] soft_als: iter 009, frobenious norm change 0.004
+## INFO [2018-12-21 20:44:49] soft_als: iter 010, frobenious norm change 0.003
+## INFO [2018-12-21 20:44:49] soft_als: iter 011, frobenious norm change 0.002
+## INFO [2018-12-21 20:44:49] soft_als: iter 012, frobenious norm change 0.001
+## INFO [2018-12-21 20:44:49] soft_als: iter 013, frobenious norm change 0.001
+## INFO [2018-12-21 20:44:49] soft_als: iter 014, frobenious norm change 0.001
+## INFO [2018-12-21 20:44:49] soft_impute: converged with tol 0.001000 after 14 iter
+## INFO [2018-12-21 20:44:49] running final svd
+## INFO [2018-12-21 20:44:49] final rank = 10</code></pre>
 <p><code>doc_embeddings</code> contains matrix with document embeddings (document-topic matrix) and <code>lsa$components</code> contains topic-word matrix:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(doc_embeddings)</code></pre></div>
 <pre><code>## [1] 700  10</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(lsa$components)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(lsa<span class="op">$</span>components)</code></pre></div>
 <pre><code>## [1]   10 3029</code></pre>
-<p>Usually we need not only analyze a fixed dataset, but also apply model to new data. For instance we may need to embed unseen documents into the same latent space in order to use their representation in some downstream task (for example classification). <code>text2vec</code> keep in mind such task from the very first days of development. We can elegantly <strong>perform exactly the same transformation on the new data</strong> with <code>transform()</code> method and “not-a-pipe” <code>%&gt;%</code>:</p>
+<p>Usually we need not only analyze a fixed dataset, but also apply model to new data. For instance we may need to embed unseen documents into the same latent space in order to use their representation in some downstream task (for example classification). <code>text2vec</code> keep in mind such task from the very first days of development. We can elegantly <strong>perform exactly the same transformation on the new data</strong> with <code>transform()</code> method (and possibly with <code>%&gt;%</code> pipe):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">new_data =<span class="st"> </span>movie_review_test
-new_doc_embeddings =<span class="st"> </span>
-<span class="st">  </span>new_data$review %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">itoken</span>(<span class="dt">preprocessor =</span> prep_fun, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">create_dtm</span>(vectorizer) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="co"># apply exaxtly same scaling wcich was used in train data</span>
-<span class="st">  </span><span class="kw">transform</span>(tfidf) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="co"># embed into same space as was in train data</span>
-<span class="st">  </span><span class="kw">transform</span>(lsa)
+it =<span class="st"> </span><span class="kw">itoken</span>(new_data<span class="op">$</span>review, <span class="dt">preprocessor =</span> prep_fun, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+new_doc_embeddings =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer)
+  <span class="co"># apply exaxtly same scaling wcich was used in train data</span>
+new_doc_embeddings =<span class="st"> </span><span class="kw">transform</span>(new_doc_embeddings, tfidf)
+  <span class="co"># embed into same space as was in train data</span>
+new_doc_embeddings =<span class="st"> </span><span class="kw">transform</span>(new_doc_embeddings, lsa)
 <span class="kw">dim</span>(new_doc_embeddings)</code></pre></div>
 <pre><code>## [1] 300  10</code></pre>
 </div>
@@ -459,43 +472,33 @@ new_doc_embeddings =<span class="st"> </span>
 <div id="example-1" class="section level3">
 <h3>Example</h3>
 <p>Let us create topic model with <code>10</code> topics:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tokens =<span class="st"> </span>movie_review$review[<span class="dv">1</span>:<span class="dv">4000</span>] %&gt;%<span class="st"> </span>
-<span class="st">  </span>tolower %&gt;%<span class="st"> </span>
-<span class="st">  </span>word_tokenizer
-it =<span class="st"> </span><span class="kw">itoken</span>(tokens, <span class="dt">ids =</span> movie_review$id[<span class="dv">1</span>:<span class="dv">4000</span>], <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
-v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">prune_vocabulary</span>(<span class="dt">term_count_min =</span> <span class="dv">10</span>, <span class="dt">doc_proportion_max =</span> <span class="fl">0.2</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tokens =<span class="st"> </span><span class="kw">tolower</span>(movie_review<span class="op">$</span>review[<span class="dv">1</span><span class="op">:</span><span class="dv">4000</span>])
+tokens =<span class="st"> </span><span class="kw">word_tokenizer</span>(tokens)
+it =<span class="st"> </span><span class="kw">itoken</span>(tokens, <span class="dt">ids =</span> movie_review<span class="op">$</span>id[<span class="dv">1</span><span class="op">:</span><span class="dv">4000</span>], <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it)
+v =<span class="st"> </span><span class="kw">prune_vocabulary</span>(v, <span class="dt">term_count_min =</span> <span class="dv">10</span>, <span class="dt">doc_proportion_max =</span> <span class="fl">0.2</span>)
+  
 vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(v)
 dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer, <span class="dt">type =</span> <span class="st">&quot;dgTMatrix&quot;</span>)
 
-lda_model =<span class="st"> </span>LDA$<span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">10</span>, <span class="dt">doc_topic_prior =</span> <span class="fl">0.1</span>, <span class="dt">topic_word_prior =</span> <span class="fl">0.01</span>)
+lda_model =<span class="st"> </span>LDA<span class="op">$</span><span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">10</span>, <span class="dt">doc_topic_prior =</span> <span class="fl">0.1</span>, <span class="dt">topic_word_prior =</span> <span class="fl">0.01</span>)
 doc_topic_distr =<span class="st"> </span>
-<span class="st">  </span>lda_model$<span class="kw">fit_transform</span>(<span class="dt">x =</span> dtm, <span class="dt">n_iter =</span> <span class="dv">1000</span>, 
+<span class="st">  </span>lda_model<span class="op">$</span><span class="kw">fit_transform</span>(<span class="dt">x =</span> dtm, <span class="dt">n_iter =</span> <span class="dv">1000</span>, 
                           <span class="dt">convergence_tol =</span> <span class="fl">0.001</span>, <span class="dt">n_check_convergence =</span> <span class="dv">25</span>, 
                           <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)</code></pre></div>
-<pre><code>## INFO [2017-07-12 09:28:41] iter 25 loglikelihood = -2739471.624
-## INFO [2017-07-12 09:28:42] iter 50 loglikelihood = -2689784.369
-## INFO [2017-07-12 09:28:43] iter 75 loglikelihood = -2665906.863
-## INFO [2017-07-12 09:28:44] iter 100 loglikelihood = -2650951.848
-## INFO [2017-07-12 09:28:45] iter 125 loglikelihood = -2640540.549
-## INFO [2017-07-12 09:28:46] iter 150 loglikelihood = -2631921.113
-## INFO [2017-07-12 09:28:47] iter 175 loglikelihood = -2625292.752
-## INFO [2017-07-12 09:28:48] iter 200 loglikelihood = -2622313.280
-## INFO [2017-07-12 09:28:49] iter 225 loglikelihood = -2617041.128
-## INFO [2017-07-12 09:28:50] iter 250 loglikelihood = -2614400.745
-## INFO [2017-07-12 09:28:51] iter 275 loglikelihood = -2612813.374
-## INFO [2017-07-12 09:28:51] early stopping at 275 iteration</code></pre>
+<pre><code>## INFO [2018-12-21 20:45:01] early stopping at 275 iteration
+## INFO [2018-12-21 20:45:03] early stopping at 50 iteration</code></pre>
 <p>Now <code>doc_topic_distr</code> matrix represents distribution of topics in documents. Each row is document and values are proportions of corresponding topics.</p>
 <p>For example topic distribution for first document:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">barplot</span>(doc_topic_distr[<span class="dv">1</span>, ], <span class="dt">xlab =</span> <span class="st">&quot;topic&quot;</span>, 
         <span class="dt">ylab =</span> <span class="st">&quot;proportion&quot;</span>, <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), 
-        <span class="dt">names.arg =</span> <span class="dv">1</span>:<span class="kw">ncol</span>(doc_topic_distr))</code></pre></div>
+        <span class="dt">names.arg =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(doc_topic_distr))</code></pre></div>
 <p><img src="topic_modeling_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
 <div id="describing-topics---top-words" class="section level2">
 <h2>Describing topics - top words</h2>
 <p>Also we can get top words for each topic. They can be sorted by probability of the chance to observe word in a given topic (<code>lambda = 1</code>):</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lda_model$<span class="kw">get_top_words</span>(<span class="dt">n =</span> <span class="dv">10</span>, <span class="dt">topic_number =</span> <span class="kw">c</span>(1L, 5L, 10L), <span class="dt">lambda =</span> <span class="dv">1</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lda_model<span class="op">$</span><span class="kw">get_top_words</span>(<span class="dt">n =</span> <span class="dv">10</span>, <span class="dt">topic_number =</span> <span class="kw">c</span>(1L, 5L, 10L), <span class="dt">lambda =</span> <span class="dv">1</span>)</code></pre></div>
 <pre><code>##       [,1]        [,2]     [,3]      
 ##  [1,] &quot;know&quot;      &quot;war&quot;    &quot;director&quot;
 ##  [2,] &quot;horror&quot;    &quot;before&quot; &quot;films&quot;   
@@ -508,7 +511,7 @@ doc_topic_distr =<span class="st"> </span>
 ##  [9,] &quot;scene&quot;     &quot;these&quot;  &quot;may&quot;     
 ## [10,] &quot;ever&quot;      &quot;part&quot;   &quot;enough&quot;</code></pre>
 <p>Also top-words could be sorted by “relevance” which also takes into account frequency of word in the corpus (<code>0 &lt; lambda &lt; 1</code>). From my experience in most cases setting <code>0.2 &lt; lambda &lt; 0.4</code> works best. See <a href="http://nlp.stanford.edu/events/illvi2014/papers/sievert-illvi2014.pdf">LDAvis: A method for visualizing and interpreting topics</a> paper for details.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lda_model$<span class="kw">get_top_words</span>(<span class="dt">n =</span> <span class="dv">10</span>, <span class="dt">topic_number =</span> <span class="kw">c</span>(1L, 5L, 10L), <span class="dt">lambda =</span> <span class="fl">0.2</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lda_model<span class="op">$</span><span class="kw">get_top_words</span>(<span class="dt">n =</span> <span class="dv">10</span>, <span class="dt">topic_number =</span> <span class="kw">c</span>(1L, 5L, 10L), <span class="dt">lambda =</span> <span class="fl">0.2</span>)</code></pre></div>
 <pre><code>##       [,1]      [,2]         [,3]        
 ##  [1,] &quot;zombie&quot;  &quot;war&quot;        &quot;atmosphere&quot;
 ##  [2,] &quot;gore&quot;    &quot;match&quot;      &quot;thriller&quot;  
@@ -524,15 +527,10 @@ doc_topic_distr =<span class="st"> </span>
 <div id="apply-learned-model-to-new-data" class="section level2">
 <h2>Apply learned model to new data</h2>
 <p>As with other decompositions we can apply model to new data and obtain document-topic distribution:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">new_dtm =<span class="st"> </span><span class="kw">itoken</span>(movie_review$review[<span class="dv">4001</span>:<span class="dv">5000</span>], tolower, word_tokenizer, <span class="dt">ids =</span> movie_review$id[<span class="dv">4001</span>:<span class="dv">5000</span>]) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">create_dtm</span>(vectorizer, <span class="dt">type =</span> <span class="st">&quot;dgTMatrix&quot;</span>)
-new_doc_topic_distr =<span class="st"> </span>lda_model$<span class="kw">transform</span>(new_dtm)</code></pre></div>
-<pre><code>## INFO [2017-07-20 15:50:25] iter 5 loglikelihood = -509731.596
-## INFO [2017-07-20 15:50:25] iter 10 loglikelihood = -504774.598
-## INFO [2017-07-20 15:50:25] iter 15 loglikelihood = -504082.274
-## INFO [2017-07-20 15:50:25] iter 20 loglikelihood = -503266.085
-## INFO [2017-07-20 15:50:25] iter 25 loglikelihood = -503086.430
-## INFO [2017-07-20 15:50:25] early stopping at 25 iteration</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">it =<span class="st"> </span><span class="kw">itoken</span>(movie_review<span class="op">$</span>review[<span class="dv">4001</span><span class="op">:</span><span class="dv">5000</span>], tolower, word_tokenizer, <span class="dt">ids =</span> movie_review<span class="op">$</span>id[<span class="dv">4001</span><span class="op">:</span><span class="dv">5000</span>])
+new_dtm =<span class="st">  </span><span class="kw">create_dtm</span>(it, vectorizer, <span class="dt">type =</span> <span class="st">&quot;dgTMatrix&quot;</span>)
+new_doc_topic_distr =<span class="st"> </span>lda_model<span class="op">$</span><span class="kw">transform</span>(new_dtm)</code></pre></div>
+<pre><code>## INFO [2018-12-21 20:45:06] early stopping at 40 iteration</code></pre>
 </div>
 <div id="cross-validation-and-hyper-parameter-tuning" class="section level2">
 <h2>Cross-validation and hyper-parameter tuning</h2>
@@ -540,7 +538,7 @@ new_doc_topic_distr =<span class="st"> </span>lda_model$<span class="kw">transfo
 <div id="perplexity-example" class="section level3">
 <h3>Perplexity example</h3>
 <p>Remember that we’ve fitted model on first 4000 reviews (learned <code>topic_word_distribution</code> which will be fixed during <code>transform</code> phase) and predicted last 1000. We can calculate perplexity on these 1000 docs:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">perplexity</span>(new_dtm, <span class="dt">topic_word_distribution =</span> lda_model$topic_word_distribution, <span class="dt">doc_topic_distribution =</span> new_doc_topic_distr)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">perplexity</span>(new_dtm, <span class="dt">topic_word_distribution =</span> lda_model<span class="op">$</span>topic_word_distribution, <span class="dt">doc_topic_distribution =</span> new_doc_topic_distr)</code></pre></div>
 <pre><code>## [1] 2552.401</code></pre>
 <p>The lower perplexity the better. Goal could to find set of hyper-parameters (<code>n_topics</code>, <code>doc_topic_prior</code>, <code>topic_word_prior</code>) which minimize per-word perplexity on hold-out dataset. However it is worth to keep in mind that perplexity is not always correlated with people judgement about topics interpretability and coherence. I personally usually use <strong>LDAvis</strong> for parameter tuning - see next section.</p>
 </div>
@@ -548,7 +546,7 @@ new_doc_topic_distr =<span class="st"> </span>lda_model$<span class="kw">transfo
 <div id="visualization" class="section level2">
 <h2>Visualization</h2>
 <p>Finally <code>text2vec</code> wraps <code>LDAvis</code> package in order to provide interactive tool for topic exploration. Usually it worth to play with it in order to find meaningfull model hyperparameters.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lda_model$<span class="kw">plot</span>()</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lda_model<span class="op">$</span><span class="kw">plot</span>()</code></pre></div>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>

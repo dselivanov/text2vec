@@ -17,5 +17,3 @@
 * checking installed package size ... NOTE. 
     - Data was not touched since previous release. Vignettes were improved, 
     but have same size as in previous release.
-* checking for GNU extensions in Makefiles ... NOTE
-    - GNU make needed for RcppParallel

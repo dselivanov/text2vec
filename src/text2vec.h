@@ -27,7 +27,6 @@
 
 #include <unordered_map>
 #include <unordered_set>
-#include <RcppParallel.h>
 
 // spp has calls to 'exit' on failure, which upsets R CMD check.
 // We won't bump into them during normal test execution so just override

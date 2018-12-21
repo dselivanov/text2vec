@@ -11,7 +11,7 @@
 
 <meta name="author" content="Dmitriy Selivanov" />
 
-<meta name="date" content="2017-08-08" />
+<meta name="date" content="2018-12-21" />
 
 <title>Collocations</title>
 
@@ -367,7 +367,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Collocations</h1>
 <h4 class="author"><em>Dmitriy Selivanov</em></h4>
-<h4 class="date"><em>2017-08-08</em></h4>
+<h4 class="date"><em>2018-12-21</em></h4>
 
 </div>
 
@@ -375,15 +375,15 @@ div.tocify {
 <p>It this tutorial I will show how to extract phrases from text and how they can be used in downstream tasks. I will use <code>text8</code> dataset which is available for download <a href="http://mattmahoney.net/dc/text8.zip">here</a>. It consists of 100mb of texts from english wikipedia.</p>
 <p>Fitting model is as easy as:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(text2vec)
-model =<span class="st"> </span>Collocations$<span class="kw">new</span>(<span class="dt">collocation_count_min =</span> <span class="dv">50</span>)
+model =<span class="st"> </span>Collocations<span class="op">$</span><span class="kw">new</span>(<span class="dt">collocation_count_min =</span> <span class="dv">50</span>)
 txt =<span class="st"> </span><span class="kw">readLines</span>(<span class="st">&quot;~/text8&quot;</span>)
 it =<span class="st"> </span><span class="kw">itoken</span>(txt)
-model$<span class="kw">fit</span>(it, <span class="dt">n_iter =</span> <span class="dv">3</span>)</code></pre></div>
+model<span class="op">$</span><span class="kw">fit</span>(it, <span class="dt">n_iter =</span> <span class="dv">3</span>)</code></pre></div>
 <pre><code>## INFO [2017-07-07 19:02:08] iteration 1 - found 5300 collocations
 ## INFO [2017-07-07 19:02:24] iteration 2 - found 6778 collocations
 ## INFO [2017-07-07 19:02:37] iteration 3 - found 6802 collocations</code></pre>
 <p>Now let us check what we got. Learned collocations are kept in <code>collocation_stat</code> field of the model:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model$collocation_stat</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model<span class="op">$</span>collocation_stat</code></pre></div>
 <pre><code>##                  prefix               suffix   n_i    n_j n_ij       pmi
 ##    1:     politics_main     article_politics    52     50   50 18.143106
 ##    2:            krag_j              rgensen    54     50   50 18.088658
@@ -414,7 +414,7 @@ model$<span class="kw">fit</span>(it, <span class="dt">n_iter =</span> <span cla
 <div id="details" class="section level2">
 <h2>Details</h2>
 <p>There are several important parameters in the model. Let’s take a closer look into constructor:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">colloc =<span class="st"> </span>Collocations$<span class="kw">new</span>(<span class="dt">vocabulary =</span> <span class="ot">NULL</span>, <span class="dt">collocation_count_min =</span> <span class="dv">50</span>, <span class="dt">pmi_min =</span> <span class="dv">5</span>, <span class="dt">gensim_min =</span> <span class="dv">0</span>, <span class="dt">lfmd_min =</span> -<span class="ot">Inf</span>, <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">colloc =<span class="st"> </span>Collocations<span class="op">$</span><span class="kw">new</span>(<span class="dt">vocabulary =</span> <span class="ot">NULL</span>, <span class="dt">collocation_count_min =</span> <span class="dv">50</span>, <span class="dt">pmi_min =</span> <span class="dv">5</span>, <span class="dt">gensim_min =</span> <span class="dv">0</span>, <span class="dt">lfmd_min =</span> <span class="op">-</span><span class="ot">Inf</span>, <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>)</code></pre></div>
 <ul>
 <li><code>vocabulary</code>(optional parameter) - instance of <code>text2vec</code> vocabulary. If provided, the model will search for collocations consisted of words from vocabulary. If not provided, first the model will make one pass over data and create it.</li>
 <li><code>collocation_count_min</code> - model will only consider set of words as phrase if it will observe it at least <code>collocation_count_min</code> time. For example if collocation <em>“new york”</em> was observed less than 50 times, model will treat <em>“new”</em> and <em>“york”</em> as separate words.</li>
@@ -435,8 +435,8 @@ model$<span class="kw">fit</span>(it, <span class="dt">n_iter =</span> <span cla
         <span class="st">&quot;san francisco is very expensive city&quot;</span>, 
         <span class="st">&quot;who claimed that model works?&quot;</span>)
 it =<span class="st"> </span><span class="kw">itoken</span>(test_txt, <span class="dt">n_chunks =</span> <span class="dv">1</span>, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
-it_phrases =<span class="st"> </span>model$<span class="kw">transform</span>(it)
-it_phrases$<span class="kw">nextElem</span>()</code></pre></div>
+it_phrases =<span class="st"> </span>model<span class="op">$</span><span class="kw">transform</span>(it)
+it_phrases<span class="op">$</span><span class="kw">nextElem</span>()</code></pre></div>
 <pre><code>## $tokens
 ## $tokens[[1]]
 ## [1] &quot;i_am&quot;          &quot;living&quot;        &quot;in&quot;            &quot;a&quot;            
@@ -458,11 +458,11 @@ it_phrases$<span class="kw">nextElem</span>()</code></pre></div>
 ## [1] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot;</code></pre>
 <p>As we can see results are pretty impressive but not ideal - we probably do not want to get <em>“claimed_that”</em> as collocation. One solution is to provide <code>vocabulary</code> without stopwords to the model constructor. But this won’t solve most of the edge cases. Another solution is to keep tracking what model learned after each pass over the data. We can fit model incrementally with <code>partial_fit()</code> method and prune bad phrases after each iteration.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">it =<span class="st"> </span><span class="kw">itoken</span>(txt)
-v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it, <span class="dt">stopwords =</span> tokenizers::<span class="kw">stopwords</span>(<span class="st">&quot;en&quot;</span>))
+v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it, <span class="dt">stopwords =</span> tokenizers<span class="op">::</span><span class="kw">stopwords</span>(<span class="st">&quot;en&quot;</span>))
 v =<span class="st"> </span><span class="kw">prune_vocabulary</span>(v, <span class="dt">term_count_min =</span> <span class="dv">50</span>)
-model2 =<span class="st"> </span>Collocations$<span class="kw">new</span>(<span class="dt">vocabulary =</span> v, <span class="dt">collocation_count_min =</span> <span class="dv">50</span>, <span class="dt">pmi_min =</span> <span class="dv">0</span>)
-model2$<span class="kw">partial_fit</span>(it)
-model2$collocation_stat</code></pre></div>
+model2 =<span class="st"> </span>Collocations<span class="op">$</span><span class="kw">new</span>(<span class="dt">vocabulary =</span> v, <span class="dt">collocation_count_min =</span> <span class="dv">50</span>, <span class="dt">pmi_min =</span> <span class="dv">0</span>)
+model2<span class="op">$</span><span class="kw">partial_fit</span>(it)
+model2<span class="op">$</span>collocation_stat</code></pre></div>
 <pre><code>##          prefix  suffix    n_i    n_j n_ij          pmi      lfmd
 ##     1:  merleau   ponty     63     65   62 1.736649e+01 -17.54900
 ##     2:     limp  bizkit     66     57   54 1.728955e+01 -18.02457
@@ -488,7 +488,7 @@ model2$collocation_stat</code></pre></div>
 ## 10766: 1.073880e-01    10766     10742       10303
 ## 10767: 5.762957e-01    10767      9528        9295</code></pre>
 <p>Since we set restriction to PMI scrore to 0 we got a lot of garbage collocations like <em>“when_its”</em>. Fortunately we can manually prune them and continue training. Let’s filter by some thresholds:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">temp =<span class="st"> </span>model2$collocation_stat[pmi &gt;=<span class="st"> </span><span class="dv">8</span> &amp;<span class="st"> </span>gensim &gt;=<span class="st"> </span><span class="dv">10</span> &amp;<span class="st"> </span>lfmd &gt;=<span class="st"> </span>-<span class="dv">25</span>, ]
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">temp =<span class="st"> </span>model2<span class="op">$</span>collocation_stat[pmi <span class="op">&gt;=</span><span class="st"> </span><span class="dv">8</span> <span class="op">&amp;</span><span class="st"> </span>gensim <span class="op">&gt;=</span><span class="st"> </span><span class="dv">10</span> <span class="op">&amp;</span><span class="st"> </span>lfmd <span class="op">&gt;=</span><span class="st"> </span><span class="op">-</span><span class="dv">25</span>, ]
 temp</code></pre></div>
 <pre><code>##           prefix   suffix  n_i   n_j n_ij       pmi      lfmd     gensim
 ##    1:    merleau    ponty   63    65   62 17.366494 -17.54900 32705.8227
@@ -515,13 +515,13 @@ temp</code></pre></div>
 ## 1340:     1907      1111        1279
 ## 1341:     1916      1201        1295</code></pre>
 <p>If it looks reasonable we can prune learned collocations:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model2$<span class="kw">prune</span>(<span class="dt">pmi_min =</span> <span class="dv">8</span>, <span class="dt">gensim_min =</span> <span class="dv">10</span>, <span class="dt">lfmd_min =</span> -<span class="dv">25</span>)
-<span class="kw">identical</span>(temp, model2$collocation_stat)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model2<span class="op">$</span><span class="kw">prune</span>(<span class="dt">pmi_min =</span> <span class="dv">8</span>, <span class="dt">gensim_min =</span> <span class="dv">10</span>, <span class="dt">lfmd_min =</span> <span class="op">-</span><span class="dv">25</span>)
+<span class="kw">identical</span>(temp, model2<span class="op">$</span>collocation_stat)</code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 <p>And continue training:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model2$<span class="kw">partial_fit</span>(it)
-model2$<span class="kw">prune</span>(<span class="dt">pmi_min =</span> <span class="dv">8</span>, <span class="dt">gensim_min =</span> <span class="dv">10</span>, <span class="dt">lfmd_min =</span> -<span class="dv">25</span>)
-model2$collocation_stat</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model2<span class="op">$</span><span class="kw">partial_fit</span>(it)
+model2<span class="op">$</span><span class="kw">prune</span>(<span class="dt">pmi_min =</span> <span class="dv">8</span>, <span class="dt">gensim_min =</span> <span class="dv">10</span>, <span class="dt">lfmd_min =</span> <span class="op">-</span><span class="dv">25</span>)
+model2<span class="op">$</span>collocation_stat</code></pre></div>
 <pre><code>##               prefix   suffix  n_i   n_j n_ij       pmi      lfmd
 ##    1:        merleau    ponty   63    65   62 17.366494 -17.54900
 ##    2:       ifad_ifc    ifrcs   64    64   60 17.291136 -17.66357
@@ -554,10 +554,10 @@ model2$collocation_stat</code></pre></div>
 <p>It is pretty interesting that we can extract collocation like <em>“george_washington”</em> or <em>“new_york_city”</em>, but it is even more exciting to use them in downstream tasks. Good examples could be <strong>topic models</strong> (phrases improves interpretability a lot!) and <strong>word embeddings</strong>.</p>
 <p>How to incorporate them into the model? This is simple - create vocabulary which contains words and phrases and then document-term matrix or term-co-occurence matrix.</p>
 <p>In order to do that we need to create <code>itoken</code> iterator which will concatenate collocations and then just pass it to any fucntion which consumes iterators.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">it_phrases =<span class="st"> </span>model2$<span class="kw">transform</span>(it)
-vocabulary_with_phrases =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_phrases, <span class="dt">stopwords =</span> tokenizers::<span class="kw">stopwords</span>(<span class="st">&quot;en&quot;</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">it_phrases =<span class="st"> </span>model2<span class="op">$</span><span class="kw">transform</span>(it)
+vocabulary_with_phrases =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_phrases, <span class="dt">stopwords =</span> tokenizers<span class="op">::</span><span class="kw">stopwords</span>(<span class="st">&quot;en&quot;</span>))
 vocabulary_with_phrases =<span class="st"> </span><span class="kw">prune_vocabulary</span>(vocabulary_with_phrases, <span class="dt">term_count_min =</span> <span class="dv">10</span>)
-vocabulary_with_phrases[<span class="kw">startsWith</span>(vocabulary_with_phrases$term, <span class="st">&quot;new_&quot;</span>), ]</code></pre></div>
+vocabulary_with_phrases[<span class="kw">startsWith</span>(vocabulary_with_phrases<span class="op">$</span>term, <span class="st">&quot;new_&quot;</span>), ]</code></pre></div>
 <pre><code>## Number of docs: 1 
 ## 33 stopwords: a, an, and, are, as, at ... 
 ## ngram_min = 1; ngram_max = 1 
@@ -577,8 +577,8 @@ vocabulary_with_phrases[<span class="kw">startsWith</span>(vocabulary_with_phras
 <p>Now we can create term-co-occurence matrix wich will contain both words and multi-word phrases (make sure you provide <code>itoken</code> iterator which generates phrases, not plain words):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tcm =<span class="st"> </span><span class="kw">create_tcm</span>(it_phrases, <span class="kw">vocab_vectorizer</span>(vocabulary_with_phrases))</code></pre></div>
 <p>And train word embeddings model:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">glove =<span class="st"> </span>GloVe$<span class="kw">new</span>(<span class="dv">50</span>, <span class="dt">vocabulary =</span> vocabulary_with_phrases, <span class="dt">x_max =</span> <span class="dv">50</span>)
-wv_main =<span class="st"> </span>glove$<span class="kw">fit_transform</span>(tcm, <span class="dv">10</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">glove =<span class="st"> </span>GloVe<span class="op">$</span><span class="kw">new</span>(<span class="dv">50</span>, <span class="dt">vocabulary =</span> vocabulary_with_phrases, <span class="dt">x_max =</span> <span class="dv">50</span>)
+wv_main =<span class="st"> </span>glove<span class="op">$</span><span class="kw">fit_transform</span>(tcm, <span class="dv">10</span>)</code></pre></div>
 <pre><code>## INFO [2017-07-07 19:05:05] 2017-07-07 19:05:05 - epoch 1, expected cost 0.0305
 ## INFO [2017-07-07 19:05:08] 2017-07-07 19:05:08 - epoch 2, expected cost 0.0211
 ## INFO [2017-07-07 19:05:11] 2017-07-07 19:05:11 - epoch 3, expected cost 0.0187
@@ -589,14 +589,14 @@ wv_main =<span class="st"> </span>glove$<span class="kw">fit_transform</span>(tc
 ## INFO [2017-07-07 19:05:28] 2017-07-07 19:05:28 - epoch 8, expected cost 0.0149
 ## INFO [2017-07-07 19:05:31] 2017-07-07 19:05:31 - epoch 9, expected cost 0.0146
 ## INFO [2017-07-07 19:05:35] 2017-07-07 19:05:35 - epoch 10, expected cost 0.0143</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">wv_context =<span class="st"> </span>glove$components
-wv =<span class="st"> </span>wv_main +<span class="st"> </span><span class="kw">t</span>(wv_context)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">wv_context =<span class="st"> </span>glove<span class="op">$</span>components
+wv =<span class="st"> </span>wv_main <span class="op">+</span><span class="st"> </span><span class="kw">t</span>(wv_context)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> wv, <span class="dt">y =</span> wv[<span class="st">&quot;new_zealand&quot;</span>, , <span class="dt">drop =</span> <span class="ot">FALSE</span>], <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
 <span class="kw">head</span>(<span class="kw">sort</span>(cos_sim[,<span class="dv">1</span>], <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), <span class="dv">5</span>)</code></pre></div>
 <pre><code>##    new_zealand      australia united_kingdom         canada     queensland 
 ##      1.0000000      0.8906049      0.7560024      0.7496143      0.7143516</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">paris =<span class="st"> </span>wv[<span class="st">&quot;new_york&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] -<span class="st"> </span>
-<span class="st">  </span>wv[<span class="st">&quot;usa&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] +<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">paris =<span class="st"> </span>wv[<span class="st">&quot;new_york&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] <span class="op">-</span><span class="st"> </span>
+<span class="st">  </span>wv[<span class="st">&quot;usa&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] <span class="op">+</span><span class="st"> </span>
 <span class="st">  </span>wv[<span class="st">&quot;france&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>]
 cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> wv, <span class="dt">y =</span> paris, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
 <span class="kw">head</span>(<span class="kw">sort</span>(cos_sim[,<span class="dv">1</span>], <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), <span class="dv">5</span>)</code></pre></div>
@@ -607,17 +607,17 @@ cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">
 <h2>Topic models with collocations</h2>
 <p>Incorporating collocations into topic models is very straightforward - need just to create document-term matrix and pass it to LDA model.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;movie_review&quot;</span>)
-prep_fun =<span class="st"> </span>function(x) {
-  stringr::<span class="kw">str_replace_all</span>(<span class="kw">tolower</span>(x), <span class="st">&quot;[^[:alpha:]]&quot;</span>, <span class="st">&quot; &quot;</span>)
+prep_fun =<span class="st"> </span><span class="cf">function</span>(x) {
+  stringr<span class="op">::</span><span class="kw">str_replace_all</span>(<span class="kw">tolower</span>(x), <span class="st">&quot;[^[:alpha:]]&quot;</span>, <span class="st">&quot; &quot;</span>)
 }
-it =<span class="st"> </span><span class="kw">itoken</span>(movie_review$review, <span class="dt">preprocessor =</span> prep_fun, <span class="dt">tokenizer =</span> word_tokenizer, 
-            <span class="dt">ids =</span> movie_review$id, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
-it =<span class="st"> </span>model2$<span class="kw">transform</span>(it)
-v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it, <span class="dt">stopwords =</span> tokenizers::<span class="kw">stopwords</span>(<span class="st">&quot;en&quot;</span>))
+it =<span class="st"> </span><span class="kw">itoken</span>(movie_review<span class="op">$</span>review, <span class="dt">preprocessor =</span> prep_fun, <span class="dt">tokenizer =</span> word_tokenizer, 
+            <span class="dt">ids =</span> movie_review<span class="op">$</span>id, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+it =<span class="st"> </span>model2<span class="op">$</span><span class="kw">transform</span>(it)
+v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it, <span class="dt">stopwords =</span> tokenizers<span class="op">::</span><span class="kw">stopwords</span>(<span class="st">&quot;en&quot;</span>))
 v =<span class="st"> </span><span class="kw">prune_vocabulary</span>(v, <span class="dt">term_count_min =</span> <span class="dv">10</span>, <span class="dt">doc_proportion_min =</span> <span class="fl">0.01</span>)</code></pre></div>
 <p>Let’s check how many phrases that we’ve learned from wikipedia we can find in <code>movie_review</code> dataset:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">word_count_per_token =<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">strsplit</span>(v$term, <span class="st">&quot;_&quot;</span>, T), length)
-v$term[word_count_per_token &gt;<span class="st"> </span><span class="dv">1</span>]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">word_count_per_token =<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">strsplit</span>(v<span class="op">$</span>term, <span class="st">&quot;_&quot;</span>, T), length)
+v<span class="op">$</span>term[word_count_per_token <span class="op">&gt;</span><span class="st"> </span><span class="dv">1</span>]</code></pre></div>
 <pre><code>##  [1] &quot;ve_got&quot;        &quot;th_century&quot;    &quot;anything_else&quot; &quot;takes_place&quot;  
 ##  [5] &quot;her_husband&quot;   &quot;once_again&quot;    &quot;weren_t&quot;       &quot;sci_fi&quot;       
 ##  [9] &quot;years_ago&quot;     &quot;new_york&quot;      &quot;looks_like&quot;    &quot;rather_than&quot;  
@@ -629,8 +629,8 @@ v$term[word_count_per_token &gt;<span class="st"> </span><span class="dv">1</spa
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">N_TOPICS =<span class="st"> </span><span class="dv">20</span>
 vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(v)
 dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer)
-lda =<span class="st"> </span>LDA$<span class="kw">new</span>(N_TOPICS)
-doc_topic =<span class="st"> </span>lda$<span class="kw">fit_transform</span>(dtm)</code></pre></div>
+lda =<span class="st"> </span>LDA<span class="op">$</span><span class="kw">new</span>(N_TOPICS)
+doc_topic =<span class="st"> </span>lda<span class="op">$</span><span class="kw">fit_transform</span>(dtm)</code></pre></div>
 </div>
 </div>
 

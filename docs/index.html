@@ -241,8 +241,11 @@ $(document).ready(function () {
 <p>See <a href="api.html">API</a> section for details.</p>
 <div id="performance" class="section level1">
 <h1>Performance</h1>
-<p><img src="images/htop.png" alt="htop" /> <em>Author of the package is a little bit obsessed about efficiency.</em></p>
-<p>This package is efficient because it is carefully written in C++, which also means that text2vec is memory friendly. Some parts (such as GloVe) are fully parallelized using the excellent <a href="http://rcppcore.github.io/RcppParallel/">RcppParallel</a> package. This means that the word embeddings are computed in parallel on OS X, Linux, Windows, and even Solaris (x86) without any additional tuning or tricks.</p>
+<div class="figure">
+<img src="images/htop.png" alt="htop" />
+<p class="caption">htop</p>
+</div>
+<p>This package is efficient because it is carefully written in C++, which also means that text2vec is memory friendly. Some parts are fully parallelized using OpenMP.</p>
 <p>Other emrassingly parallel tasks (such as vectorization) can use any parallel backend which supports <a href="https://cran.r-project.org/package=foreach">foreach</a> package. They can achieve near-linear scalability with number of available cores.</p>
 <p>Finally, a streaming API means that users do not have to load all the data into RAM.</p>
 </div>

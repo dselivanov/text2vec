@@ -30,17 +30,22 @@ NULL
 #' @import methods
 #' @import Matrix
 #' @import Rcpp
-#' @import digest
 #' @import data.table
 #' @importFrom foreach foreach %do% %dopar%
 #' @importFrom R6 R6Class
 #' @import mlapi
-#' @importFrom RcppParallel RcppParallelLibs
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' @importFrom methods as
 #' @importFrom futile.logger flog.debug flog.info flog.warn flog.error
 #' @useDynLib "text2vec", .registration=TRUE
 NULL
+
+#' @importFrom rsparse GloVe
+#' @export
+rsparse::GloVe
+
+#' @export
+GlobalVectors = rsparse::GloVe
 
 #' @export
 mlapi::fit

@@ -56,7 +56,7 @@
 #' dtm_tfidf = model_tfidf$fit_transform(dtm)
 TfIdf = R6::R6Class(
   classname = c("TfIdf"),
-  inherit = mlapiTransformation,
+  inherit = mlapi::mlapiTransformer,
   public = list(
     #----------------------------------------------------------------------------
     # methods
