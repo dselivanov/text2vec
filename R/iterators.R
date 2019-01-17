@@ -1,14 +1,11 @@
 text2vec.tokens = function(tokens, ids) {
-  res = data.frame(tokens = I(tokens), ids = ids, stringsAsFactors = FALSE)
-  data.table::setattr(res, "row.names",  NULL)
-  data.table::setattr(res$tokens, "class",  class(tokens))
+  res = list(tokens = tokens, ids = ids)
   data.table::setattr(res, "class",  "text2vec.tokens")
   res
 }
 
 "[.text2vec.tokens" = function(x, i) {
-  res = data.frame(tokens = I(x$tokens[i]), ids = x$ids[i], stringsAsFactors = FALSE)
-  data.table::setattr(res, "row.names",  NULL)
+  res = list(tokens = x$tokens[i], ids = x$ids[i])
   data.table::setattr(res$tokens, "class",  class(x$tokens))
   res
 }

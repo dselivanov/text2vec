@@ -43,7 +43,7 @@ appearence of the context word and remaining occurrence are ignored. Useful when
 of coherence of topic models.
 \code{"symmetric"} by default - take into account \code{skip_grams_window} left and right.}
 
-\item{...}{arguments to \link{foreach} function which is used to iterate over
+\item{...}{placeholder for additional arguments (not used at the moment).
 \code{it}.}
 }
 \value{

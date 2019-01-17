@@ -51,7 +51,7 @@ get_dtm = function(corpus_ptr) {
 #' @param vectorizer \code{function} vectorizer function; see
 #'   \link{vectorizers}.
 #' @param type \code{character}, one of \code{c("dgCMatrix", "dgTMatrix")}.
-#' @param ... arguments to the \link{foreach} function which is used to iterate
+#' @param ... placeholder for additional arguments (not used at the moment).
 #'   over \code{it}.
 #' @return A document-term matrix
 #' @seealso \link{itoken} \link{vectorizers}
@@ -112,44 +112,26 @@ create_dtm.itoken = function(it, vectorizer,
 }
 
 #------------------------------------------------------------------------------
-# TO REMOVE IN text2vec 0.6
-#------------------------------------------------------------------------------
-#' @rdname create_dtm
-#' @export
-create_dtm.list = function(it, vectorizer,
-                       type = c("dgCMatrix", "dgTMatrix"),
-                       ...) {
-  .Deprecated("create_dtm.itoken_parallel()")
-  check_itoken = sapply(it, inherits, 'itoken', USE.NAMES = FALSE)
-  stopifnot(all( check_itoken ))
-  type = match.arg(type)
-
-  res = foreach(batch = it, .combine = rbind_dgTMatrix,
-                .multicombine = TRUE,
-                # user already made split for jobs
-                # preschedule = FALSE is much more memory efficient
-                .options.multicore = list(preschedule = FALSE)) %dopar% {
-          create_dtm(batch, vectorizer, "dgTMatrix", ...)
-        }
-  as(res, type)
-}
-#------------------------------------------------------------------------------
 
 #' @rdname create_dtm
 #' @export
-create_dtm.itoken_parallel = function(it, vectorizer,
-                           type = c("dgCMatrix", "dgTMatrix"),
-                           ...) {
+create_dtm.itoken_parallel =
+  function(
+    it,
+    vectorizer,
+    type = c("dgCMatrix", "dgTMatrix", "RsparseMatrix")) {
+
   type = match.arg(type)
 
-  res =
-    foreach(batch = it,
-            .combine = rbind_dgTMatrix,
-            .multicombine = TRUE,
-            # user already made split for jobs
-            # preschedule = FALSE is much more memory efficient
-            .options.multicore = list(preschedule = FALSE)) %dopar% {
-              create_dtm(batch, vectorizer, "dgTMatrix")
-            }
+  FUN = function(x) {
+    it2 = itoken(x$tokens, n_chunks = 1L, progressbar = FALSE, ids = x$ids)
+    create_dtm(it2, vectorizer, "dgTMatrix")
+  }
+
+  res = mc_queue(it, FUN)
+  # reorder
+  res = res[as.character(seq_along(res))]
+  res = do.call(rbind_dgTMatrix, res)
   as(res, type)
+
 }

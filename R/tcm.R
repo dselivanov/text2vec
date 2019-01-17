@@ -75,7 +75,7 @@ get_tcm = function(corpus_ptr) {
 #' appearence of the context word and remaining occurrence are ignored. Useful when creating TCM for evaluation
 #' of coherence of topic models.
 #' \code{"symmetric"} by default - take into account \code{skip_grams_window} left and right.
-#' @param ... arguments to \link{foreach} function which is used to iterate over
+#' @param ... placeholder for additional arguments (not used at the moment).
 #'   \code{it}.
 #' @return \code{dgTMatrix} TCM matrix
 #' @seealso \link{itoken} \link{create_dtm}
@@ -149,58 +149,29 @@ create_tcm.itoken_parallel = function(it, vectorizer,
   MIN_R_VERSION_large_serialization = 34
   #---------------------------------------------------------------
   skip_grams_window_context = match.arg(skip_grams_window_context)
-  jobs = Map(function(job_id, it) list(job_id = job_id, it = it), seq_along(it), it)
-  res =
-    foreach(batch = jobs,
-            .combine = mc_triplet_sum,
-            .inorder = FALSE,
-            .multicombine = TRUE,
-            # .maxcombine = foreach::getDoParWorkers(),
-            # user already made split for jobs
-            # preschedule = FALSE is much more memory efficient
-            .options.multicore = list(preschedule = FALSE),
-            ...) %dopar%
-            {
-              tcm = create_tcm(batch$it, vectorizer = vectorizer, skip_grams_window = skip_grams_window,
-                               skip_grams_window_context = skip_grams_window_context, weights = weights, ...)
-              tcm_bytes = utils::object.size(tcm)
-              if(tcm_bytes >= 2**31 &&  R_VERSION < MIN_R_VERSION_large_serialization) {
-                err_msg = sprintf("result from worker pid=%d can't be transfered to master:
+
+  res = mc_queue(it, FUN = function(x) {
+
+    it2 = itoken(x$tokens, n_chunks = 1L, progressbar = FALSE, ids = x$ids)
+
+    tcm = create_tcm(it2, vectorizer = vectorizer, skip_grams_window = skip_grams_window,
+                     skip_grams_window_context = skip_grams_window_context, weights = weights, ...)
+    tcm_bytes = utils::object.size(tcm)
+    if(tcm_bytes >= 2**31 &&  R_VERSION < MIN_R_VERSION_large_serialization) {
+      err_msg = sprintf("result from worker pid=%d can't be transfered to master:
                                   relust %d bytes, max_bytes allowed = 2^31",
-                                  Sys.getpid(), tcm_bytes)
-                flog.error(err_msg)
-                stop(err_msg)
-              }
-              tcm
-            }
+                        Sys.getpid(), tcm_bytes)
+      flog.error(err_msg)
+      stop(err_msg)
+    }
+    tcm
+  })
+  res = do.call(triplet_sum, res)
   flog.debug("map phase finished, starting reduce")
   wc = attr(res, "word_count", TRUE)
   res = as(res, "dgTMatrix")
   data.table::setattr(res, "word_count", wc)
   res
-}
-
-# multicore combine
-mc_reduce = function(X, FUN,  ...) {
-  if (length(X) >= 2) {
-    # split into pairs of elements
-    pairs = split(X, ceiling(seq_along(X) / 2))
-
-    X_NEW =
-      foreach( pair = pairs, ...) %dopar% {
-        # if length(X) is odd, we will recieve several pairs + single element
-        if (length(pair) == 1)
-          pair[[1]]
-        else {
-          FUN(pair[[1]], pair[[2]])
-        }
-      }
-    # recursive call
-    mc_reduce(X_NEW, FUN = FUN, ...)
-  }
-  # finally reduce to single element
-  else
-    X[[1]]
 }
 
 sum_m = function(m1, m2) {
@@ -220,17 +191,12 @@ sum_m = function(m1, m2) {
   res
 }
 
-# multicore version of triplet_sum
-mc_triplet_sum = function(...) {
+triplet_sum = function(...) {
   lst = list(...)
   if(any(vapply(lst, is.null, TRUE))) {
     err_msg = "got NULL from one of the workers - something went wrong (uncaught error)"
     flog.error(err_msg)
     stop(err_msg)
   }
-  mc_reduce(lst,
-            FUN = sum_m,
-            .inorder = FALSE,
-            .multicombine = TRUE)
+  Reduce(sum_m, lst)
 }
-

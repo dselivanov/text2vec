@@ -10,8 +10,7 @@ ifiles(file_paths, reader = readLines)
 
 idir(path, reader = readLines)
 
-ifiles_parallel(file_paths, reader = readLines,
-  n_chunks = foreach::getDoParWorkers())
+ifiles_parallel(file_paths, reader = readLines, ...)
 }
 \arguments{
 \item{file_paths}{\code{character} paths of input files}

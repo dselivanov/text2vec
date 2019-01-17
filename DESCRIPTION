@@ -25,16 +25,16 @@ Depends:
 Imports:
     Matrix (>= 1.1),
     Rcpp (>= 0.11),
-    R6 (>= 2.1.2), 
+    R6 (>= 2.3.0), 
     data.table(>= 1.9.6),
     rsparse (>= 0.3.2), 
     stringi (>= 1.1.5), 
     mlapi (>= 0.1.0), 
-    futile.logger (>= 1.4.3),
-    foreach(>= 1.4.3)
+    futile.logger (>= 1.4.3)
 Remotes: 
     github::dselivanov/rsparse
-LinkingTo: Rcpp,
+LinkingTo: 
+    Rcpp,
     digest (>= 0.6.8),
     sparsepp (>= 0.2.0)
 Suggests:
@@ -44,8 +44,7 @@ Suggests:
     testthat,
     covr,
     knitr,
-    rmarkdown,
-    doParallel
+    rmarkdown
 URL: http://text2vec.org
 BugReports: https://github.com/dselivanov/text2vec/issues
 VignetteBuilder: knitr

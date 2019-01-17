@@ -3,7 +3,6 @@
 \name{create_dtm}
 \alias{create_dtm}
 \alias{create_dtm.itoken}
-\alias{create_dtm.list}
 \alias{create_dtm.itoken_parallel}
 \title{Document-term matrix construction}
 \usage{
@@ -12,11 +11,8 @@ create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix"), ...)
 \method{create_dtm}{itoken}(it, vectorizer, type = c("dgCMatrix",
   "dgTMatrix"), ...)
 
-\method{create_dtm}{list}(it, vectorizer, type = c("dgCMatrix", "dgTMatrix"),
-  ...)
-
 \method{create_dtm}{itoken_parallel}(it, vectorizer, type = c("dgCMatrix",
-  "dgTMatrix"), ...)
+  "dgTMatrix", "RsparseMatrix"))
 }
 \arguments{
 \item{it}{\link{itoken} iterator or \code{list} of \code{itoken} iterators.}
@@ -26,7 +22,7 @@ create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix"), ...)
 
 \item{type}{\code{character}, one of \code{c("dgCMatrix", "dgTMatrix")}.}
 
-\item{...}{arguments to the \link{foreach} function which is used to iterate
+\item{...}{placeholder for additional arguments (not used at the moment).
 over \code{it}.}
 }
 \value{

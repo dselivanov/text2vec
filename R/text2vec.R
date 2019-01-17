@@ -27,11 +27,11 @@
 #' @docType package
 NULL
 
+#' @import digest
 #' @import methods
 #' @import Matrix
 #' @import Rcpp
 #' @import data.table
-#' @importFrom foreach foreach %do% %dopar%
 #' @importFrom R6 R6Class
 #' @import mlapi
 #' @importFrom utils txtProgressBar setTxtProgressBar

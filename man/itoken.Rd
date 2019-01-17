@@ -2,58 +2,41 @@
 % Please edit documentation in R/iterators.R
 \name{itoken}
 \alias{itoken}
-\alias{itoken.list}
 \alias{itoken.character}
+\alias{itoken.list}
 \alias{itoken.iterator}
 \alias{itoken_parallel}
 \alias{itoken_parallel.character}
-\alias{itoken_parallel.ifiles_parallel}
+\alias{itoken_parallel.iterator}
 \alias{itoken_parallel.list}
 \title{Iterators (and parallel iterators) over input objects}
 \usage{
 itoken(iterable, ...)
 
-\method{itoken}{list}(iterable, n_chunks = 10, progressbar = interactive(),
-  ids = NULL, ...)
-
 \method{itoken}{character}(iterable, preprocessor = identity,
   tokenizer = space_tokenizer, n_chunks = 10, progressbar = interactive(),
   ids = NULL, ...)
 
+\method{itoken}{list}(iterable, n_chunks = 10, progressbar = interactive(),
+  ids = names(iterable), ...)
+
 \method{itoken}{iterator}(iterable, preprocessor = identity,
-  tokenizer = space_tokenizer, n_chunks = 1L, progressbar = interactive(),
-  ...)
+  tokenizer = space_tokenizer, progressbar = interactive(), ...)
 
 itoken_parallel(iterable, ...)
 
 \method{itoken_parallel}{character}(iterable, preprocessor = identity,
-  tokenizer = space_tokenizer, n_chunks = foreach::getDoParWorkers(),
-  ids = NULL, ...)
+  tokenizer = space_tokenizer, n_chunks = 10, ids = NULL, ...)
 
-\method{itoken_parallel}{ifiles_parallel}(iterable, preprocessor = identity,
+\method{itoken_parallel}{iterator}(iterable, preprocessor = identity,
   tokenizer = space_tokenizer, n_chunks = 1L, ...)
 
-\method{itoken_parallel}{list}(iterable,
-  n_chunks = foreach::getDoParWorkers(), ids = NULL, ...)
+\method{itoken_parallel}{list}(iterable, n_chunks = 10, ids = NULL, ...)
 }
 \arguments{
 \item{iterable}{an object from which to generate an iterator}
 
 \item{...}{arguments passed to other methods}
-
-\item{n_chunks}{\code{integer}, the number of pieces that object should
-be divided into. Then each chunk is processed independently (and in case \code{itoken_parallel}
-\bold{in parallel if some parallel backend is registered}).
-Usually there is tradeoff: larger number of chunks means lower memory footprint, but slower (if
-\code{preprocessor, tokenizer} functions are efficiently vectorized). And small number
-of chunks means larger memory footprint but faster execution (again if user
-supplied \code{preprocessor, tokenizer} functions are efficiently vectorized).}
-
-\item{progressbar}{\code{logical} indicates whether to show progress bar.}
-
-\item{ids}{\code{vector} of document ids. If \code{ids} is not provided,
-\code{names(iterable)} will be used. If \code{names(iterable) == NULL},
-incremental ids will be assigned.}
 
 \item{preprocessor}{\code{function} which takes chunk of
 \code{character} vectors and does all pre-processing.
@@ -65,6 +48,16 @@ section.}
 \code{preprocessor}, split it into tokens and returns a \code{list}
 of \code{character} vectors. If you need to perform stemming -
 call stemmer inside tokenizer. See examples section.}
+
+\item{n_chunks}{\code{integer}, the number of pieces that object should
+be divided into. Then each chunk is processed independently (and in case \code{itoken_parallel}
+\bold{in parallel if some parallel backend is registered}).
+Usually there is tradeoff: larger number of chunks means lower memory footprint, but slower (if
+\code{preprocessor, tokenizer} functions are efficiently vectorized). And small number
+of chunks means larger memory footprint but faster execution (again if user
+supplied \code{preprocessor, tokenizer} functions are efficiently vectorized).}
+
+\item{progressbar}{\code{logical} indicates whether to show progress bar.}
 }
 \description{
 This family of function creates iterators over input objects

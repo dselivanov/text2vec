@@ -5,6 +5,31 @@
 
 using namespace Rcpp;
 
+// create_xptr_unordered_set
+SEXP create_xptr_unordered_set(CharacterVector x);
+RcppExport SEXP _text2vec_create_xptr_unordered_set(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(create_xptr_unordered_set(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// collapse_collocations_cpp
+ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVector>& docs, SEXP xptr_unordered_set_phrases, SEXP xptr_unordered_set_stopwords, const String r_sep);
+RcppExport SEXP _text2vec_collapse_collocations_cpp(SEXP docsSEXP, SEXP xptr_unordered_set_phrasesSEXP, SEXP xptr_unordered_set_stopwordsSEXP, SEXP r_sepSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const ListOf<const CharacterVector>& >::type docs(docsSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type xptr_unordered_set_phrases(xptr_unordered_set_phrasesSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type xptr_unordered_set_stopwords(xptr_unordered_set_stopwordsSEXP);
+    Rcpp::traits::input_parameter< const String >::type r_sep(r_sepSEXP);
+    rcpp_result_gen = Rcpp::wrap(collapse_collocations_cpp(docs, xptr_unordered_set_phrases, xptr_unordered_set_stopwords, r_sep));
+    return rcpp_result_gen;
+END_RCPP
+}
 // hasher
 IntegerVector hasher(CharacterVector x, int hash_size);
 RcppExport SEXP _text2vec_hasher(SEXP xSEXP, SEXP hash_sizeSEXP) {
@@ -65,6 +90,95 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_hash_corpus_get_dtm(ptr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// colMins
+NumericVector colMins(const NumericMatrix x);
+RcppExport SEXP _text2vec_colMins(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(colMins(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// colMaxs
+NumericVector colMaxs(const NumericMatrix x);
+RcppExport SEXP _text2vec_colMaxs(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(colMaxs(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rowMins
+NumericVector rowMins(const NumericMatrix x);
+RcppExport SEXP _text2vec_rowMins(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rowMins(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rowMaxs
+NumericVector rowMaxs(const NumericMatrix x);
+RcppExport SEXP _text2vec_rowMaxs(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rowMaxs(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// euclidean_dist
+NumericMatrix euclidean_dist(const NumericMatrix x, const NumericMatrix y);
+RcppExport SEXP _text2vec_euclidean_dist(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(euclidean_dist(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// malloc_trim
+SEXP malloc_trim();
+RcppExport SEXP _text2vec_malloc_trim() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(malloc_trim());
+    return rcpp_result_gen;
+END_RCPP
+}
+// is_invalid_ptr
+int is_invalid_ptr(SEXP sexp_ptr);
+RcppExport SEXP _text2vec_is_invalid_ptr(SEXP sexp_ptrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sexp_ptr(sexp_ptrSEXP);
+    rcpp_result_gen = Rcpp::wrap(is_invalid_ptr(sexp_ptr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_fixed_char_tokenizer
+SEXP cpp_fixed_char_tokenizer(CharacterVector x, char delim);
+RcppExport SEXP _text2vec_cpp_fixed_char_tokenizer(SEXP xSEXP, SEXP delimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< char >::type delim(delimSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_fixed_char_tokenizer(x, delim));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -177,120 +291,6 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_get_document_count(ptr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// create_xptr_unordered_set
-SEXP create_xptr_unordered_set(CharacterVector x);
-RcppExport SEXP _text2vec_create_xptr_unordered_set(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(create_xptr_unordered_set(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// collapse_collocations_cpp
-ListOf<CharacterVector> collapse_collocations_cpp(const ListOf<const CharacterVector>& docs, SEXP xptr_unordered_set_phrases, SEXP xptr_unordered_set_stopwords, const String r_sep);
-RcppExport SEXP _text2vec_collapse_collocations_cpp(SEXP docsSEXP, SEXP xptr_unordered_set_phrasesSEXP, SEXP xptr_unordered_set_stopwordsSEXP, SEXP r_sepSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const ListOf<const CharacterVector>& >::type docs(docsSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type xptr_unordered_set_phrases(xptr_unordered_set_phrasesSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type xptr_unordered_set_stopwords(xptr_unordered_set_stopwordsSEXP);
-    Rcpp::traits::input_parameter< const String >::type r_sep(r_sepSEXP);
-    rcpp_result_gen = Rcpp::wrap(collapse_collocations_cpp(docs, xptr_unordered_set_phrases, xptr_unordered_set_stopwords, r_sep));
-    return rcpp_result_gen;
-END_RCPP
-}
-// colMins
-NumericVector colMins(const NumericMatrix x);
-RcppExport SEXP _text2vec_colMins(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(colMins(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// colMaxs
-NumericVector colMaxs(const NumericMatrix x);
-RcppExport SEXP _text2vec_colMaxs(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(colMaxs(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rowMins
-NumericVector rowMins(const NumericMatrix x);
-RcppExport SEXP _text2vec_rowMins(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(rowMins(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rowMaxs
-NumericVector rowMaxs(const NumericMatrix x);
-RcppExport SEXP _text2vec_rowMaxs(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(rowMaxs(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// euclidean_dist
-NumericMatrix euclidean_dist(const NumericMatrix x, const NumericMatrix y);
-RcppExport SEXP _text2vec_euclidean_dist(SEXP xSEXP, SEXP ySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(euclidean_dist(x, y));
-    return rcpp_result_gen;
-END_RCPP
-}
-// malloc_trim
-SEXP malloc_trim();
-RcppExport SEXP _text2vec_malloc_trim() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(malloc_trim());
-    return rcpp_result_gen;
-END_RCPP
-}
-// is_invalid_ptr
-int is_invalid_ptr(SEXP sexp_ptr);
-RcppExport SEXP _text2vec_is_invalid_ptr(SEXP sexp_ptrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type sexp_ptr(sexp_ptrSEXP);
-    rcpp_result_gen = Rcpp::wrap(is_invalid_ptr(sexp_ptr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_fixed_char_tokenizer
-SEXP cpp_fixed_char_tokenizer(CharacterVector x, char delim);
-RcppExport SEXP _text2vec_cpp_fixed_char_tokenizer(SEXP xSEXP, SEXP delimSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< char >::type delim(delimSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_fixed_char_tokenizer(x, delim));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -432,11 +432,21 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_text2vec_create_xptr_unordered_set", (DL_FUNC) &_text2vec_create_xptr_unordered_set, 1},
+    {"_text2vec_collapse_collocations_cpp", (DL_FUNC) &_text2vec_collapse_collocations_cpp, 4},
     {"_text2vec_hasher", (DL_FUNC) &_text2vec_hasher, 2},
     {"_text2vec_cpp_hash_corpus_create", (DL_FUNC) &_text2vec_cpp_hash_corpus_create, 4},
     {"_text2vec_cpp_hash_corpus_insert_document_batch", (DL_FUNC) &_text2vec_cpp_hash_corpus_insert_document_batch, 6},
     {"_text2vec_cpp_hash_corpus_get_tcm", (DL_FUNC) &_text2vec_cpp_hash_corpus_get_tcm, 1},
     {"_text2vec_cpp_hash_corpus_get_dtm", (DL_FUNC) &_text2vec_cpp_hash_corpus_get_dtm, 1},
+    {"_text2vec_colMins", (DL_FUNC) &_text2vec_colMins, 1},
+    {"_text2vec_colMaxs", (DL_FUNC) &_text2vec_colMaxs, 1},
+    {"_text2vec_rowMins", (DL_FUNC) &_text2vec_rowMins, 1},
+    {"_text2vec_rowMaxs", (DL_FUNC) &_text2vec_rowMaxs, 1},
+    {"_text2vec_euclidean_dist", (DL_FUNC) &_text2vec_euclidean_dist, 2},
+    {"_text2vec_malloc_trim", (DL_FUNC) &_text2vec_malloc_trim, 0},
+    {"_text2vec_is_invalid_ptr", (DL_FUNC) &_text2vec_is_invalid_ptr, 1},
+    {"_text2vec_cpp_fixed_char_tokenizer", (DL_FUNC) &_text2vec_cpp_fixed_char_tokenizer, 2},
     {"_text2vec_cpp_vocabulary_corpus_create", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_create, 5},
     {"_text2vec_cpp_vocabulary_corpus_insert_document_batch", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_insert_document_batch, 7},
     {"_text2vec_cpp_vocabulary_corpus_get_tcm", (DL_FUNC) &_text2vec_cpp_vocabulary_corpus_get_tcm, 1},
@@ -446,16 +456,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_text2vec_cpp_vocabulary_insert_document_batch_xptr", (DL_FUNC) &_text2vec_cpp_vocabulary_insert_document_batch_xptr, 2},
     {"_text2vec_cpp_get_vocab_statistics", (DL_FUNC) &_text2vec_cpp_get_vocab_statistics, 1},
     {"_text2vec_cpp_get_document_count", (DL_FUNC) &_text2vec_cpp_get_document_count, 1},
-    {"_text2vec_create_xptr_unordered_set", (DL_FUNC) &_text2vec_create_xptr_unordered_set, 1},
-    {"_text2vec_collapse_collocations_cpp", (DL_FUNC) &_text2vec_collapse_collocations_cpp, 4},
-    {"_text2vec_colMins", (DL_FUNC) &_text2vec_colMins, 1},
-    {"_text2vec_colMaxs", (DL_FUNC) &_text2vec_colMaxs, 1},
-    {"_text2vec_rowMins", (DL_FUNC) &_text2vec_rowMins, 1},
-    {"_text2vec_rowMaxs", (DL_FUNC) &_text2vec_rowMaxs, 1},
-    {"_text2vec_euclidean_dist", (DL_FUNC) &_text2vec_euclidean_dist, 2},
-    {"_text2vec_malloc_trim", (DL_FUNC) &_text2vec_malloc_trim, 0},
-    {"_text2vec_is_invalid_ptr", (DL_FUNC) &_text2vec_is_invalid_ptr, 1},
-    {"_text2vec_cpp_fixed_char_tokenizer", (DL_FUNC) &_text2vec_cpp_fixed_char_tokenizer, 2},
     {"_text2vec_warplda_create", (DL_FUNC) &_text2vec_warplda_create, 3},
     {"_text2vec_warplda_init_dtm", (DL_FUNC) &_text2vec_warplda_init_dtm, 5},
     {"_text2vec_warplda_set_topic_word_count", (DL_FUNC) &_text2vec_warplda_set_topic_word_count, 2},

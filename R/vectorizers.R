@@ -40,16 +40,24 @@ corpus_insert_generic = function(corpus_ptr, tokens, grow_dtm, skip_grams_window
 corpus_insert = function(corpus_ptr, iterator, grow_dtm, skip_grams_window_context, window_size, weights, binary_cooccurence) {
   skip_grams_window_context_code = force(encode_context(skip_grams_window_context))
   if (inherits(iterator, "R6"))
-    it = iterator$clone(deep = TRUE)
+    it = iterator$clone(TRUE)
   else {
     warning("Can't clone input iterator. It will be modified by current function call", immediate. = TRUE)
     it = iterator
   }
-  ids = foreach(val = it, .combine = c, .multicombine = TRUE ) %do% {
+
+  ids = new.env(parent = emptyenv())
+  k = 0L
+  while(!it$is_complete) {
+    k = k + 1L
+    val = it$nextElem()
     res = corpus_insert_generic(corpus_ptr, val$tokens, grow_dtm, skip_grams_window_context_code, window_size, weights, binary_cooccurence)
     if(!res) stop("something went wrong during insert into corpus")
-    val$ids
+    ids[[as.character(k)]] = val$ids
   }
+  ids = as.list(ids)
+  ids = unlist(ids[as.character(seq_len(k))], recursive = FALSE, use.names = FALSE)
+
   attr(corpus_ptr, "ids") = ids
   corpus_ptr
 }

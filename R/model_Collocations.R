@@ -248,17 +248,18 @@ Collocations = R6::R6Class(
       stopifnot(is.character(stopwords))
       stopwords_ptr = create_xptr_unordered_set(stopwords)
       collapse_collocations = function(x) {
-        collapse_collocations_cpp(x$tokens, private$phrases_ptr, stopwords_ptr, private$sep)
+        x$tokens = collapse_collocations_cpp(x$tokens, private$phrases_ptr, stopwords_ptr, private$sep)
+        x
       }
 
       if(inherits(it, "itoken_parallel")) {
         flog.debug("clonning itoken_parallel")
         it_transformed = lapply(it, function(x) {
-          itoken_transformer_R6$new(x$clone(deep = TRUE), collapse_collocations)
+          CallbackIterator$new(x$clone(deep = TRUE), callback = collapse_collocations)
         })
         data.table::setattr(it_transformed, "class", "itoken_parallel")
       } else {
-        it_transformed = itoken_transformer_R6$new(it$clone(deep = TRUE), collapse_collocations)
+        it_transformed = CallbackIterator$new(it$clone(deep = TRUE), callback = collapse_collocations)
         data.table::setattr(it_transformed, "class", c("itoken", class(it)))
       }
       it_transformed
