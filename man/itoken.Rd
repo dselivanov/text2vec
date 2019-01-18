@@ -95,8 +95,6 @@ it = itoken(txt, tolower, word_tokenizer, n_chunks = 10, ids = ids)
 #------------------------------------------------
 library(text2vec)
 
-N_WORKERS = 1 # change 1 to number of cores in parallel backend
-if(require(doParallel)) registerDoParallel(N_WORKERS)
 data("movie_review")
 it = itoken_parallel(movie_review$review[1:100], n_chunks = N_WORKERS)
 system.time(dtm <- create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix'))

@@ -73,13 +73,9 @@ get_dtm = function(corpus_ptr) {
 #' dtm_tfidf = transformer_tfidf(dtm)
 #'
 #' ## Example of parallel mode
-#' # set to number of cores on your machine
-#' N_WORKERS = 1
-#' if(require(doParallel)) registerDoParallel(N_WORKERS)
-#' splits = split_into(movie_review$review, N_WORKERS)
-#' jobs = lapply(splits, itoken, tolower, word_tokenizer, n_chunks = 1)
+#' it = token_parallel(movie_review$review[1:N], tolower, word_tokenizer, movie_review$id[1:N])
 #' vectorizer = hash_vectorizer()
-#' dtm = create_dtm(jobs, vectorizer, type = 'dgTMatrix')
+#' dtm = create_dtm(it, vectorizer, type = 'dgTMatrix')
 #' }
 #' @export
 create_dtm = function(it, vectorizer,

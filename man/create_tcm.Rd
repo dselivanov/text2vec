@@ -74,14 +74,10 @@ tcm = create_tcm(itoken(tokens), vectorizer, skip_grams_window = 3L)
 # parallel version
 
 # set to number of cores on your machine
-N_WORKERS = 1
-if(require(doParallel)) registerDoParallel(N_WORKERS)
-splits = split_into(movie_review$review, N_WORKERS)
-jobs = lapply(splits, itoken, tolower, word_tokenizer)
+it = token_parallel(movie_review$review[1:N], tolower, word_tokenizer, movie_review$id[1:N])
 v = create_vocabulary(jobs)
 vectorizer = vocab_vectorizer(v)
-jobs = lapply(splits, itoken, tolower, word_tokenizer)
-
+dtm = create_dtm(it, vectorizer, type = 'dgTMatrix')
 tcm = create_tcm(jobs, vectorizer, skip_grams_window = 3L, skip_grams_window_context = "symmetric")
 }
 }

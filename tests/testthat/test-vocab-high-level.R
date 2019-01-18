@@ -16,7 +16,7 @@ ids = movie_review[['id']][train_ind]
 txt_splits = split_into(txt, N_WORKER)
 ids_splits = split_into(ids, N_WORKER)
 
-test_that("Vocabulary with foreach", {
+test_that("Vocabulary", {
   iterator = get_test_iterator(txt, ids)
   vocab_1 = create_vocabulary(iterator)
   expect_equal(attr(vocab_1, "document_count"),  max(train_ind))

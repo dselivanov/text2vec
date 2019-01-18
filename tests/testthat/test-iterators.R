@@ -1,5 +1,4 @@
 context("text2vec iterators")
-doParallel::registerDoParallel(2)
 
 N = 100
 ########################################
