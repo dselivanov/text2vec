@@ -4,6 +4,13 @@
 
 .onAttach = function(libname, pkgname) {# nocov start
   # Runs when attached to search() path such as by library() or require()
+
+  n_cores = 1L
+  if(.Platform$OS.type == "unix")
+    n_cores = parallel::detectCores(logical = FALSE)
+  options("text2vec.mc.cores" = n_cores)
+
+
   if (interactive()) {
     packageStartupMessage(
 "text2vec is still in beta version - APIs can be changed.

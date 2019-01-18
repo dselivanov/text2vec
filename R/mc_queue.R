@@ -1,7 +1,11 @@
 mc_queue = function(x,
                     FUN = identity,
-                    mc.cores = getOption("mc.cores", 2L),
+                    mc.cores = getOption("text2vec.mc.cores", parallel::detectCores(logical = FALSE)),
                     poll_sleep = 0.01) {
+
+  if(.Platform$OS.type != "unix")
+    stop("calling `mc_queue` on windows platform. Should not happen, please report to https://github.com/dselivanov/text2vec/issues")
+
   it = x$clone(TRUE)
   result = new.env(parent = emptyenv())
   jobs_in_progress = list()
