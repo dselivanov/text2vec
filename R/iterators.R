@@ -148,7 +148,11 @@ idir = function(path, reader = readLines) {
 #' @export
 ifiles_parallel = function(file_paths, reader = readLines, ...) {
   it = ifiles(file_paths, reader)
-  class(it) = c('ifiles_parallel', class(it))
+  if(.Platform$OS.type == "unix") {
+    class(it) = c('ifiles_parallel', class(it))
+  } else {
+    warning("`ifiles_parallel` is not supported on windows - falling back to `ifiles`")
+  }
   it
 }
 #------------------------------------------------------------------------------------------
@@ -191,8 +195,6 @@ ifiles_parallel = function(file_paths, reader = readLines, ...) {
 #' #------------------------------------------------
 #' library(text2vec)
 #'
-#' N_WORKERS = 1 # change 1 to number of cores in parallel backend
-#' if(require(doParallel)) registerDoParallel(N_WORKERS)
 #' data("movie_review")
 #' it = itoken_parallel(movie_review$review[1:100], n_chunks = N_WORKERS)
 #' system.time(dtm <- create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix'))
@@ -289,7 +291,12 @@ itoken.iterator = function(iterable,
 #' @rdname itoken
 #' @export
 itoken_parallel = function(iterable, ...) {
-  UseMethod("itoken_parallel")
+  if(.Platform$OS.type != "unix") {
+    warning("`ifiles_parallel` is not supported on windows - falling back to `itoken`")
+    UseMethod("itoken")
+  } else {
+    UseMethod("itoken_parallel")
+  }
 }
 
 #' @rdname itoken
