@@ -40,12 +40,19 @@ NULL
 #' @useDynLib "text2vec", .registration=TRUE
 NULL
 
+#' re-export rsparse::GloVe
+#'
 #' @importFrom rsparse GloVe
+#' @name GloVe
+#' @rdname GloVe
 #' @export
-rsparse::GloVe
+NULL
 
+#' @name GlobalVectors
+#' @rdname GloVe
 #' @export
 GlobalVectors = rsparse::GloVe
+
 
 #' @export
 mlapi::fit

@@ -140,11 +140,7 @@ idir = function(path, reader = readLines) {
 
 #------------------------------------------------------------------------------------------
 #' @rdname ifiles
-#' @param n_chunks \code{integer}, defines in how many chunks files will be processed.
-#' For example if you have 32 files, and \code{n_chunks = 8}, then for each 4 files will be
-#' created a job (for example document-term matrix construction).
-#' In case some parallel backend registered, each job will be evaluated in a separated thread (process) in parallel.
-#' So each such group of files will be processed in parallel and at the end all 8 results from will be combined.
+#' @param ... other arguments (not used at the moment)
 #' @export
 ifiles_parallel = function(file_paths, reader = readLines, ...) {
   it = ifiles(file_paths, reader)
@@ -190,13 +186,7 @@ ifiles_parallel = function(file_paths, reader = readLines, ...) {
 #' # stem_tokenizer =function(x) {
 #' #   lapply(word_tokenizer(x), SnowballC::wordStem, language="en")
 #' # }
-#' #------------------------------------------------
-#' # PARALLEL iterators
-#' #------------------------------------------------
-#' library(text2vec)
-#'
-#' data("movie_review")
-#' it = itoken_parallel(movie_review$review[1:100], n_chunks = N_WORKERS)
+#' it = itoken_parallel(movie_review$review[1:100], n_chunks = 4)
 #' system.time(dtm <- create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix'))
 #' @export
 itoken = function(iterable, ...) {
@@ -221,6 +211,9 @@ itoken = function(iterable, ...) {
 #'   of chunks means larger memory footprint but faster execution (again if user
 #'   supplied \code{preprocessor, tokenizer} functions are efficiently vectorized).
 #' @param progressbar \code{logical} indicates whether to show progress bar.
+#' @param ids \code{vector} of document ids. If \code{ids} is not provided,
+#'   \code{names(iterable)} will be used. If \code{names(iterable) == NULL},
+#'   incremental ids will be assigned.
 #' @export
 itoken.character = function(iterable,
                             preprocessor = identity,

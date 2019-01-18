@@ -3,8 +3,6 @@
 \docType{import}
 \name{reexports}
 \alias{reexports}
-\alias{GloVe}
-\alias{reexports}
 \alias{fit}
 \alias{reexports}
 \alias{fit_transform}
@@ -16,7 +14,5 @@ below to see their documentation.
 
 \describe{
   \item{mlapi}{\code{\link[mlapi]{fit}}, \code{\link[mlapi]{fit_transform}}}
-
-  \item{rsparse}{\code{\link[rsparse]{GloVe}}}
 }}
 

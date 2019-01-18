@@ -6,13 +6,14 @@
 \alias{create_dtm.itoken_parallel}
 \title{Document-term matrix construction}
 \usage{
-create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix"), ...)
+create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix",
+  "RsparseMatrix"), ...)
 
-\method{create_dtm}{itoken}(it, vectorizer, type = c("dgCMatrix",
-  "dgTMatrix"), ...)
+\method{create_dtm}{itoken}(it, vectorizer, type = c("dgCMatrix", "dgTMatrix",
+  "RsparseMatrix"), ...)
 
 \method{create_dtm}{itoken_parallel}(it, vectorizer, type = c("dgCMatrix",
-  "dgTMatrix", "RsparseMatrix"))
+  "dgTMatrix", "RsparseMatrix"), ...)
 }
 \arguments{
 \item{it}{\link{itoken} iterator or \code{list} of \code{itoken} iterators.}

@@ -30,7 +30,8 @@ Imports:
     rsparse (>= 0.3.2), 
     stringi (>= 1.1.5), 
     mlapi (>= 0.1.0), 
-    futile.logger (>= 1.4.3)
+    futile.logger (>= 1.4.3), 
+    digest (>= 0.6.8)
 Remotes: 
     github::dselivanov/rsparse
 LinkingTo: 
@@ -38,7 +39,7 @@ LinkingTo:
     digest (>= 0.6.8),
     sparsepp (>= 0.2.0)
 Suggests:
-    parallel,
+    magrittr,
     udpipe (>= 0.6),
     glmnet,
     testthat,

@@ -78,9 +78,7 @@ get_dtm = function(corpus_ptr) {
 #' dtm = create_dtm(it, vectorizer, type = 'dgTMatrix')
 #' }
 #' @export
-create_dtm = function(it, vectorizer,
-                       type = c("dgCMatrix", "dgTMatrix"),
-                       ...) {
+create_dtm = function(it, vectorizer, type = c("dgCMatrix", "dgTMatrix", "RsparseMatrix"), ...) {
   e = environment()
   reg.finalizer(e, malloc_trim_finalizer)
   UseMethod("create_dtm")
@@ -88,9 +86,7 @@ create_dtm = function(it, vectorizer,
 
 #' @rdname create_dtm
 #' @export
-create_dtm.itoken = function(it, vectorizer,
-                            type = c("dgCMatrix", "dgTMatrix"),
-                            ...) {
+create_dtm.itoken = function(it, vectorizer, type = c("dgCMatrix", "dgTMatrix", "RsparseMatrix"), ...) {
   # because window_size = 0, put something to skip_grams_window_context: "symmetric"
   # but it is dummy - just to provide something to vectorizer
   # skip_grams_window_context = "symmetric", window_size = 0
@@ -111,11 +107,7 @@ create_dtm.itoken = function(it, vectorizer,
 
 #' @rdname create_dtm
 #' @export
-create_dtm.itoken_parallel =
-  function(
-    it,
-    vectorizer,
-    type = c("dgCMatrix", "dgTMatrix", "RsparseMatrix")) {
+create_dtm.itoken_parallel = function( it, vectorizer, type = c("dgCMatrix", "dgTMatrix", "RsparseMatrix"), ...) {
 
   type = match.arg(type)
 

@@ -56,8 +56,8 @@ prepare_analogy_questions = function(questions_file_path, vocab_terms) {# nocov 
 #' @param m_word_vectors word vectors \code{numeric matrix}. Each row should
 #'   represent a word.
 #' @description This function checks how well the GloVe word embeddings do on
-#'   the analogy task. For full examples see \link{glove}.
-#' @seealso \link{prepare_analogy_questions}, \link{glove}
+#'   the analogy task. For full examples see \link{GloVe}.
+#' @seealso \link{prepare_analogy_questions}, \link{GloVe}
 #' @export
 check_analogy_accuracy = function(questions_list, m_word_vectors) {
 

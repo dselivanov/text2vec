@@ -58,6 +58,10 @@ of chunks means larger memory footprint but faster execution (again if user
 supplied \code{preprocessor, tokenizer} functions are efficiently vectorized).}
 
 \item{progressbar}{\code{logical} indicates whether to show progress bar.}
+
+\item{ids}{\code{vector} of document ids. If \code{ids} is not provided,
+\code{names(iterable)} will be used. If \code{names(iterable) == NULL},
+incremental ids will be assigned.}
 }
 \description{
 This family of function creates iterators over input objects
@@ -90,13 +94,7 @@ it = itoken(txt, tolower, word_tokenizer, n_chunks = 10, ids = ids)
 # stem_tokenizer =function(x) {
 #   lapply(word_tokenizer(x), SnowballC::wordStem, language="en")
 # }
-#------------------------------------------------
-# PARALLEL iterators
-#------------------------------------------------
-library(text2vec)
-
-data("movie_review")
-it = itoken_parallel(movie_review$review[1:100], n_chunks = N_WORKERS)
+it = itoken_parallel(movie_review$review[1:100], n_chunks = 4)
 system.time(dtm <- create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix'))
 }
 \seealso{
