@@ -14,6 +14,28 @@
 #   // You should have received a copy of the GNU General Public License
 # // along with text2vec.  If not, see <http://www.gnu.org/licenses/>.
 
+
+transform_rows_unit_norm = function(x, norm = 1) {
+  if(!inherits(x, "matrix") && !inherits(x, "sparseMatrix"))
+    stop("x should inherit from `matrix`` or `Matrix::sparseMatrix`")
+  if(!is.numeric(norm) || length(norm) != 1)
+    stop("`norm` should be numeric of length 1")
+  rs = rowSums(x ^ norm)
+
+  if(isTRUE(all.equal(rep(1, length(rs)), rs, tolerance = 1e-5, check.attributes = FALSE)))
+    return(x)
+
+  norm_vec = 1 / rs ^ (1 / norm)
+
+  # case when sum row elements == 0
+  norm_vec[is.infinite(norm_vec)] = 0
+
+  if(inherits(x, "sparseMatrix"))
+    Diagonal(x = norm_vec) %*% x
+  else
+    x * norm_vec
+}
+
 #' @name normalize
 #' @title Matrix normalization
 #' @description normalize matrix rows using given norm
