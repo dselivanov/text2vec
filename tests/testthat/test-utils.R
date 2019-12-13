@@ -65,3 +65,9 @@ test_that("as.lda_c ", {
   expect_equal(rs, vapply(dtm_lda_c, ncol, 0L))
   expect_equal(Matrix::rowSums(dtm), vapply(dtm_lda_c, function(x) sum(x[2, ]), 0L))
 })
+
+test_that("split_vector ", {
+  expect_error(split_vector(NULL, 0), "t")
+  expect_equal(split_vector(list(1, 2, 3, 4, 5, 6, 7, 8, 9), 99, 99), list(c(1, 9)))
+  expect_equal(split_vector(list(1, 2, 3, 4, 5, 6), 1), list(c(1, 6)))
+})
