@@ -5,8 +5,8 @@
 \title{Coherence metrics for topic models}
 \usage{
 coherence(x, tcm, metrics = c("mean_logratio", "mean_pmi", "mean_npmi",
-  "mean_difference", "mean_npmi_cosim", "mean_npmi_cosim2"), smooth = 1e-12,
-  n_doc_tcm = -1)
+  "mean_difference", "mean_npmi_cosim", "mean_npmi_cosim2"),
+  smooth = 1e-12, n_doc_tcm = -1)
 }
 \arguments{
 \item{x}{A \code{character matrix} with the top terms per topic (each column represents one topic),
@@ -138,7 +138,8 @@ tw = lda_model$get_top_words(n = 10, lambda = 1)
 tcm = crossprod(sign(dtm))
 
 # check coherence
-futile.logger::flog.threshold(futile.logger::DEBUG)
+logger = lgr::get_logger('text2vec')
+logger$set_threshold('debug')
 res = coherence(tw, tcm, n_doc_tcm = N)
 res
 

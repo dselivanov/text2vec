@@ -1,5 +1,4 @@
 context("lsa model")
-require(irlba)
 N = 100
 n_topics = 20
 train_ind = 1:N

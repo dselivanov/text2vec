@@ -9,11 +9,11 @@
 create_dtm(it, vectorizer, type = c("dgCMatrix", "dgTMatrix",
   "RsparseMatrix"), ...)
 
-\method{create_dtm}{itoken}(it, vectorizer, type = c("dgCMatrix", "dgTMatrix",
-  "RsparseMatrix"), ...)
-
-\method{create_dtm}{itoken_parallel}(it, vectorizer, type = c("dgCMatrix",
+\method{create_dtm}{itoken}(it, vectorizer, type = c("dgCMatrix",
   "dgTMatrix", "RsparseMatrix"), ...)
+
+\method{create_dtm}{itoken_parallel}(it, vectorizer,
+  type = c("dgCMatrix", "dgTMatrix", "RsparseMatrix"), ...)
 }
 \arguments{
 \item{it}{\link{itoken} iterator or \code{list} of \code{itoken} iterators.}

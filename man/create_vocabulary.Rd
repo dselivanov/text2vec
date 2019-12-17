@@ -14,11 +14,13 @@ create_vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
 vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
   stopwords = character(0), sep_ngram = "_", window_size = 0L)
 
-\method{create_vocabulary}{character}(it, ngram = c(ngram_min = 1L, ngram_max
-  = 1L), stopwords = character(0), sep_ngram = "_", window_size = 0L)
+\method{create_vocabulary}{character}(it, ngram = c(ngram_min = 1L,
+  ngram_max = 1L), stopwords = character(0), sep_ngram = "_",
+  window_size = 0L)
 
-\method{create_vocabulary}{itoken}(it, ngram = c(ngram_min = 1L, ngram_max =
-  1L), stopwords = character(0), sep_ngram = "_", window_size = 0L)
+\method{create_vocabulary}{itoken}(it, ngram = c(ngram_min = 1L,
+  ngram_max = 1L), stopwords = character(0), sep_ngram = "_",
+  window_size = 0L)
 
 \method{create_vocabulary}{itoken_parallel}(it, ngram = c(ngram_min = 1L,
   ngram_max = 1L), stopwords = character(0), sep_ngram = "_",

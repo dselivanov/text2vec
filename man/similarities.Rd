@@ -6,7 +6,8 @@
 \alias{psim2}
 \title{Pairwise Similarity Matrix Computation}
 \usage{
-sim2(x, y = NULL, method = c("cosine", "jaccard"), norm = c("l2", "none"))
+sim2(x, y = NULL, method = c("cosine", "jaccard"), norm = c("l2",
+  "none"))
 
 psim2(x, y, method = c("cosine", "jaccard"), norm = c("l2", "none"))
 }

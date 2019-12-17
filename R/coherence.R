@@ -133,7 +133,8 @@
 #' tcm = crossprod(sign(dtm))
 #'
 #' # check coherence
-#' futile.logger::flog.threshold(futile.logger::DEBUG)
+#' logger = lgr::get_logger('text2vec')
+#' logger$set_threshold('debug')
 #' res = coherence(tw, tcm, n_doc_tcm = N)
 #' res
 #'
@@ -234,7 +235,7 @@ res = matrix(NA_real_, nrow = n_topics, ncol = n_metrics,
     topic_i_term_indices = topic_i_term_indices[!is.na(topic_i_term_indices)]
     for(j in seq_len(n_metrics)) {
       m = metrics[j]
-      futile.logger::flog.debug("calculating coherence metric '%s' for topic %d", m, i)
+      logger$debug("calculating coherence metric '%s' for topic %d", m, i)
       res[i, j] = calc_coherence(m, topic_i_term_indices, tcm, smooth, n_doc_tcm = n_doc_tcm)
     }
   }

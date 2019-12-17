@@ -1,4 +1,6 @@
-# text2vec 0.5.1.*
+# text2vec 0.6
+1. 2019-12-17
+    *  **breaking change** - removed construction of a vocabulary in parallel on windows
 1. 2018-09-10
     *  **breaking change** - changed IDF formula - see #280 for details.
 1. 2018-05-28

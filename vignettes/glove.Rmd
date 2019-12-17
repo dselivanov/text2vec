@@ -95,7 +95,7 @@ text2vec uses a parallel stochastic gradient descent algorithm. By default it wi
 Let's fit our model. (It can take several minutes to fit!)
 
 ```{r, message=TRUE}
-glove = GlobalVectors$new(word_vectors_size = 50, vocabulary = vocab, x_max = 10)
+glove = GlobalVectors$new(rank = 50, x_max = 10)
 glove$fit(tcm, n_iter = 20)
 # 2016-10-03 10:09:14 - epoch 1, expected cost 0.0893
 # 2016-10-03 10:09:17 - epoch 2, expected cost 0.0608
@@ -121,7 +121,7 @@ glove$fit(tcm, n_iter = 20)
 
 Alternatively we can train model with R's `S3` interface (but keep in mind that all text2vec models are R6 classes and they are mutable! So `fit`, `fit_transform` methods modify models!):
 ```{r, message=TRUE, eval=FALSE}
-glove = GlobalVectors$new(word_vectors_size = 50, vocabulary = vocab, x_max = 10)
+glove = GlobalVectors$new(rank = 50, x_max = 10)
 # `glove` object will be modified by `fit()` call !
 fit(tcm, glove, n_iter = 20)
 ```

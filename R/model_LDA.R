@@ -276,13 +276,13 @@ LatentDirichletAllocation = R6::R6Class(
         if(i %% n_check_convergence == 0) {
           loglik = private$calc_pseudo_loglikelihood(model_ptr)
           # if(progressbar) cat("\n")
-          flog.debug("iter %d loglikelihood = %.3f", i, loglik)
+          logger$debug("iter %d loglikelihood = %.3f", i, loglik)
 
           loglik_hist[[j]] = data.frame(iter = i, loglikelihood = loglik)
 
           if(loglik_previous / loglik - 1 < convergence_tol) {
             if(progressbar) setTxtProgressBar(pb, n_iter)
-            flog.info("early stopping at %d iteration", i)
+            logger$info("early stopping at %d iteration", i)
             break
           }
           loglik_previous = loglik
@@ -339,7 +339,7 @@ LatentDirichletAllocation = R6::R6Class(
       # Document-term matrix should have column names - vocabulary
       stopifnot(!is.null(colnames(x)))
 
-      flog.debug("converting DTM to internal C++ structure")
+      logger$debug("converting DTM to internal C++ structure")
 
       # random topic assignements for each word
       nnz = sum(x@x)
