@@ -98,6 +98,9 @@ L_func = function(p, n, k) {
 #'
 #' @export
 jsPCA_robust = function(phi) {
+  if (!requireNamespace("proxy", quietly = TRUE)) {
+    stop("Need 'proxy' package for this function.", call. = FALSE)
+  }
   # first, we compute a pairwise distance between topic distributions
   # using a symmetric version of KL-divergence
   # http://en.wikipedia.org/wiki/Jensen%E2%80%93Shannon_divergence
