@@ -71,7 +71,7 @@ normalize = function(m, norm = c("l1", "l2", "none")) {
 #' @export
 as.lda_c = function(X) {
   # recieved matrix in lda_c format, but without class attribute
-  if (class(X) == 'list' && all(vapply(X, function(x) is.matrix(x) && is.integer(x), FALSE)) ) {
+  if (is.list(X) && all(vapply(X, function(x) is.matrix(x) && is.integer(x), FALSE)) ) {
     class(X) = "lda_c"
     return(X)
   }

@@ -3,7 +3,7 @@
 #' @description Given document-term matrix, topic-word distribution, document-topic
 #' distribution calculates perplexity
 #' @param X sparse document-term matrix which contains terms counts. Internally \code{Matrix::RsparseMatrix} is used.
-#' If \code{class(X) != 'RsparseMatrix'} function will try to coerce \code{X} to \code{RsparseMatrix}
+#' If \code{!inherits(X, 'RsparseMatrix')} function will try to coerce \code{X} to \code{RsparseMatrix}
 #' via \code{as()} call.
 #' @param topic_word_distribution dense matrix for topic-word distribution. Number of rows = \code{n_topics},
 #' number of columns = \code{vocabulary_size}. Sum of elements in each row should be equal to 1 -

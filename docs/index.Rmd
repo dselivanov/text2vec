@@ -18,7 +18,7 @@ Goals which we aimed to achieve as a result of development of `text2vec`:
 * **Fast** - maximize efficiency per single thread, transparently scale to multiple threads on multicore machines
 * **Memory efficient** - use streams and iterators, not keep data in RAM if possible
 
-See [API](api.html) section for details.
+See [API](http://text2vec.org/api.html) section for details.
 
 # Performance
 

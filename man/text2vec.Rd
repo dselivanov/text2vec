@@ -9,7 +9,7 @@
 Fast vectorization, topic modeling, distances and GloVe word embeddings in R.
 }
 \details{
-To learn more about text2vec visit project website: \url{text2vec.org}
+To learn more about text2vec visit project website: \url{http://text2vec.org}
 Or start with the vignettes:
 \code{browseVignettes(package = "text2vec")}
 }

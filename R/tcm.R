@@ -105,7 +105,7 @@ create_tcm = function(it, vectorizer, skip_grams_window = 5L,
                       skip_grams_window_context = c("symmetric", "right", "left"),
                       weights = 1 / seq_len(skip_grams_window), binary_cooccurence = FALSE, ...) {
   stopifnot(length(weights) == skip_grams_window)
-  stopifnot(class(weights) %in% c("numeric", "integer"))
+  stopifnot(inherits(weights, "numeric"))
   e = environment()
   reg.finalizer(e, malloc_trim_finalizer)
   # if(attr(vectorizer, "skip_grams_window", TRUE) == 0)
