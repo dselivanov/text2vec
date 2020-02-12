@@ -9,8 +9,8 @@
 dist2(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
   norm = c("l2", "l1", "none"))
 
-pdist2(x, y, method = c("cosine", "euclidean", "jaccard"), norm = c("l2",
-  "l1", "none"))
+pdist2(x, y, method = c("cosine", "euclidean", "jaccard"),
+  norm = c("l2", "l1", "none"))
 }
 \arguments{
 \item{x}{first matrix.}

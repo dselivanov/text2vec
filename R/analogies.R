@@ -39,7 +39,7 @@ prepare_analogy_questions = function(questions_file_path, vocab_terms) {# nocov 
 
   questions_number = sum(sapply(q, nrow))
 
-  flog.info("%d full questions found out of %d total",
+  logger$info("%d full questions found out of %d total",
             questions_number,
             length(lines) - length(section_name_ind))
 
@@ -90,7 +90,7 @@ check_analogy_accuracy = function(questions_list, m_word_vectors) {
     act = q_mat[, 4]
     correct_number = sum(preds == act)
 
-    flog.info("%s: correct %d out of %d, accuracy = %.4f",
+    logger$info("%s: correct %d out of %d, accuracy = %.4f",
                    category,
                    correct_number,
                    q_number,
@@ -104,6 +104,6 @@ check_analogy_accuracy = function(questions_list, m_word_vectors) {
       )
   }
   res = rbindlist(res)
-  flog.info("OVERALL ACCURACY = %.4f", sum(res[['predicted']] == res[['actual']]) / nrow(res) )
+  logger$info("OVERALL ACCURACY = %.4f", sum(res[['predicted']] == res[['actual']]) / nrow(res) )
   res
 }# nocov end

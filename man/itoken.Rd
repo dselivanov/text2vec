@@ -14,11 +14,11 @@
 itoken(iterable, ...)
 
 \method{itoken}{character}(iterable, preprocessor = identity,
-  tokenizer = space_tokenizer, n_chunks = 10, progressbar = interactive(),
-  ids = NULL, ...)
+  tokenizer = space_tokenizer, n_chunks = 10,
+  progressbar = interactive(), ids = NULL, ...)
 
-\method{itoken}{list}(iterable, n_chunks = 10, progressbar = interactive(),
-  ids = names(iterable), ...)
+\method{itoken}{list}(iterable, n_chunks = 10,
+  progressbar = interactive(), ids = names(iterable), ...)
 
 \method{itoken}{iterator}(iterable, preprocessor = identity,
   tokenizer = space_tokenizer, progressbar = interactive(), ...)
@@ -31,7 +31,8 @@ itoken_parallel(iterable, ...)
 \method{itoken_parallel}{iterator}(iterable, preprocessor = identity,
   tokenizer = space_tokenizer, n_chunks = 1L, ...)
 
-\method{itoken_parallel}{list}(iterable, n_chunks = 10, ids = NULL, ...)
+\method{itoken_parallel}{list}(iterable, n_chunks = 10, ids = NULL,
+  ...)
 }
 \arguments{
 \item{iterable}{an object from which to generate an iterator}

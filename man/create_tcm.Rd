@@ -8,15 +8,18 @@
 \usage{
 create_tcm(it, vectorizer, skip_grams_window = 5L,
   skip_grams_window_context = c("symmetric", "right", "left"),
-  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE, ...)
+  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE,
+  ...)
 
 \method{create_tcm}{itoken}(it, vectorizer, skip_grams_window = 5L,
   skip_grams_window_context = c("symmetric", "right", "left"),
-  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE, ...)
+  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE,
+  ...)
 
-\method{create_tcm}{itoken_parallel}(it, vectorizer, skip_grams_window = 5L,
-  skip_grams_window_context = c("symmetric", "right", "left"),
-  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE, ...)
+\method{create_tcm}{itoken_parallel}(it, vectorizer,
+  skip_grams_window = 5L, skip_grams_window_context = c("symmetric",
+  "right", "left"), weights = 1/seq_len(skip_grams_window),
+  binary_cooccurence = FALSE, ...)
 }
 \arguments{
 \item{it}{\code{list} of iterators over tokens from \link{itoken}.

@@ -24,7 +24,7 @@ mc_queue = function(x,
 
       available_queue_size = available_queue_size - 1L
 
-      futile.logger::flog.trace(
+      logger$trace(
         "[mc_queue] adding job {%d} with pid=%d. Available queue size %d.",
         job_id,
         job$pid,
@@ -48,7 +48,7 @@ mc_queue = function(x,
       jobs_in_progress[[finished_job_id]] = NULL
 
       available_queue_size  = available_queue_size + 1
-      futile.logger::flog.trace(
+      logger$trace(
         "[mc_queue] finished job: {%s}, jobs in progress: {%s}",
         finished_job_id,
         paste(names(jobs_in_progress), collapse = ", ")

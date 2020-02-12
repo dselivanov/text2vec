@@ -54,7 +54,7 @@ text2vec_dist = R6::R6Class(
 #' vectorizer = vocab_vectorizer(v)
 #' dtm = create_dtm(it, vectorizer)
 #' tcm = create_tcm(it, vectorizer, skip_grams_window = 5)
-#' glove_model = GloVe$new(word_vectors_size = 50, x_max = 10)
+#' glove_model = GloVe$new(rank = 50, x_max = 10)
 #' wv = glove_model$fit_transform(tcm, n_iter = 5)
 #' # get average of main and context vectors as proposed in GloVe paper
 #' wv = wv + t(glove_model$components)

@@ -157,13 +157,13 @@ create_tcm.itoken_parallel = function(it, vectorizer,
       err_msg = sprintf("result from worker pid=%d can't be transfered to master:
                                   relust %d bytes, max_bytes allowed = 2^31",
                         Sys.getpid(), tcm_bytes)
-      flog.error(err_msg)
+      logger$.error(err_msg)
       stop(err_msg)
     }
     tcm
   })
   res = do.call(triplet_sum, res)
-  flog.debug("map phase finished, starting reduce")
+  logger$debug("map phase finished, starting reduce")
   wc = attr(res, "word_count", TRUE)
   res = as(res, "dgTMatrix")
   data.table::setattr(res, "word_count", wc)
@@ -191,7 +191,7 @@ triplet_sum = function(...) {
   lst = list(...)
   if(any(vapply(lst, is.null, TRUE))) {
     err_msg = "got NULL from one of the workers - something went wrong (uncaught error)"
-    flog.error(err_msg)
+    logger$error(err_msg)
     stop(err_msg)
   }
   Reduce(sum_m, lst)

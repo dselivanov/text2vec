@@ -81,7 +81,7 @@ dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
     method = match.arg(method)
     if(method %in% c("cosine", "jaccard")) {
       if( inherits(x, "sparseMatrix") || inherits(y, "sparseMatrix"))
-        flog.warn("Sparsity will be lost - worth to calculate similarity instead of distance.")
+        logger$warn("Sparsity will be lost - worth to calculate similarity instead of distance.")
       RESULT = 1 - sim2(x = x, y = y, method = method, norm = norm)
     }
     if (method == "euclidean") {
@@ -89,7 +89,7 @@ dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
         y = x
       if (!inherits(x, "matrix") || !inherits(y, "matrix")) {
         msg = "At the moment eucludian distance could be calculated only for dense matrices of class 'matrix'"
-        flog.error(msg)
+        logger$error(msg)
         stop(msg)
 
       }
@@ -109,7 +109,7 @@ dist2 = function(x, y = NULL, method = c("cosine", "euclidean", "jaccard"),
     if (inherits(method, "RWMD")) {
       if (norm != "none") {
         msg = paste(norm, "norm provided. RWMD can be computed only on bag-of-words matrices - raw word-counts")
-        flog.warn(msg)
+        logger$warn(msg)
       }
       RESULT = method$dist2(x, y)
     }
@@ -154,7 +154,7 @@ pdist2 = function(x, y, method = c("cosine", "euclidean", "jaccard"),
     if (inherits(method, "RWMD")) {
       if (norm != "none") {
         msg = paste(norm, "norm provided. RWMD can be computed only on bag-of-words matrices - raw word-counts")
-        flog.warn(msg)
+        logger$warn(msg)
       }
       RESULT = method$pdist2(x, y)
     }
@@ -217,7 +217,7 @@ sim2 = function(x, y = NULL, method = c("cosine", "jaccard"),
     if (norm != "none") {
       msg = paste(norm, "norm provided. Howewer matrix will be converted to binary (0,1) automatically.")
       msg = paste(msg, "'jaccard' can be computed only on sets which should be encoded as sparse matrices of 0, 1.")
-      flog.warn(msg)
+      logger$warn(msg)
     }
     x@x = sign(x@x)
     if (FLAG_TWO_MATRICES_INPUT) {
@@ -259,7 +259,7 @@ psim2 = function(x, y, method = c("cosine", "jaccard"), norm = c("l2", "none")) 
     if (norm != "none") {
       msg = paste(norm, "norm provided. Howewer matrix will be converted to binary (0,1) automatically.")
       msg = paste(msg, "'jaccard' can be computed only on sets which should be encoded as sparse matrices of 0, 1.")
-      flog.warn(msg)
+      logger$warn(msg)
     }
 
     x@x = sign(x@x)
