@@ -33,11 +33,11 @@
 // it in the spp namespace before we include 'sparsepp'.
 //https://github.com/hadley/testthat/blob/c7e8330867645c174f9a286d00eb0036cea78b0c/inst/include/testthat/testthat.h#L44-L50
 //https://stackoverflow.com/questions/43263880/no-ambiguous-reference-error-even-after-using-namespace-directive/43294812
-namespace spp {
-  inline void exit(int status) throw() {}
-}
+// namespace spp {
+//   inline void exit(int status) throw() {}
+// }
 
-#include <sparsepp/spp.h>
+//#include <sparsepp/spp.h>
 
 using namespace std;
 using namespace Rcpp;

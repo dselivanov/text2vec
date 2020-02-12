@@ -17,7 +17,7 @@
 #include "text2vec.h"
 using namespace Rcpp;
 using namespace std;
-using spp::sparse_hash_map;
+// using spp::sparse_hash_map;
 
 class TermStat {
 public:
@@ -72,7 +72,8 @@ public:
                              _["stringsAsFactors"] = false );
   }
   void insert_terms (const vector< string> &terms) {
-    typename sparse_hash_map < string, uint32_t > :: iterator term_iterator;
+    // typename sparse_hash_map < string, uint32_t > :: iterator term_iterator;
+    typename std::unordered_map < string, uint32_t > :: iterator term_iterator;
     int term_id;
     int window_size_ = this->window_size;
     int terms_size = terms.size();
@@ -137,7 +138,8 @@ public:
   void increase_token_count() {token_count++;};
 private:
   vector< TermStat > vocab_statistics;
-  sparse_hash_map< string, uint32_t > vocab;
+  // sparse_hash_map< string, uint32_t > vocab;
+  std::unordered_map< string, uint32_t > vocab;
   uint32_t ngram_min;
   uint32_t ngram_max;
   string ngram_delim;
