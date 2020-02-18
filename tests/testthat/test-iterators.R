@@ -1,5 +1,4 @@
 context("text2vec iterators")
-doParallel::registerDoParallel(2)
 
 N = 100
 ########################################
@@ -41,7 +40,7 @@ test_that("ifiles_parallel", {
   dtm = create_dtm(it2, hash_vectorizer())
   expected_rownames = c(paste(basename(temp_file_1), seq_along(txt_1), sep = "_"),
                         paste(basename(temp_file_2), seq_along(txt_2), sep = "_"))
-  expect_equal(rownames(dtm), expected_rownames)
+  expect_equivalent(rownames(dtm), expected_rownames)
 })
 
 

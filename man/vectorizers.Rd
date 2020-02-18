@@ -8,7 +8,8 @@
 \usage{
 vocab_vectorizer(vocabulary)
 
-hash_vectorizer(hash_size = 2^18, ngram = c(1L, 1L), signed_hash = FALSE)
+hash_vectorizer(hash_size = 2^18, ngram = c(1L, 1L),
+  signed_hash = FALSE)
 }
 \arguments{
 \item{vocabulary}{\code{text2vec_vocabulary} object, see \link{create_vocabulary}.}

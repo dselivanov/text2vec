@@ -106,26 +106,17 @@ str(dtm, list.len = 5)
 
 # Multicore machines
 
-For many tasks `text2vec` allows to take the advantage of multicore machines. The functions `create_dtm()`, `create_tcm()`, and `create_vocabulary()` are good example. In contrast to GloVe fitting which uses low-level thread parallelism via `RcppParallel`, these functions use standard high-level R parallelizatin  provided by the `foreach` package. They are flexible and can use diffrent parallel backends, such as `doParallel()` or `doRedis()`. But remember that such high-level parallelism might involve significant overhead.
+For many tasks `text2vec` allows to take the advantage of multicore machines. The functions `create_dtm()`, `create_tcm()`, and `create_vocabulary()` are good example. In contrast to GloVe fitting which uses low-level thread parallelism via OpenMP, these functions use fork-join R parallelizatin on UNIX-like systems provided by the `parallel` package. But remember that such high-level parallelism might involve significant overhead.
 
-The user must do two things manually to take advantage of a multicore machine: 
-
-1. Register a parallel backend.
-2. Use `ifiles_parallel` and `itoken_parallel` iterators.
+In order to take advantage of a multicore machine user just has to use use `ifiles_parallel` and `itoken_parallel` iterators.
 
 ## Data in memory
 
 ```{r, eval=FALSE}
-N_WORKERS = 2
-library(doParallel)
-# register parallel backend
-registerDoParallel(N_WORKERS)
-
 # note that we can control level of granularity with `n_chunks` argument
 it_token_par = itoken_parallel(movie_review$review, preprocessor = tolower, 
                                tokenizer = word_tokenizer, ids = movie_review$id, 
                                n_chunks = 8)
-
 vocab = create_vocabulary(it_token_par)
 v_vectorizer = vocab_vectorizer(vocab)
 dtm = create_dtm(it_token_par, vectorizer = v_vectorizer)
@@ -136,11 +127,6 @@ dtm = create_dtm(it_token_par, vectorizer = v_vectorizer)
 Processing files from disk is also easy with `ifiles_parallel` and `itoken_parallel`:
 
 ```{r, warning=FALSE, message=FALSE, eval=FALSE}
-N_WORKERS = 2
-library(doParallel)
-# register parallel backend
-registerDoParallel(N_WORKERS)
-
 it_files_par = ifiles_parallel(file_paths = files)
 it_token_par = itoken_parallel(it_files_par, preprocessor = tolower, tokenizer = word_tokenizer)
 

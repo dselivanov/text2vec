@@ -19,7 +19,7 @@
 #'
 #' Fast vectorization, topic modeling, distances and GloVe word embeddings in R.
 #'
-#' To learn more about text2vec visit project website: \url{text2vec.org}
+#' To learn more about text2vec visit project website: \url{http://text2vec.org}
 #' Or start with the vignettes:
 #' \code{browseVignettes(package = "text2vec")}
 #'
@@ -27,20 +27,31 @@
 #' @docType package
 NULL
 
+#' @import digest
 #' @import methods
 #' @import Matrix
 #' @import Rcpp
-#' @import digest
 #' @import data.table
-#' @importFrom foreach foreach %do% %dopar%
 #' @importFrom R6 R6Class
 #' @import mlapi
-#' @importFrom RcppParallel RcppParallelLibs
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' @importFrom methods as
-#' @importFrom futile.logger flog.debug flog.info flog.warn flog.error
 #' @useDynLib "text2vec", .registration=TRUE
 NULL
+
+#' re-export rsparse::GloVe
+#'
+#' @importFrom rsparse GloVe
+#' @name GloVe
+#' @rdname GloVe
+#' @export
+NULL
+
+#' @name GlobalVectors
+#' @rdname GloVe
+#' @export
+GlobalVectors = rsparse::GloVe
+
 
 #' @export
 mlapi::fit

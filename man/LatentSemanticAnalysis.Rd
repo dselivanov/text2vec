@@ -19,7 +19,7 @@ See \url{https://en.wikipedia.org/wiki/Latent_semantic_analysis} for details.
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
 \preformatted{
-lsa = LatentSemanticAnalysis$new(n_topics, method = c("randomized", "irlba"))
+lsa = LatentSemanticAnalysis$new(n_topics)
 lsa$fit_transform(x, ...)
 lsa$transform(x, ...)
 lsa$components
@@ -42,10 +42,8 @@ lsa$components
  \item{lsa}{A \code{LSA} object.}
  \item{x}{An input document-term matrix. Preferably in \code{dgCMatrix} format}
  \item{n_topics}{\code{integer} desired number of latent topics.}
- \item{method}{\code{character}, one of \code{c("randomized", "irlba")}. Defines underlying SVD algorithm.
- For very large data "randomized" usually works faster and more accurate. }
  \item{...}{Arguments to internal functions. Notably useful for \code{fit_transform()} -
- these arguments will be passed to \link{irlba} or \link{svdr} functions which are used as backend for SVD.}
+ these arguments will be passed to \code{rsparse::soft_svd}}
 }
 }
 
@@ -53,8 +51,8 @@ lsa$components
 data("movie_review")
 N = 100
 tokens = word_tokenizer(tolower(movie_review$review[1:N]))
-dtm = create_dtm(itoken(tokens), hash_vectorizer())
-n_topics = 10
+dtm = create_dtm(itoken(tokens), hash_vectorizer(2**10))
+n_topics = 5
 lsa_1 = LatentSemanticAnalysis$new(n_topics)
 d1 = lsa_1$fit_transform(dtm)
 # the same, but wrapped with S3 methods

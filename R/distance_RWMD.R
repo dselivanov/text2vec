@@ -1,21 +1,3 @@
-# we assume wv matrix is already normalized. In this case L2 normalized
-# wv - word vectors matrix (WORDS = COLUMNS, because faster subsetting!)
-cosine_dist_internal = function(m_i, m_j) {
-  1 - crossprod(m_i, m_j)
-}
-
-# we assume wv matrix is already normalized. In this case L2 normalized
-# wv - word vectors matrix (WORDS = COLUMNS, because faster subsetting!)
-euclidean_dist_internal = function(m_i, m_j) {
-  euclidean_dist(m_i, m_j)
-}
-
-dist_internal = function(m_i, m_j, method) {
-  switch(method,
-         cosine = cosine_dist_internal(m_i, m_j),
-         euclidean = euclidean_dist_internal(m_i, m_j))
-}
-
 text2vec_dist = R6::R6Class(
   classname = "distance_model",
   public = list(
@@ -27,45 +9,43 @@ text2vec_dist = R6::R6Class(
     internal_matrix_format = NULL
   )
 )
+
 #' @name RelaxedWordMoversDistance
-#' @title Creates model which can be used for calculation of "relaxed word movers distance".
-#' @description Relaxed word movers distance tries to measure distance between documents by
-#' calculating how hard is to transform words from first document into words from second document
-#' and vice versa. For more detail see original article: \url{http://mkusner.github.io/publications/WMD.pdf}.
+#' @title Creates Relaxed Word Movers Distance (RWMD) model
+#' @description RWMD model can be used to query the "relaxed word movers distance" from a document to a
+#' collection of documents. RWMD tries to measure distance between query document and collection of documents by
+#' calculating how hard is to transform words from query document into words from each document in collection.
+#' For more detail see following article: \url{http://mkusner.github.io/publications/WMD.pdf}.
+#' However in contrast to the article above we calculate "easiness" of the convertion of one word into another
+#' by using \bold{cosine} similarity (but not a euclidean distance).
+#' Also here in text2vec we've implemented effiient RWMD using the tricks from the
+#' \href{https://arxiv.org/abs/1711.07227}{Linear-Complexity Relaxed Word Mover's Distance with GPU Acceleration} article.
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
-#' rwmd = RelaxedWordMoversDistance$new(wv, method = c("cosine", "euclidean"), normalize = TRUE, progressbar = interactive())
-#' rwmd$dist2(x, y)
-#' rwmd$pdist2(x, y)
+#' rwmd = RelaxedWordMoversDistance$new(x, embeddings)
+#' rwmd$sim2(x)
 #' }
 #' @format \code{\link{R6Class}} object.
 #' @section Methods:
 #' \describe{
-#'   \item{\code{$new(wv, method = c("cosine", "euclidean"))}}{Constructor for RWMD model
-#'         For description of arguments see \bold{Arguments} section}
-#'   \item{\code{$dist2(x, y)}}{Computes distance between each row of sparse matrix
-#'         \code{x} and each row of sparse matrix \code{y}}
-#'   \item{\code{$pdist2(x, y)}}{Computes "parallel" distance between rows of
-#'         sparse matrix \code{x} and corresponding rows of the sparse matrix \code{y}}
-#' }
-#' @field progressbar \code{logical = TRUE} whether to display progressbar
-#' @section Arguments:
-#' \describe{
-#'  \item{rwmd}{\code{RWMD} object}
-#'  \item{x}{\code{x} sparse document term matrix}
-#'  \item{y}{\code{y = NULL} sparse document term matrix.
-#'          If \code{y = NULL} (as by default), we will assume \code{y = x} }
-#'  \item{wv}{word vectors. Numeric matrix which contains word embeddings. Rows - words,
-#'            columns - corresponding vectors. Rows should have word names.}
-#'  \item{method}{name of the distance for measuring similarity between two word vectors.
-#'                In original paper authors use \code{"euclidean"},
-#'                however we use \code{"cosine"} by default (better from our experience).
-#'                This means \code{distance = 1 - cosine_angle_betwen_wv}}
+#'   \item{\code{$new(x, embeddings)}}{Constructor for RWMD model.
+#'         \code{x} - docuent-term matrix which represents collection of
+#'         documents against which you want to perform queries. \code{embeddings} -
+#'         matrix of word embeddings which will be used to calculate similarities
+#'         between words (each row represents a word vector).}
+#'   \item{\code{$sim(x)}}{calculates similarity from a collection of documents
+#'   to collection query documents \code{x}.
+#'   \code{x} here is a document-term matrix which represents the set of query documents}
+#'   \item{\code{$dist(x)}}{calculates distance from a collection of documents
+#'   to collection query documents \code{x}
+#'   \code{x} here is a document-term matrix which represents the set of query documents}
 #' }
 #' @export
 #' @examples
 #' \dontrun{
+#' library(text2vec)
+#' library(rsparse)
 #' data("movie_review")
 #' tokens = word_tokenizer(tolower(movie_review$review))
 #' v = create_vocabulary(itoken(tokens))
@@ -74,127 +54,78 @@ text2vec_dist = R6::R6Class(
 #' vectorizer = vocab_vectorizer(v)
 #' dtm = create_dtm(it, vectorizer)
 #' tcm = create_tcm(it, vectorizer, skip_grams_window = 5)
-#' glove_model = GloVe$new(word_vectors_size = 50, vocabulary = v, x_max = 10)
-#' wv = glove_model$fit_transform(tcm, n_iter = 10)
+#' glove_model = GloVe$new(rank = 50, x_max = 10)
+#' wv = glove_model$fit_transform(tcm, n_iter = 5)
 #' # get average of main and context vectors as proposed in GloVe paper
 #' wv = wv + t(glove_model$components)
-#' rwmd_model = RWMD$new(wv)
-#' rwmd_dist = dist2(dtm[1:100, ], dtm[1:10, ], method = rwmd_model, norm = 'none')
-#' head(rwmd_dist)
+#' rwmd_model = RelaxedWordMoversDistance$new(dtm, wv)
+#' rwms = rwmd_model$sim2(dtm[1:10, ])
+#' head(sort(rwms[1, ], decreasing = T))
 #'}
 RelaxedWordMoversDistance = R6::R6Class(
   classname = "RWMD",
-  inherit = text2vec_dist,
   public = list(
-    initialize = function(wv, method = c('cosine', 'euclidean'), normalize = TRUE, progressbar = interactive()) {
-      stopifnot(is.matrix(wv))
-      stopifnot(is.numeric(wv))
-      stopifnot(is.logical(normalize) && is.logical(progressbar))
+    x = NULL,
+    embedding_ids = NULL,
+    item_ids = NULL,
+    embeddings = NULL,
+    initialize = function(x, embeddings) {
+      stopifnot(is.matrix(embeddings))
+      stopifnot(is.numeric(embeddings))
+
+      self$embedding_ids = intersect(colnames(x), rownames(embeddings))
+      self$item_ids = rownames(x)
+
+      embeddings = embeddings[self$embedding_ids, , drop = FALSE]
+      x = x[, self$embedding_ids, drop = FALSE]
+      x = text2vec:::transform_rows_unit_norm(x, 1)
 
       private$internal_matrix_format = 'RsparseMatrix'
-      private$method = match.arg(method)
-      self$progressbar = progressbar
+      self$x = as(x, private$internal_matrix_format)
       # make shure  that word vectors are L2 normalized
       # and transpose them for faster column subsetting
       # R stores matrices in column-major format
-      private$wv = t(as.matrix(normalize(wv, "l2")))
+      self$embeddings = t(text2vec:::transform_rows_unit_norm(embeddings, 2))
     },
-    dist2 = function(x, y) {
-      stopifnot( inherits(x, "sparseMatrix") && inherits(y, "sparseMatrix"))
-      stopifnot( colnames(x) == colnames(y) )
-      # take only words that appear both in word vectors
-      terms = intersect(colnames(x), colnames(private$wv))
-      # make sure we don't have empty string - matrices doesn't allow subsetting by empty string
-      terms = setdiff(terms, "")
-      wv_internal = private$wv[, terms, drop = FALSE]
-      # convert matrices in row-major format
-      x_csr =  normalize(x[, terms, drop = FALSE], "l1")
-      x_csr =  as(x_csr, private$internal_matrix_format)
+    sim2 = function(x) {
+      stopifnot(identical(colnames(x), self$embedding_ids))
+      x = as(x, private$internal_matrix_format)
 
-      y_csr = normalize(y[, terms, drop = FALSE], "l1")
-      y_csr = as(y_csr, private$internal_matrix_format)
-
-      if (self$progressbar)
-        pb = txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)
-      # preallocate resulting matrix
-      res = matrix(Inf, nrow = nrow(x_csr), ncol = nrow(y_csr))
       # main loop
-      for (j in 2L:(length(x_csr@p))) {
-        if (self$progressbar) setTxtProgressBar(pb, j)
-        i1 = (x_csr@p[[j - 1]] + 1L):x_csr@p[[j]]
-        j1 = x_csr@j[i1] + 1L
-        m_j1 = wv_internal[, j1, drop = FALSE]
-        x1 = x_csr@x[i1]
+      res = vector("list", nrow(x))
 
-        dist_matrix = dist_internal(m_j1, wv_internal, private$method)
-        for (i in 2L:(length(y_csr@p))) {
-          # document offsets
-          i2 = (y_csr@p[[i - 1L]] + 1L):y_csr@p[[i]]
-          # word indices
-          j2 = y_csr@j[i2] + 1L
-          # nbow values
-          x2 = y_csr@x[i2]
-          res[j - 1L, i - 1L] = private$rwmd_cache(dist_matrix[, j2, drop = FALSE], x1, x2)
-        }
+      for (j in 2L:(length(x@p))) {
+        row_number = j - 1L
+        # futile.logger::flog.debug(sprintf("row %d", row_number))
+        i1 = (x@p[[row_number]] + 1L):x@p[[j]]
+        j1 = x@j[i1] + 1L
+        m_j1 = self$embeddings[, j1, drop = FALSE]
+
+        d = crossprod(m_j1, self$embeddings)
+        # calculates how easy is to transform each word in vocabulary into words from query
+        d = matrix(text2vec:::colMaxs(d), ncol = 1)
+
+        # matrix mult from rsparse
+        # calculates the cost of the best transformation from each of the
+        # documents from collection into query document. We transform each word from
+        # each document into closest word in the query
+        d = self$x %*% d
+        res[[row_number]]= d[, 1]
       }
-      if (self$progressbar) close(pb)
+      res = do.call(rbind, res)
+      colnames(res) = self$item_ids
+      rownames(res) = rownames(x)
       res
     },
-    pdist2 = function(x, y) {
-      stopifnot( inherits(x, "sparseMatrix") && inherits(y, "sparseMatrix"))
-      stopifnot( ncol(x) == ncol(y) )
-      stopifnot( colnames(x) == colnames(y) )
-      stopifnot( nrow(x) == nrow(y) )
-      # take only words that appear both in word vectors
-      terms = intersect(colnames(x), colnames(private$wv))
-      # make sure we don't have empty string - matrices doesn't allow subsetting by empty string
-      terms = setdiff(terms, "")
-      wv_internal = private$wv[, terms, drop = FALSE]
-
-      x_csr = normalize(x[, terms, drop = FALSE], "l1")
-      x_csr = as(x_csr, private$internal_matrix_format)
-
-      y_csr = normalize(y[, terms, drop = FALSE], "l1")
-      y_csr = as(y_csr, private$internal_matrix_format)
-
-
-      if (self$progressbar)
-        pb = txtProgressBar(initial = 1L, min = 2L, max = length(x_csr@p), style = 3)
-      # preallocate space for result
-      res = rep(Inf,  nrow(x_csr))
-      for (j in 2L:(length(x_csr@p))) {
-        if (self$progressbar) setTxtProgressBar(pb, j)
-        i1 = (x_csr@p[[j - 1]] + 1L):x_csr@p[[j]]
-        j1 = x_csr@j[i1] + 1L
-        m_j1 = wv_internal[ , j1, drop = FALSE]
-        x1 = x_csr@x[i1]
-        i2 = (y_csr@p[[j - 1L]] + 1L):y_csr@p[[j]]
-        j2 = y_csr@j[i2] + 1L
-        m_j2 = wv_internal[ , j2, drop = FALSE]
-        x2 = y_csr@x[i2]
-        res[j - 1L] = private$rwmd(m_j1, m_j2, x1, x2)
-      }
-      if (self$progressbar) close(pb)
-      res
+    dist2 = function(x) {
+      1 - self$sim2(x)
     }
   ),
   private = list(
-    wv = NULL,
-    method = NULL,
-    # workhorse for rwmd calculation
-    rwmd = function(m_i, m_j, weight_i, weight_j) {
-      dist_matrix = dist_internal(m_i, m_j, private$method)
-      d1 = sum( text2vec:::rowMins(dist_matrix) * weight_i)
-      d2 = sum( text2vec:::colMins(dist_matrix) * weight_j)
-      max(d1, d2)
-    },
-    rwmd_cache = function(dist_matrix, weight_i, weight_j) {
-      d1 = sum( rowMins(dist_matrix) * weight_i)
-      d2 = sum( colMins(dist_matrix) * weight_j)
-      max(d1, d2)
-    }
+    internal_matrix_format = NULL
   )
 )
+
 
 #' @rdname RelaxedWordMoversDistance
 #' @export

@@ -4,7 +4,7 @@
 \name{RelaxedWordMoversDistance}
 \alias{RelaxedWordMoversDistance}
 \alias{RWMD}
-\title{Creates model which can be used for calculation of "relaxed word movers distance".}
+\title{Creates Relaxed Word Movers Distance (RWMD) model}
 \format{\code{\link{R6Class}} object.}
 \usage{
 RelaxedWordMoversDistance
@@ -12,56 +12,45 @@ RelaxedWordMoversDistance
 RWMD
 }
 \description{
-Relaxed word movers distance tries to measure distance between documents by
-calculating how hard is to transform words from first document into words from second document
-and vice versa. For more detail see original article: \url{http://mkusner.github.io/publications/WMD.pdf}.
+RWMD model can be used to query the "relaxed word movers distance" from a document to a
+collection of documents. RWMD tries to measure distance between query document and collection of documents by
+calculating how hard is to transform words from query document into words from each document in collection.
+For more detail see following article: \url{http://mkusner.github.io/publications/WMD.pdf}.
+However in contrast to the article above we calculate "easiness" of the convertion of one word into another
+by using \bold{cosine} similarity (but not a euclidean distance).
+Also here in text2vec we've implemented effiient RWMD using the tricks from the
+\href{https://arxiv.org/abs/1711.07227}{Linear-Complexity Relaxed Word Mover's Distance with GPU Acceleration} article.
 }
-\section{Fields}{
-
-\describe{
-\item{\code{progressbar}}{\code{logical = TRUE} whether to display progressbar}
-}}
-
 \section{Usage}{
 
 For usage details see \bold{Methods, Arguments and Examples} sections.
 \preformatted{
-rwmd = RelaxedWordMoversDistance$new(wv, method = c("cosine", "euclidean"), normalize = TRUE, progressbar = interactive())
-rwmd$dist2(x, y)
-rwmd$pdist2(x, y)
+rwmd = RelaxedWordMoversDistance$new(x, embeddings)
+rwmd$sim2(x)
 }
 }
 
 \section{Methods}{
 
 \describe{
-  \item{\code{$new(wv, method = c("cosine", "euclidean"))}}{Constructor for RWMD model
-        For description of arguments see \bold{Arguments} section}
-  \item{\code{$dist2(x, y)}}{Computes distance between each row of sparse matrix
-        \code{x} and each row of sparse matrix \code{y}}
-  \item{\code{$pdist2(x, y)}}{Computes "parallel" distance between rows of
-        sparse matrix \code{x} and corresponding rows of the sparse matrix \code{y}}
-}
-}
-
-\section{Arguments}{
-
-\describe{
- \item{rwmd}{\code{RWMD} object}
- \item{x}{\code{x} sparse document term matrix}
- \item{y}{\code{y = NULL} sparse document term matrix.
-         If \code{y = NULL} (as by default), we will assume \code{y = x} }
- \item{wv}{word vectors. Numeric matrix which contains word embeddings. Rows - words,
-           columns - corresponding vectors. Rows should have word names.}
- \item{method}{name of the distance for measuring similarity between two word vectors.
-               In original paper authors use \code{"euclidean"},
-               however we use \code{"cosine"} by default (better from our experience).
-               This means \code{distance = 1 - cosine_angle_betwen_wv}}
+  \item{\code{$new(x, embeddings)}}{Constructor for RWMD model.
+        \code{x} - docuent-term matrix which represents collection of
+        documents against which you want to perform queries. \code{embeddings} -
+        matrix of word embeddings which will be used to calculate similarities
+        between words (each row represents a word vector).}
+  \item{\code{$sim(x)}}{calculates similarity from a collection of documents
+  to collection query documents \code{x}.
+  \code{x} here is a document-term matrix which represents the set of query documents}
+  \item{\code{$dist(x)}}{calculates distance from a collection of documents
+  to collection query documents \code{x}
+  \code{x} here is a document-term matrix which represents the set of query documents}
 }
 }
 
 \examples{
 \dontrun{
+library(text2vec)
+library(rsparse)
 data("movie_review")
 tokens = word_tokenizer(tolower(movie_review$review))
 v = create_vocabulary(itoken(tokens))
@@ -70,13 +59,13 @@ it = itoken(tokens)
 vectorizer = vocab_vectorizer(v)
 dtm = create_dtm(it, vectorizer)
 tcm = create_tcm(it, vectorizer, skip_grams_window = 5)
-glove_model = GloVe$new(word_vectors_size = 50, vocabulary = v, x_max = 10)
-wv = glove_model$fit_transform(tcm, n_iter = 10)
+glove_model = GloVe$new(rank = 50, x_max = 10)
+wv = glove_model$fit_transform(tcm, n_iter = 5)
 # get average of main and context vectors as proposed in GloVe paper
 wv = wv + t(glove_model$components)
-rwmd_model = RWMD$new(wv)
-rwmd_dist = dist2(dtm[1:100, ], dtm[1:10, ], method = rwmd_model, norm = 'none')
-head(rwmd_dist)
+rwmd_model = RelaxedWordMoversDistance$new(dtm, wv)
+rwms = rwmd_model$sim2(dtm[1:10, ])
+head(sort(rwms[1, ], decreasing = T))
 }
 }
 \keyword{datasets}

@@ -23,7 +23,7 @@
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{
-#' lsa = LatentSemanticAnalysis$new(n_topics, method = c("randomized", "irlba"))
+#' lsa = LatentSemanticAnalysis$new(n_topics)
 #' lsa$fit_transform(x, ...)
 #' lsa$transform(x, ...)
 #' lsa$components
@@ -40,10 +40,8 @@
 #'  \item{lsa}{A \code{LSA} object.}
 #'  \item{x}{An input document-term matrix. Preferably in \code{dgCMatrix} format}
 #'  \item{n_topics}{\code{integer} desired number of latent topics.}
-#'  \item{method}{\code{character}, one of \code{c("randomized", "irlba")}. Defines underlying SVD algorithm.
-#'  For very large data "randomized" usually works faster and more accurate. }
 #'  \item{...}{Arguments to internal functions. Notably useful for \code{fit_transform()} -
-#'  these arguments will be passed to \link{irlba} or \link{svdr} functions which are used as backend for SVD.}
+#'  these arguments will be passed to \code{rsparse::soft_svd}}
 #' }
 #' @export
 #' @examples
@@ -65,26 +63,14 @@ LatentSemanticAnalysis = R6::R6Class(
     #----------------------------------------------------------------------------
     # methods
     # constructor
-    initialize = function(n_topics, method = c("irlba", "randomized")) {
-      super$set_internal_matrix_formats(sparse = "CsparseMatrix")
+    initialize = function(n_topics) {
       private$n_topics = n_topics
       private$fitted = FALSE
-      private$svd_method = match.arg(method)
     },
     fit_transform = function(x, ...) {
-      x = super$check_convert_input(x)
-      if(private$svd_method == "irlba") {
-        # http://stackoverflow.com/questions/7028385/can-i-remove-an-element-in-dot-dot-dot-and-pass-it-on
-        # remove "y" from S3 call
-        fit_svd = function(..., y)
-          irlba::irlba(x, nv = private$n_topics, nu = private$n_topics, ...)
-      } else if(private$svd_method == "randomized") {
-        fit_svd = function(..., y)
-          irlba::svdr(x, k = private$n_topics, ...)
-      } else {
-        stop(sprintf("don't know method %d", private$svd_method))
-      }
-      svd_fit = fit_svd(...)
+      stopifnot(inherits(x, "matrix") || inherits(x, "sparseMatrix") || inherits("float32"))
+      FUN = function(..., y) rsparse::soft_svd(x, private$n_topics, ...)
+      svd_fit = FUN(...)
 
       documents = svd_fit$u %*% diag(x = svd_fit$d)
       private$components_ = t(svd_fit$v %*% diag(x = svd_fit$d))
@@ -145,7 +131,6 @@ LatentSemanticAnalysis = R6::R6Class(
     n_topics = NULL,
     components_ = NULL,
     fitted = FALSE,
-    svd_method = NULL,
     vt = NULL,
     explained_variance = NULL,
     explained_variance_ratio = NULL

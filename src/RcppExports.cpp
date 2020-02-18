@@ -5,75 +5,6 @@
 
 using namespace Rcpp;
 
-// cpp_glove_create
-SEXP cpp_glove_create(const List& params);
-RcppExport SEXP _text2vec_cpp_glove_create(SEXP paramsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const List& >::type params(paramsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_glove_create(params));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_glove_get_word_vectors
-NumericMatrix cpp_glove_get_word_vectors(SEXP ptr);
-RcppExport SEXP _text2vec_cpp_glove_get_word_vectors(SEXP ptrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_glove_get_word_vectors(ptr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_glove_set_cost_zero
-void cpp_glove_set_cost_zero(SEXP ptr);
-RcppExport SEXP _text2vec_cpp_glove_set_cost_zero(SEXP ptrSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    cpp_glove_set_cost_zero(ptr);
-    return R_NilValue;
-END_RCPP
-}
-// cpp_glove_partial_fit
-double cpp_glove_partial_fit(SEXP ptr, const IntegerVector x_irow, const IntegerVector x_icol, const NumericVector x_val, const IntegerVector iter_order);
-RcppExport SEXP _text2vec_cpp_glove_partial_fit(SEXP ptrSEXP, SEXP x_irowSEXP, SEXP x_icolSEXP, SEXP x_valSEXP, SEXP iter_orderSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type x_irow(x_irowSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type x_icol(x_icolSEXP);
-    Rcpp::traits::input_parameter< const NumericVector >::type x_val(x_valSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type iter_order(iter_orderSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_glove_partial_fit(ptr, x_irow, x_icol, x_val, iter_order));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_glove_get_sparsity_level
-double cpp_glove_get_sparsity_level(SEXP ptr);
-RcppExport SEXP _text2vec_cpp_glove_get_sparsity_level(SEXP ptrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_glove_get_sparsity_level(ptr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_glove_dump_model
-List cpp_glove_dump_model(SEXP ptr);
-RcppExport SEXP _text2vec_cpp_glove_dump_model(SEXP ptrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_glove_dump_model(ptr));
-    return rcpp_result_gen;
-END_RCPP
-}
 // hasher
 IntegerVector hasher(CharacterVector x, int hash_size);
 RcppExport SEXP _text2vec_hasher(SEXP xSEXP, SEXP hash_sizeSEXP) {
@@ -501,12 +432,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_text2vec_cpp_glove_create", (DL_FUNC) &_text2vec_cpp_glove_create, 1},
-    {"_text2vec_cpp_glove_get_word_vectors", (DL_FUNC) &_text2vec_cpp_glove_get_word_vectors, 1},
-    {"_text2vec_cpp_glove_set_cost_zero", (DL_FUNC) &_text2vec_cpp_glove_set_cost_zero, 1},
-    {"_text2vec_cpp_glove_partial_fit", (DL_FUNC) &_text2vec_cpp_glove_partial_fit, 5},
-    {"_text2vec_cpp_glove_get_sparsity_level", (DL_FUNC) &_text2vec_cpp_glove_get_sparsity_level, 1},
-    {"_text2vec_cpp_glove_dump_model", (DL_FUNC) &_text2vec_cpp_glove_dump_model, 1},
     {"_text2vec_hasher", (DL_FUNC) &_text2vec_hasher, 2},
     {"_text2vec_cpp_hash_corpus_create", (DL_FUNC) &_text2vec_cpp_hash_corpus_create, 4},
     {"_text2vec_cpp_hash_corpus_insert_document_batch", (DL_FUNC) &_text2vec_cpp_hash_corpus_insert_document_batch, 6},

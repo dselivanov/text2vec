@@ -38,11 +38,11 @@ Now let's examine how GloVe embeddings works. As commonly known, word2vec word v
 
 $$vector("paris") - vector("france") + vector("germany")$$ 
 
-the resulting vector will be close to the vector for "rome."
+the resulting vector will be close to the vector for "berlin"
 
 Let's download the same Wikipedia data used as a demo by word2vec:
 
-```{r}
+```{r, "download_text8"}
 library(text2vec)
 text8_file = "~/text8"
 if (!file.exists(text8_file)) {
@@ -54,7 +54,7 @@ wiki = readLines(text8_file, n = 1, warn = FALSE)
 
 In the next step we will create a vocabulary, a set of words for which we want to learn word vectors. Note, that all of text2vec's functions which operate on raw text data (`create_vocabulary`, `create_corpus`, `create_dtm`, `create_tcm`) have a streaming API and you should iterate over tokens as the first argument for these functions.
 
-```{r}
+```{r, "vocabulary"}
 # Create iterator over tokens
 tokens = space_tokenizer(wiki)
 # Create vocabulary. Terms will be unigrams (simple words).
@@ -64,13 +64,13 @@ vocab = create_vocabulary(it)
 
 These words should not be too uncommon. Fot example we cannot calculate a meaningful word vector for a word which we saw only once in the entire corpus. Here we will take only words which appear at least five times. text2vec provides additional options to filter vocabulary (see `?prune_vocabulary`).
 
-```{r}
+```{r, "prune vocabulary"}
 vocab = prune_vocabulary(vocab, term_count_min = 5L)
 ```
 
 Now we have 71,290 terms in the vocabulary and are ready to construct term-co-occurence matrix (TCM).
 
-```{r}
+```{r, "tcm"}
 # Use our filtered vocabulary
 vectorizer = vocab_vectorizer(vocab)
 # use window of 5 for context words
@@ -78,19 +78,19 @@ tcm = create_tcm(it, vectorizer, skip_grams_window = 5L)
 ```
 
 Now we have a TCM matrix and can factorize it via the GloVe algorithm.  
-text2vec uses a parallel stochastic gradient descent algorithm. By default it will use all cores on your machine, but you can specify the number of cores if you wish. For example, to use 4 threads call `RcppParallel::setThreadOptions(numThreads = 4)`. 
+text2vec uses a parallel stochastic gradient descent algorithm. By default it will use all cores on your machine, but you can specify the number of cores if you wish. 
 
 Let's fit our model. (It can take several minutes to fit!)
 
-```{r, message=TRUE}
-glove = GlobalVectors$new(word_vectors_size = 50, vocabulary = vocab, x_max = 10)
-wv_main = glove$fit_transform(tcm, n_iter = 10, convergence_tol = 0.01)
+```{r, "GloVe", message=TRUE}
+glove = GlobalVectors$new(word_vectors_size = 50, x_max = 10)
+wv_main = glove$fit_transform(tcm, n_iter = 10, convergence_tol = 0.01, n_threads = 8)
 ```
 ```{r}
 dim(wv_main)
 ```
 Alternatively we can train model with R's `S3` interface (but keep in mind that all text2vec models are R6 classes and they are mutable! So `fit_transform` methods modify models!):
-```{r, message=TRUE, eval=FALSE}
+```{r, "GloVe-2", message=TRUE, eval=FALSE}
 glove = GlobalVectors$new(word_vectors_size = 50, vocabulary = vocab, x_max = 10)
 # `glove` object will be modified by `fit_transform()` call !
 wv_main = fit_transform(tcm, glove, n_iter = 20)
@@ -108,20 +108,18 @@ Note that as in all models which inherit from `mlapiDecomposition` transformed m
 
 While both of word-vectors matrices can be used as result it usually better (idea from GloVe paper) to average or take a sum of main and context vector:
 
-```{r}
+```{r, "average-wv"}
 word_vectors = wv_main + t(wv_context)
 ```
 
 We can find the closest word vectors for our *paris - france + germany* example:
 
-```{r}
+```{r, "word-regularities"}
 berlin = word_vectors["paris", , drop = FALSE] - 
   word_vectors["france", , drop = FALSE] + 
   word_vectors["germany", , drop = FALSE]
 cos_sim = sim2(x = word_vectors, y = berlin, method = "cosine", norm = "l2")
 head(sort(cos_sim[,1], decreasing = TRUE), 5)
-# berlin     paris    munich    leipzig   germany 
-# 0.8015347 0.7623165 0.7013252 0.6616945 0.6540700 
 ```
 
 You can achieve much better results by experimenting with `skip_grams_window` and the parameters of the `GloVe` class (including word vectors size and the number of iterations). For more details and large-scale experiments on wikipedia data see this [old post](http://dsnotes.com/blog/text2vec/2015/12/01/glove-enwiki/) on my blog.

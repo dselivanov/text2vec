@@ -1,4 +1,5 @@
-futile.logger::flog.threshold(futile.logger::FATAL)
+logger = lgr::get_logger("text2vec")
+logger$set_threshold("fatal")
 
 context("collocations")
 

@@ -1,7 +1,6 @@
 Package: text2vec
 Type: Package
-Version: 0.5.1.5
-Date: 2018-05-28
+Version: 0.6
 Title: Modern Text Mining Framework for R
 License: GPL (>= 2) | file LICENSE
 Description: Fast and memory-friendly tools for text vectorization, topic
@@ -18,37 +17,34 @@ Authors@R: c(
       comment = "Author of the WaprLDA C++ code"))
 Maintainer: Dmitriy Selivanov <selivanov.dmitriy@gmail.com>
 Encoding: UTF-8
-SystemRequirements: GNU make, C++11
+SystemRequirements: C++11
 Depends:
-    R (>= 3.2.0),
+    R (>= 3.6.0),
     methods
 Imports:
     Matrix (>= 1.1),
-    Rcpp (>= 0.11),
-    RcppParallel (>= 4.3.14),
-    digest (>= 0.6.8),
-    foreach(>= 1.4.3),
+    Rcpp (>= 1.0.3),
+    R6 (>= 2.3.0), 
     data.table(>= 1.9.6),
-    irlba (>= 2.2.1),
-    R6 (>= 2.1.2), 
-    futile.logger (>= 1.4.3), 
+    rsparse (>= 0.3.3.4), 
     stringi (>= 1.1.5), 
-    mlapi (>= 0.1.0)
-LinkingTo: Rcpp,
-    RcppParallel,
-    digest,
-    sparsepp (>= 0.2.0)
+    mlapi (>= 0.1.0), 
+    lgr (>= 0.2), 
+    digest (>= 0.6.8)
+LinkingTo: 
+    Rcpp,
+    digest (>= 0.6.8)
 Suggests:
-    parallel,
-    doParallel,
-    glmnet,
+    magrittr,
     udpipe (>= 0.6),
+    glmnet,
     testthat,
     covr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    proxy
 URL: http://text2vec.org
 BugReports: https://github.com/dselivanov/text2vec/issues
 VignetteBuilder: knitr
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1

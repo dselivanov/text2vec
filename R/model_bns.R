@@ -53,7 +53,7 @@
 #' dtm_bns = model_bns$fit_transform(dtm, head(movie_review$sentiment, N))
 BNS = R6::R6Class(
   classname = c("BNS"),
-  inherit = mlapiTransformation,
+  inherit = mlapi::mlapiTransformation,
   public = list(
     bns_stat = NULL,
     initialize = function(treshold = 0.0005) {

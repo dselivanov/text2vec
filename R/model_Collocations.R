@@ -111,7 +111,7 @@ Collocations = R6::R6Class(
                           llr_min = 0,
                           sep = "_") {
       if(is.null(vocabulary)) {
-        flog.debug("got NULL as vocabulary - so it will be built from training data iterator later")
+        logger$debug("got NULL as vocabulary - so it will be built from training data iterator later")
       } else if(inherits(vocabulary, "text2vec_vocabulary")) {
         private$vocabulary = copy(vocabulary)
       } else {
@@ -132,11 +132,11 @@ Collocations = R6::R6Class(
       for(i in seq_len(n_iter)) {
         self$partial_fit(it, ...)
         if(nrow(self$collocation_stat) > n_colloc_last) {
-          flog.info("iteration %d - found %d collocations", i, nrow(self$collocation_stat))
-          flog.debug("iteration %d - n_words = %d", i, attr(self$collocation_stat, "nword"))
+          logger$info("iteration %d - found %d collocations", i, nrow(self$collocation_stat))
+          logger$debug("iteration %d - n_words = %d", i, attr(self$collocation_stat, "nword"))
           n_colloc_last = nrow(self$collocation_stat)
         } else {
-          flog.info("iteration %d - converged", i)
+          logger$info("iteration %d - converged", i)
           break()
         }
       }
@@ -145,10 +145,10 @@ Collocations = R6::R6Class(
     partial_fit = function(it, ...) {
       stopifnot(inherits(it, "itoken") || inherits(it, "itoken_parallel"))
       if(is.null(private$vocabulary)) {
-        flog.debug("building vocabulary for Collocations model")
+        logger$debug("building vocabulary for Collocations model")
         private$vocabulary = create_vocabulary(it, ...)
         private$vocabulary = prune_vocabulary(private$vocabulary, term_count_min = private$collocation_count_min)
-        flog.debug("vocabulary construction done - %d terms", nrow(private$vocabulary))
+        logger$debug("vocabulary construction done - %d terms", nrow(private$vocabulary))
       }
       if(!is.null(self$collocation_stat)) {
         private$vocabulary = create_vocabulary(it = unique(c(private$phrases, private$vocabulary$term)),
@@ -159,7 +159,7 @@ Collocations = R6::R6Class(
       }
       else {
         if(inherits(it, "itoken_parallel")) {
-          flog.debug("clonning itoken_parallel")
+          logger$debug("clonning itoken_parallel")
           it_internal = lapply(it, function(x) x$clone(deep = TRUE))
           data.table::setattr(it_internal, "class", "itoken_parallel")
         } else
@@ -168,7 +168,6 @@ Collocations = R6::R6Class(
       vectorizer = vocab_vectorizer(private$vocabulary)
       tcm = create_tcm(it_internal, vectorizer, skip_grams_window = 1L,
                        skip_grams_window_context = "right")
-      # flog.debug("tcm done dim = %d * %d", nrow(tcm), ncol(tcm))
       word_counts = attr(tcm, "word_count", TRUE)
       # cast to double in order to not get integer overflow in multiplications below
       nword = as.numeric(sum(word_counts))
@@ -248,17 +247,18 @@ Collocations = R6::R6Class(
       stopifnot(is.character(stopwords))
       stopwords_ptr = create_xptr_unordered_set(stopwords)
       collapse_collocations = function(x) {
-        collapse_collocations_cpp(x$tokens, private$phrases_ptr, stopwords_ptr, private$sep)
+        x$tokens = collapse_collocations_cpp(x$tokens, private$phrases_ptr, stopwords_ptr, private$sep)
+        x
       }
 
       if(inherits(it, "itoken_parallel")) {
-        flog.debug("clonning itoken_parallel")
+        logger$debug("clonning itoken_parallel")
         it_transformed = lapply(it, function(x) {
-          itoken_transformer_R6$new(x$clone(deep = TRUE), collapse_collocations)
+          CallbackIterator$new(x$clone(deep = TRUE), callback = collapse_collocations)
         })
         data.table::setattr(it_transformed, "class", "itoken_parallel")
       } else {
-        it_transformed = itoken_transformer_R6$new(it$clone(deep = TRUE), collapse_collocations)
+        it_transformed = CallbackIterator$new(it$clone(deep = TRUE), callback = collapse_collocations)
         data.table::setattr(it_transformed, "class", c("itoken", class(it)))
       }
       it_transformed

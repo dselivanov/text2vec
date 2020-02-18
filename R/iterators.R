@@ -1,261 +1,92 @@
-#------------------------------------------------------------------------------------------
-# R6 iterator workhorse
-# partially inspired by rivr package - https://github.com/vsbuffalo/rivr
-#------------------------------------------------------------------------------------------
-StopIteration = function(message="Iteration is complete", call = NULL, pb = NULL) {
-  if(inherits(pb, "txtProgressBar")) {
-    close(pb)
-  }
-
-  class = c("StopIteration", "error", "condition")
-  structure(list(message = as.character(message), call = call),
-            class = class)
+text2vec.tokens = function(tokens, ids) {
+  res = list(tokens = tokens, ids = ids)
+  data.table::setattr(res, "class",  "text2vec.tokens")
+  res
 }
 
-finite_iterator_R6 = R6::R6Class(
-  c("iterator", "iter", "abstractiter"),
-  #------------------------
+"[.text2vec.tokens" = function(x, i) {
+  res = list(tokens = x$tokens[i], ids = x$ids[i])
+  data.table::setattr(res$tokens, "class",  class(x$tokens))
+  res
+}
+
+length.text2vec.tokens = function(x) length(x$tokens)
+
+GenericIterator = R6::R6Class(
+  classname = c("GenericIterator", "iterator"),
   public = list(
-    iterable = NULL,
-    chunk_size = NULL,
-    counter = NULL,
-    progress = NULL,
-    progressbar = NULL,
-    initialize = function(iterable, chunk_size = 1L, progress = interactive()) {
-      self$iterable = iterable
-      self$chunk_size = chunk_size
-      self$progress = progress
-      self$counter = 0L
-      if (progress)
-        self$progressbar = txtProgressBar(initial = -1L, min = 0, max = self$length, style = 3)
+    x = NULL,
+    cursor = NULL,
+    step = NULL,
+    initialize = function(x, step = 1L) {
+      self$x = x
+      self$cursor = 1L
+      private$iterable_cursor = 1L
+      self$step = step
+      self$x = x
+      private$iterable_length = length(x)
+      private$length_ = as.integer(ceiling(private$iterable_length / self$step))
     },
     nextElem = function() {
-      if (self$is_complete) {
-        stop(StopIteration("StopIteration", pb = self$progressbar))
-      }
-      new_counter = min(self$counter + self$chunk_size, self$length)
-      ix = (self$counter + 1L):new_counter
-      ret = self$iterable[ix]
-      self$counter = new_counter
-      if (self$progress)
-        setTxtProgressBar(self$progressbar, self$counter)
-      ret
-    }
-  ),
-  #------------------------
-  active = list(
-    #------------------------
-    is_complete = function(value) {
-      if (!missing(value)) {
-        stop("field is read-only")
-      }
-      self$counter >= self$length
+      i = self$move_cursor()
+      self$x[i]
     },
-    #------------------------
-    length = function(value) {
-      if (!missing(value)) {
-        stop("field is read-only")
-      }
-      length(self$iterable)
-    }
-    #------------------------
-  )
-)
-# it = finite_iterator_R6$new(movie_review$id[1:10], chunk_size = 4L)
-# while(T) temp = it$nextElem()
-itoken_character_R6 = R6::R6Class(
-  "itoken",
-  inherit = finite_iterator_R6,
-  public = list(
-    #------------------------
-    # FIXME - https://github.com/wch/R6/issues/94
-    preprocessor = list(),
-    tokenizer = list(),
-    #------------------------------------------------
-    ids = NULL,
-    #------------------------
-    initialize = function(iterable,
-                          ids = NULL,
-                          n_chunks = 10,
-                          progress_ = interactive(),
-                          preprocessor_ = identity,
-                          tokenizer_ = identity) {
-      self$iterable = iterable
-      self$counter = 0L
-      # FIXME - https://github.com/wch/R6/issues/94
-      self$preprocessor = list(preprocessor_)
-      self$tokenizer = list(tokenizer_)
-      #------------------------------------------------
-      self$progress = progress_
-      if (is.null(ids)) {
-        self$ids = names(self$iterable)
-        if (is.null(self$ids))
-          self$ids = as.character(seq_len(self$length))
-      }
-      else {
-        stopifnot(length(ids) == length(iterable))
-        self$ids = as.character(ids)
-      }
+    move_cursor = function() {
+      range_start = private$iterable_cursor
 
-      self$chunk_size = ceiling(self$length / n_chunks)
-
-      if (self$progress)
-        self$progressbar = txtProgressBar(initial = -1L, min = 0, max = self$length, style = 3)
-    },
-    #------------------------
-    nextElem = function() {
-      if (self$is_complete) {
-        stop(StopIteration("StopIteration", pb = self$progressbar))
-      }
-      new_counter = min(self$counter + self$chunk_size, self$length)
-      ix = (self$counter + 1L):new_counter
-      # FIXME - https://github.com/wch/R6/issues/94
-      iterable_val = self$iterable[ix]
-
-      # case for example when we pass integers or numeric values in sequence
-      for(j in seq_along(iterable_val)) {
-        if(!is.character(iterable_val[[j]])) {
-          iterable_val[[j]] = as.character(iterable_val[[j]])
-        }
-      }
-
-      tokens = self$preprocessor[[1]](iterable_val)
-      tokens = self$tokenizer[[1]](tokens)
-      #-----------------------------------------------
-      ret = list(tokens = tokens, ids = self$ids[ix])
-      self$counter = new_counter
-      if (self$progress)
-        setTxtProgressBar(self$progressbar, self$counter)
-      ret
-    }
-    #------------------------
-  )
-)
-
-# it = itoken_character_R6$new(movie_review$review[1:10], ids = movie_review$id[1:10], n_chunks = 3L, preprocessor = tolower, tokenizer = text2vec::word_tokenizer)
-# it = itoken_character_R6$new(movie_review$review[1:10], n_chunks = 3L, preprocessor = tolower, tokenizer = text2vec::word_tokenizer)
-# while(T) temp = it$nextElem()
-
-ifiles_R6 = R6::R6Class(
-  "ifiles",
-  inherit = finite_iterator_R6,
-  public = list(
-    reader_function = list(),
-    initialize = function(iterable,  reader = readLines) {
-      stopifnot(is.character(iterable))
-      stopifnot(is.function(reader))
-      self$iterable = iterable
-      self$reader_function = list(reader)
-      self$counter = 0
-    },
-    nextElem = function() {
-      if (self$is_complete) {
-        stop(StopIteration("StopIteration", pb = self$progressbar))
-      }
-      self$counter = self$counter + 1L
-      path = self$iterable[[self$counter]]
-      filename = basename(path)
-      docs = self$reader_function[[1]](path)
-      if(!inherits(docs, "character"))
-        stop("reader function should return character vector!")
-      # if user didn't assign names/ids to documents we will generate
-      # names = file name + doc number
-      if(is.null(names(docs))) {
-        #warning("reader function doesn't provide ids for documents (see ?ifiles).
-        #        Generating ids internally: id = file_name + '_' + doc_number_in_file")
-        names(docs) = paste(filename, seq_along(docs), sep = "_")
-      }
-      docs
-    }
-  )
-)
-
-# temp = ifiles_R6$new(c('man/as.lda_c.Rd', 'man/check_analogy_accuracy.Rd'), readr::read_lines )
-# str(temp$nextElem())
-
-itoken_iterator_R6 = R6::R6Class(
-  inherit = itoken_character_R6,
-  public = list(
-    iterator = NULL,
-    outer_progress = NULL,
-    outer_counter = NULL,
-    outer_length = NULL,
-    n_chunks = NULL,
-    initialize = function(input_iterator,
-                          n_chunks = 1,
-                          progress = interactive(),
-                          preprocessor_ = identity,
-                          tokenizer_ = identity) {
-      self$iterator = input_iterator
-      self$outer_length = self$iterator$length
-      self$progress = FALSE
-      self$preprocessor = list(preprocessor_)
-      self$tokenizer = list(tokenizer_)
-      self$n_chunks = n_chunks
-      if (!is.null(self$iterator$length))
-        self$outer_progress = progress
-      else
-        self$outer_progress = FALSE
-      self$outer_counter = 0L
-      if (self$outer_progress)
-        self$progressbar = txtProgressBar(initial = -1L, min = 0, max = self$outer_length, style = 3)
-    },
-    nextOuterIter = function() {
-      if (self$outer_is_complete) {
-        stop(StopIteration("StopIteration", pb = self$progressbar))
-      }
-      self$iterable = self$iterator$nextElem()
-      self$outer_counter = self$outer_counter + 1L
-      self$chunk_size = ceiling(self$length / self$n_chunks)
-      self$ids = names(self$iterable)
-      if (is.null(self$ids))
-        self$ids = as.character(seq_len(self$length))
-      self$counter = 0L
-      if (self$outer_progress)
-        setTxtProgressBar(self$progressbar, self$outer_counter)
-        #self$progressbar = txtProgressBar(initial = -1L, min = 0, max = self$outer_length, style = 3)
-    },
-    nextElem = function() {
-      res = try(super$nextElem(), silent = TRUE)
-      self$counter = self$counter + 1L
-      if (!inherits(res, "try-error")) {
-        res
-      }
-      else {
-        self$nextOuterIter()
-        super$nextElem()
+      range_end = private$iterable_cursor + self$step - 1L
+      range_end = min(range_end, private$iterable_length)
+      if(!self$is_complete) {
+        i = range_start:range_end
+        private$iterable_cursor = range_end + 1L
+        self$cursor = self$cursor + 1L
+        invisible(i)
+      } else {
+        stop("stopIteration")
       }
     }
   ),
+  private = list(
+    length_ = NULL,
+    iterable_cursor = NULL,
+    iterable_length = NULL
+  ),
   active = list(
-    #------------------------
-    outer_is_complete = function(value) {
-      if (!missing(value)) {
-        stop("field is read-only")
-      }
-      self$outer_counter >= self$outer_length
+    is_complete = function(x) {
+      self$cursor > private$length_
+    },
+    length = function(x) {
+      private$length_
     }
   )
 )
 
-itoken_transformer_R6 = R6::R6Class(
-  inherit = itoken_character_R6,
+CallbackIterator = R6::R6Class(
+  classname = c("CallbackIterator", "iterator"),
   public = list(
-    iterator = NULL,
-    transformer = NULL,
-    initialize = function(input_iterator, transformer = identity) {
-      self$iterator = input_iterator
-      self$transformer = list(transformer)
+    callback = NULL,
+    x = NULL,
+    initialize = function(x, callback = identity) {
+      self$x = if(inherits(x, "GenericIterator") || inherits(x, "CallbackIterator")) {
+        x$clone(TRUE)
+      } else {
+        GenericIterator$new(x, step = 1)
+      }
+      self$callback = callback
     },
     nextElem = function() {
-      res = try(self$iterator$nextElem(), silent = TRUE)
-      if (!inherits(res, 'try-error')) {
-        res$tokens = self$transformer[[1]](res)
-        res
-      }
-      else {
-        stop(StopIteration("StopIteration", pb = self$progressbar))
-      }
+      self$callback(self$x$nextElem())
+    },
+    move_cursor = function() {
+      self$x$move_cursor()
+    }
+  ),
+  active = list(
+    is_complete = function(x) {
+      self$x$is_complete
+    },
+    length = function(x) {
+      self$x$length
     }
   )
 )
@@ -284,7 +115,17 @@ itoken_transformer_R6 = R6::R6Class(
 #' @export
 ifiles = function(file_paths, reader = readLines) {
   stopifnot(length(file_paths) > 0)
-  ifiles_R6$new(file_paths, reader = reader)
+  CallbackIterator$new(
+    x = file_paths,
+    callback = function(x) {
+      res = reader(x)
+      ids = names(res)
+      if(is.null(ids))
+        ids = paste(basename(x), seq_along(res), sep = "_")
+
+      text2vec.tokens(res, ids)
+    }
+  )
 }
 #------------------------------------------------------------------------------------------
 #' @rdname ifiles
@@ -299,21 +140,16 @@ idir = function(path, reader = readLines) {
 
 #------------------------------------------------------------------------------------------
 #' @rdname ifiles
-#' @param n_chunks \code{integer}, defines in how many chunks files will be processed.
-#' For example if you have 32 files, and \code{n_chunks = 8}, then for each 4 files will be
-#' created a job (for example document-term matrix construction).
-#' In case some parallel backend registered, each job will be evaluated in a separated thread (process) in parallel.
-#' So each such group of files will be processed in parallel and at the end all 8 results from will be combined.
+#' @param ... other arguments (not used at the moment)
 #' @export
-ifiles_parallel = function(file_paths, reader = readLines,
-                           n_chunks = foreach::getDoParWorkers()) {
-  stopifnot(length(file_paths) > 0)
-  chunk_indices = split_into(seq_along(file_paths), n_chunks)
-  iter_list = lapply(chunk_indices, function(i) {
-    ifiles_R6$new(file_paths[i], reader = reader)
-  })
-  class(iter_list) = 'ifiles_parallel'
-  iter_list
+ifiles_parallel = function(file_paths, reader = readLines, ...) {
+  it = ifiles(file_paths, reader)
+  if(.Platform$OS.type == "unix") {
+    class(it) = c('ifiles_parallel', class(it))
+  } else {
+    warning("`ifiles_parallel` is not supported on windows - falling back to `ifiles`")
+  }
+  it
 }
 #------------------------------------------------------------------------------------------
 #' @name itoken
@@ -350,36 +186,11 @@ ifiles_parallel = function(file_paths, reader = readLines,
 #' # stem_tokenizer =function(x) {
 #' #   lapply(word_tokenizer(x), SnowballC::wordStem, language="en")
 #' # }
-#' #------------------------------------------------
-#' # PARALLEL iterators
-#' #------------------------------------------------
-#' library(text2vec)
-#'
-#' N_WORKERS = 1 # change 1 to number of cores in parallel backend
-#' if(require(doParallel)) registerDoParallel(N_WORKERS)
-#' data("movie_review")
-#' it = itoken_parallel(movie_review$review[1:100], n_chunks = N_WORKERS)
+#' it = itoken_parallel(movie_review$review[1:100], n_chunks = 4)
 #' system.time(dtm <- create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix'))
 #' @export
 itoken = function(iterable, ...) {
   UseMethod("itoken")
-}
-
-#' @rdname itoken
-#' @param ids \code{vector} of document ids. If \code{ids} is not provided,
-#'   \code{names(iterable)} will be used. If \code{names(iterable) == NULL},
-#'   incremental ids will be assigned.
-#' @export
-itoken.list = function(iterable,
-                        n_chunks = 10,
-                        progressbar = interactive(),
-                        ids = NULL, ...) {
-  # flog.debug("checking whether `itoken` input is list of characrter vectors")
-  # input_is_list_of_char_vec = all( vapply(X = iterable, FUN = inherits, FUN.VALUE = FALSE, "character") )
-  # if(!input_is_list_of_char_vec)
-  #   flog.warn("input isn't a list of character vectors. Each element will be coerced to a character vector with as.character()")
-  itoken_character_R6$new(iterable, n_chunks = n_chunks, progress = progressbar, ids = ids,
-                          preprocessor_ = identity, tokenizer_ = identity)
 }
 
 #' @rdname itoken
@@ -400,44 +211,85 @@ itoken.list = function(iterable,
 #'   of chunks means larger memory footprint but faster execution (again if user
 #'   supplied \code{preprocessor, tokenizer} functions are efficiently vectorized).
 #' @param progressbar \code{logical} indicates whether to show progress bar.
+#' @param ids \code{vector} of document ids. If \code{ids} is not provided,
+#'   \code{names(iterable)} will be used. If \code{names(iterable) == NULL},
+#'   incremental ids will be assigned.
 #' @export
 itoken.character = function(iterable,
-                             preprocessor = identity,
-                             tokenizer = space_tokenizer,
-                             n_chunks = 10,
-                             progressbar = interactive(),
-                             ids = NULL, ...) {
-  itoken_character_R6$new(iterable, n_chunks = n_chunks, progress = progressbar, ids = ids,
-                          preprocessor_ = preprocessor, tokenizer_ = tokenizer)
+                            preprocessor = identity,
+                            tokenizer = space_tokenizer,
+                            n_chunks = 10,
+                            progressbar = interactive(),
+                            ids = NULL, ...) {
+
+  step = ceiling(length(iterable) / n_chunks)
+
+  if(is.null(ids))
+    ids = names(iterable)
+
+  if(is.null(ids))
+    ids = seq_along(iterable)
+
+  ids = as.character(ids)
+
+  tt = text2vec.tokens(iterable, ids)
+
+  it = GenericIterator$new(x = tt, step = step)
+
+  res = CallbackIterator$new(x = it, callback = function(x) {
+    tokens = tokenizer(preprocessor(x$tokens))
+    list(tokens = tokens, ids = x$ids)
+  })
+  data.table::setattr(res, "class", c("itoken", class(res)))
+  res
 }
+
+# it = itoken(movie_review$review, preprocessor = tolower, tokenizer = space_tokenizer, n_chunks = 10, ids = movie_review$id)
+# v = create_vocabulary(it)
+# dtm = create_dtm(it, vocab_vectorizer(v))
+
+#' @rdname itoken
+#' @export
+itoken.list = function(
+  iterable,
+  n_chunks = 10,
+  progressbar = interactive(),
+  ids = names(iterable), ...) {
+
+  itoken.character(iterable = iterable, preprocessor = identity, tokenizer = identity, n_chunks = n_chunks, ids = ids)
+}
+
+# tokens = strsplit(movie_review$review, split = " ", fixed = T)
+# it = itoken(tokens, ids = movie_review$id, n_chunks = 4)
+# v = create_vocabulary(it)
+# dtm = create_dtm(it, vocab_vectorizer(v))
 
 #' @rdname itoken
 #' @export
 itoken.iterator = function(iterable,
                            preprocessor = identity,
                            tokenizer = space_tokenizer,
-                           n_chunks = 1L,
                            progressbar = interactive(), ...) {
-  if (inherits(iterable, "R6"))
-    it = iterable$clone()
-  else {
-    warning("Can't clone input iterator. It will be modified in place by `itoken` call", immediate. = TRUE)
-    it = iterable
-  }
 
-  itoken_iterator_R6$new(it,
-                         n_chunks = n_chunks,
-                         progress = progressbar,
-                         preprocessor_ = preprocessor,
-                         tokenizer_ = tokenizer
-                         )
+  res = CallbackIterator$new(x = iterable, callback = function(x) {
+    tokens = tokenizer(preprocessor(x$tokens))
+    list(tokens = tokens, ids = x$ids)
+  })
+
+  data.table::setattr(res, "class", c("itoken", class(res)))
+  res
 }
 
 #' @name itoken_parallel
 #' @rdname itoken
 #' @export
 itoken_parallel = function(iterable, ...) {
-  UseMethod("itoken_parallel")
+  if(.Platform$OS.type != "unix") {
+    warning("`ifiles_parallel` is not supported on windows - falling back to `itoken`")
+    UseMethod("itoken")
+  } else {
+    UseMethod("itoken_parallel")
+  }
 }
 
 #' @rdname itoken
@@ -445,98 +297,31 @@ itoken_parallel = function(iterable, ...) {
 itoken_parallel.character = function(iterable,
                                      preprocessor = identity,
                                      tokenizer = space_tokenizer,
-                                     n_chunks = foreach::getDoParWorkers(),
+                                     n_chunks = 10,
                                      ids = NULL, ...) {
-  chunk_indices = split_into(seq_along(iterable), n_chunks)
-  iter_list = lapply(chunk_indices, function(i) {
-    ids_chunk = if(is.null(ids)) NULL else(ids[i])
-    itoken(iterable[i], preprocessor, tokenizer, n_chunks = 1, ids = ids_chunk)
-  })
-  class(iter_list) = 'itoken_parallel'
-  iter_list
+  it = itoken(iterable, preprocessor, tokenizer, n_chunks, ids)
+  class(it) = c('itoken_parallel', class(it))
+  it
 }
 
 #' @rdname itoken
 #' @export
-itoken_parallel.ifiles_parallel = function(iterable,
-                                           preprocessor = identity,
-                                           tokenizer = space_tokenizer,
-                                           n_chunks = 1L,
-                                           ...) {
-  iter_list = lapply(iterable, function(it_files) {
-    itoken(it_files, preprocessor = preprocessor, tokenizer = tokenizer, n_chunks = n_chunks, ...)
-  })
-  class(iter_list) = 'itoken_parallel'
-  iter_list
+itoken_parallel.iterator = function(iterable,
+                                    preprocessor = identity,
+                                    tokenizer = space_tokenizer,
+                                    n_chunks = 1L,
+                                    ...) {
+  it = itoken(iterable, preprocessor, tokenizer, n_chunks = n_chunks, ...)
+  class(it) = c('itoken_parallel', class(it))
+  it
 }
-
 
 #' @rdname itoken
 #' @export
 itoken_parallel.list = function(iterable,
-                                n_chunks = foreach::getDoParWorkers(),
+                                n_chunks = 10,
                                 ids = NULL, ...) {
-  chunk_indices = split_into(seq_along(iterable), n_chunks)
-
-  if(is.null(ids)) {
-    ids = seq_along(iterable)
-    if(!is.null(names(iterable)))
-      ids = names(iterable)
-  } else {
-    stopifnot(length(ids) == length(iterable))
-    ids = as.character(ids)
-  }
-
-  iter_list = lapply(chunk_indices, function(i) {
-    ids_chunk = if(is.null(ids)) NULL else(ids[i])
-    itoken(iterable[i], n_chunks = 1, ids = ids_chunk, progressbar = FALSE)
-  })
-  class(iter_list) = 'itoken_parallel'
-  iter_list
+  it = itoken(iterable, n_chunks, progressbar = interactive(), ids = ids, ...)
+  class(it) = c('itoken_parallel', class(it))
+  it
 }
-
-
-# #' @name ilines
-# #' @title Creates iterator over the lines of a connection or file
-# #' @description The result of this function is usually used in an \link{itoken}
-# #'   function.
-# #' @param con \code{connection} object or a \code{character} string.
-# #' @param n \code{integer}, the maximum number of lines to read per iteration.
-# #'   Negative values indicate that one should read up to the end of the
-# #'   connection. The default value is 1.
-# #' @param ... arguments passed to \link{readLines} function.
-# #' @seealso \link{itoken}, \link{readLines}
-# #' @export
-# ilines = function(con, n, ...) {
-#   ilines_R6$new(con = con, chunk_size = n)
-# }
-
-# ilines_R6 = R6::R6Class(
-#   "ilines",
-#   inherit = finite_iterator_R6,
-#   public = list(
-#     do_close = NULL,
-#     con = NULL,
-#     initialize = function(con, chunk_size) {
-#       if (is.character(con)) {
-#         self$con = file(con, open = "r")
-#         self$do_close = TRUE
-#       }
-#       self$progress = FALSE
-#       # self$ids = as.character(ids)
-#       self$chunk_size = chunk_size
-#     },
-#     nextElem = function() {
-#       if (is.null(self$con))
-#         stop(StopIteration("StopIteration", pb = self$progressbar))
-#       res = readLines(self$con, n = self$chunk_size)
-#       if (length(res) == 0) {
-#         if (self$do_close)
-#           close(self$con)
-#         self$con = NULL
-#         stop(StopIteration("StopIteration", pb = self$progressbar))
-#       }
-#       res
-#     }
-#   )
-# )

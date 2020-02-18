@@ -8,15 +8,18 @@
 \usage{
 create_tcm(it, vectorizer, skip_grams_window = 5L,
   skip_grams_window_context = c("symmetric", "right", "left"),
-  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE, ...)
+  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE,
+  ...)
 
 \method{create_tcm}{itoken}(it, vectorizer, skip_grams_window = 5L,
   skip_grams_window_context = c("symmetric", "right", "left"),
-  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE, ...)
+  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE,
+  ...)
 
-\method{create_tcm}{itoken_parallel}(it, vectorizer, skip_grams_window = 5L,
-  skip_grams_window_context = c("symmetric", "right", "left"),
-  weights = 1/seq_len(skip_grams_window), binary_cooccurence = FALSE, ...)
+\method{create_tcm}{itoken_parallel}(it, vectorizer,
+  skip_grams_window = 5L, skip_grams_window_context = c("symmetric",
+  "right", "left"), weights = 1/seq_len(skip_grams_window),
+  binary_cooccurence = FALSE, ...)
 }
 \arguments{
 \item{it}{\code{list} of iterators over tokens from \link{itoken}.
@@ -43,7 +46,7 @@ appearence of the context word and remaining occurrence are ignored. Useful when
 of coherence of topic models.
 \code{"symmetric"} by default - take into account \code{skip_grams_window} left and right.}
 
-\item{...}{arguments to \link{foreach} function which is used to iterate over
+\item{...}{placeholder for additional arguments (not used at the moment).
 \code{it}.}
 }
 \value{
@@ -74,14 +77,10 @@ tcm = create_tcm(itoken(tokens), vectorizer, skip_grams_window = 3L)
 # parallel version
 
 # set to number of cores on your machine
-N_WORKERS = 1
-if(require(doParallel)) registerDoParallel(N_WORKERS)
-splits = split_into(movie_review$review, N_WORKERS)
-jobs = lapply(splits, itoken, tolower, word_tokenizer)
+it = token_parallel(movie_review$review[1:N], tolower, word_tokenizer, movie_review$id[1:N])
 v = create_vocabulary(jobs)
 vectorizer = vocab_vectorizer(v)
-jobs = lapply(splits, itoken, tolower, word_tokenizer)
-
+dtm = create_dtm(it, vectorizer, type = 'dgTMatrix')
 tcm = create_tcm(jobs, vectorizer, skip_grams_window = 3L, skip_grams_window_context = "symmetric")
 }
 }

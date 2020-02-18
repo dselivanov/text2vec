@@ -67,14 +67,11 @@ test_that("euclidean", {
 })
 
 test_that("relaxed word mover distance", {
-  glove = GlobalVectors$new(word_vectors_size = 50, vocabulary = v, x_max = 10)
-  wv = glove$fit_transform(tcm, n_iter = 10)
-  rwmd_model = RWMD$new(wv)
-  rwmd_dist = dist2(dtm[i1, ], dtm[i2, ], method = rwmd_model, norm = "none")
+  glove = GlobalVectors$new(rank = 50, x_max = 10)
+  wv = glove$fit_transform(tcm, n_iter = 5)
+  rwmd_model = RWMD$new(dtm[i2, ], wv)
+  rwmd_dist = rwmd_model$dist2(dtm[i1, ])
   expect_equal(nrow(rwmd_dist), length(i1))
   expect_equal(ncol(rwmd_dist), length(i2))
   expect_equal(rwmd_dist[1,1], 0, tol = tol)
-  expect_equal(dist2(dtm[i1, ], method = rwmd_model, norm = "none"),
-               dist2(dtm[i1, ], dtm[i1, ], method = rwmd_model, norm = "none"))
-
 })

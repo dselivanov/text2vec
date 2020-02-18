@@ -1,5 +1,4 @@
 context("lsa model")
-require(irlba)
 N = 100
 n_topics = 20
 train_ind = 1:N
@@ -36,14 +35,14 @@ test_that("LSA decomposition quality", {
 
   m1 = model$fit_transform(dtm)
 
-  manual_decomp = irlba::irlba(dtm, nu = max_size, nv = max_size)
+  manual_decomp = rsparse::soft_svd(dtm, max_size)
 
   m2 = dtm %*% manual_decomp$v
 
   expect_equal(dim(m1), dim(m2), info = "Dimensions sanity check")
 
   expect_equal(sum(model$get_explained_variance_ratio()),
-               sum(proportion_var_explained(dtm, m2)), tolerance = 1e-8,
+               sum(proportion_var_explained(dtm, m2)), tolerance = 1e-5,
                info = "Proportion of variance explained should match")
 
   expect_equal(sum(model$get_explained_variance_ratio()), 1.0, tolerance = 1e-3,

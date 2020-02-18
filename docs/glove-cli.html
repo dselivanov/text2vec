@@ -11,7 +11,7 @@
 
 <meta name="author" content="Dmitriy Selivanov" />
 
-<meta name="date" content="2017-08-08" />
+<meta name="date" content="2018-12-21" />
 
 <title>GloVe Command Line Interface</title>
 
@@ -367,7 +367,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">GloVe Command Line Interface</h1>
 <h4 class="author"><em>Dmitriy Selivanov</em></h4>
-<h4 class="date"><em>2017-08-08</em></h4>
+<h4 class="date"><em>2018-12-21</em></h4>
 
 </div>
 
@@ -387,40 +387,40 @@ div.tocify {
 <div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="co"># change following line accordingly to your system:</span>
 <span class="co"># https://cran.r-project.org/bin/linux/ubuntu/</span>
 <span class="co"># here is string for ubuntu 14.04</span>
-<span class="kw">echo</span> <span class="st">&#39;deb https://cloud.r-project.org/bin/linux/ubuntu trusty/&#39;</span> <span class="kw">|</span> <span class="kw">sudo</span> tee --append /etc/apt/sources.list
-<span class="kw">sudo</span> apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-<span class="kw">sudo</span> apt-key update
+<span class="bu">echo</span> <span class="st">&#39;deb https://cloud.r-project.org/bin/linux/ubuntu trusty/&#39;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee --append /etc/apt/sources.list
+<span class="fu">sudo</span> apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+<span class="fu">sudo</span> apt-key update
 <span class="co"># install dependencies</span>
-<span class="kw">sudo</span> apt-get install -y libssl-dev libcurl4-openssl-dev git
+<span class="fu">sudo</span> apt-get install -y libssl-dev libcurl4-openssl-dev git
 <span class="co"># isntall R</span>
-<span class="kw">sudo</span> apt-get install -y r-base r-base-dev</code></pre></div>
+<span class="fu">sudo</span> apt-get install -y r-base r-base-dev</code></pre></div>
 </div>
 <div id="centosfedorarhel" class="section level3">
 <h3>Centos/Fedora/RHEL</h3>
 <p>Need something similar to instructions above. See how to install fresh R (3.2+) <a href="https://cran.r-project.org/bin/linux/redhat/README">here</a>.</p>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">sudo</span> yum install openssl-devel libcurl-openssl-devel R</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="fu">sudo</span> yum install openssl-devel libcurl-openssl-devel R</code></pre></div>
 </div>
 </div>
 <div id="text2vec" class="section level2">
 <h2>text2vec</h2>
 <p>After R is installed clone this repo and make main scripts executable:</p>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/dselivanov/text2vec-cli.git
-<span class="kw">cd</span> text2vec-cli
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="fu">git</span> clone https://github.com/dselivanov/text2vec-cli.git
+<span class="bu">cd</span> text2vec-cli
 <span class="co"># make scripts executable</span>
-<span class="kw">chmod</span> +x install.R vocabulary.R cooccurence.R glove.R analogy.R</code></pre></div>
+<span class="fu">chmod</span> +x install.R vocabulary.R cooccurence.R glove.R analogy.R</code></pre></div>
 <p>And install text2vec with dependencies:</p>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">./install.R</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="ex">./install.R</span></code></pre></div>
 </div>
 </div>
 <div id="usage" class="section level1">
 <h1>Usage</h1>
 <div id="shut-up-and-show-me-the-code" class="section level3">
 <h3>Shut up and show me the code</h3>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">wget</span> http://mattmahoney.net/dc/text8.zip
-<span class="kw">./vocabulary.R</span> files=text8.zip vocab_file=vocab.rds
-<span class="kw">./cooccurence.R</span> files=text8.zip vocab_file=vocab.rds vocab_min_count=5 window_size=5 cooccurences_file=tcm.rds
-<span class="kw">./glove.R</span> cooccurences_file=tcm.rds word_vectors_size=50 iter=10 x_max=10 convergence_tol=0.01
-<span class="kw">./analogy.R</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="fu">wget</span> http://mattmahoney.net/dc/text8.zip
+<span class="ex">./vocabulary.R</span> files=text8.zip vocab_file=vocab.rds
+<span class="ex">./cooccurence.R</span> files=text8.zip vocab_file=vocab.rds vocab_min_count=5 window_size=5 cooccurences_file=tcm.rds
+<span class="ex">./glove.R</span> cooccurences_file=tcm.rds word_vectors_size=50 iter=10 x_max=10 convergence_tol=0.01
+<span class="ex">./analogy.R</span></code></pre></div>
 </div>
 <div id="notes" class="section level2">
 <h2>Notes</h2>
@@ -436,7 +436,7 @@ div.tocify {
 <li>split stream by lines with a constraint that each chunk should not be more than 100mb</li>
 <li>pass each chunk to pipe, compress it back and save to disk</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">gunzip</span> -c BIG_FILE.gz <span class="kw">|</span> <span class="kw">split</span> --line-bytes=100m --filter=<span class="st">&#39;gzip --fast &gt; ./chunk_$FILE.gz&#39;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="fu">gunzip</span> -c BIG_FILE.gz <span class="kw">|</span> <span class="fu">split</span> --line-bytes=100m --filter=<span class="st">&#39;gzip --fast &gt; ./chunk_$FILE.gz&#39;</span></code></pre></div>
 <p>For OS X install <code>coreutils</code>: <code>brew install coreutils</code> and use <code>gsplit</code> instead of split.</p>
 <p>We assume:</p>
 <ol style="list-style-type: decimal">
@@ -451,7 +451,7 @@ div.tocify {
 <p>To fit GloVe model user need to go through following steps.</p>
 <div id="create-vocabulary" class="section level3">
 <h3>create vocabulary</h3>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">./vocabulary.R</span> files=text8.zip vocab_file=vocab.rds</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="ex">./vocabulary.R</span> files=text8.zip vocab_file=vocab.rds</code></pre></div>
 <p>Arguments:</p>
 <ol style="list-style-type: decimal">
 <li><code>files</code> - filenames of input files.multiple input files can be provided to <code>files</code> argument - use comma <code>,</code> to concatenate names: <code>files=file1,file2</code>.</li>
@@ -461,7 +461,7 @@ div.tocify {
 </div>
 <div id="create-co-occurence-statistics" class="section level3">
 <h3>create co-occurence statistics</h3>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">./cooccurence.R</span> files=text8.zip vocab_file=vocab.rds vocab_min_count=5 window_size=5 cooccurences_file=tcm.rds</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="ex">./cooccurence.R</span> files=text8.zip vocab_file=vocab.rds vocab_min_count=5 window_size=5 cooccurences_file=tcm.rds</code></pre></div>
 <p>Arguments:</p>
 <ol style="list-style-type: decimal">
 <li><code>files</code> - filenames of input files.multiple input files can be provided to <code>files</code> argument - use comma <code>,</code> to concatenate names: <code>files=file1,file2</code>.</li>
@@ -474,7 +474,7 @@ div.tocify {
 </div>
 <div id="train-glove-model" class="section level3">
 <h3>train GloVe model</h3>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">./glove.R</span> cooccurences_file=tcm.rds word_vectors_size=50 iter=10 x_max=10 convergence_tol=0.01</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="ex">./glove.R</span> cooccurences_file=tcm.rds word_vectors_size=50 iter=10 x_max=10 convergence_tol=0.01</code></pre></div>
 <p>Arguments:</p>
 <ol style="list-style-type: decimal">
 <li><code>cooccurences_file</code> - name of the file with co-occurence statistics</li>
@@ -491,7 +491,7 @@ div.tocify {
 </div>
 <div id="check-accuracy-on-word-analogy-task" class="section level2">
 <h2>check accuracy on word-analogy task</h2>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">./analogy.R</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="ex">./analogy.R</span></code></pre></div>
 </div>
 </div>
 

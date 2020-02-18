@@ -11,7 +11,7 @@
 
 <meta name="author" content="Dmitriy Selivanov" />
 
-<meta name="date" content="2017-08-08" />
+<meta name="date" content="2018-12-21" />
 
 <title>Documents similarity</title>
 
@@ -367,7 +367,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Documents similarity</h1>
 <h4 class="author"><em>Dmitriy Selivanov</em></h4>
-<h4 class="date"><em>2017-08-08</em></h4>
+<h4 class="date"><em>2018-12-21</em></h4>
 
 </div>
 
@@ -401,27 +401,27 @@ div.tocify {
 <span class="kw">library</span>(text2vec)
 <span class="kw">data</span>(<span class="st">&quot;movie_review&quot;</span>)
 <span class="co"># select 500 rows for faster running times</span>
-movie_review =<span class="st"> </span>movie_review[<span class="dv">1</span>:<span class="dv">500</span>, ]
-prep_fun =<span class="st"> </span>function(x) {
-  x %&gt;%<span class="st"> </span>
-<span class="st">    </span><span class="co"># make text lower case</span>
-<span class="st">    </span>str_to_lower %&gt;%<span class="st"> </span>
-<span class="st">    </span><span class="co"># remove non-alphanumeric symbols</span>
-<span class="st">    </span><span class="kw">str_replace_all</span>(<span class="st">&quot;[^[:alnum:]]&quot;</span>, <span class="st">&quot; &quot;</span>) %&gt;%<span class="st"> </span>
-<span class="st">    </span><span class="co"># collapse multiple spaces</span>
-<span class="st">    </span><span class="kw">str_replace_all</span>(<span class="st">&quot;</span><span class="ch">\\</span><span class="st">s+&quot;</span>, <span class="st">&quot; &quot;</span>)
+movie_review =<span class="st"> </span>movie_review[<span class="dv">1</span><span class="op">:</span><span class="dv">500</span>, ]
+prep_fun =<span class="st"> </span><span class="cf">function</span>(x) {
+    <span class="co"># make text lower case</span>
+    x =<span class="st"> </span><span class="kw">str_to_lower</span>(x)
+    <span class="co"># remove non-alphanumeric symbols</span>
+    x =<span class="st"> </span><span class="kw">str_replace_all</span>(x, <span class="st">&quot;[^[:alnum:]]&quot;</span>, <span class="st">&quot; &quot;</span>)
+    <span class="co"># collapse multiple spaces</span>
+    <span class="kw">str_replace_all</span>(x, <span class="st">&quot;</span><span class="ch">\\</span><span class="st">s+&quot;</span>, <span class="st">&quot; &quot;</span>)
 }
-movie_review$review_clean =<span class="st"> </span><span class="kw">prep_fun</span>(movie_review$review)</code></pre></div>
+movie_review<span class="op">$</span>review_clean =<span class="st"> </span><span class="kw">prep_fun</span>(movie_review<span class="op">$</span>review)</code></pre></div>
 <p>Now let’s define two sets of documents on which we will evaluate our distance models:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc_set_1 =<span class="st"> </span>movie_review[<span class="dv">1</span>:<span class="dv">300</span>, ]
-it1 =<span class="st"> </span><span class="kw">itoken</span>(doc_set_1$review_clean, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc_set_<span class="dv">1</span> =<span class="st"> </span>movie_review[<span class="dv">1</span><span class="op">:</span><span class="dv">300</span>, ]
+it1 =<span class="st"> </span><span class="kw">itoken</span>(doc_set_<span class="dv">1</span><span class="op">$</span>review_clean, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
 
 <span class="co"># specially take different number of docs in second set</span>
-doc_set_2 =<span class="st"> </span>movie_review[<span class="dv">301</span>:<span class="dv">500</span>, ]
-it2 =<span class="st"> </span><span class="kw">itoken</span>(doc_set_2$review_clean, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)</code></pre></div>
+doc_set_<span class="dv">2</span> =<span class="st"> </span>movie_review[<span class="dv">301</span><span class="op">:</span><span class="dv">500</span>, ]
+it2 =<span class="st"> </span><span class="kw">itoken</span>(doc_set_<span class="dv">2</span><span class="op">$</span>review_clean, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)</code></pre></div>
 <p>We will compare documents in a vector space. So we need to define common space and project documents to it. We will use vocabulary-based vectorization vectorization for better interpretability:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">it =<span class="st"> </span><span class="kw">itoken</span>(movie_review$review_clean, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
-v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it) %&gt;%<span class="st"> </span><span class="kw">prune_vocabulary</span>(<span class="dt">doc_proportion_max =</span> <span class="fl">0.1</span>, <span class="dt">term_count_min =</span> <span class="dv">5</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">it =<span class="st"> </span><span class="kw">itoken</span>(movie_review<span class="op">$</span>review_clean, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
+v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it)
+v =<span class="st"> </span><span class="kw">prune_vocabulary</span>(v, <span class="dt">doc_proportion_max =</span> <span class="fl">0.1</span>, <span class="dt">term_count_min =</span> <span class="dv">5</span>)
 vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(v)</code></pre></div>
 <div id="jaccard-similarity" class="section level2">
 <h2>Jaccard similarity</h2>
@@ -441,15 +441,15 @@ dtm1 =<span class="st"> </span><span class="kw">create_dtm</span>(it1, vectorize
 <p>Check result:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(d1_d2_jac_sim)</code></pre></div>
 <pre><code>## [1] 300 200</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_jac_sim[<span class="dv">1</span>:<span class="dv">2</span>, <span class="dv">1</span>:<span class="dv">5</span>]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_jac_sim[<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]</code></pre></div>
 <pre><code>## 2 x 5 sparse Matrix of class &quot;dgCMatrix&quot;
 ##            1 2          3           4          5
 ## 1 0.02142857 . 0.02362205 0.007575758 0.02597403
 ## 2 0.01219512 . 0.02941176 0.013888889 0.02083333</code></pre>
 <p>Also we can comptute <em>“parallel”</em> similarity - similarity between corresponding rows of matrices (matrices should have identical shapes):</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dtm1_2 =<span class="st"> </span>dtm1[<span class="dv">1</span>:<span class="dv">200</span>, ]
-dtm2_2 =<span class="st"> </span>dtm2[<span class="dv">1</span>:<span class="dv">200</span>, ]
-d1_d2_jac_psim =<span class="st"> </span><span class="kw">psim2</span>(dtm1_2, dtm2_2, <span class="dt">method =</span> <span class="st">&quot;jaccard&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;none&quot;</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dtm1_<span class="dv">2</span> =<span class="st"> </span>dtm1[<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>, ]
+dtm2_<span class="dv">2</span> =<span class="st"> </span>dtm2[<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>, ]
+d1_d2_jac_psim =<span class="st"> </span><span class="kw">psim2</span>(dtm1_<span class="dv">2</span>, dtm2_<span class="dv">2</span>, <span class="dt">method =</span> <span class="st">&quot;jaccard&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;none&quot;</span>)
 <span class="kw">str</span>(d1_d2_jac_psim)</code></pre></div>
 <pre><code>##  Named num [1:200] 0.02143 0 0.00735 0 0.03311 ...
 ##  - attr(*, &quot;names&quot;)= chr [1:200] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...</code></pre>
@@ -463,7 +463,7 @@ d1_d2_jac_psim =<span class="st"> </span><span class="kw">psim2</span>(dtm1_2, d
 <p>Check result:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(d1_d2_cos_sim)</code></pre></div>
 <pre><code>## [1] 300 200</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_cos_sim[<span class="dv">1</span>:<span class="dv">2</span>, <span class="dv">1</span>:<span class="dv">5</span>]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_cos_sim[<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]</code></pre></div>
 <pre><code>## 2 x 5 sparse Matrix of class &quot;dgCMatrix&quot;
 ##            1 2          3           4          5
 ## 1 0.02703999 . 0.05063299 0.009500143 0.02753954
@@ -472,40 +472,54 @@ d1_d2_jac_psim =<span class="st"> </span><span class="kw">psim2</span>(dtm1_2, d
 <h3>Cosine similarity with Tf-Idf</h3>
 <p>It can be useful to measure similarity not on vanilla bag-of-words matrix, but on transformed one. One choice is to apply tf-idf transformation. First let’t create tf-idf model:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dtm =<span class="st"> </span><span class="kw">create_dtm</span>(it, vectorizer)
-tfidf =<span class="st"> </span>TfIdf$<span class="kw">new</span>()
+tfidf =<span class="st"> </span>TfIdf<span class="op">$</span><span class="kw">new</span>()
 dtm_tfidf =<span class="st"> </span><span class="kw">fit_transform</span>(dtm, tfidf)</code></pre></div>
 <p>Calculate similarities between all rows of <code>dtm_tfidf</code> matrix:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_tfidf_cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> dtm_tfidf, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
-d1_d2_tfidf_cos_sim[<span class="dv">1</span>:<span class="dv">2</span>, <span class="dv">1</span>:<span class="dv">5</span>]</code></pre></div>
+d1_d2_tfidf_cos_sim[<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]</code></pre></div>
 <pre><code>## 2 x 5 sparse Matrix of class &quot;dgCMatrix&quot;
 ##             1           2          3          4          5
-## 1 1.000000000 0.007885415 0.02380155 0.02864296 0.01510648
-## 2 0.007885415 1.000000000 0.01120455 .          .</code></pre>
+## 1 1.000000000 0.007517279 0.02216897 0.02697791 0.01366605
+## 2 0.007517279 1.000000000 0.01111845 .          .</code></pre>
 </div>
 <div id="cosine-similarity-with-lsa" class="section level3">
 <h3>Cosine similarity with LSA</h3>
 <p>Usually tf-idf/bag-of-words matrices contain a lot of noise. Applying LSA model can help with this problem, so you can achieve better quality similarities:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lsa =<span class="st"> </span>LSA$<span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">100</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lsa =<span class="st"> </span>LSA<span class="op">$</span><span class="kw">new</span>(<span class="dt">n_topics =</span> <span class="dv">100</span>)
 dtm_tfidf_lsa =<span class="st"> </span><span class="kw">fit_transform</span>(dtm_tfidf, lsa)</code></pre></div>
+<pre><code>## INFO [2018-12-21 20:44:35] soft_als: iter 001, frobenious norm change 1.719
+## INFO [2018-12-21 20:44:35] soft_als: iter 002, frobenious norm change 0.329
+## INFO [2018-12-21 20:44:35] soft_als: iter 003, frobenious norm change 0.077
+## INFO [2018-12-21 20:44:35] soft_als: iter 004, frobenious norm change 0.028
+## INFO [2018-12-21 20:44:35] soft_als: iter 005, frobenious norm change 0.013
+## INFO [2018-12-21 20:44:35] soft_als: iter 006, frobenious norm change 0.007
+## INFO [2018-12-21 20:44:35] soft_als: iter 007, frobenious norm change 0.004
+## INFO [2018-12-21 20:44:35] soft_als: iter 008, frobenious norm change 0.003
+## INFO [2018-12-21 20:44:35] soft_als: iter 009, frobenious norm change 0.002
+## INFO [2018-12-21 20:44:35] soft_als: iter 010, frobenious norm change 0.001
+## INFO [2018-12-21 20:44:35] soft_als: iter 011, frobenious norm change 0.001
+## INFO [2018-12-21 20:44:35] soft_impute: converged with tol 0.001000 after 11 iter
+## INFO [2018-12-21 20:44:35] running final svd
+## INFO [2018-12-21 20:44:35] final rank = 100</code></pre>
 <p>Calculate similarities between all rows of <code>dtm_tfidf_lsa</code> matrix:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d1_d2_tfidf_cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> dtm_tfidf_lsa, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
-d1_d2_tfidf_cos_sim[<span class="dv">1</span>:<span class="dv">2</span>, <span class="dv">1</span>:<span class="dv">5</span>]</code></pre></div>
-<pre><code>##           1         2         3           4          5
-## 1 1.0000000 0.1131078 0.2441785  0.22306293  0.2737060
-## 2 0.1131078 1.0000000 0.1196555 -0.02698341 -0.0475149</code></pre>
+d1_d2_tfidf_cos_sim[<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]</code></pre></div>
+<pre><code>##           1         2         3          4          5
+## 1 1.0000000 0.2155649 0.3245058 0.28449807 0.38486893
+## 2 0.2155649 1.0000000 0.2575520 0.01282894 0.02879225</code></pre>
 <p>And “parallel” similarities:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">1</span>:<span class="dv">250</span>, ]
-y =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">251</span>:<span class="dv">500</span>, ]
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">1</span><span class="op">:</span><span class="dv">250</span>, ]
+y =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">251</span><span class="op">:</span><span class="dv">500</span>, ]
 <span class="kw">head</span>(<span class="kw">psim2</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>))</code></pre></div>
 <pre><code>##          1          2          3          4          5          6 
-## 0.11315322 0.12302464 0.19952480 0.07238329 0.18239954 0.02230496</code></pre>
+## 0.22419185 0.22964204 0.30510876 0.10639831 0.29816243 0.02997241</code></pre>
 </div>
 </div>
 <div id="euclidean-distance" class="section level2">
 <h2>Euclidean distance</h2>
 <p>Euclidean <strong>distance</strong> is not so useful in NLP field as Jaccard or Cosine similarities. But it always worth to try different measures. In text2vec it can by computed only on dense matrices, here is example:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">1</span>:<span class="dv">300</span>, ]
-y =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">1</span>:<span class="dv">200</span>, ]
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">1</span><span class="op">:</span><span class="dv">300</span>, ]
+y =<span class="st"> </span>dtm_tfidf_lsa[<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>, ]
 m1 =<span class="st"> </span><span class="kw">dist2</span>(x, y, <span class="dt">method =</span> <span class="st">&quot;euclidean&quot;</span>)</code></pre></div>
 <p>Also we can apply different row normalization techniques (by default was <code>&quot;l2&quot;</code> in example above):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m2 =<span class="st"> </span><span class="kw">dist2</span>(x, y, <span class="dt">method =</span> <span class="st">&quot;euclidean&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l1&quot;</span>)

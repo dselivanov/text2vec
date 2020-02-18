@@ -1,5 +1,4 @@
 context("tcm construction")
-doParallel::registerDoParallel(2)
 
 train_ind = 1:100
 

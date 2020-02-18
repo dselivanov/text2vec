@@ -22,7 +22,7 @@ test_that("coherence, general functionality", {
 # intrinsic reference tcm from corpus for testing general functionality
   tcm_intrinsic = Matrix::crossprod(sign(dtm))
   coherence_res = coherence(x = top_terms ,tcm = tcm_intrinsic, n_doc_tcm = nrow(dtm))
-  expect_equal(class(coherence_res), "matrix")
+  expect_true(inherits(coherence_res, "matrix"))
   expect_equal(typeof(coherence_res), "double")
   expect_true(setequal(colnames(coherence_res),
                        c("mean_logratio", "mean_pmi", "mean_npmi", "mean_difference", "mean_npmi_cosim", "mean_npmi_cosim2")))
@@ -112,8 +112,8 @@ test_that("coherence, results of text2vec vs other packages", {
            " index terms or phi must be a numeric vector whose entries index terms.")
     }
     # is dtm a matrix we can work with?
-    if( ! is.matrix(dtm) &
-        ! class(dtm) %in% c("dgCMatrix", "dgTMatrix", "dgeMatrix", "dgRMatrix") ){
+    if( ! is.matrix(dtm) &&
+        ! inherits(dtm, 'Matrix')){
       stop("dtm must be a matrix. This can be a standard R dense matrix or a\n",
            " matrix of class dgCMatrix, dgTMatrix, dgRMatrix, or dgeMatrix")
     }

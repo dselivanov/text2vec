@@ -18,8 +18,8 @@ represent a word.}
 }
 \description{
 This function checks how well the GloVe word embeddings do on
-  the analogy task. For full examples see \link{glove}.
+  the analogy task. For full examples see \link{GloVe}.
 }
 \seealso{
-\link{prepare_analogy_questions}, \link{glove}
+\link{prepare_analogy_questions}, \link{GloVe}
 }

@@ -128,8 +128,8 @@ create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" 
   ngram_min = as.integer( ngram[[1]] )
   ngram_max = as.integer( ngram[[2]] )
   vocab_ptr = cpp_vocab_create(ngram_min, ngram_max, stopwords, sep_ngram, window_size)
-
-  foreach(tokens = it) %do% {
+  while(!it$is_complete) {
+    tokens = it$nextElem()
     vocabulary_insert_document_batch_generic(vocab_ptr, tokens$tokens)
   }
 
@@ -148,50 +148,22 @@ create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" 
   res
 }
 
-# FIXME
-#------------------------------------------------------------------------------
-# TO REMOVE IN text2vec 0.6
-#------------------------------------------------------------------------------
-#' @describeIn create_vocabulary collects unique terms and corresponding
-#'   statistics from list of itoken iterators. If parallel backend is
-#'   registered, it will build vocabulary in parallel using \link{foreach}.
-#' @export
-create_vocabulary.list = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
-                            stopwords = character(0), sep_ngram = "_", window_size = 0L, ...) {
-  .Deprecated("create_vocabulary.itoken_parallel()")
-  stopifnot( all( vapply(X = it, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
-  res =
-    foreach(it = it,
-          .combine = combine_vocabularies,
-          .inorder = FALSE,
-          .multicombine = TRUE,
-          .options.multicore = list(preschedule = FALSE),
-          ...) %dopar%
-          {
-            create_vocabulary(it, ngram, stopwords)
-          }
-  res
-}
 #------------------------------------------------------------------------------
 
 #' @describeIn create_vocabulary collects unique terms and corresponding
-#'   statistics from iterator. If parallel backend is
-#'   registered, it will build vocabulary in parallel using \link{foreach}.
-#' @param ... additional arguments to \link{foreach} function.
+#'   statistics from iterator.
+#' @param ... placeholder for additional arguments (not used at the moment).
 #' @export
 create_vocabulary.itoken_parallel = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
                                   stopwords = character(0), sep_ngram = "_", window_size = 0L, ...) {
-  stopifnot( all( vapply(X = it, FUN = inherits, FUN.VALUE = FALSE, "itoken") ) )
-  res =
-    foreach(it = it,
-            .combine = combine_vocabularies,
-            .inorder = FALSE,
-            .multicombine = TRUE,
-            .options.multicore = list(preschedule = FALSE),
-            ...) %dopar%
-            {
-              create_vocabulary(it, ngram, stopwords)
-            }
+
+  FUN = function(x) {
+    it2 = itoken(x$tokens, n_chunks = 1L, progressbar = FALSE, ids = x$ids)
+    create_vocabulary(it2, ngram, stopwords, sep_ngram, window_size, ...)
+  }
+
+  res = mc_queue(it, FUN)
+  res = do.call(combine_vocabularies, res)
   res
 }
 

@@ -15,7 +15,7 @@ Topic modeling is technique to extract abstract topics from a collection of docu
 
 Latent Semantic Analysis is the oldest among topic modeling techniques. It decomposes Document-Term matrix into a product of 2 **low rank** matrices $X \approx D \times T$. Goal of LSA is to receive approximation with a [respect to minimize Frobenious norm](https://en.wikipedia.org/wiki/Singular_value_decomposition#Low-rank_matrix_approximation): $error = \left\lVert X - D \times T \right\rVert _F$. Turns out this can be done with **truncated SVD** decomposition. 
 
-`text2vec` borrows SVD from very efficient [irlba](https://cran.r-project.org/package=irlba) package and adds convenient interface with an ability to fit model and apply it to new data.
+`text2vec` borrows SVD from [rsparse](https://github.com/dselivanov/rsparse) package and adds convenient interface with an ability to fit model and apply it to new data.
  
 ## Example
 

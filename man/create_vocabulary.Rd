@@ -5,7 +5,6 @@
 \alias{vocabulary}
 \alias{create_vocabulary.character}
 \alias{create_vocabulary.itoken}
-\alias{create_vocabulary.list}
 \alias{create_vocabulary.itoken_parallel}
 \title{Creates a vocabulary of unique terms}
 \usage{
@@ -15,14 +14,13 @@ create_vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
 vocabulary(it, ngram = c(ngram_min = 1L, ngram_max = 1L),
   stopwords = character(0), sep_ngram = "_", window_size = 0L)
 
-\method{create_vocabulary}{character}(it, ngram = c(ngram_min = 1L, ngram_max
-  = 1L), stopwords = character(0), sep_ngram = "_", window_size = 0L)
+\method{create_vocabulary}{character}(it, ngram = c(ngram_min = 1L,
+  ngram_max = 1L), stopwords = character(0), sep_ngram = "_",
+  window_size = 0L)
 
-\method{create_vocabulary}{itoken}(it, ngram = c(ngram_min = 1L, ngram_max =
-  1L), stopwords = character(0), sep_ngram = "_", window_size = 0L)
-
-\method{create_vocabulary}{list}(it, ngram = c(ngram_min = 1L, ngram_max =
-  1L), stopwords = character(0), sep_ngram = "_", window_size = 0L, ...)
+\method{create_vocabulary}{itoken}(it, ngram = c(ngram_min = 1L,
+  ngram_max = 1L), stopwords = character(0), sep_ngram = "_",
+  window_size = 0L)
 
 \method{create_vocabulary}{itoken_parallel}(it, ngram = c(ngram_min = 1L,
   ngram_max = 1L), stopwords = character(0), sep_ngram = "_",
@@ -41,7 +39,7 @@ such that ngram_min <= n <= ngram_max will be used.}
 
 \item{stopwords}{\code{character} vector of stopwords to filter out. \bold{NOTE} that
 stopwords will be used "as is". This means that if preprocessing function in \link{itoken} does some
-text modification (like stemming), then this preprocessing need to be applied to stopwrods before passing them here.
+text modification (like stemming), then this preprocessing need to be applied to stopwords before passing them here.
 See \url{https://github.com/dselivanov/text2vec/issues/228} for example.}
 
 \item{sep_ngram}{\code{character} a character string to concatenate words in ngrams}
@@ -51,7 +49,7 @@ be created from pseudo-documents which are obtained by virtually splitting each 
 chunks of the length \code{window_size} by going with sliding window through them.
 This is useful for creating special statistics which are used for coherence estimation in topic models.}
 
-\item{...}{additional arguments to \link{foreach} function.}
+\item{...}{placeholder for additional arguments (not used at the moment).}
 }
 \value{
 \code{text2vec_vocabulary} object, which is actually a \code{data.frame}
@@ -80,13 +78,8 @@ character vector. Terms will be inserted \bold{as is}, without any checks
 
 \item \code{itoken}: collects unique terms and corresponding statistics from object.
 
-\item \code{list}: collects unique terms and corresponding
-statistics from list of itoken iterators. If parallel backend is
-registered, it will build vocabulary in parallel using \link{foreach}.
-
 \item \code{itoken_parallel}: collects unique terms and corresponding
-statistics from iterator. If parallel backend is
-registered, it will build vocabulary in parallel using \link{foreach}.
+statistics from iterator.
 }}
 
 \examples{

@@ -10,8 +10,7 @@ ifiles(file_paths, reader = readLines)
 
 idir(path, reader = readLines)
 
-ifiles_parallel(file_paths, reader = readLines,
-  n_chunks = foreach::getDoParWorkers())
+ifiles_parallel(file_paths, reader = readLines, ...)
 }
 \arguments{
 \item{file_paths}{\code{character} paths of input files}
@@ -25,11 +24,7 @@ file_name + line_number (assuming that each line is a document).}
 
 \item{path}{\code{character} path of directory. All files in the directory will be read.}
 
-\item{n_chunks}{\code{integer}, defines in how many chunks files will be processed.
-For example if you have 32 files, and \code{n_chunks = 8}, then for each 4 files will be
-created a job (for example document-term matrix construction).
-In case some parallel backend registered, each job will be evaluated in a separated thread (process) in parallel.
-So each such group of files will be processed in parallel and at the end all 8 results from will be combined.}
+\item{...}{other arguments (not used at the moment)}
 }
 \description{
 The result of this function usually used in an \link{itoken} function.
