@@ -162,7 +162,7 @@
 #' diag(tcm_ext) = attributes(tcm_ext)$word_count
 #'
 #' # get number of sliding windows that serve as virtual documents, i.e. n_doc_tcm argument
-#' n_skip_gram_windows = sum(sapply(tokens, function(x) {length(x)}))
+#' n_skip_gram_windows = sum(sapply(tokens_ext, function(x) {length(x)}))
 #'
 #' @export
 
