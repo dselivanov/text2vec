@@ -240,6 +240,8 @@ Collocations = R6::R6Class(
       invisible(self$collocation_stat)
     },
     transform = function(it) {
+      if(is.null(private$vocabulary))
+        stop("fit object is missing. Please run fit() method first before transform().")
       # if pointer is invalid - init it
       if(is.null(private$phrases_ptr) || is_invalid_ptr(private$phrases_ptr))
         private$phrases_ptr = create_xptr_unordered_set(private$phrases)
