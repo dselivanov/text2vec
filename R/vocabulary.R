@@ -58,7 +58,7 @@
 #' doc_proportion_min = 0.001, vocab_term_max = 20000)
 #'@export
 create_vocabulary = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
-                       stopwords = character(0), sep_ngram = "_", window_size = 0L) {
+                       stopwords = character(0), sep_ngram = "_", window_size = 0L, ...) {
   stopifnot(is.numeric(ngram) && length(ngram) == 2 && ngram[[2]] >= ngram[[1]])
   stopifnot(is.character(stopwords))
   stopifnot(is.character(sep_ngram) && nchar(sep_ngram) == 1L)
@@ -71,16 +71,16 @@ create_vocabulary = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
 #' @rdname create_vocabulary
 #' @export
 vocabulary = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
-                       stopwords = character(0), sep_ngram = "_", window_size = 0L) {
+                       stopwords = character(0), sep_ngram = "_", window_size = 0L, ...) {
   .Deprecated("create_vocabulary")
-  create_vocabulary(it, ngram, stopwords, sep_ngram, window_size)
+  create_vocabulary(it, ngram, stopwords, sep_ngram, window_size, ...)
 }
 #' @describeIn create_vocabulary creates \code{text2vec_vocabulary} from predefined
 #' character vector. Terms will be inserted \bold{as is}, without any checks
 #' (ngrams number, ngram delimiters, etc.).
 #' @export
 create_vocabulary.character = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
-                                 stopwords = character(0), sep_ngram = "_", window_size = 0L) {
+                                 stopwords = character(0), sep_ngram = "_", window_size = 0L, ...) {
 
   ngram_min = as.integer( ngram[[1]] )
   ngram_max = as.integer( ngram[[2]] )
@@ -117,7 +117,7 @@ vocabulary_insert_document_batch_generic = function(ptr, x) {
 #' @describeIn create_vocabulary collects unique terms and corresponding statistics from object.
 #' @export
 create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
-                              stopwords = character(0), sep_ngram = "_", window_size = 0L) {
+                              stopwords = character(0), sep_ngram = "_", window_size = 0L, ...) {
   if (inherits(it, "R6"))
     it = it$clone(deep = TRUE)
   else {

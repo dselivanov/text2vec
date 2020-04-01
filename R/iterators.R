@@ -285,7 +285,7 @@ itoken.iterator = function(iterable,
 #' @export
 itoken_parallel = function(iterable, ...) {
   if(.Platform$OS.type != "unix") {
-    warning("`ifiles_parallel` is not supported on windows - falling back to `itoken`")
+    warning("`itoken_parallel` is not supported on windows - falling back to `itoken`")
     UseMethod("itoken")
   } else {
     UseMethod("itoken_parallel")
