@@ -147,7 +147,7 @@ pdist2 = function(x, y, method = c("cosine", "euclidean", "jaccard"),
       if (!inherits(x, "matrix") || !inherits(y, "matrix"))
         stop("At the moment eucludian distance can be calculated only for
               dense matrices of class 'matrix'")
-        RESULT = sqrt(rowSums((x - y) * 2))
+        RESULT = sqrt(rowSums((x - y) ^ 2))
     }
   }
   if (inherits(method, "distance_model")) {
