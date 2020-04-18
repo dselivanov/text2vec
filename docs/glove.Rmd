@@ -83,17 +83,11 @@ text2vec uses a parallel stochastic gradient descent algorithm. By default it wi
 Let's fit our model. (It can take several minutes to fit!)
 
 ```{r, "GloVe", message=TRUE}
-glove = GlobalVectors$new(word_vectors_size = 50, x_max = 10)
+glove = GlobalVectors$new(rank = 50, x_max = 10)
 wv_main = glove$fit_transform(tcm, n_iter = 10, convergence_tol = 0.01, n_threads = 8)
 ```
 ```{r}
 dim(wv_main)
-```
-Alternatively we can train model with R's `S3` interface (but keep in mind that all text2vec models are R6 classes and they are mutable! So `fit_transform` methods modify models!):
-```{r, "GloVe-2", message=TRUE, eval=FALSE}
-glove = GlobalVectors$new(word_vectors_size = 50, vocabulary = vocab, x_max = 10)
-# `glove` object will be modified by `fit_transform()` call !
-wv_main = fit_transform(tcm, glove, n_iter = 20)
 ```
 
 Note that model learns two sets of word vectors - main and context. Essentially they are the same since model is symmetric. From our experience learning two sets of word vectors leads to higher quality embeddings.
