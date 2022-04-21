@@ -125,7 +125,7 @@ test_that("coherence, results of text2vec vs other packages", {
 
     if(length(M) != 1){
       warning("M is a vector when scalar is expected. Taking only the first value")
-      M <- M[ 1 ]
+      M <- M[[1 ]]
     }
 
     if(floor(M) != M){
