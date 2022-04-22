@@ -236,7 +236,7 @@ Further tuning is left up to the reader.
 
 ## Feature hashing
 
-If you are not familiar with feature hashing (the so-called "hashing trick") I recommend you start with the [Wikipedia article](https://en.wikipedia.org/wiki/Feature_hashing), then read the [original paper](http://alex.smola.org/papers/2009/Weinbergeretal09.pdf) by a Yahoo! research team. This technique is very fast because we don't have to perform a lookup over an associative array. Another benefit is that it leads to a very low memory footprint, since we can map an arbitrary number of features into much more compact space. This method was popularized by Yahoo! and is widely used in [Vowpal Wabbit](https://github.com/JohnLangford/vowpal_wabbit/). 
+If you are not familiar with feature hashing (the so-called "hashing trick") I recommend you start with the [Wikipedia article](https://en.wikipedia.org/wiki/Feature_hashing), then read the [original paper](http://alex.smola.org/papers/2009/Weinbergeretal09.pdf) by a Yahoo! research team. This technique is very fast because we don't have to perform a lookup over an associative array. Another benefit is that it leads to a very low memory footprint, since we can map an arbitrary number of features into much more compact space. This method was popularized by Yahoo! and is widely used in [Vowpal Wabbit](https://github.com/VowpalWabbit/vowpal_wabbit). 
 
 Here is how to use feature hashing in *text2vec*.
 

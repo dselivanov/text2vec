@@ -37,9 +37,9 @@
 
 get_tcm = function(corpus_ptr) {
   stopifnot(inherits(corpus_ptr, "VocabCorpus") || inherits(corpus_ptr, "HashCorpus"))
-  if(class(corpus_ptr) == "HashCorpus")
+  if(inherits(corpus_ptr, "HashCorpus"))
     tcm = cpp_hash_corpus_get_tcm(corpus_ptr)
-  if(class(corpus_ptr) == "VocabCorpus")
+  if(inherits(corpus_ptr, "VocabCorpus"))
     tcm = cpp_vocabulary_corpus_get_tcm(corpus_ptr)
 
   if (length(tcm@x) == 0)

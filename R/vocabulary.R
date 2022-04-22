@@ -35,6 +35,7 @@
 #'be created from pseudo-documents which are obtained by virtually splitting each documents into
 #'chunks of the length \code{window_size} by going with sliding window through them.
 #'This is useful for creating special statistics which are used for coherence estimation in topic models.
+#'@param ... placeholder for additional arguments (not used at the moment).
 #'@return \code{text2vec_vocabulary} object, which is actually a \code{data.frame}
 #'  with following columns:
 #'  \item{\code{term}       }{ \code{character} vector of unique terms}

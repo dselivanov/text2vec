@@ -64,7 +64,7 @@ model$collocation_stat
   \item Dunning's  logarithm of the ratio between the likelihoods of the hypotheses of dependence and independence
  }
  See \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.11.8101&rep=rep1&type=pdf},
- \url{http://www.aclweb.org/anthology/I05-1050} for details.
+ \url{https://aclanthology.org/I05-1050/} for details.
  Also see data in \code{model$collocation_stat} for better intuition}
  \item{it}{An input \code{itoken} or \code{itoken_parallel} iterator}
  \item{vocabulary}{\code{text2vec_vocabulary} - if provided will look for collocations consisted of only from vocabulary}

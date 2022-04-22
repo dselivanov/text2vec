@@ -3,7 +3,6 @@
 \docType{package}
 \name{text2vec}
 \alias{text2vec}
-\alias{text2vec-package}
 \title{text2vec}
 \description{
 Fast vectorization, topic modeling, distances and GloVe word embeddings in R.

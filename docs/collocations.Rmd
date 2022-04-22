@@ -27,7 +27,7 @@ model$collocation_stat
 
 # How it works 
 
-Model goes through subsequent tokens and calculate some statstics - how frequently one token follows another, frequencies of tokens, etc. Based on this statistics model calculates several scores: [PMI](https://en.wikipedia.org/wiki/Pointwise_mutual_information), LFMD (see paper below), ["gensim"](https://radimrehurek.com/gensim/models/phrases.html). Scores are actually heuristics - model is unsupervised. For overview of performance of different approaches check [Automatic Extraction of Fixed Multiword Expressions](http://www.aclweb.org/anthology/I05-1050) paper.
+Model goes through subsequent tokens and calculate some statstics - how frequently one token follows another, frequencies of tokens, etc. Based on this statistics model calculates several scores: [PMI](https://en.wikipedia.org/wiki/Pointwise_mutual_information), LFMD (see paper below), ["gensim"](https://radimrehurek.com/gensim/models/phrases.html). Scores are actually heuristics - model is unsupervised. For overview of performance of different approaches check [Automatic Extraction of Fixed Multiword Expressions](https://aclanthology.org/I05-1050/) paper.
 
 ## Details
 

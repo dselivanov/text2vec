@@ -331,8 +331,8 @@ div.tocify {
         <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     <span class="fa fa-language"></span>
-     
-     
+
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -347,13 +347,13 @@ div.tocify {
 <li>
   <a href="https://github.com/dselivanov/text2vec">
     <span class="fa fa-github"></span>
-     
+
   </a>
 </li>
 <li>
   <a href="http://stackoverflow.com/questions/tagged/text2vec">
     <span class="fa fa-stack-overflow"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -390,7 +390,7 @@ model<span class="op">$</span><span class="kw">fit</span>(it, <span class="dt">n
 ##    3: demographics_main article_demographics    54     50   50 18.088658
 ##    4:      economy_main      article_economy    55     55   55 18.062186
 ##    5:           merleau                ponty    63     65   62 17.880585
-##   ---                                                                   
+##   ---
 ## 6798:          produced                   by  3457 111831  777  5.001542
 ## 6799:              seem                   to   807 316376  513  5.001146
 ## 6800:        referendum                   on   300  91250   55  5.001041
@@ -402,7 +402,7 @@ model<span class="op">$</span><span class="kw">fit</span>(it, <span class="dt">n
 ##    3: -18.31072     0.000000        3       144        6640
 ##    4: -18.06219 24880.960331        4       119          85
 ##    5: -18.06310 46707.003663        5       120          33
-##   ---                                                      
+##   ---
 ## 6798: -23.64699    29.972812     6798      1266        4121
 ## 6799: -24.84530    28.904043     6799      1812        4203
 ## 6800: -31.28831     2.911190     6800      6769        6423
@@ -410,7 +410,7 @@ model<span class="op">$</span><span class="kw">fit</span>(it, <span class="dt">n
 ## 6802: -30.59820     7.758113     6802      6353        6022</code></pre>
 <div id="how-it-works" class="section level1">
 <h1>How it works</h1>
-<p>Model goes through subsequent tokens and calculate some statstics - how frequently one token follows another, frequencies of tokens, etc. Based on this statistics model calculates several scores: <a href="https://en.wikipedia.org/wiki/Pointwise_mutual_information">PMI</a>, LFMD (see paper below), <a href="https://radimrehurek.com/gensim/models/phrases.html">“gensim”</a>. Scores are actually heuristics - model is unsupervised. For overview of performance of different approaches check <a href="http://www.aclweb.org/anthology/I05-1050">Automatic Extraction of Fixed Multiword Expressions</a> paper.</p>
+<p>Model goes through subsequent tokens and calculate some statstics - how frequently one token follows another, frequencies of tokens, etc. Based on this statistics model calculates several scores: <a href="https://en.wikipedia.org/wiki/Pointwise_mutual_information">PMI</a>, LFMD (see paper below), <a href="https://radimrehurek.com/gensim/models/phrases.html">“gensim”</a>. Scores are actually heuristics - model is unsupervised. For overview of performance of different approaches check <a href="https://aclanthology.org/I05-1050/">Automatic Extraction of Fixed Multiword Expressions</a> paper.</p>
 <div id="details" class="section level2">
 <h2>Details</h2>
 <p>There are several important parameters in the model. Let’s take a closer look into constructor:</p>
@@ -430,30 +430,30 @@ model<span class="op">$</span><span class="kw">fit</span>(it, <span class="dt">n
 <li>Suppose we have detected phrase <em>“new_york”</em> after first pass. During second pass model will scan tokens and if it finds words <em>“new”</em> and <em>“york”</em> in sequence it will concatenate them into “new_york” and treat as single token (if any other word follows <em>“new”</em> then model won’t concatenate them and consider them as 2 separate tokens). Now imagine next token after <em>“new_york”</em> is <em>“city”</em>. Then model again will calculate co-occurence scores as in step 1 and decide whether to keep <em>“new_york_city”</em> as phrase/collocation or treat sequence <em>“new_york”</em> and <em>“city”</em> as separate tokens. So by repeating the process we can learn large multi-word phrases.</li>
 </ol>
 <p>As a result, in the end model will be able to concatenate collocations from tokens. Let’s check how naive model trained on wikipedia will work:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">test_txt =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;i am living in a new apartment in new york city&quot;</span>, 
-        <span class="st">&quot;new york is the same as new york city&quot;</span>, 
-        <span class="st">&quot;san francisco is very expensive city&quot;</span>, 
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">test_txt =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;i am living in a new apartment in new york city&quot;</span>,
+        <span class="st">&quot;new york is the same as new york city&quot;</span>,
+        <span class="st">&quot;san francisco is very expensive city&quot;</span>,
         <span class="st">&quot;who claimed that model works?&quot;</span>)
 it =<span class="st"> </span><span class="kw">itoken</span>(test_txt, <span class="dt">n_chunks =</span> <span class="dv">1</span>, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
 it_phrases =<span class="st"> </span>model<span class="op">$</span><span class="kw">transform</span>(it)
 it_phrases<span class="op">$</span><span class="kw">nextElem</span>()</code></pre></div>
 <pre><code>## $tokens
 ## $tokens[[1]]
-## [1] &quot;i_am&quot;          &quot;living&quot;        &quot;in&quot;            &quot;a&quot;            
+## [1] &quot;i_am&quot;          &quot;living&quot;        &quot;in&quot;            &quot;a&quot;
 ## [5] &quot;new&quot;           &quot;apartment&quot;     &quot;in&quot;            &quot;new_york_city&quot;
-## 
+##
 ## $tokens[[2]]
-## [1] &quot;new_york&quot;      &quot;is&quot;            &quot;the&quot;           &quot;same&quot;         
+## [1] &quot;new_york&quot;      &quot;is&quot;            &quot;the&quot;           &quot;same&quot;
 ## [5] &quot;as&quot;            &quot;new_york_city&quot;
-## 
+##
 ## $tokens[[3]]
-## [1] &quot;san_francisco&quot; &quot;is&quot;            &quot;very&quot;          &quot;expensive&quot;    
-## [5] &quot;city&quot;         
-## 
+## [1] &quot;san_francisco&quot; &quot;is&quot;            &quot;very&quot;          &quot;expensive&quot;
+## [5] &quot;city&quot;
+##
 ## $tokens[[4]]
-## [1] &quot;who&quot;          &quot;claimed_that&quot; &quot;model&quot;        &quot;works?&quot;      
-## 
-## 
+## [1] &quot;who&quot;          &quot;claimed_that&quot; &quot;model&quot;        &quot;works?&quot;
+##
+##
 ## $ids
 ## [1] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot;</code></pre>
 <p>As we can see results are pretty impressive but not ideal - we probably do not want to get <em>“claimed_that”</em> as collocation. One solution is to provide <code>vocabulary</code> without stopwords to the model constructor. But this won’t solve most of the edge cases. Another solution is to keep tracking what model learned after each pass over the data. We can fit model incrementally with <code>partial_fit()</code> method and prune bad phrases after each iteration.</p>
@@ -469,7 +469,7 @@ model2<span class="op">$</span>collocation_stat</code></pre></div>
 ##     3: bhagavad    gita     51     70   50 1.725409e+01 -18.28208
 ##     4:     krav    maga     76     73   70 1.710348e+01 -17.46185
 ##     5:      orl     ans     59     81   58 1.704743e+01 -18.06050
-##    ---                                                           
+##    ---
 ## 10763:     when     its  20623  29567   55 9.637992e-03 -35.25153
 ## 10764:     from english  72871  11868   78 9.500960e-03 -34.24358
 ## 10765:        e     two  11426 192644  198 5.691199e-03 -31.55949
@@ -481,7 +481,7 @@ model2<span class="op">$</span>collocation_stat</code></pre></div>
 ##     3: 0.000000e+00        3       141       10541
 ##     4: 4.023382e+04        4        82           7
 ##     5: 1.868318e+04        5       121          49
-##    ---                                            
+##    ---
 ## 10763: 9.151845e-02    10763     10747       10338
 ## 10764: 3.613462e-01    10764     10421        9757
 ## 10765: 7.504292e-01    10765      7987        8938
@@ -496,7 +496,7 @@ temp</code></pre></div>
 ##    3:       krav     maga   76    73   70 17.103476 -17.46185 40233.8212
 ##    4:        orl      ans   59    81   58 17.047433 -18.06050 18683.1756
 ##    5:     lingua   franca   78    55   52 17.045623 -18.37739  5203.1991
-##   ---                                                                   
+##   ---
 ## 1337: difference  between 1375 15737  506  8.027850 -20.83005   235.2003
 ## 1338:    working    class 2271  3412  181  8.026277 -23.79792   188.6874
 ## 1339:   chemical elements 1944  2723  123  8.018666 -24.92020   153.9135
@@ -508,7 +508,7 @@ temp</code></pre></div>
 ##    3:        4        82           7
 ##    4:        5       121          49
 ##    5:        6       152         150
-##   ---                               
+##   ---
 ## 1337:     1899       474        1182
 ## 1338:     1900      1392        1324
 ## 1339:     1904      1887        1461
@@ -528,7 +528,7 @@ model2<span class="op">$</span>collocation_stat</code></pre></div>
 ##    3:           limp   bizkit   66    57   54 17.289548 -18.02457
 ##    4:    leonardo_da    vinci   66    75   66 17.155426 -17.52428
 ##    5:           krav     maga   76    73   70 17.103476 -17.46185
-##   ---                                                            
+##   ---
 ## 1572:            ice      age 1441  4875  167  8.023908 -23.97717
 ## 1573:       chemical elements 1944  2723  123  8.018666 -24.92020
 ## 1574:       republic  ireland 4231  2362  231  8.011118 -23.10927
@@ -540,7 +540,7 @@ model2<span class="op">$</span>collocation_stat</code></pre></div>
 ##    3: 11866.9452        4       133          97
 ##    4: 35389.4626        6        94          16
 ##    5: 40233.8212        7        87          10
-##   ---                                          
+##   ---
 ## 1572:   182.3503     2032      1571        1534
 ## 1573:   153.9135     2036      2048        1628
 ## 1574:   202.1405     2042      1193        1469
@@ -558,10 +558,10 @@ model2<span class="op">$</span>collocation_stat</code></pre></div>
 vocabulary_with_phrases =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_phrases, <span class="dt">stopwords =</span> tokenizers<span class="op">::</span><span class="kw">stopwords</span>(<span class="st">&quot;en&quot;</span>))
 vocabulary_with_phrases =<span class="st"> </span><span class="kw">prune_vocabulary</span>(vocabulary_with_phrases, <span class="dt">term_count_min =</span> <span class="dv">10</span>)
 vocabulary_with_phrases[<span class="kw">startsWith</span>(vocabulary_with_phrases<span class="op">$</span>term, <span class="st">&quot;new_&quot;</span>), ]</code></pre></div>
-<pre><code>## Number of docs: 1 
-## 33 stopwords: a, an, and, are, as, at ... 
-## ngram_min = 1; ngram_max = 1 
-## Vocabulary: 
+<pre><code>## Number of docs: 1
+## 33 stopwords: a, an, and, are, as, at ...
+## ngram_min = 1; ngram_max = 1
+## Vocabulary:
 ##                term term_count doc_count
 ## 1: new_york_yankees         85         1
 ## 2:    new_hampshire        183         1
@@ -593,14 +593,14 @@ wv_main =<span class="st"> </span>glove<span class="op">$</span><span class="kw"
 wv =<span class="st"> </span>wv_main <span class="op">+</span><span class="st"> </span><span class="kw">t</span>(wv_context)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> wv, <span class="dt">y =</span> wv[<span class="st">&quot;new_zealand&quot;</span>, , <span class="dt">drop =</span> <span class="ot">FALSE</span>], <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
 <span class="kw">head</span>(<span class="kw">sort</span>(cos_sim[,<span class="dv">1</span>], <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), <span class="dv">5</span>)</code></pre></div>
-<pre><code>##    new_zealand      australia united_kingdom         canada     queensland 
+<pre><code>##    new_zealand      australia united_kingdom         canada     queensland
 ##      1.0000000      0.8906049      0.7560024      0.7496143      0.7143516</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">paris =<span class="st"> </span>wv[<span class="st">&quot;new_york&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] <span class="op">-</span><span class="st"> </span>
 <span class="st">  </span>wv[<span class="st">&quot;usa&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>] <span class="op">+</span><span class="st"> </span>
 <span class="st">  </span>wv[<span class="st">&quot;france&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>]
 cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> wv, <span class="dt">y =</span> paris, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)
 <span class="kw">head</span>(<span class="kw">sort</span>(cos_sim[,<span class="dv">1</span>], <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), <span class="dv">5</span>)</code></pre></div>
-<pre><code>##    france     paris    london     after   england 
+<pre><code>##    france     paris    london     after   england
 ## 0.7630746 0.7031228 0.6930537 0.6638524 0.6628017</code></pre>
 </div>
 <div id="topic-models-with-collocations" class="section level2">
@@ -610,7 +610,7 @@ cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">
 prep_fun =<span class="st"> </span><span class="cf">function</span>(x) {
   stringr<span class="op">::</span><span class="kw">str_replace_all</span>(<span class="kw">tolower</span>(x), <span class="st">&quot;[^[:alpha:]]&quot;</span>, <span class="st">&quot; &quot;</span>)
 }
-it =<span class="st"> </span><span class="kw">itoken</span>(movie_review<span class="op">$</span>review, <span class="dt">preprocessor =</span> prep_fun, <span class="dt">tokenizer =</span> word_tokenizer, 
+it =<span class="st"> </span><span class="kw">itoken</span>(movie_review<span class="op">$</span>review, <span class="dt">preprocessor =</span> prep_fun, <span class="dt">tokenizer =</span> word_tokenizer,
             <span class="dt">ids =</span> movie_review<span class="op">$</span>id, <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
 it =<span class="st"> </span>model2<span class="op">$</span><span class="kw">transform</span>(it)
 v =<span class="st"> </span><span class="kw">create_vocabulary</span>(it, <span class="dt">stopwords =</span> tokenizers<span class="op">::</span><span class="kw">stopwords</span>(<span class="st">&quot;en&quot;</span>))
@@ -618,11 +618,11 @@ v =<span class="st"> </span><span class="kw">prune_vocabulary</span>(v, <span cl
 <p>Let’s check how many phrases that we’ve learned from wikipedia we can find in <code>movie_review</code> dataset:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">word_count_per_token =<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">strsplit</span>(v<span class="op">$</span>term, <span class="st">&quot;_&quot;</span>, T), length)
 v<span class="op">$</span>term[word_count_per_token <span class="op">&gt;</span><span class="st"> </span><span class="dv">1</span>]</code></pre></div>
-<pre><code>##  [1] &quot;ve_got&quot;        &quot;th_century&quot;    &quot;anything_else&quot; &quot;takes_place&quot;  
-##  [5] &quot;her_husband&quot;   &quot;once_again&quot;    &quot;weren_t&quot;       &quot;sci_fi&quot;       
-##  [9] &quot;years_ago&quot;     &quot;new_york&quot;      &quot;looks_like&quot;    &quot;rather_than&quot;  
-## [13] &quot;don_t_know&quot;    &quot;wouldn_t&quot;      &quot;aren_t&quot;        &quot;couldn_t&quot;     
-## [17] &quot;wasn_t&quot;        &quot;i_am&quot;          &quot;isn_t&quot;         &quot;didn_t&quot;       
+<pre><code>##  [1] &quot;ve_got&quot;        &quot;th_century&quot;    &quot;anything_else&quot; &quot;takes_place&quot;
+##  [5] &quot;her_husband&quot;   &quot;once_again&quot;    &quot;weren_t&quot;       &quot;sci_fi&quot;
+##  [9] &quot;years_ago&quot;     &quot;new_york&quot;      &quot;looks_like&quot;    &quot;rather_than&quot;
+## [13] &quot;don_t_know&quot;    &quot;wouldn_t&quot;      &quot;aren_t&quot;        &quot;couldn_t&quot;
+## [17] &quot;wasn_t&quot;        &quot;i_am&quot;          &quot;isn_t&quot;         &quot;didn_t&quot;
 ## [21] &quot;doesn_t&quot;       &quot;don_t&quot;</code></pre>
 <p>Not many. Seems we may need to learn collocations from <code>movie_review</code> dataset itself or use other thresholds for scores. I leave this exercise for the reader.</p>
 <p>Anyway now we can create document-term matrix and run LDA:</p>

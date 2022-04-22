@@ -331,8 +331,8 @@ div.tocify {
         <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     <span class="fa fa-language"></span>
-     
-     
+
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -347,13 +347,13 @@ div.tocify {
 <li>
   <a href="https://github.com/dselivanov/text2vec">
     <span class="fa fa-github"></span>
-     
+
   </a>
 </li>
 <li>
   <a href="http://stackoverflow.com/questions/tagged/text2vec">
     <span class="fa fa-stack-overflow"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -407,10 +407,10 @@ test =<span class="st"> </span>movie_review[<span class="kw">J</span>(test_ids)]
 prep_fun =<span class="st"> </span>tolower
 tok_fun =<span class="st"> </span>word_tokenizer
 
-it_train =<span class="st"> </span><span class="kw">itoken</span>(train<span class="op">$</span>review, 
-             <span class="dt">preprocessor =</span> prep_fun, 
-             <span class="dt">tokenizer =</span> tok_fun, 
-             <span class="dt">ids =</span> train<span class="op">$</span>id, 
+it_train =<span class="st"> </span><span class="kw">itoken</span>(train<span class="op">$</span>review,
+             <span class="dt">preprocessor =</span> prep_fun,
+             <span class="dt">tokenizer =</span> tok_fun,
+             <span class="dt">ids =</span> train<span class="op">$</span>id,
              <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
 vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_train)</code></pre></div>
 <p>What was done here?</p>
@@ -420,24 +420,24 @@ vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_tra
 </ol>
 <p>Alternatively, we could create list of tokens and reuse it in further steps. Each element of the list should represent a document, and each element should be a character vector of tokens.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">train_tokens =<span class="st"> </span><span class="kw">tok_fun</span>(<span class="kw">prep_fun</span>(train<span class="op">$</span>review))
-it_train =<span class="st"> </span><span class="kw">itoken</span>(train_tokens, 
+it_train =<span class="st"> </span><span class="kw">itoken</span>(train_tokens,
                   <span class="dt">ids =</span> train<span class="op">$</span>id,
                   <span class="co"># turn off progressbar because it won&#39;t look nice in rmd</span>
                   <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
 
 vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_train)
 vocab</code></pre></div>
-<pre><code>## Number of docs: 4000 
-## 0 stopwords:  ... 
-## ngram_min = 1; ngram_max = 1 
-## Vocabulary: 
+<pre><code>## Number of docs: 4000
+## 0 stopwords:  ...
+## ngram_min = 1; ngram_max = 1
+## Vocabulary:
 ##         term term_count doc_count
 ##     1:   0.3          1         1
 ##     2:   0.5          1         1
 ##     3: 00015          1         1
 ##     4:   001          1         1
 ##     5:    03          1         1
-##    ---                           
+##    ---
 ## 38302:    to      22095      3805
 ## 38303:    of      23653      3792
 ## 38304:     a      26614      3878
@@ -460,8 +460,8 @@ dtm_train =<span class="st"> </span><span class="kw">create_dtm</span>(it_train,
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(glmnet)
 NFOLDS =<span class="st"> </span><span class="dv">4</span>
 t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
-glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]], 
-                              <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>, 
+glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]],
+                              <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>,
                               <span class="co"># L1 penalty</span>
                               <span class="dt">alpha =</span> <span class="dv">1</span>,
                               <span class="co"># interested in the area under ROC curve</span>
@@ -481,7 +481,7 @@ glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<s
 <p>We have successfully fit a model to our DTM. Now we can check the model’s performance on test data. Note that we use exactly the same functions from prepossessing and tokenization. Also we reuse/use the same <code>vectorizer</code> - function which maps terms to indices.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Note that most text2vec functions are pipe friendly!</span>
 it_test =<span class="st"> </span><span class="kw">tok_fun</span>(<span class="kw">prep_fun</span>(test<span class="op">$</span>review))
-it_test =<span class="st"> </span><span class="kw">itoken</span>(it_test, <span class="dt">ids =</span> test<span class="op">$</span>id, 
+it_test =<span class="st"> </span><span class="kw">itoken</span>(it_test, <span class="dt">ids =</span> test<span class="op">$</span>id,
                  <span class="co"># turn off progressbar because it won&#39;t look nice in rmd</span>
                  <span class="dt">progressbar =</span> <span class="ot">FALSE</span>)
 
@@ -500,8 +500,8 @@ t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
 vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_train, <span class="dt">stopwords =</span> stop_words)
 <span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
 <pre><code>## Time difference of 0.3403959 secs</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pruned_vocab =<span class="st"> </span><span class="kw">prune_vocabulary</span>(vocab, 
-                                 <span class="dt">term_count_min =</span> <span class="dv">10</span>, 
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pruned_vocab =<span class="st"> </span><span class="kw">prune_vocabulary</span>(vocab,
+                                 <span class="dt">term_count_min =</span> <span class="dv">10</span>,
                                  <span class="dt">doc_proportion_max =</span> <span class="fl">0.5</span>,
                                  <span class="dt">doc_proportion_min =</span> <span class="fl">0.001</span>)
 vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(pruned_vocab)
@@ -526,7 +526,7 @@ dtm_train  =<span class="st"> </span><span class="kw">create_dtm</span>(it_train
 vocab =<span class="st"> </span><span class="kw">create_vocabulary</span>(it_train, <span class="dt">ngram =</span> <span class="kw">c</span>(1L, 2L))
 <span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
 <pre><code>## Time difference of 1.533202 secs</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vocab =<span class="st"> </span><span class="kw">prune_vocabulary</span>(vocab, <span class="dt">term_count_min =</span> <span class="dv">10</span>, 
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vocab =<span class="st"> </span><span class="kw">prune_vocabulary</span>(vocab, <span class="dt">term_count_min =</span> <span class="dv">10</span>,
                          <span class="dt">doc_proportion_max =</span> <span class="fl">0.5</span>)
 
 bigram_vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</span>(vocab)
@@ -534,8 +534,8 @@ bigram_vectorizer =<span class="st"> </span><span class="kw">vocab_vectorizer</s
 dtm_train =<span class="st"> </span><span class="kw">create_dtm</span>(it_train, bigram_vectorizer)
 
 t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
-glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]], 
-                 <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>, 
+glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]],
+                 <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>,
                  <span class="dt">alpha =</span> <span class="dv">1</span>,
                  <span class="dt">type.measure =</span> <span class="st">&quot;auc&quot;</span>,
                  <span class="dt">nfolds =</span> NFOLDS,
@@ -557,7 +557,7 @@ glmnet<span class="op">:::</span><span class="kw">auc</span>(test<span class="op
 </div>
 <div id="feature-hashing" class="section level2">
 <h2>Feature hashing</h2>
-<p>If you are not familiar with feature hashing (the so-called “hashing trick”) I recommend you start with the <a href="https://en.wikipedia.org/wiki/Feature_hashing">Wikipedia article</a>, then read the <a href="http://alex.smola.org/papers/2009/Weinbergeretal09.pdf">original paper</a> by a Yahoo! research team. This technique is very fast because we don’t have to perform a lookup over an associative array. Another benefit is that it leads to a very low memory footprint, since we can map an arbitrary number of features into much more compact space. This method was popularized by Yahoo! and is widely used in <a href="https://github.com/JohnLangford/vowpal_wabbit/">Vowpal Wabbit</a>.</p>
+<p>If you are not familiar with feature hashing (the so-called “hashing trick”) I recommend you start with the <a href="https://en.wikipedia.org/wiki/Feature_hashing">Wikipedia article</a>, then read the <a href="http://alex.smola.org/papers/2009/Weinbergeretal09.pdf">original paper</a> by a Yahoo! research team. This technique is very fast because we don’t have to perform a lookup over an associative array. Another benefit is that it leads to a very low memory footprint, since we can map an arbitrary number of features into much more compact space. This method was popularized by Yahoo! and is widely used in <a href="https://github.com/VowpalWabbit/vowpal_wabbit">Vowpal Wabbit</a>.</p>
 <p>Here is how to use feature hashing in <em>text2vec</em>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">h_vectorizer =<span class="st"> </span><span class="kw">hash_vectorizer</span>(<span class="dt">hash_size =</span> <span class="dv">2</span> <span class="op">^</span><span class="st"> </span><span class="dv">14</span>, <span class="dt">ngram =</span> <span class="kw">c</span>(1L, 2L))
 
@@ -566,8 +566,8 @@ dtm_train =<span class="st"> </span><span class="kw">create_dtm</span>(it_train,
 <span class="kw">print</span>(<span class="kw">difftime</span>(<span class="kw">Sys.time</span>(), t1, <span class="dt">units =</span> <span class="st">&#39;sec&#39;</span>))</code></pre></div>
 <pre><code>## Time difference of 0.960351 secs</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
-glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]], 
-                             <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>, 
+glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]],
+                             <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>,
                              <span class="dt">alpha =</span> <span class="dv">1</span>,
                              <span class="dt">type.measure =</span> <span class="st">&quot;auc&quot;</span>,
                              <span class="dt">nfolds =</span> <span class="dv">5</span>,
@@ -620,8 +620,8 @@ dtm_test_tfidf =<span class="st"> </span><span class="kw">transform</span>(dtm_t
 <p>You can find more detailed overview of models and models API in a <a href="#FIXME">separate vignette</a>.</p>
 <p>Once we have tf-idf reweighted DTM we can fit our linear classifier again:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">t1 =<span class="st"> </span><span class="kw">Sys.time</span>()
-glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train_tfidf, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]], 
-                              <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>, 
+glmnet_classifier =<span class="st"> </span><span class="kw">cv.glmnet</span>(<span class="dt">x =</span> dtm_train_tfidf, <span class="dt">y =</span> train[[<span class="st">&#39;sentiment&#39;</span>]],
+                              <span class="dt">family =</span> <span class="st">&#39;binomial&#39;</span>,
                               <span class="dt">alpha =</span> <span class="dv">1</span>,
                               <span class="dt">type.measure =</span> <span class="st">&quot;auc&quot;</span>,
                               <span class="dt">nfolds =</span> NFOLDS,

@@ -453,8 +453,8 @@ div.tocify {
         <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     <span class="fa fa-language"></span>
-     
-     
+
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -469,13 +469,13 @@ div.tocify {
 <li>
   <a href="https://github.com/dselivanov/text2vec">
     <span class="fa fa-github"></span>
-     
+
   </a>
 </li>
 <li>
   <a href="http://stackoverflow.com/questions/tagged/text2vec">
     <span class="fa fa-stack-overflow"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -496,7 +496,7 @@ div.tocify {
 
 <div id="word-embeddings" class="section level1">
 <h1>Word embeddings</h1>
-<p>After Tomas Mikolov et al. released the <a href="https://code.google.com/p/word2vec/">word2vec</a> tool, there was a boom of articles about word vector representations. One of the best of these articles is Stanford’s <a href="http://nlp.stanford.edu/projects/glove/">GloVe: Global Vectors for Word Representation</a>, which explained why such algorithms work and reformulated word2vec optimizations as a special kind of factoriazation for word co-occurence matrices.</p>
+<p>After Tomas Mikolov et al. released the <a href="https://code.google.com/archive/p/word2vec">word2vec</a> tool, there was a boom of articles about word vector representations. One of the best of these articles is Stanford’s <a href="http://nlp.stanford.edu/projects/glove/">GloVe: Global Vectors for Word Representation</a>, which explained why such algorithms work and reformulated word2vec optimizations as a special kind of factoriazation for word co-occurence matrices.</p>
 <p>Here I will briefly introduce the GloVe algorithm and show how to use its text2vec implementation.</p>
 </div>
 <div id="glove-algorithm" class="section level1">
@@ -508,7 +508,7 @@ div.tocify {
 <li><p>Define a cost function <span class="math display">\[J = \sum_{i=1}^V \sum_{j=1}^V \; f(X_{ij}) ( w_i^T w_j + b_i + b_j - \log X_{ij})^2\]</span> Here <span class="math inline">\(f\)</span> is a weighting function which help us to prevent learning only from extremely common word pairs. The GloVe authors choose the following function:</p></li>
 </ol>
 <p><span class="math display">\[
-f(X_{ij}) = 
+f(X_{ij}) =
 \begin{cases}
 (\frac{X_{ij}}{x_{max}})^\alpha &amp; \text{if } X_{ij} &lt; XMAX \\
 1 &amp; \text{otherwise}
@@ -546,15 +546,15 @@ text2vec uses a parallel stochastic gradient descent algorithm. By default it wi
 <p>Let’s fit our model. (It can take several minutes to fit!)</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">glove =<span class="st"> </span>GlobalVectors<span class="op">$</span><span class="kw">new</span>(<span class="dt">rank =</span> <span class="dv">50</span>, <span class="dt">x_max =</span> <span class="dv">10</span>)</a>
 <a class="sourceLine" id="cb5-2" data-line-number="2">wv_main =<span class="st"> </span>glove<span class="op">$</span><span class="kw">fit_transform</span>(tcm, <span class="dt">n_iter =</span> <span class="dv">10</span>, <span class="dt">convergence_tol =</span> <span class="fl">0.01</span>, <span class="dt">n_threads =</span> <span class="dv">8</span>)</a></code></pre></div>
-<pre><code>## INFO  [09:39:07.657] epoch 1, loss 0.1755 
-## INFO  [09:39:15.795] epoch 2, loss 0.1228 
-## INFO  [09:39:24.507] epoch 3, loss 0.1085 
-## INFO  [09:39:33.514] epoch 4, loss 0.1005 
-## INFO  [09:39:42.651] epoch 5, loss 0.0954 
-## INFO  [09:39:51.221] epoch 6, loss 0.0918 
-## INFO  [09:40:00.094] epoch 7, loss 0.0890 
-## INFO  [09:40:08.177] epoch 8, loss 0.0869 
-## INFO  [09:40:16.672] epoch 9, loss 0.0851 
+<pre><code>## INFO  [09:39:07.657] epoch 1, loss 0.1755
+## INFO  [09:39:15.795] epoch 2, loss 0.1228
+## INFO  [09:39:24.507] epoch 3, loss 0.1085
+## INFO  [09:39:33.514] epoch 4, loss 0.1005
+## INFO  [09:39:42.651] epoch 5, loss 0.0954
+## INFO  [09:39:51.221] epoch 6, loss 0.0918
+## INFO  [09:40:00.094] epoch 7, loss 0.0890
+## INFO  [09:40:08.177] epoch 8, loss 0.0869
+## INFO  [09:40:16.672] epoch 9, loss 0.0851
 ## INFO  [09:40:24.678] epoch 10, loss 0.0837</code></pre>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">dim</span>(wv_main)</a></code></pre></div>
 <pre><code>## [1] 71290    50</code></pre>
@@ -571,7 +571,7 @@ text2vec uses a parallel stochastic gradient descent algorithm. By default it wi
 <a class="sourceLine" id="cb12-3" data-line-number="3"><span class="st">  </span>word_vectors[<span class="st">&quot;germany&quot;</span>, , drop =<span class="st"> </span><span class="ot">FALSE</span>]</a>
 <a class="sourceLine" id="cb12-4" data-line-number="4">cos_sim =<span class="st"> </span><span class="kw">sim2</span>(<span class="dt">x =</span> word_vectors, <span class="dt">y =</span> berlin, <span class="dt">method =</span> <span class="st">&quot;cosine&quot;</span>, <span class="dt">norm =</span> <span class="st">&quot;l2&quot;</span>)</a>
 <a class="sourceLine" id="cb12-5" data-line-number="5"><span class="kw">head</span>(<span class="kw">sort</span>(cos_sim[,<span class="dv">1</span>], <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), <span class="dv">5</span>)</a></code></pre></div>
-<pre><code>##      paris     berlin     munich    germany versailles 
+<pre><code>##      paris     berlin     munich    germany versailles
 ##  0.7724678  0.7156243  0.6962157  0.6381500  0.6170311</code></pre>
 <p>You can achieve much better results by experimenting with <code>skip_grams_window</code> and the parameters of the <code>GloVe</code> class (including word vectors size and the number of iterations). For more details and large-scale experiments on wikipedia data see this <a href="http://dsnotes.com/blog/text2vec/2015/12/01/glove-enwiki/">old post</a> on my blog.</p>
 </div>

@@ -21,9 +21,9 @@
 # dtm = create_dtm(it, vectorizer)
 
 get_dtm = function(corpus_ptr) {
-  if(class(corpus_ptr) == "HashCorpus")
+  if(inherits(corpus_ptr, "HashCorpus"))
     dtm = cpp_hash_corpus_get_dtm(corpus_ptr)
-  if(class(corpus_ptr) == "VocabCorpus")
+  if(inherits(corpus_ptr, "VocabCorpus"))
     dtm = cpp_vocabulary_corpus_get_dtm(corpus_ptr)
 
   if (length(dtm@x) == 0)
