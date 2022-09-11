@@ -39,9 +39,6 @@ test_that("coherence, general functionality", {
   expect_warning({coherence_err = coherence(x = top_terms, tcm = tcm_err, n_doc_tcm = nrow(dtm))})
   expect_true(all(is.na(coherence_err)))
 
-# erronerous input (non-symmetric tcm)
-  rownames(tcm_err) <- rev(rownames(tcm_err))
-  expect_error(coherence(x = top_terms, tcm = tcm_err, n_doc_tcm = nrow(dtm)))
 })
 
 test_that("coherence, vectorized vs. mapply loop calculation of PMI", {
