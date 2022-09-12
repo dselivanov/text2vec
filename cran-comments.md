@@ -1,6 +1,7 @@
-##  New submission
+##  Resubmission
 
-* patch failing tests as requested by CRAN
+* fixed url redirect
+* patch tests following Matrix package update to version 1.5
 
 ## Test environments
 

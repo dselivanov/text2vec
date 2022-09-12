@@ -7,3 +7,4 @@ R/drafts/*
 ^vignettes/drafts/*
 ^docs/*
 ^CRAN-RELEASE$
+^CRAN-SUBMISSION$
