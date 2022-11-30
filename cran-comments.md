@@ -1,12 +1,11 @@
-##  Resubmission
+##  New submission
 
-* fixed url redirect
-* patch tests following Matrix package update to version 1.5
+* fixes CRAN errors related to the Matrix 1.5 release
 
 ## Test environments
 
 * local OS X install, R 4.0.5
-* win-builder (devel)
+* win-builder (release)
 
 ## R CMD check results
 
