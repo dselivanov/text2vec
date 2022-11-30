@@ -79,7 +79,7 @@ TfIdf = R6::R6Class(
     },
     transform = function(x, ...) {
       if (private$fitted)
-        private$prepare_x(x) %*% private$idf
+        Matrix::colScale(private$prepare_x(x), diag(private$idf))
       else
         stop("Fit the model first!")
     }

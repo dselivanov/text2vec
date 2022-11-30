@@ -31,7 +31,7 @@ transform_rows_unit_norm = function(x, norm = 1) {
   norm_vec[is.infinite(norm_vec)] = 0
 
   if(inherits(x, "sparseMatrix"))
-    Diagonal(x = norm_vec) %*% x
+    Matrix::rowScale(x, norm_vec)
   else
     x * norm_vec
 }
@@ -59,7 +59,7 @@ normalize = function(m, norm = c("l1", "l2", "none")) {
   norm_vec[is.infinite(norm_vec)] = 0
 
   if(inherits(m, "sparseMatrix"))
-    Diagonal(x = norm_vec) %*% m
+    Matrix::rowScale(m, norm_vec)
   else
     m * norm_vec
 }

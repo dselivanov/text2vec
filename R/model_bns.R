@@ -72,7 +72,7 @@ BNS = R6::R6Class(
     },
     transform = function(x, ...) {
       if (private$fitted)
-        private$prepare_x(x) %*% Diagonal(x = self$bns_stat$bns)
+        Matrix::colScale(private$prepare_x(x), self$bns_stat$bns)
       else
         stop("Fit the model first!")
     }
