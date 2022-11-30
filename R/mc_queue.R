@@ -34,12 +34,6 @@ mc_queue = function(x,
     finished_jobs = parallel::mccollect(jobs = jobs_in_progress, wait = FALSE)
     finished_jobs_ids = names(finished_jobs)
 
-
-    if(length(finished_jobs_ids) > 0) {
-      # will signal the job as terminating
-      parallel::mccollect(jobs = jobs_in_progress[finished_jobs_ids], wait = FALSE)
-    }
-
     for(finished_job_id in finished_jobs_ids) {
 
       result[[finished_job_id]] = finished_jobs[[finished_job_id]]
