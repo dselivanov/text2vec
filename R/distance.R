@@ -32,7 +32,7 @@ jaccard_sim = function(x, y = NULL, format = "dgCMatrix") {
     # union y
     rs_y = rowSums(y)
   }
-  RESULT = as(RESULT, "dgTMatrix")
+  RESULT = as(RESULT, "TsparseMatrix")
   # add 1 to indices because of zero-based indices in sparse matrices
   RESULT@x = RESULT@x / (rs_x[RESULT@i + 1L] + rs_y[RESULT@j + 1L] - RESULT@x)
   if (!inherits(RESULT, format))

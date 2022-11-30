@@ -165,7 +165,7 @@ create_tcm.itoken_parallel = function(it, vectorizer,
   res = do.call(triplet_sum, res)
   logger$debug("map phase finished, starting reduce")
   wc = attr(res, "word_count", TRUE)
-  res = as(res, "dgTMatrix")
+  res = as(res, "TsparseMatrix")
   data.table::setattr(res, "word_count", wc)
   res
 }
@@ -173,12 +173,12 @@ create_tcm.itoken_parallel = function(it, vectorizer,
 sum_m = function(m1, m2) {
   wc1 = attr(m1, "word_count", TRUE)
   if (!inherits(m1, "dgCMatrix")) {
-    m1 = as(m1, "dgCMatrix")
+    m1 = as(m1, "CsparseMatrix")
     gc()
   }
   wc2 = attr(m2, "word_count", TRUE)
   if (!inherits(m2, "dgCMatrix")) {
-    m2 = as(m2, "dgCMatrix")
+    m2 = as(m2, "CsparseMatrix")
     gc()
   }
   res = m1 + m2
