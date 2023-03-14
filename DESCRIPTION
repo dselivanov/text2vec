@@ -42,7 +42,8 @@ Suggests:
     covr,
     knitr,
     rmarkdown,
-    proxy
+    proxy,
+    LDAvis
 URL: http://text2vec.org
 BugReports: https://github.com/dselivanov/text2vec/issues
 VignetteBuilder: knitr

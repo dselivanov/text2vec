@@ -69,30 +69,27 @@ TopicModel = R6::R6Class(
       do.call(cbind, res)
     },
     plot = function(lambda.step = 0.1, reorder.topics = FALSE, doc_len = private$doc_len, mds.method = jsPCA_robust, ...) {
-      if("LDAvis" %in% rownames(installed.packages())) {
-        if (!is.null(self$components)) {
-
-          json = LDAvis::createJSON(phi = private$topic_word_distribution_with_prior(),
-                                    theta = private$doc_topic_distribution_with_prior(),
-                                    doc.length = doc_len,
-                                    vocab = private$vocabulary,
-                                    term.frequency = colSums(self$components),
-                                    lambda.step = lambda.step,
-                                    reorder.topics = reorder.topics,
-                                    mds.method = mds.method,
-                                    ...)
-          # modify global option - fixes #181
-          # also we save user encoding and restore it after exit
-          enc = getOption("encoding")
-          on.exit(options(encoding = enc))
-          options(encoding = "UTF-8")
-
-          LDAvis::serVis(json, ...)
-        } else {
-          stop("Model was not fitted, please fit it first...")
-        }
-      } else
+      if (!requireNamespace("LDAvis", quietly = TRUE)) {
         stop("To use visualisation, please install 'LDAvis' package first.")
+      }
+      if (is.null(self$components)) {
+        stop("Model was not fitted, please fit it first...")
+      }
+      json = LDAvis::createJSON(phi = private$topic_word_distribution_with_prior(),
+                                theta = private$doc_topic_distribution_with_prior(),
+                                doc.length = doc_len,
+                                vocab = private$vocabulary,
+                                term.frequency = colSums(self$components),
+                                lambda.step = lambda.step,
+                                reorder.topics = reorder.topics,
+                                mds.method = mds.method,
+                                ...)
+      # modify global option - fixes #181
+      # also we save user encoding and restore it after exit
+      old_opt <- options(encoding = "UTF-8")
+      on.exit(options(old_opt))
+
+      LDAvis::serVis(json, ...)
     }
   ),
   active = list(
