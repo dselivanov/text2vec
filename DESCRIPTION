@@ -17,7 +17,7 @@ Authors@R: c(
       comment = "Author of the WaprLDA C++ code"))
 Maintainer: Dmitriy Selivanov <selivanov.dmitriy@gmail.com>
 Encoding: UTF-8
-SystemRequirements: C++11
+SystemRequirements: C++
 Depends:
     R (>= 3.6.0),
     methods
