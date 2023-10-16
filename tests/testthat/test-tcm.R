@@ -23,8 +23,9 @@ test_that("tcm", {
 
   tcm_par = create_tcm(it_par, vectorizer, skip_grams_window = 1L,
                    skip_grams_window_context = "symmetric")
-
-  expect_identical(Matrix::uniqTsparse(tcm), Matrix::uniqTsparse(tcm_par))
+  u_tcm_par = Matrix::uniqTsparse(tcm_par)
+  attr(u_tcm_par, "word_count") = NULL
+  expect_identical(Matrix::uniqTsparse(tcm), u_tcm_par)
   expect_equal(tcm["you", "are"], 6)
   expect_true(Matrix::isTriangular(tcm, upper = TRUE))
 

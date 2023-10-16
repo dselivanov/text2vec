@@ -1,3 +1,9 @@
+# text2vec 0.6.5 (2023-10-16)
+- fix test discovered with `Matrix==1.6-2` release
+
+# text2vec 0.6.4 (2023-02-15)
+- update dependency `Matrix>=1.5-2`, fixes #338
+
 # text2vec 0.6.2 (2022-09-11)
 - removed test which is not needed with Matrix package v 1.5
 
