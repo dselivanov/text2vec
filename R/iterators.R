@@ -109,7 +109,7 @@ CallbackIterator = R6::R6Class(
 #' files_iterator = ifiles(current_dir_files)
 #' parallel_files_iterator = ifiles_parallel(current_dir_files, n_chunks = 4)
 #' it = itoken_parallel(parallel_files_iterator)
-#' dtm = create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix')
+#' dtm = create_dtm(it, hash_vectorizer(2**16), type = 'TsparseMatrix')
 #' }
 
 #' @export
@@ -187,7 +187,7 @@ ifiles_parallel = function(file_paths, reader = readLines, ...) {
 #' #   lapply(word_tokenizer(x), SnowballC::wordStem, language="en")
 #' # }
 #' it = itoken_parallel(movie_review$review[1:100], n_chunks = 4)
-#' system.time(dtm <- create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix'))
+#' system.time(dtm <- create_dtm(it, hash_vectorizer(2**16), type = 'TsparseMatrix'))
 #' @export
 itoken = function(iterable, ...) {
   UseMethod("itoken")

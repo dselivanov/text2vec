@@ -112,7 +112,7 @@ test_that("coherence, results of text2vec vs other packages", {
     if( ! is.matrix(dtm) &&
         ! inherits(dtm, 'Matrix')){
       stop("dtm must be a matrix. This can be a standard R dense matrix or a\n",
-           " matrix of class dgCMatrix, dgTMatrix, dgRMatrix, or dgeMatrix")
+           " matrix of class CsparseMatrix, TsparseMatrix, RsparseMatrix, or dgeMatrix")
     }
 
     # is M numeric? If it is not an integer, give a warning.

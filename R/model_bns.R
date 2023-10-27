@@ -82,7 +82,7 @@ BNS = R6::R6Class(
     fitted = FALSE,
     prepare_x = function(x) {
       x_internal = super$check_convert_input(x)
-      as(x, "lgCMatrix")
+      as(x, "lsparseMatrix")
     },
     clip = function(x, min_val, max_val){
       pmin(pmax(x, min_val), max_val)

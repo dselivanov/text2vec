@@ -96,7 +96,7 @@ it = itoken(txt, tolower, word_tokenizer, n_chunks = 10, ids = ids)
 #   lapply(word_tokenizer(x), SnowballC::wordStem, language="en")
 # }
 it = itoken_parallel(movie_review$review[1:100], n_chunks = 4)
-system.time(dtm <- create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix'))
+system.time(dtm <- create_dtm(it, hash_vectorizer(2**16), type = 'TsparseMatrix'))
 }
 \seealso{
 \link{ifiles}, \link{idir}, \link{create_vocabulary},

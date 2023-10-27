@@ -77,7 +77,7 @@ get_tcm = function(corpus_ptr) {
 #' \code{"symmetric"} by default - take into account \code{skip_grams_window} left and right.
 #' @param ... placeholder for additional arguments (not used at the moment).
 #'   \code{it}.
-#' @return \code{dgTMatrix} TCM matrix
+#' @return \code{TsparseMatrix} TCM matrix
 #' @seealso \link{itoken} \link{create_dtm}
 #' @examples
 #' \dontrun{
@@ -97,7 +97,7 @@ get_tcm = function(corpus_ptr) {
 #' it = token_parallel(movie_review$review[1:N], tolower, word_tokenizer, movie_review$id[1:N])
 #' v = create_vocabulary(jobs)
 #' vectorizer = vocab_vectorizer(v)
-#' dtm = create_dtm(it, vectorizer, type = 'dgTMatrix')
+#' dtm = create_dtm(it, vectorizer, type = 'TsparseMatrix')
 #' tcm = create_tcm(jobs, vectorizer, skip_grams_window = 3L, skip_grams_window_context = "symmetric")
 #' }
 #' @export
