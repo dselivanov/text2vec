@@ -50,7 +50,7 @@ of coherence of topic models.
 \code{it}.}
 }
 \value{
-\code{dgTMatrix} TCM matrix
+\code{TsparseMatrix} TCM matrix
 }
 \description{
 This is a function for constructing a
@@ -80,7 +80,7 @@ tcm = create_tcm(itoken(tokens), vectorizer, skip_grams_window = 3L)
 it = token_parallel(movie_review$review[1:N], tolower, word_tokenizer, movie_review$id[1:N])
 v = create_vocabulary(jobs)
 vectorizer = vocab_vectorizer(v)
-dtm = create_dtm(it, vectorizer, type = 'dgTMatrix')
+dtm = create_dtm(it, vectorizer, type = 'TsparseMatrix')
 tcm = create_tcm(jobs, vectorizer, skip_grams_window = 3L, skip_grams_window_context = "symmetric")
 }
 }

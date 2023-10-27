@@ -153,7 +153,6 @@ create_vocabulary.itoken = function(it, ngram = c("ngram_min" = 1L, "ngram_max" 
 
 #' @describeIn create_vocabulary collects unique terms and corresponding
 #'   statistics from iterator.
-#' @param ... placeholder for additional arguments (not used at the moment).
 #' @export
 create_vocabulary.itoken_parallel = function(it, ngram = c("ngram_min" = 1L, "ngram_max" = 1L),
                                   stopwords = character(0), sep_ngram = "_", window_size = 0L, ...) {
@@ -306,6 +305,10 @@ detect_ngrams = function(vocab, ...) {
 
 
 #' @export
+#' @title Printing Vocabulary
+#' @description Print a vocabulary.
+#' @param x vocabulary
+#' @param ... optional arguments to print methods.
 #' @method print text2vec_vocabulary
 print.text2vec_vocabulary = function(x, ...) {
   m1 = paste("Number of docs:", attr(x, "document_count", TRUE))

@@ -2,17 +2,10 @@
 title: "Analyzing Texts with the text2vec package"
 author: "Dmitriy Selivanov"
 date: "`r Sys.Date()`"
-output:
-  html_document:
-    fig_caption: false
-    toc: true
-    toc_float:
-      collapsed: false
-      smooth_scroll: false
-    toc_depth: 3
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Analyzing Texts with the text2vec Package}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 ---
 ```{r global_options, include=FALSE}

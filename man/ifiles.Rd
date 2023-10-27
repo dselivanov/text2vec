@@ -35,7 +35,7 @@ current_dir_files = list.files(path = ".", full.names = TRUE)
 files_iterator = ifiles(current_dir_files)
 parallel_files_iterator = ifiles_parallel(current_dir_files, n_chunks = 4)
 it = itoken_parallel(parallel_files_iterator)
-dtm = create_dtm(it, hash_vectorizer(2**16), type = 'dgTMatrix')
+dtm = create_dtm(it, hash_vectorizer(2**16), type = 'TsparseMatrix')
 }
 dir_files_iterator = idir(path = ".")
 }

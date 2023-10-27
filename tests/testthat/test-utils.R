@@ -3,7 +3,7 @@ context("text2vec utils - tokenization, etc.")
 txt = tolower(movie_review$review[[1]])
 N = 20
 it = itoken(movie_review$review[1:N], ids = movie_review$id[1:N], progressbar = FALSE)
-dtm = create_dtm(it, hash_vectorizer(2**8), "dgTMatrix")
+dtm = create_dtm(it, hash_vectorizer(2**8), "TsparseMatrix")
 
 txt_first_10 = c("with", "all", "this", "stuff",
              "going", "down", "at", "the",
@@ -41,9 +41,9 @@ test_that("split_into ", {
 
 test_that("rbind_dgTMatrix ", {
   it1 = itoken(movie_review$review[1:10], ids = movie_review$id[1:10], progressbar = FALSE)
-  dtm1 = create_dtm(it1, hash_vectorizer(2**8), "dgTMatrix")
+  dtm1 = create_dtm(it1, hash_vectorizer(2**8), "TsparseMatrix")
   it2 = itoken(movie_review$review[11:20], ids = movie_review$id[11:20], progressbar = FALSE)
-  dtm2 = create_dtm(it2, hash_vectorizer(2**8), "dgTMatrix")
+  dtm2 = create_dtm(it2, hash_vectorizer(2**8), "TsparseMatrix")
   expect_equal(Matrix::uniqTsparse(text2vec:::rbind_dgTMatrix(dtm1, dtm2)),
                Matrix::uniqTsparse(dtm))
 })
