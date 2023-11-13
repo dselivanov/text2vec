@@ -19,7 +19,7 @@ For more detail see following article: \url{http://mkusner.github.io/publication
 However in contrast to the article above we calculate "easiness" of the convertion of one word into another
 by using \bold{cosine} similarity (but not a euclidean distance).
 Also here in text2vec we've implemented effiient RWMD using the tricks from the
-\href{https://arxiv.org/abs/1711.07227}{Linear-Complexity Relaxed Word Mover's Distance with GPU Acceleration} article.
+Linear-Complexity Relaxed Word Mover's Distance with GPU Acceleration article https://arxiv.org/abs/1711.07227
 }
 \section{Usage}{
 

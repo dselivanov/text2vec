@@ -12,6 +12,7 @@
 #' number of columns = \code{n_topics}. Sum of elements in each row should be equal to 1 -
 #' each row is a distribution of topics over document.
 #' @examples
+#' \dontrun{
 #' library(text2vec)
 #' data("movie_review")
 #' n_iter = 10
@@ -31,6 +32,7 @@
 #'                       convergence_tol = -1, progressbar = FALSE)
 #' topic_word_distr_10 = model$topic_word_distribution
 #' perplexity(dtm, topic_word_distr_10, doc_topic_distr)
+#' }
 #' @export
 perplexity = function(X, topic_word_distribution, doc_topic_distribution) {
   # introduce EPS for stability - avoid log(0)

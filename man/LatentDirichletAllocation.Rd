@@ -91,6 +91,7 @@ lda$get_top_words(n = 10, topic_number = 1L:private$n_topics, lambda = 1)
 }
 
 \examples{
+\dontrun{
 library(text2vec)
 data("movie_review")
 N = 500
@@ -103,5 +104,6 @@ lda_model = LDA$new(n_topics = 10)
 doc_topic_distr = lda_model$fit_transform(dtm, n_iter = 20)
 # run LDAvis visualisation if needed (make sure LDAvis package installed)
 # lda_model$plot()
+}
 }
 \keyword{datasets}

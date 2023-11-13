@@ -172,6 +172,7 @@ TopicModel = R6::R6Class(
 #' }
 #' @format \code{\link{R6Class}} object.
 #' @examples
+#' \dontrun{
 #' library(text2vec)
 #' data("movie_review")
 #' N = 500
@@ -184,6 +185,7 @@ TopicModel = R6::R6Class(
 #' doc_topic_distr = lda_model$fit_transform(dtm, n_iter = 20)
 #' # run LDAvis visualisation if needed (make sure LDAvis package installed)
 #' # lda_model$plot()
+#' }
 #' @export
 LatentDirichletAllocation = R6::R6Class(
   classname = c("WarpLDA", "LDA"),
