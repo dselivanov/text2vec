@@ -78,20 +78,30 @@ get_dtm = function(corpus_ptr) {
 #' dtm = create_dtm(it, vectorizer, type = 'TsparseMatrix')
 #' }
 #' @export
-create_dtm = function(it, vectorizer, type = c("CsparseMatrix", "TsparseMatrix", "RsparseMatrix"), ...) {
+create_dtm = function(it, vectorizer, type = c("dgCMatrix", "dgTMatrix", "dgRMatrix", "CsparseMatrix", "TsparseMatrix", "RsparseMatrix"), ...) {
   e = environment()
   reg.finalizer(e, malloc_trim_finalizer)
   UseMethod("create_dtm")
 }
 
+types_match = c(
+  'dgCMatrix' = 'CsparseMatrix',
+  'dgTMatrix' = 'TsparseMatrix',
+  'dgRMatrix' = 'RsparseMatrix',
+  'CsparseMatrix' = 'CsparseMatrix',
+  'TsparseMatrix' = 'TsparseMatrix',
+  'RsparseMatrix' = 'RsparseMatrix'
+)
 #' @rdname create_dtm
 #' @export
-create_dtm.itoken = function(it, vectorizer, type = c("CsparseMatrix", "TsparseMatrix", "RsparseMatrix"), ...) {
+create_dtm.itoken = function(it, vectorizer, type = c("dgCMatrix", "dgTMatrix", "dgRMatrix", "CsparseMatrix", "TsparseMatrix", "RsparseMatrix"), ...) {
   # because window_size = 0, put something to skip_grams_window_context: "symmetric"
   # but it is dummy - just to provide something to vectorizer
   # skip_grams_window_context = "symmetric", window_size = 0
   corp = vectorizer(it, grow_dtm = TRUE, skip_grams_window_context = "symmetric", window_size = 0, weights = numeric(0))
   type = match.arg(type)
+  type = types_match[type]
+
   # get it in triplet form - fastest and most
   # memory efficient way because internally it
   # kept in triplet form
@@ -107,9 +117,10 @@ create_dtm.itoken = function(it, vectorizer, type = c("CsparseMatrix", "TsparseM
 
 #' @rdname create_dtm
 #' @export
-create_dtm.itoken_parallel = function( it, vectorizer, type = c("CsparseMatrix", "TsparseMatrix", "RsparseMatrix"), ...) {
+create_dtm.itoken_parallel = function( it, vectorizer, type = c("dgCMatrix", "dgTMatrix", "dgRMatrix", "CsparseMatrix", "TsparseMatrix", "RsparseMatrix"), ...) {
 
   type = match.arg(type)
+  type = types_match[type]
 
   FUN = function(x) {
     it2 = itoken(x$tokens, n_chunks = 1L, progressbar = FALSE, ids = x$ids)

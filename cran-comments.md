@@ -1,10 +1,10 @@
-##  New submission
+## Re-submission
 
-* fixes CRAN errors related to the Matrix 1.5 release
+* fixes revdep checks issues
 
 ## Test environments
 
-* local OS X install, R 4.0.5
+* local OS X install, R 4.3.1
 * win-builder (release)
 
 ## R CMD check results

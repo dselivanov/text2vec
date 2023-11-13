@@ -59,7 +59,7 @@ model$collocation_stat
  statistics in order to collapse tokens into collocation:
  \itemize{
   \item pointwise mutual information
-  \item "gensim" scores - \url{https://radimrehurek.com/gensim/models/phrases.html} adapted from word2vec paper
+  \item "gensim" scores - https://radimrehurek.com/gensim/models/phrases.html adapted from word2vec paper
   \item log-frequency biased mutual dependency
   \item Dunning's  logarithm of the ratio between the likelihoods of the hypotheses of dependence and independence
  }

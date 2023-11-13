@@ -8,3 +8,4 @@ R/drafts/*
 ^docs/*
 ^CRAN-RELEASE$
 ^CRAN-SUBMISSION$
+^revdep

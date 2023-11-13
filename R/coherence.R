@@ -111,7 +111,7 @@
 #' See https://github.com/dice-group/Palmetto or http://aksw.org/Projects/Palmetto.html.
 #'
 #' @examples
-#'
+#' \dontrun{
 #' library(data.table)
 #' library(text2vec)
 #' library(Matrix)
@@ -163,7 +163,7 @@
 #'
 #' # get number of sliding windows that serve as virtual documents, i.e. n_doc_tcm argument
 #' n_skip_gram_windows = sum(sapply(tokens_ext, function(x) {length(x)}))
-#'
+#' }
 #' @export
 
 coherence = function(x, tcm, metrics = c("mean_logratio", "mean_pmi", "mean_npmi", "mean_difference", "mean_npmi_cosim", "mean_npmi_cosim2"), smooth = 1e-12, n_doc_tcm = -1) {

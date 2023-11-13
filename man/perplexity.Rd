@@ -24,6 +24,7 @@ Given document-term matrix, topic-word distribution, document-topic
 distribution calculates perplexity
 }
 \examples{
+\dontrun{
 library(text2vec)
 data("movie_review")
 n_iter = 10
@@ -43,4 +44,5 @@ doc_topic_distr  =
                       convergence_tol = -1, progressbar = FALSE)
 topic_word_distr_10 = model$topic_word_distribution
 perplexity(dtm, topic_word_distr_10, doc_topic_distr)
+}
 }
