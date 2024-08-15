@@ -215,7 +215,7 @@ LatentDirichletAllocation = R6::R6Class(
 
       private$doc_len = rowSums(x)
 
-      private$ptr = warplda_create(n = private$n_topics,
+      private$ptr = warplda_create(n_topics = private$n_topics,
                                    doc_topic_prior = private$doc_topic_prior,
                                    topic_word_prior = private$topic_word_prior)
 
@@ -308,7 +308,7 @@ LatentDirichletAllocation = R6::R6Class(
                          progressbar = interactive(), set_doc_topic_matrix = FALSE, ...) {
       stopifnot(all.equal(colnames(x), private$vocabulary))
       # create model for inferenct (we have to init internal C++ data structures for document-term matrix)
-      inference_model_ptr = warplda_create(n = private$n_topics,
+      inference_model_ptr = warplda_create(n_topics = private$n_topics,
                                            doc_topic_prior = private$doc_topic_prior,
                                            topic_word_prior = private$topic_word_prior)
       private$init_model_dtm(x, inference_model_ptr)
