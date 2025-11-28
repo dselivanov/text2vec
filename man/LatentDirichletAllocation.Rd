@@ -5,7 +5,7 @@
 \alias{LatentDirichletAllocation}
 \alias{LDA}
 \title{Creates Latent Dirichlet Allocation model.}
-\format{\code{\link{R6Class}} object.}
+\format{\code{\link[R6]{R6Class}} object.}
 \usage{
 LatentDirichletAllocation
 

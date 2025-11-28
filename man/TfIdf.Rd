@@ -4,7 +4,7 @@
 \name{TfIdf}
 \alias{TfIdf}
 \title{TfIdf}
-\format{\code{\link{R6Class}} object.}
+\format{\code{\link[R6]{R6Class}} object.}
 \usage{
 TfIdf
 }

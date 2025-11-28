@@ -12,7 +12,7 @@
 #' model$prune(pmi_min = 5, gensim_min = 0, lfmd_min = -Inf, llr_min = 0)
 #' model$collocation_stat
 #' }
-#' @format \code{\link{R6Class}} object.
+#' @format \code{\link[R6]{R6Class}} object.
 #' @section Methods:
 #' \describe{
 #'   \item{\code{$new(vocabulary = NULL, collocation_count_min = 50, sep = "_")}}{Constructor for Collocations model.

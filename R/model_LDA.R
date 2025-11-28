@@ -167,7 +167,7 @@ TopicModel = R6::R6Class(
 #'     when one of two following conditions will be satisfied: (a) we have used
 #'     all iterations, or (b) \code{score_previous_check / score_current < 1 + convergence_tol}}}
 #' }
-#' @format \code{\link{R6Class}} object.
+#' @format \code{\link[R6]{R6Class}} object.
 #' @examples
 #' \dontrun{
 #' library(text2vec)

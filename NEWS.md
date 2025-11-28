@@ -1,3 +1,6 @@
+# text2vec 0.6.6 (2025-11-29)
+- fix R CMD check notes in documentation of R6 classes
+
 # text2vec 0.6.5 (2023-10-16)
 - fix test discovered with `Matrix==1.6-2` release
 
