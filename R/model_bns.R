@@ -18,7 +18,7 @@
 #' Bi-Normal Separation
 #' @description Creates BNS (bi-normal separation) model.
 #' Defined as: Q(true positive rate) - Q(false positive rate), where Q is a quantile function of normal distribution.
-#' @format \code{\link{R6Class}} object.
+#' @format \code{\link[R6]{R6Class}} object.
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{

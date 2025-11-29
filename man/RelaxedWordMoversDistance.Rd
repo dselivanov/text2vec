@@ -5,7 +5,7 @@
 \alias{RelaxedWordMoversDistance}
 \alias{RWMD}
 \title{Creates Relaxed Word Movers Distance (RWMD) model}
-\format{\code{\link{R6Class}} object.}
+\format{\code{\link[R6]{R6Class}} object.}
 \usage{
 RelaxedWordMoversDistance
 

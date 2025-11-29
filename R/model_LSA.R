@@ -19,7 +19,7 @@
 #' @title Latent Semantic Analysis model
 #' @description Creates LSA(Latent semantic analysis) model.
 #' See \url{https://en.wikipedia.org/wiki/Latent_semantic_analysis} for details.
-#' @format \code{\link{R6Class}} object.
+#' @format \code{\link[R6]{R6Class}} object.
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{

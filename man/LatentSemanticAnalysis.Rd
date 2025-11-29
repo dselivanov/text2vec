@@ -5,7 +5,7 @@
 \alias{LatentSemanticAnalysis}
 \alias{LSA}
 \title{Latent Semantic Analysis model}
-\format{\code{\link{R6Class}} object.}
+\format{\code{\link[R6]{R6Class}} object.}
 \usage{
 LatentSemanticAnalysis
 

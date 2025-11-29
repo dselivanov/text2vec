@@ -26,7 +26,7 @@ text2vec_dist = R6::R6Class(
 #' rwmd = RelaxedWordMoversDistance$new(x, embeddings)
 #' rwmd$sim2(x)
 #' }
-#' @format \code{\link{R6Class}} object.
+#' @format \code{\link[R6]{R6Class}} object.
 #' @section Methods:
 #' \describe{
 #'   \item{\code{$new(x, embeddings)}}{Constructor for RWMD model.
