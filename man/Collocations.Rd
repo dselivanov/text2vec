@@ -4,7 +4,7 @@
 \name{Collocations}
 \alias{Collocations}
 \title{Collocations model.}
-\format{\code{\link{R6Class}} object.}
+\format{\code{\link[R6]{R6Class}} object.}
 \usage{
 Collocations
 }

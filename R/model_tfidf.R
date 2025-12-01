@@ -19,7 +19,7 @@
 #' @description Creates TfIdf(Latent semantic analysis) model.
 #' "smooth" IDF (default) is defined as follows: \code{idf = log(1 + (# documents in the corpus) / (# documents where the term appears) )}
 #' "non-smooth" IDF is defined as follows: \code{idf = log((# documents in the corpus) / (# documents where the term appears) )}
-#' @format \code{\link{R6Class}} object.
+#' @format \code{\link[R6]{R6Class}} object.
 #' @section Usage:
 #' For usage details see \bold{Methods, Arguments and Examples} sections.
 #' \preformatted{

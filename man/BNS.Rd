@@ -4,7 +4,7 @@
 \name{BNS}
 \alias{BNS}
 \title{BNS}
-\format{\code{\link{R6Class}} object.}
+\format{\code{\link[R6]{R6Class}} object.}
 \usage{
 BNS
 }
