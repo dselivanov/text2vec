@@ -1,6 +1,6 @@
-## Re-submission
+## New submission
 
-* fixes revdep checks issues
+* fixes CRAN check notes
 
 ## Test environments
 
